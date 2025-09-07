@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Super Admin - Cellexon</title>
+    <title>Super Admin - Celloxen</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', sans-serif; background: #0f172a; color: white; }
@@ -17,6 +17,7 @@
         .btn { padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; margin: 5px; font-weight: 500; }
         .btn-primary { background: #10b981; color: white; }
         .btn-secondary { background: #6b7280; color: white; }
+        .btn-danger { background: #ef4444; color: white; }
         .clinic-list { max-height: 400px; overflow-y: auto; }
         .clinic-item { background: rgba(255, 255, 255, 0.1); margin: 10px 0; padding: 15px; border-radius: 8px; border-left: 4px solid #10b981; }
         .table { width: 100%; border-collapse: collapse; margin-top: 15px; }
@@ -24,18 +25,29 @@
         .table th { background: rgba(16, 185, 129, 0.2); color: #10b981; font-weight: 600; }
         .status-active { color: #10b981; font-weight: bold; }
         .status-inactive { color: #ef4444; font-weight: bold; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; display: flex; align-items: center; justify-content: center; }
+        .modal-content { background: #1e293b; border-radius: 12px; padding: 30px; max-width: 600px; width: 90%; max-height: 90vh; overflow-y: auto; color: white; }
+        .form-group { margin: 15px 0; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 500; color: #cbd5e1; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #374151; border-radius: 6px; background: #374151; color: white; }
+        .form-group textarea { resize: vertical; min-height: 80px; }
+        .alert { padding: 10px; border-radius: 4px; margin: 10px 0; }
+        .alert-success { background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981; }
+        .alert-error { background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #ef4444; }
     </style>
 </head>
 <body>
     <div class="header">
         <div class="container">
-            <h1>Cellexon Super Admin Dashboard</h1>
+            <h1>Celloxen Super Admin Dashboard</h1>
             <p>Global platform management and oversight</p>
             <button class="btn btn-secondary" onclick="window.location.href='index.html'">Back to Main</button>
         </div>
     </div>
     
     <div class="container">
+        <div id="alertContainer"></div>
+        
         <div class="dashboard-grid">
             <div class="stat-card">
                 <div class="stat-number" id="totalClinics">0</div>
@@ -104,12 +116,23 @@
     <script type="module">
         import { supabase } from './supabase-config.js';
         
+        let currentClinics = [];
+        
         // Load dashboard data
         document.addEventListener('DOMContentLoaded', function() {
             loadDashboardData();
             loadClinics();
             loadAllPatients();
         });
+        
+        // Show alert messages
+        function showAlert(message, type = 'success') {
+            const alertContainer = document.getElementById('alertContainer');
+            alertContainer.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+            setTimeout(() => {
+                alertContainer.innerHTML = '';
+            }, 5000);
+        }
         
         // Load dashboard statistics
         async function loadDashboardData() {
@@ -155,40 +178,47 @@
                     
                 if (error) throw error;
                 
-                const clinicList = document.getElementById('clinicList');
-                
-                if (data && data.length > 0) {
-                    clinicList.innerHTML = data.map(clinic => `
-                        <div class="clinic-item">
-                            <div style="display: flex; justify-content: space-between; align-items: start;">
-                                <div>
-                                    <h3>${clinic.clinic_name}</h3>
-                                    <p>Code: ${clinic.clinic_code}</p>
-                                    <p>Owner: ${clinic.owner_name}</p>
-                                    <p>Email: ${clinic.email}</p>
-                                    <p>Phone: ${clinic.phone || 'Not provided'}</p>
-                                    <p class="${clinic.is_active ? 'status-active' : 'status-inactive'}">
-                                        Status: ${clinic.is_active ? 'Active' : 'Inactive'}
-                                    </p>
-                                    <small>Created: ${new Date(clinic.created_at).toLocaleDateString()}</small>
-                                </div>
-                                <div>
-                                    <button class="btn btn-primary" onclick="editClinic(${clinic.id})">Edit</button>
-                                    <button class="btn ${clinic.is_active ? 'btn-secondary' : 'btn-primary'}" 
-                                            onclick="toggleClinicStatus(${clinic.id}, ${clinic.is_active})">
-                                        ${clinic.is_active ? 'Deactivate' : 'Activate'}
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    `).join('');
-                } else {
-                    clinicList.innerHTML = '<p>No clinics found.</p>';
-                }
+                currentClinics = data || [];
+                displayClinics(currentClinics);
                 
             } catch (error) {
                 console.error('Error loading clinics:', error);
                 document.getElementById('clinicList').innerHTML = '<p>Error loading clinics.</p>';
+            }
+        }
+        
+        // Display clinics
+        function displayClinics(clinics) {
+            const clinicList = document.getElementById('clinicList');
+            
+            if (clinics && clinics.length > 0) {
+                clinicList.innerHTML = clinics.map(clinic => `
+                    <div class="clinic-item">
+                        <div style="display: flex; justify-content: space-between; align-items: start;">
+                            <div>
+                                <h3>${clinic.clinic_name}</h3>
+                                <p>Code: ${clinic.clinic_code}</p>
+                                <p>Owner: ${clinic.owner_name}</p>
+                                <p>Email: ${clinic.email}</p>
+                                <p>Phone: ${clinic.phone || 'Not provided'}</p>
+                                <p>Address: ${clinic.address || 'Not provided'}</p>
+                                <p class="${clinic.is_active ? 'status-active' : 'status-inactive'}">
+                                    Status: ${clinic.is_active ? 'Active' : 'Inactive'}
+                                </p>
+                                <small>Created: ${new Date(clinic.created_at).toLocaleDateString()}</small>
+                            </div>
+                            <div>
+                                <button class="btn btn-primary" onclick="editClinic(${clinic.id})">Edit</button>
+                                <button class="btn ${clinic.is_active ? 'btn-secondary' : 'btn-primary'}" 
+                                        onclick="toggleClinicStatus(${clinic.id}, ${clinic.is_active})">
+                                    ${clinic.is_active ? 'Deactivate' : 'Activate'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                clinicList.innerHTML = '<p>No clinics found.</p>';
             }
         }
         
@@ -230,48 +260,171 @@
         
         // Show add clinic form
         window.showAddClinicForm = function() {
-            const clinicName = prompt('Clinic Name:');
-            const clinicCode = prompt('Clinic Code (3-4 letters):');
-            const ownerName = prompt('Owner Name:');
-            const email = prompt('Email:');
-            const phone = prompt('Phone (optional):');
-            const address = prompt('Address (optional):');
-            
-            if (clinicName && clinicCode && ownerName && email) {
-                addNewClinic({
-                    clinic_name: clinicName,
-                    clinic_code: clinicCode.toUpperCase(),
-                    owner_name: ownerName,
-                    email: email,
-                    phone: phone,
-                    address: address
-                });
+            showClinicModal(null, 'add');
+        };
+        
+        // Edit clinic
+        window.editClinic = function(clinicId) {
+            const clinic = currentClinics.find(c => c.id === clinicId);
+            if (clinic) {
+                showClinicModal(clinic, 'edit');
             }
         };
         
-        // Add new clinic
-        async function addNewClinic(clinicData) {
-            try {
-                const { data, error } = await supabase
-                    .from('clinics')
-                    .insert([clinicData])
-                    .select();
+        // Show clinic modal
+        function showClinicModal(clinic, mode) {
+            const isEdit = mode === 'edit';
+            const modalOverlay = document.createElement('div');
+            modalOverlay.className = 'modal-overlay';
+            modalOverlay.id = 'clinicModal';
+            
+            modalOverlay.innerHTML = `
+                <div class="modal-content">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h2 style="color: #10b981; margin: 0;">${isEdit ? 'Edit Clinic' : 'Add New Clinic'}</h2>
+                        <button onclick="closeClinicModal()" class="btn btn-danger">Close</button>
+                    </div>
                     
-                if (error) throw error;
+                    <form id="clinicForm">
+                        <input type="hidden" id="clinicId" value="${clinic?.id || ''}">
+                        
+                        <div class="form-group">
+                            <label>Clinic Name</label>
+                            <input type="text" id="clinicName" value="${clinic?.clinic_name || ''}" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Clinic Code</label>
+                            <input type="text" id="clinicCode" value="${clinic?.clinic_code || ''}" required maxlength="10" style="text-transform: uppercase;">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Owner Name</label>
+                            <input type="text" id="ownerName" value="${clinic?.owner_name || ''}" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" id="clinicEmail" value="${clinic?.email || ''}" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Phone</label>
+                            <input type="tel" id="clinicPhone" value="${clinic?.phone || ''}" placeholder="Optional">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Address</label>
+                            <textarea id="clinicAddress" placeholder="Optional">${clinic?.address || ''}</textarea>
+                        </div>
+                        
+                        ${isEdit ? `
+                        <div class="form-group">
+                            <label>Status</label>
+                            <select id="clinicStatus">
+                                <option value="true" ${clinic?.is_active ? 'selected' : ''}>Active</option>
+                                <option value="false" ${!clinic?.is_active ? 'selected' : ''}>Inactive</option>
+                            </select>
+                        </div>
+                        ` : ''}
+                        
+                        <div style="text-align: center; margin-top: 20px;">
+                            <button type="submit" class="btn btn-primary">${isEdit ? 'Update Clinic' : 'Add Clinic'}</button>
+                            <button type="button" onclick="closeClinicModal()" class="btn btn-secondary">Cancel</button>
+                            ${isEdit ? '<button type="button" onclick="deleteClinic(' + clinic.id + ')" class="btn btn-danger">Delete Clinic</button>' : ''}
+                        </div>
+                    </form>
+                </div>
+            `;
+            
+            document.body.appendChild(modalOverlay);
+            
+            // Setup form handler
+            document.getElementById('clinicForm').addEventListener('submit', handleClinicSubmit);
+            
+            // Auto-uppercase clinic code
+            document.getElementById('clinicCode').addEventListener('input', function() {
+                this.value = this.value.toUpperCase();
+            });
+        }
+        
+        // Handle clinic form submission
+        async function handleClinicSubmit(e) {
+            e.preventDefault();
+            
+            try {
+                const clinicId = document.getElementById('clinicId').value;
+                const isEdit = !!clinicId;
                 
-                alert('Clinic added successfully!');
+                const clinicData = {
+                    clinic_name: document.getElementById('clinicName').value,
+                    clinic_code: document.getElementById('clinicCode').value,
+                    owner_name: document.getElementById('ownerName').value,
+                    email: document.getElementById('clinicEmail').value,
+                    phone: document.getElementById('clinicPhone').value || null,
+                    address: document.getElementById('clinicAddress').value || null
+                };
+                
+                if (isEdit) {
+                    clinicData.is_active = document.getElementById('clinicStatus').value === 'true';
+                    
+                    const { error } = await supabase
+                        .from('clinics')
+                        .update(clinicData)
+                        .eq('id', clinicId);
+                        
+                    if (error) throw error;
+                    showAlert('Clinic updated successfully!');
+                } else {
+                    const { error } = await supabase
+                        .from('clinics')
+                        .insert([clinicData]);
+                        
+                    if (error) throw error;
+                    showAlert('Clinic added successfully!');
+                }
+                
+                closeClinicModal();
                 loadClinics();
                 loadDashboardData();
                 
             } catch (error) {
-                console.error('Error adding clinic:', error);
-                alert('Error adding clinic: ' + error.message);
+                console.error('Error saving clinic:', error);
+                showAlert('Error saving clinic: ' + error.message, 'error');
             }
         }
         
-        // Edit clinic
-        window.editClinic = function(clinicId) {
-            alert(`Edit clinic ID: ${clinicId}\n\nThis would open a detailed edit form in a real system.`);
+        // Delete clinic
+        window.deleteClinic = async function(clinicId) {
+            if (!confirm('Are you sure you want to delete this clinic? This action cannot be undone and will affect all associated patients and data.')) {
+                return;
+            }
+            
+            try {
+                const { error } = await supabase
+                    .from('clinics')
+                    .delete()
+                    .eq('id', clinicId);
+                    
+                if (error) throw error;
+                
+                showAlert('Clinic deleted successfully!');
+                closeClinicModal();
+                loadClinics();
+                loadDashboardData();
+                
+            } catch (error) {
+                console.error('Error deleting clinic:', error);
+                showAlert('Error deleting clinic: ' + error.message, 'error');
+            }
+        };
+        
+        // Close clinic modal
+        window.closeClinicModal = function() {
+            const modal = document.getElementById('clinicModal');
+            if (modal) {
+                document.body.removeChild(modal);
+            }
         };
         
         // Toggle clinic status
@@ -284,13 +437,13 @@
                     
                 if (error) throw error;
                 
-                alert(`Clinic ${!currentStatus ? 'activated' : 'deactivated'} successfully!`);
+                showAlert(`Clinic ${!currentStatus ? 'activated' : 'deactivated'} successfully!`);
                 loadClinics();
                 loadDashboardData();
                 
             } catch (error) {
                 console.error('Error updating clinic status:', error);
-                alert('Error updating clinic status: ' + error.message);
+                showAlert('Error updating clinic status: ' + error.message, 'error');
             }
         };
         
