@@ -13,6 +13,11 @@
         .system-subtitle { font-size: 1.2rem; color: #94a3b8; margin-bottom: 30px; }
         .system-info { font-size: 1rem; color: #cbd5e1; }
         .status { background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; border-radius: 8px; padding: 20px; margin: 20px 0; }
+        .modules-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 40px; }
+        .module-card { background: rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 20px; border: 1px solid rgba(255, 255, 255, 0.2); transition: all 0.3s ease; cursor: pointer; }
+        .module-card:hover { transform: translateY(-2px); background: rgba(255, 255, 255, 0.15); }
+        .module-title { font-size: 1.2rem; font-weight: 600; margin-bottom: 10px; color: #10b981; }
+        .module-description { color: #cbd5e1; font-size: 0.9rem; }
     </style>
 </head>
 <body>
@@ -30,6 +35,23 @@
             <h2>Platform Successfully Deployed</h2>
             <p>Cellexon medical platform is now live and ready for module integration.</p>
             <p>Database: Connected | Hosting: Vercel | Status: Operational</p>
+        </div>
+        
+        <div class="modules-grid">
+            <div class="module-card" onclick="window.open('patient-management.html', '_blank')">
+                <div class="module-title">Patient Management</div>
+                <div class="module-description">Register and manage patient records with Supabase integration</div>
+            </div>
+            
+            <div class="module-card" onclick="alert('Module coming soon')">
+                <div class="module-title">Health Assessment</div>
+                <div class="module-description">AI-powered health questionnaire and analysis</div>
+            </div>
+            
+            <div class="module-card" onclick="alert('Module coming soon')">
+                <div class="module-title">Treatment Interface</div>
+                <div class="module-description">Therapy protocol delivery and monitoring</div>
+            </div>
         </div>
     </div>
 </body>
