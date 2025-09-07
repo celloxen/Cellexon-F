@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Health Assessment - Cellexon</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f8fafc; }
+        .header { background: linear-gradient(135deg, #1e293b, #334155); color: white; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; padding: 20px; }
+        .card { background: white; border-radius: 12px; padding: 30px; margin: 20px 0; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .progress-bar { background: #e5e7eb; height: 8px; border-radius: 4px; margin: 20px 0; }
+        .progress-fill { background: linear-gradient(90deg, #10b981, #059669); height: 100%; border-radius: 4px; transition: width 0.3s ease; }
+        .category-tabs { display: flex; gap: 10px; margin: 20px 0; flex-wrap: wrap; }
+        .tab { padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer; background: #f3f4f6; color: #374151; font-weight: 500; }
+        .tab.active { background: #10b981; color: white; }
+        .tab.completed { background: #059669; color: white; }
+        .question-card { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; margin: 15px 0; }
+        .question-text { font-size: 1.1rem; font-weight: 500; margin-bottom: 15px; color: #1f2937; }
+        .options { display: grid; gap: 10px; }
+        .option { padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
+        .option:hover { border-color: #10b981; background: #f0fdf4; }
+        .option.selected { border-color: #10b981; background: #dcfce7; }
+        .btn { padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; font-weight: 500; margin: 5px; }
+        .btn-primary { background: #10b981; color: white; }
+        .btn-secondary { background: #6b7280; color: white; }
+        .results-card { background: linear-gradient(135deg, #f0fdf4, #dcfce7); border: 2px solid #10b981; }
+        .score-display { text-align: center; margin: 20px 0; }
+        .score-number { font-size: 3rem; font-weight: bold; color: #059669; }
+        .score-label { font-size: 1.2rem; color: #374151; }
+        .recommendations { background: white; border-radius: 8px; padding: 20px; margin: 15px 0; }
+        .recommendation-item { padding: 10px; margin: 8px 0; background: #f0fdf4; border-left: 4px solid #10b981; border-radius: 4px; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <h1>Cellexon Health Assessment</h1>
+            <p>Comprehensive 5-category health evaluation system</p>
+            <button class="btn btn-secondary" onclick="window.location.href='index.html'">Back to Dashboard</button>
+        </div>
+    </div>
+    
+    <div class="container">
+        <!-- Patient Selection -->
+        <div class="card" id="patientSelection">
+            <h2>Select Patient for Assessment</h2>
+            <div style="display: grid; grid-template-columns: 1fr auto; gap: 15px; align-items: end;">
+                <div>
+                    <label>Select Patient:</label>
+                    <select id="patientSelect" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+                        <option value="">Select a patient...</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary" onclick="startAssessment()">Start Assessment</button>
+            </div>
+        </div>
+
+        <!-- Assessment Interface -->
+        <div class="card hidden" id="assessmentInterface">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2>Health Assessment</h2>
+                <div id="patientInfo" style="text-align: right; color: #6b7280;"></div>
+            </div>
+            
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill" style="width: 0%;"></div>
+            </div>
+            <div style="text-align: center; margin: 10px 0;">
+                <span id="progressText">Category 1 of 5</span>
+            </div>
+            
+            <div class="category-tabs" id="categoryTabs">
+                <button class="tab active" onclick="switchCategory(0)">Physical Health</button>
+                <button class="tab" onclick="switchCategory(1)">Mental Wellbeing</button>
+                <button class="tab" onclick="switchCategory(2)">Lifestyle</button>
+                <button class="tab" onclick="switchCategory(3)">Environment</button>
+                <button class="tab" onclick="switchCategory(4)">Medical History</button>
+            </div>
+            
+            <div id="questionsContainer">
+                <!-- Questions will be populated here -->
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; margin-top: 30px;">
+                <button class="btn btn-secondary" id="prevBtn" onclick="previousCategory()">Previous Category</button>
+                <button class="btn btn-primary" id="nextBtn" onclick="nextCategory()">Next Category</button>
+            </div>
+        </div>
+
+        <!-- Results Display -->
+        <div class="card results-card hidden" id="resultsDisplay">
+            <h2 style="text-align: center; color: #059669;">Assessment Complete!</h2>
+            
+            <div class="score-display">
+                <div class="score-number" id="totalScore">0</div>
+                <div class="score-label">Overall Health Score</div>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 20px 0;">
+                <div style="text-align: center; padding: 15px; background: white; border-radius: 8px;">
+                    <div style="font-size: 1.5rem; font-weight: bold; color: #10b981;" id="physicalScore">0</div>
+                    <div>Physical Health</div>
+                </div>
+                <div style="text-align: center; padding: 15px; background: white; border-radius: 8px;">
+                    <div style="font-size: 1.5rem; font-weight: bold; color: #10b981;" id="mentalScore">0</div>
+                    <div>Mental Wellbeing</div>
+                </div>
+                <div style="text-align: center; padding: 15px; background: white; border-radius: 8px;">
+                    <div style="font-size: 1.5rem; font-weight: bold; color: #10b981;" id="lifestyleScore">0</div>
+                    <div>Lifestyle</div>
+                </div>
+                <div style="text-align: center; padding: 15px; background: white; border-radius: 8px;">
+                    <div style="font-size: 1.5rem; font-weight: bold; color: #10b981;" id="environmentScore">0</div>
+                    <div>Environment</div>
+                </div>
+                <div style="text-align: center; padding: 15px; background: white; border-radius: 8px;">
+                    <div style="font-size: 1.5rem; font-weight: bold; color: #10b981;" id="historyScore">0</div>
+                    <div>Medical History</div>
+                </div>
+            </div>
+            
+            <div class="recommendations">
+                <h3>Recommended Therapy Protocols</h3>
+                <div id="recommendationsList">
+                    <!-- Recommendations will be populated here -->
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 20px;">
+                <button class="btn btn-primary" onclick="saveAssessment()">Save Assessment</button>
+                <button class="btn btn-secondary" onclick="startNewAssessment()">New Assessment</button>
+                <button class="btn btn-secondary" onclick="printResults()">Print Results</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { supabase } from './supabase-config.js';
+        
+        // Assessment data structure
+        const assessmentQuestions = {
+            physical: [
+                { text: "How would you rate your overall energy levels?", options: ["Very Low", "Low", "Moderate", "High", "Very High"] },
+                { text: "How often do you experience physical pain or discomfort?", options: ["Daily", "Several times a week", "Weekly", "Rarely", "Never"] },
+                { text: "How is your sleep quality?", options: ["Very Poor", "Poor", "Fair", "Good", "Excellent"] },
+                { text: "How would you rate your physical fitness?", options: ["Very Poor", "Poor", "Average", "Good", "Excellent"] },
+                { text: "Do you have any chronic health conditions?", options: ["Multiple conditions", "One major condition", "Minor conditions", "Occasional issues", "None"] }
+            ],
+            mental: [
+                { text: "How often do you feel stressed or anxious?", options: ["Always", "Often", "Sometimes", "Rarely", "Never"] },
+                { text: "How would you rate your mood most days?", options: ["Very Low", "Low", "Neutral", "Good", "Very Good"] },
+                { text: "How well do you handle daily challenges?", options: ["Very Poorly", "Poorly", "Adequately", "Well", "Very Well"] },
+                { text: "Do you feel mentally clear and focused?", options: ["Never", "Rarely", "Sometimes", "Often", "Always"] },
+                { text: "How satisfied are you with your life overall?", options: ["Very Dissatisfied", "Dissatisfied", "Neutral", "Satisfied", "Very Satisfied"] }
+            ],
+            lifestyle: [
+                { text: "How often do you exercise or engage in physical activity?", options: ["Never", "Rarely", "1-2 times/week", "3-4 times/week", "Daily"] },
+                { text: "How would you rate your diet and nutrition?", options: ["Very Poor", "Poor", "Average", "Good", "Excellent"] },
+                { text: "Do you smoke or use tobacco products?", options: ["Heavy use", "Moderate use", "Light use", "Occasionally", "Never"] },
+                { text: "How much alcohol do you consume?", options: ["Heavy drinking", "Moderate drinking", "Light drinking", "Occasionally", "Never"] },
+                { text: "How many hours of sleep do you get per night?", options: ["Less than 5", "5-6 hours", "6-7 hours", "7-8 hours", "More than 8"] }
+            ],
+            environment: [
+                { text: "How clean and healthy is your living environment?", options: ["Very Poor", "Poor", "Average", "Good", "Excellent"] },
+                { text: "Are you exposed to environmental toxins at work or home?", options: ["High exposure", "Moderate exposure", "Some exposure", "Minimal exposure", "No exposure"] },
+                { text: "How much time do you spend in nature or outdoors?", options: ["Never", "Rarely", "Weekly", "Several times/week", "Daily"] },
+                { text: "How would you rate the air quality in your area?", options: ["Very Poor", "Poor", "Average", "Good", "Excellent"] },
+                { text: "Do you have a supportive social environment?", options: ["Very Poor", "Poor", "Average", "Good", "Excellent"] }
+            ],
+            history: [
+                { text: "Have you had any major surgeries or hospitalizations?", options: ["Multiple major", "One major", "Minor procedures", "Few minor", "None"] },
+                { text: "Do you take any regular medications?", options: ["Many medications", "Several medications", "Few medications", "One medication", "None"] },
+                { text: "Do you have any known allergies or sensitivities?", options: ["Severe multiple", "Several allergies", "Few allergies", "One allergy", "None"] },
+                { text: "Have you experienced any serious injuries?", options: ["Multiple serious", "One serious", "Few minor", "Very minor", "None"] },
+                { text: "Do you have a family history of serious health conditions?", options: ["Multiple conditions", "Several conditions", "Few conditions", "One condition", "None known"] }
+            ]
+        };
+        
+        let currentCategory = 0;
+        let selectedPatient = null;
+        let answers = {};
+        let categoryScores = { physical: 0, mental: 0, lifestyle: 0, environment: 0, history: 0 };
+        
+        // Load patients on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadPatients();
+        });
+        
+        // Load patients for selection
+        async function loadPatients() {
+            try {
+                const { data, error } = await supabase
+                    .from('patients')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+                    
+                if (error) throw error;
+                
+                const patientSelect = document.getElementById('patientSelect');
+                patientSelect.innerHTML = '<option value="">Select a patient...</option>';
+                
+                if (data && data.length > 0) {
+                    data.forEach(patient => {
+                        patientSelect.innerHTML += `<option value="${patient.id}">${patient.first_name} ${patient.last_name} (${patient.patient_id})</option>`;
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading patients:', error);
+                alert('Error loading patients: ' + error.message);
+            }
+        }
+        
+        // Start assessment
+        window.startAssessment = function() {
+            const patientId = document.getElementById('patientSelect').value;
+            if (!patientId) {
+                alert('Please select a patient first');
+                return;
+            }
+            
+            selectedPatient = patientId;
+            const patientText = document.getElementById('patientSelect').selectedOptions[0].text;
+            document.getElementById('patientInfo').textContent = `Patient: ${patientText}`;
+            
+            document.getElementById('patientSelection').classList.add('hidden');
+            document.getElementById('assessmentInterface').classList.remove('hidden');
+            
+            // Initialize answers
+            answers = { physical: {}, mental: {}, lifestyle: {}, environment: {}, history: {} };
+            currentCategory = 0;
+            
+            loadCategoryQuestions();
+        };
+        
+        // Load questions for current category
+        function loadCategoryQuestions() {
+            const categories = ['physical', 'mental', 'lifestyle', 'environment', 'history'];
+            const categoryName = categories[currentCategory];
+            const questions = assessmentQuestions[categoryName];
+            
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+            
+            questions.forEach((question, index) => {
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'question-card';
+                questionDiv.innerHTML = `
+                    <div class="question-text">${index + 1}. ${question.text}</div>
+                    <div class="options" data-question="${index}">
+                        ${question.options.map((option, optIndex) => `
+                            <div class="option" onclick="selectOption(${index}, ${optIndex})" data-value="${optIndex}">
+                                ${option}
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                container.appendChild(questionDiv);
+            });
+            
+            // Restore previous answers if they exist
+            if (answers[categoryName]) {
+                Object.keys(answers[categoryName]).forEach(questionIndex => {
+                    const optionValue = answers[categoryName][questionIndex];
+                    const optionElement = container.querySelector(`[data-question="${questionIndex}"] [data-value="${optionValue}"]`);
+                    if (optionElement) {
+                        optionElement.classList.add('selected');
+                    }
+                });
+            }
+            
+            updateProgress();
+            updateNavigation();
+        }
+        
+        // Select option
+        window.selectOption = function(questionIndex, optionValue) {
+            const categories = ['physical', 'mental', 'lifestyle', 'environment', 'history'];
+            const categoryName = categories[currentCategory];
+            
+            // Remove previous selection
+            const optionsContainer = document.querySelector(`[data-question="${questionIndex}"]`);
+            optionsContainer.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+            
+            // Add new selection
+            const selectedOption = optionsContainer.querySelector(`[data-value="${optionValue}"]`);
+            selectedOption.classList.add('selected');
+            
+            // Store answer
+            if (!answers[categoryName]) answers[categoryName] = {};
+            answers[categoryName][questionIndex] = optionValue;
+        };
+        
+        // Navigation functions
+        window.nextCategory = function() {
+            if (currentCategory < 4) {
+                currentCategory++;
+                loadCategoryQuestions();
+            } else {
+                calculateResults();
+            }
+        };
+        
+        window.previousCategory = function() {
+            if (currentCategory > 0) {
+                currentCategory--;
+                loadCategoryQuestions();
+            }
+        };
+        
+        window.switchCategory = function(categoryIndex) {
+            currentCategory = categoryIndex;
+            loadCategoryQuestions();
+        };
+        
+        // Update progress
+        function updateProgress() {
+            const progress = ((currentCategory + 1) / 5) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+            document.getElementById('progressText').textContent = `Category ${currentCategory + 1} of 5`;
+            
+            // Update tab states
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach((tab, index) => {
+                tab.classList.remove('active', 'completed');
+                if (index === currentCategory) {
+                    tab.classList.add('active');
+                } else if (index < currentCategory) {
+                    tab.classList.add('completed');
+                }
+            });
+        }
+        
+        // Update navigation buttons
+        function updateNavigation() {
+            document.getElementById('prevBtn').disabled = currentCategory === 0;
+            document.getElementById('nextBtn').textContent = currentCategory === 4 ? 'Complete Assessment' : 'Next Category';
+        }
+        
+        // Calculate results
+        function calculateResults() {
+            const categories = ['physical', 'mental', 'lifestyle', 'environment', 'history'];
+            let totalScore = 0;
+            
+            categories.forEach(category => {
+                let categoryTotal = 0;
+                const categoryAnswers = answers[category] || {};
+                
+                Object.values(categoryAnswers).forEach(answer => {
+                    categoryTotal += (answer * 20); // Convert 0-4 scale to 0-80 points
+                });
+                
+                const maxQuestions = assessmentQuestions[category].length;
+                const categoryScore = Math.round((categoryTotal / (maxQuestions * 80)) * 100);
+                categoryScores[category] = categoryScore;
+                totalScore += categoryScore;
+            });
+            
+            const overallScore = Math.round(totalScore / 5);
+            
+            displayResults(overallScore);
+        }
+        
+        // Display results
+        function displayResults(overallScore) {
+            document.getElementById('assessmentInterface').classList.add('hidden');
+            document.getElementById('resultsDisplay').classList.remove('hidden');
+            
+            document.getElementById('totalScore').textContent = overallScore;
+            document.getElementById('physicalScore').textContent = categoryScores.physical;
+            document.getElementById('mentalScore').textContent = categoryScores.mental;
+            document.getElementById('lifestyleScore').textContent = categoryScores.lifestyle;
+            document.getElementById('environmentScore').textContent = categoryScores.environment;
+            document.getElementById('historyScore').textContent = categoryScores.history;
+            
+            generateRecommendations(overallScore);
+        }
+        
+        // Generate therapy recommendations
+        function generateRecommendations(overallScore) {
+            const recommendations = [];
+            
+            if (categoryScores.physical < 70) {
+                recommendations.push("Energy Enhancement Protocol - Boost physical vitality and reduce fatigue");
+                recommendations.push("Pain Management Protocol - Address chronic pain and inflammation");
+            }
+            
+            if (categoryScores.mental < 70) {
+                recommendations.push("Stress Relief Protocol - Reduce anxiety and promote mental calm");
+                recommendations.push("Mental Clarity Protocol - Improve focus and cognitive function");
+            }
+            
+            if (categoryScores.lifestyle < 70) {
+                recommendations.push("Detoxification Protocol - Support body's natural cleansing processes");
+                recommendations.push("Sleep Enhancement Protocol - Improve sleep quality and recovery");
+            }
+            
+            if (categoryScores.environment < 70) {
+                recommendations.push("Environmental Harmony Protocol - Address environmental stress factors");
+            }
+            
+            if (categoryScores.history < 70) {
+                recommendations.push("Constitutional Support Protocol - Address underlying health patterns");
+            }
+            
+            if (overallScore >= 80) {
+                recommendations.push("Wellness Maintenance Protocol - Maintain optimal health levels");
+            }
+            
+            const recommendationsList = document.getElementById('recommendationsList');
+            recommendationsList.innerHTML = recommendations.map(rec => 
+                `<div class="recommendation-item">${rec}</div>`
+            ).join('');
+        }
+        
+        // Save assessment
+        window.saveAssessment = async function() {
+            try {
+                const assessmentData = {
+                    patient_id: selectedPatient,
+                    clinic_id: 1, // Default clinic
+                    assessment_type: 'comprehensive',
+                    physical_score: categoryScores.physical,
+                    mental_score: categoryScores.mental,
+                    lifestyle_score: categoryScores.lifestyle,
+                    environmental_score: categoryScores.environment,
+                    medical_history_score: categoryScores.history,
+                    total_score: Math.round((Object.values(categoryScores).reduce((a, b) => a + b, 0)) / 5),
+                    assessment_responses: answers,
+                    completed_at: new Date().toISOString()
+                };
+                
+                const { data, error } = await supabase
+                    .from('health_assessments')
+                    .insert([assessmentData]);
+                    
+                if (error) throw error;
+                
+                alert('Assessment saved successfully!');
+                
+            } catch (error) {
+                console.error('Error saving assessment:', error);
+                alert('Error saving assessment: ' + error.message);
+            }
+        };
+        
+        // Utility functions
+        window.startNewAssessment = function() {
+            location.reload();
+        };
+        
+        window.printResults = function() {
+            window.print();
+        };
+        
+    </script>
+</body>
+</html>
