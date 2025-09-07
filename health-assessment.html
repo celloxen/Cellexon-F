@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Health Assessment - Cellexon</title>
+    <title>Health Assessment - Celloxen</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', sans-serif; background: #f8fafc; }
-        .header { background: linear-gradient(135deg, #1e293b, #334155); color: white; padding: 20px; }
+        .header { background: linear-gradient(135deg, #1e293b, #334155); color: white; padding: 20px; border-bottom: 2px solid #10b981; }
         .container { max-width: 1000px; margin: 0 auto; padding: 20px; }
         .card { background: white; border-radius: 12px; padding: 30px; margin: 20px 0; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .progress-bar { background: #e5e7eb; height: 8px; border-radius: 4px; margin: 20px 0; }
@@ -32,27 +32,33 @@
         .recommendations { background: white; border-radius: 8px; padding: 20px; margin: 15px 0; }
         .recommendation-item { padding: 10px; margin: 8px 0; background: #f0fdf4; border-left: 4px solid #10b981; border-radius: 4px; }
         .hidden { display: none; }
+        .alert { padding: 10px; border-radius: 4px; margin: 10px 0; }
+        .alert-success { background: #d1fae5; color: #065f46; border: 1px solid #10b981; }
+        .alert-error { background: #fee2e2; color: #991b1b; border: 1px solid #ef4444; }
     </style>
 </head>
 <body>
     <div class="header">
         <div class="container">
-            <h1>Cellexon Health Assessment</h1>
+            <h1>Celloxen Health Assessment</h1>
             <p>Comprehensive 5-category health evaluation system</p>
             <button class="btn btn-secondary" onclick="window.location.href='index.html'">Back to Dashboard</button>
         </div>
     </div>
     
     <div class="container">
+        <div id="alertContainer"></div>
+        
         <!-- Patient Selection -->
         <div class="card" id="patientSelection">
             <h2>Select Patient for Assessment</h2>
-            <div style="display: grid; grid-template-columns: 1fr auto; gap: 15px; align-items: end;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; align-items: end;">
                 <div>
                     <label>Select Patient:</label>
                     <select id="patientSelect" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
                         <option value="">Select a patient...</option>
                     </select>
+                    <div id="patientInfo" style="margin-top: 15px; padding: 10px; background: rgba(16, 185, 129, 0.1); border-radius: 6px; display: none;"></div>
                 </div>
                 <button class="btn btn-primary" onclick="startAssessment()">Start Assessment</button>
             </div>
@@ -62,7 +68,7 @@
         <div class="card hidden" id="assessmentInterface">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                 <h2>Health Assessment</h2>
-                <div id="patientInfo" style="text-align: right; color: #6b7280;"></div>
+                <div id="patientInfoHeader" style="text-align: right; color: #6b7280;"></div>
             </div>
             
             <div class="progress-bar">
@@ -130,7 +136,7 @@
             </div>
             
             <div style="text-align: center; margin-top: 20px;">
-                <button class="btn btn-primary" onclick="saveAssessment()">Save Assessment</button>
+                <button class="btn btn-primary" onclick="saveAssessment()">Save Assessment Report</button>
                 <button class="btn btn-secondary" onclick="startNewAssessment()">New Assessment</button>
                 <button class="btn btn-secondary" onclick="printResults()">Print Results</button>
             </div>
@@ -189,12 +195,24 @@
             loadPatients();
         });
         
+        // Show alert messages
+        function showAlert(message, type = 'success') {
+            const alertContainer = document.getElementById('alertContainer');
+            alertContainer.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+            setTimeout(() => {
+                alertContainer.innerHTML = '';
+            }, 5000);
+        }
+        
         // Load patients for selection
         async function loadPatients() {
             try {
                 const { data, error } = await supabase
                     .from('patients')
-                    .select('*')
+                    .select(`
+                        *,
+                        clinics (clinic_name, clinic_code)
+                    `)
                     .order('created_at', { ascending: false });
                     
                 if (error) throw error;
@@ -204,12 +222,12 @@
                 
                 if (data && data.length > 0) {
                     data.forEach(patient => {
-                        patientSelect.innerHTML += `<option value="${patient.id}">${patient.first_name} ${patient.last_name} (${patient.patient_id})</option>`;
+                        patientSelect.innerHTML += `<option value="${patient.id}" data-patient='${JSON.stringify(patient)}'>${patient.first_name} ${patient.last_name} (${patient.patient_id})</option>`;
                     });
                 }
             } catch (error) {
                 console.error('Error loading patients:', error);
-                alert('Error loading patients: ' + error.message);
+                showAlert('Error loading patients: ' + error.message, 'error');
             }
         }
         
@@ -217,13 +235,17 @@
         window.startAssessment = function() {
             const patientId = document.getElementById('patientSelect').value;
             if (!patientId) {
-                alert('Please select a patient first');
+                showAlert('Please select a patient first', 'error');
                 return;
             }
             
-            selectedPatient = patientId;
-            const patientText = document.getElementById('patientSelect').selectedOptions[0].text;
+            const selectedOption = document.getElementById('patientSelect').selectedOptions[0];
+            selectedPatient = JSON.parse(selectedOption.dataset.patient);
+            
+            const patientText = `${selectedPatient.first_name} ${selectedPatient.last_name} (${selectedPatient.patient_id})`;
             document.getElementById('patientInfo').textContent = `Patient: ${patientText}`;
+            document.getElementById('patientInfo').style.display = 'block';
+            document.getElementById('patientInfoHeader').textContent = `Patient: ${patientText}`;
             
             document.getElementById('patientSelection').classList.add('hidden');
             document.getElementById('assessmentInterface').classList.remove('hidden');
@@ -382,6 +404,9 @@
         function generateRecommendations(overallScore) {
             const recommendations = [];
             
+            // Always include detoxification as mandatory
+            recommendations.push("Detoxification Protocol - Mandatory foundational therapy");
+            
             if (categoryScores.physical < 70) {
                 recommendations.push("Energy Enhancement Protocol - Boost physical vitality and reduce fatigue");
                 recommendations.push("Pain Management Protocol - Address chronic pain and inflammation");
@@ -393,8 +418,8 @@
             }
             
             if (categoryScores.lifestyle < 70) {
-                recommendations.push("Detoxification Protocol - Support body's natural cleansing processes");
                 recommendations.push("Sleep Enhancement Protocol - Improve sleep quality and recovery");
+                recommendations.push("Metabolic Support Protocol - Enhance nutrition and energy systems");
             }
             
             if (categoryScores.environment < 70) {
@@ -417,32 +442,73 @@
         
         // Save assessment
         window.saveAssessment = async function() {
+            if (!selectedPatient) {
+                showAlert('No patient selected for assessment', 'error');
+                return;
+            }
+            
             try {
+                const overallScore = Math.round((Object.values(categoryScores).reduce((a, b) => a + b, 0)) / 5);
+                const recommendations = Array.from(document.querySelectorAll('.recommendation-item')).map(item => item.textContent);
+                
+                const reportData = {
+                    patient_info: {
+                        name: `${selectedPatient.first_name} ${selectedPatient.last_name}`,
+                        patient_id: selectedPatient.patient_id,
+                        date_of_birth: selectedPatient.date_of_birth,
+                        gender: selectedPatient.gender,
+                        clinic: selectedPatient.clinics
+                    },
+                    assessment_responses: answers,
+                    category_scores: categoryScores,
+                    overall_score: overallScore,
+                    recommendations: recommendations,
+                    assessment_date: new Date().toISOString()
+                };
+                
+                const { data, error } = await supabase
+                    .from('medical_reports')
+                    .insert([{
+                        patient_id: selectedPatient.id,
+                        clinic_id: selectedPatient.clinic_id,
+                        report_type: 'health_assessment',
+                        report_title: 'Health Assessment Report',
+                        report_data: reportData,
+                        recommendations: recommendations,
+                        therapies_recommended: recommendations,
+                        total_score: overallScore,
+                        category_scores: categoryScores
+                    }])
+                    .select();
+                    
+                if (error) throw error;
+                
+                showAlert('Health assessment report saved successfully!', 'success');
+                
+                // Also save to health_assessments table for backward compatibility
                 const assessmentData = {
-                    patient_id: selectedPatient,
-                    clinic_id: 1, // Default clinic
+                    patient_id: selectedPatient.id,
+                    clinic_id: selectedPatient.clinic_id,
                     assessment_type: 'comprehensive',
                     physical_score: categoryScores.physical,
                     mental_score: categoryScores.mental,
                     lifestyle_score: categoryScores.lifestyle,
                     environmental_score: categoryScores.environment,
                     medical_history_score: categoryScores.history,
-                    total_score: Math.round((Object.values(categoryScores).reduce((a, b) => a + b, 0)) / 5),
+                    total_score: overallScore,
                     assessment_responses: answers,
                     completed_at: new Date().toISOString()
                 };
                 
-                const { data, error } = await supabase
+                const { error: healthError } = await supabase
                     .from('health_assessments')
                     .insert([assessmentData]);
                     
-                if (error) throw error;
-                
-                alert('Assessment saved successfully!');
+                if (healthError) console.warn('Warning: Could not save to health_assessments table:', healthError);
                 
             } catch (error) {
                 console.error('Error saving assessment:', error);
-                alert('Error saving assessment: ' + error.message);
+                showAlert('Error saving assessment: ' + error.message, 'error');
             }
         };
         
