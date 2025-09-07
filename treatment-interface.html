@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Treatment Interface - Cellexon</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f172a; color: white; }
+        .header { background: linear-gradient(135deg, #1e293b, #334155); padding: 20px; border-bottom: 2px solid #10b981; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        .treatment-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 20px; }
+        .card { background: rgba(255, 255, 255, 0.05); border-radius: 12px; padding: 20px; border: 1px solid rgba(16, 185, 129, 0.3); margin: 10px 0; }
+        .protocol-card { background: rgba(16, 185, 129, 0.1); border: 1px solid #10b981; border-radius: 8px; padding: 15px; margin: 8px 0; cursor: pointer; transition: all 0.2s; }
+        .protocol-card:hover { background: rgba(16, 185, 129, 0.2); transform: translateY(-1px); }
+        .protocol-card.selected { background: rgba(16, 185, 129, 0.3); border-color: #059669; }
+        .control-panel { background: rgba(0, 0, 0, 0.3); border-radius: 8px; padding: 20px; margin: 10px 0; }
+        .frequency-display { text-align: center; font-size: 2rem; font-weight: bold; color: #10b981; margin: 15px 0; }
+        .slider { width: 100%; height: 6px; border-radius: 3px; background: #374151; outline: none; margin: 10px 0; }
+        .slider::-webkit-slider-thumb { appearance: none; width: 20px; height: 20px; border-radius: 50%; background: #10b981; cursor: pointer; }
+        .btn { padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; font-weight: 500; margin: 5px; }
+        .btn-primary { background: #10b981; color: white; }
+        .btn-danger { background: #ef4444; color: white; }
+        .btn-warning { background: #f59e0b; color: white; }
+        .btn-secondary { background: #6b7280; color: white; }
+        .status-indicator { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; }
+        .status-active { background: #10b981; }
+        .status-inactive { background: #6b7280; }
+        .status-warning { background: #f59e0b; }
+        .timer-display { font-size: 1.5rem; font-weight: bold; text-align: center; margin: 15px 0; }
+        .progress-ring { transform: rotate(-90deg); margin: 10px auto; }
+        .channel-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 15px 0; }
+        .channel-item { background: rgba(255, 255, 255, 0.1); padding: 10px; border-radius: 6px; text-align: center; cursor: pointer; }
+        .channel-item.active { background: rgba(16, 185, 129, 0.3); border: 1px solid #10b981; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <h1>Cellexon Treatment Interface</h1>
+            <p>33 Electromagnetic Therapy Protocols with Real-time Control</p>
+            <button class="btn btn-secondary" onclick="window.location.href='index.html'">Back to Dashboard</button>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="treatment-grid">
+            <!-- Protocol Selection Panel -->
+            <div>
+                <div class="card">
+                    <h2>Patient Selection</h2>
+                    <select id="patientSelect" style="width: 100%; padding: 10px; border: 1px solid #374151; border-radius: 6px; background: #1f2937; color: white;">
+                        <option value="">Select Patient...</option>
+                    </select>
+                    <div id="patientInfo" style="margin-top: 15px; padding: 10px; background: rgba(16, 185, 129, 0.1); border-radius: 6px; display: none;">
+                        <div id="patientDetails"></div>
+                        <div id="lastAssessment"></div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h2>Treatment Protocols</h2>
+                    <div style="max-height: 500px; overflow-y: auto;">
+                        <div id="protocolsList">
+                            <!-- Protocols will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Treatment Control Panel -->
+            <div>
+                <div class="card">
+                    <h2>Treatment Control Panel</h2>
+                    <div id="selectedProtocolInfo" style="margin-bottom: 20px;">
+                        <p style="color: #94a3b8;">Select a protocol to begin treatment</p>
+                    </div>
+                    
+                    <div class="control-panel">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                            <div>
+                                <label>Frequency (Hz)</label>
+                                <div class="frequency-display" id="frequencyDisplay">0.0</div>
+                                <input type="range" class="slider" id="frequencySlider" min="0.1" max="100" step="0.1" value="7.83" disabled>
+                                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: #94a3b8;">
+                                    <span>0.1Hz</span>
+                                    <span>100Hz</span>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label>Amplitude (%)</label>
+                                <div class="frequency-display" id="amplitudeDisplay">0</div>
+                                <input type="range" class="slider" id="amplitudeSlider" min="10" max="100" step="5" value="50" disabled>
+                                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: #94a3b8;">
+                                    <span>10%</span>
+                                    <span>100%</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="margin: 20px 0;">
+                            <label>Treatment Duration</label>
+                            <select id="durationSelect" style="width: 100%; padding: 10px; border: 1px solid #374151; border-radius: 6px; background: #1f2937; color: white;" disabled>
+                                <option value="15">15 minutes</option>
+                                <option value="30" selected>30 minutes</option>
+                                <option value="45">45 minutes</option>
+                                <option value="60">60 minutes</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="control-panel">
+                        <h3>Session Control</h3>
+                        <div style="display: flex; justify-content: center; gap: 15px; margin: 20px 0;">
+                            <button class="btn btn-primary" id="startBtn" onclick="startTreatment()" disabled>Start Treatment</button>
+                            <button class="btn btn-warning" id="pauseBtn" onclick="pauseTreatment()" disabled>Pause</button>
+                            <button class="btn btn-danger" id="stopBtn" onclick="stopTreatment()" disabled>Stop</button>
+                        </div>
+                        
+                        <div class="timer-display" id="timerDisplay">00:00</div>
+                        
+                        <div style="background: #374151; height: 8px; border-radius: 4px; overflow: hidden;">
+                            <div id="progressBar" style="background: #10b981; height: 100%; width: 0%; transition: width 1s;"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h3>Channel Configuration</h3>
+                    <div class="channel-grid" id="channelGrid">
+                        <!-- Channels 1-16 will be populated here -->
+                    </div>
+                    <div style="margin-top: 15px; text-align: center;">
+                        <button class="btn btn-secondary" onclick="selectAllChannels()">Select All</button>
+                        <button class="btn btn-secondary" onclick="clearAllChannels()">Clear All</button>
+                        <span style="margin-left: 15px; color: #94a3b8;">Active Channels: <span id="activeChannelCount">0</span></span>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h3>Treatment Status</h3>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        <div style="text-align: center; padding: 15px; background: rgba(255, 255, 255, 0.05); border-radius: 6px;">
+                            <div><span class="status-indicator status-inactive" id="systemStatus"></span>System Status</div>
+                            <div style="font-weight: bold; margin-top: 5px;" id="systemStatusText">Ready</div>
+                        </div>
+                        <div style="text-align: center; padding: 15px; background: rgba(255, 255, 255, 0.05); border-radius: 6px;">
+                            <div><span class="status-indicator status-inactive" id="safetyStatus"></span>Safety Check</div>
+                            <div style="font-weight: bold; margin-top: 5px;" id="safetyStatusText">OK</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { supabase } from './supabase-config.js';
+        
+        // Treatment protocols data
+        const treatmentProtocols = [
+            { id: 1, name: "Stress Relief Protocol", frequency: 7.83, amplitude: 50, duration: 30, category: "Mental Wellness" },
+            { id: 2, name: "Pain Management Protocol", frequency: 10.0, amplitude: 75, duration: 45, category: "Physical Therapy" },
+            { id: 3, name: "Detox Support Protocol", frequency: 3.5, amplitude: 40, duration: 35, category: "Detoxification" },
+            { id: 4, name: "Immune Boost Protocol", frequency: 20.0, amplitude: 60, duration: 40, category: "Immune Support" },
+            { id: 5, name: "Sleep Enhancement Protocol", frequency: 4.0, amplitude: 45, duration: 35, category: "Sleep Support" },
+            { id: 6, name: "Energy Boost Protocol", frequency: 25.0, amplitude: 70, duration: 30, category: "Energy Enhancement" },
+            { id: 7, name: "Mental Clarity Protocol", frequency: 15.0, amplitude: 65, duration: 40, category: "Cognitive Support" },
+            { id: 8, name: "Digestive Health Protocol", frequency: 12.5, amplitude: 55, duration: 30, category: "Digestive Support" },
+            { id: 9, name: "Joint Support Protocol", frequency: 8.5, amplitude: 70, duration: 45, category: "Joint Health" },
+            { id: 10, name: "Circulation Protocol", frequency: 18.0, amplitude: 60, duration: 35, category: "Cardiovascular" },
+            { id: 11, name: "Lymphatic Drainage Protocol", frequency: 6.5, amplitude: 50, duration: 40, category: "Detoxification" },
+            { id: 12, name: "Hormone Balance Protocol", frequency: 22.0, amplitude: 55, duration: 45, category: "Endocrine Support" },
+            { id: 13, name: "Skin Health Protocol", frequency: 14.5, amplitude: 45, duration: 30, category: "Skin Care" },
+            { id: 14, name: "Respiratory Support Protocol", frequency: 11.0, amplitude: 65, duration: 35, category: "Respiratory" },
+            { id: 15, name: "Muscle Recovery Protocol", frequency: 16.5, amplitude: 75, duration: 40, category: "Sports Recovery" },
+            { id: 16, name: "Nerve Support Protocol", frequency: 9.5, amplitude: 50, duration: 45, category: "Neurological" },
+            { id: 17, name: "Inflammation Reduction Protocol", frequency: 13.0, amplitude: 60, duration: 35, category: "Anti-inflammatory" },
+            { id: 18, name: "Cellular Regeneration Protocol", frequency: 28.0, amplitude: 65, duration: 50, category: "Regenerative" },
+            { id: 19, name: "Chakra Alignment Protocol", frequency: 7.23, amplitude: 40, duration: 30, category: "Energy Balance" },
+            { id: 20, name: "Emotional Balance Protocol", frequency: 5.5, amplitude: 45, duration: 35, category: "Emotional Support" },
+            { id: 21, name: "Focus Enhancement Protocol", frequency: 19.5, amplitude: 55, duration: 30, category: "Cognitive Support" },
+            { id: 22, name: "Trauma Release Protocol", frequency: 4.8, amplitude: 35, duration: 45, category: "Emotional Healing" },
+            { id: 23, name: "Addiction Support Protocol", frequency: 17.0, amplitude: 50, duration: 40, category: "Addiction Recovery" },
+            { id: 24, name: "Memory Enhancement Protocol", frequency: 21.5, amplitude: 60, duration: 35, category: "Cognitive Support" },
+            { id: 25, name: "Anxiety Relief Protocol", frequency: 6.0, amplitude: 40, duration: 30, category: "Mental Wellness" },
+            { id: 26, name: "Depression Support Protocol", frequency: 8.0, amplitude: 45, duration: 40, category: "Mental Wellness" },
+            { id: 27, name: "Confidence Boost Protocol", frequency: 12.0, amplitude: 55, duration: 30, category: "Personal Development" },
+            { id: 28, name: "Creativity Enhancement Protocol", frequency: 23.5, amplitude: 50, duration: 35, category: "Creative Flow" },
+            { id: 29, name: "Spiritual Connection Protocol", frequency: 2.5, amplitude: 30, duration: 45, category: "Spiritual Wellness" },
+            { id: 30, name: "Grounding Protocol", frequency: 1.5, amplitude: 25, duration: 30, category: "Energy Balance" },
+            { id: 31, name: "Athletic Performance Protocol", frequency: 26.0, amplitude: 80, duration: 40, category: "Sports Enhancement" },
+            { id: 32, name: "Anti-aging Protocol", frequency: 24.5, amplitude: 55, duration: 50, category: "Longevity" },
+            { id: 33, name: "Universal Healing Protocol", frequency: 33.0, amplitude: 60, duration: 60, category: "General Wellness" }
+        ];
+        
+        let selectedProtocol = null;
+        let selectedPatient = null;
+        let treatmentTimer = null;
+        let treatmentSeconds = 0;
+        let totalTreatmentTime = 0;
+        let activeChannels = [];
+        
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            loadPatients();
+            populateProtocols();
+            initializeChannels();
+            setupEventListeners();
+        });
+        
+        // Load patients
+        async function loadPatients() {
+            try {
+                const { data, error } = await supabase
+                    .from('patients')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+                    
+                if (error) throw error;
+                
+                const patientSelect = document.getElementById('patientSelect');
+                patientSelect.innerHTML = '<option value="">Select Patient...</option>';
+                
+                if (data && data.length > 0) {
+                    data.forEach(patient => {
+                        patientSelect.innerHTML += `<option value="${patient.id}" data-patient='${JSON.stringify(patient)}'>${patient.first_name} ${patient.last_name} (${patient.patient_id})</option>`;
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading patients:', error);
+            }
+        }
+        
+        // Populate treatment protocols
+        function populateProtocols() {
+            const protocolsList = document.getElementById('protocolsList');
+            const categories = {};
+            
+            // Group protocols by category
+            treatmentProtocols.forEach(protocol => {
+                if (!categories[protocol.category]) {
+                    categories[protocol.category] = [];
+                }
+                categories[protocol.category].push(protocol);
+            });
+            
+            // Display protocols by category
+            protocolsList.innerHTML = '';
+            Object.keys(categories).forEach(category => {
+                const categoryDiv = document.createElement('div');
+                categoryDiv.innerHTML = `
+                    <h4 style="color: #10b981; margin: 15px 0 10px 0; border-bottom: 1px solid #374151; padding-bottom: 5px;">${category}</h4>
+                    ${categories[category].map(protocol => `
+                        <div class="protocol-card" onclick="selectProtocol(${protocol.id})">
+                            <div style="font-weight: 600; margin-bottom: 5px;">${protocol.name}</div>
+                            <div style="font-size: 0.9rem; color: #94a3b8;">
+                                ${protocol.frequency}Hz | ${protocol.amplitude}% | ${protocol.duration}min
+                            </div>
+                        </div>
+                    `).join('')}
+                `;
+                protocolsList.appendChild(categoryDiv);
+            });
+        }
+        
+        // Initialize channel grid
+        function initializeChannels() {
+            const channelGrid = document.getElementById('channelGrid');
+            channelGrid.innerHTML = '';
+            
+            for (let i = 1; i <= 16; i++) {
+                const channelDiv = document.createElement('div');
+                channelDiv.className = 'channel-item';
+                channelDiv.innerHTML = `Channel ${i}`;
+                channelDiv.onclick = () => toggleChannel(i);
+                channelGrid.appendChild(channelDiv);
+            }
+            
+            updateActiveChannelCount();
+        }
+        
+        // Setup event listeners
+        function setupEventListeners() {
+            document.getElementById('patientSelect').addEventListener('change', function() {
+                const selectedOption = this.selectedOptions[0];
+                if (selectedOption.value) {
+                    const patientData = JSON.parse(selectedOption.dataset.patient);
+                    showPatientInfo(patientData);
+                    selectedPatient = patientData;
+                } else {
+                    hidePatientInfo();
+                    selectedPatient = null;
+                }
+            });
+            
+            document.getElementById('frequencySlider').addEventListener('input', function() {
+                document.getElementById('frequencyDisplay').textContent = parseFloat(this.value).toFixed(1);
+            });
+            
+            document.getElementById('amplitudeSlider').addEventListener('input', function() {
+                document.getElementById('amplitudeDisplay').textContent = this.value;
+            });
+        }
+        
+        // Show patient information
+        function showPatientInfo(patient) {
+            document.getElementById('patientInfo').style.display = 'block';
+            document.getElementById('patientDetails').innerHTML = `
+                <strong>${patient.first_name} ${patient.last_name}</strong><br>
+                ID: ${patient.patient_id}<br>
+                Age: ${calculateAge(patient.date_of_birth)}
+            `;
+            
+            loadLastAssessment(patient.id);
+        }
+        
+        // Hide patient information
+        function hidePatientInfo() {
+            document.getElementById('patientInfo').style.display = 'none';
+        }
+        
+        // Load last assessment
+        async function loadLastAssessment(patientId) {
+            try {
+                const { data, error } = await supabase
+                    .from('health_assessments')
+                    .select('*')
+                    .eq('patient_id', patientId)
+                    .order('completed_at', { ascending: false })
+                    .limit(1);
+                    
+                if (error) throw error;
+                
+                if (data && data.length > 0) {
+                    const assessment = data[0];
+                    document.getElementById('lastAssessment').innerHTML = `
+                        <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #374151;">
+                            <small>Last Assessment: Score ${assessment.total_score}/100</small>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading assessment:', error);
+            }
+        }
+        
+        // Calculate age
+        function calculateAge(birthDate) {
+            const today = new Date();
+            const birth = new Date(birthDate);
+            let age = today.getFullYear() - birth.getFullYear();
+            const monthDiff = today.getMonth() - birth.getMonth();
+            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+                age--;
+            }
+            return age;
+        }
+        
+        // Select protocol
+        window.selectProtocol = function(protocolId) {
+            selectedProtocol = treatmentProtocols.find(p => p.id === protocolId);
+            
+            // Update UI
+            document.querySelectorAll('.protocol-card').forEach(card => card.classList.remove('selected'));
+            event.target.closest('.protocol-card').classList.add('selected');
+            
+            // Update protocol info
+            document.getElementById('selectedProtocolInfo').innerHTML = `
+                <h3 style="color: #10b981;">${selectedProtocol.name}</h3>
+                <p>Category: ${selectedProtocol.category}</p>
+                <p>Default Settings: ${selectedProtocol.frequency}Hz, ${selectedProtocol.amplitude}%, ${selectedProtocol.duration} minutes</p>
+            `;
+            
+            // Update controls
+            document.getElementById('frequencySlider').value = selectedProtocol.frequency;
+            document.getElementById('amplitudeSlider').value = selectedProtocol.amplitude;
+            document.getElementById('durationSelect').value = selectedProtocol.duration;
+            document.getElementById('frequencyDisplay').textContent = selectedProtocol.frequency.toFixed(1);
+            document.getElementById('amplitudeDisplay').textContent = selectedProtocol.amplitude;
+            
+            // Enable controls
+            document.getElementById('frequencySlider').disabled = false;
+            document.getElementById('amplitudeSlider').disabled = false;
+            document.getElementById('durationSelect').disabled = false;
+            document.getElementById('startBtn').disabled = !selectedPatient;
+        };
+        
+        // Channel management
+        window.toggleChannel = function(channelNumber) {
+            const channelIndex = activeChannels.indexOf(channelNumber);
+            const channelElement = document.querySelector(`#channelGrid .channel-item:nth-child(${channelNumber})`);
+            
+            if (channelIndex > -1) {
+                activeChannels.splice(channelIndex, 1);
+                channelElement.classList.remove('active');
+            } else {
+                activeChannels.push(channelNumber);
+                channelElement.classList.add('active');
+            }
+            
+            updateActiveChannelCount();
+        };
+        
+        window.selectAllChannels = function() {
+            activeChannels = Array.from({length: 16}, (_, i) => i + 1);
+            document.querySelectorAll('.channel-item').forEach(item => item.classList.add('active'));
+            updateActiveChannelCount();
+        };
+        
+        window.clearAllChannels = function() {
+            activeChannels = [];
+            document.querySelectorAll('.channel-item').forEach(item => item.classList.remove('active'));
+            updateActiveChannelCount();
+        };
+        
+        function updateActiveChannelCount() {
+            document.getElementById('activeChannelCount').textContent = activeChannels.length;
+        }
+        
+        // Treatment control
+        window.startTreatment = function() {
+            if (!selectedProtocol || !selectedPatient) {
+                alert('Please select both a patient and a protocol');
+                return;
+            }
+            
+            if (activeChannels.length === 0) {
+                alert('Please select at least one channel');
+                return;
+            }
+            
+            totalTreatmentTime = parseInt(document.getElementById('durationSelect').value) * 60;
+            treatmentSeconds = 0;
+            
+            document.getElementById('startBtn').disabled = true;
+            document.getElementById('pauseBtn').disabled = false;
+            document.getElementById('stopBtn').disabled = false;
+            
+            document.getElementById('systemStatus').className = 'status-indicator status-active';
+            document.getElementById('systemStatusText').textContent = 'Treatment Active';
+            
+            treatmentTimer = setInterval(updateTimer, 1000);
+            
+            console.log('Treatment started:', {
+                patient: selectedPatient.patient_id,
+                protocol: selectedProtocol.name,
+                frequency: document.getElementById('frequencySlider').value,
+                amplitude: document.getElementById('amplitudeSlider').value,
+                channels: activeChannels
+            });
+        };
+        
+        window.pauseTreatment = function() {
+            if (treatmentTimer) {
+                clearInterval(treatmentTimer);
+                treatmentTimer = null;
+                document.getElementById('pauseBtn').textContent = 'Resume';
+                document.getElementById('pauseBtn').onclick = resumeTreatment;
+                document.getElementById('systemStatusText').textContent = 'Paused';
+            }
+        };
+        
+        window.resumeTreatment = function() {
+            treatmentTimer = setInterval(updateTimer, 1000);
+            document.getElementById('pauseBtn').textContent = 'Pause';
+            document.getElementById('pauseBtn').onclick = pauseTreatment;
+            document.getElementById('systemStatusText').textContent = 'Treatment Active';
+        };
+        
+        window.stopTreatment = function() {
+            if (treatmentTimer) {
+                clearInterval(treatmentTimer);
+                treatmentTimer = null;
+            }
+            
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('pauseBtn').disabled = true;
+            document.getElementById('stopBtn').disabled = true;
+            document.getElementById('pauseBtn').textContent = 'Pause';
+            document.getElementById('pauseBtn').onclick = pauseTreatment;
+            
+            document.getElementById('systemStatus').className = 'status-indicator status-inactive';
+            document.getElementById('systemStatusText').textContent = 'Ready';
+            
+            document.getElementById('timerDisplay').textContent = '00:00';
+            document.getElementById('progressBar').style.width = '0%';
+            
+            treatmentSeconds = 0;
+            
+            saveTreatmentSession();
+        };
+        
+        function updateTimer() {
+            treatmentSeconds++;
+            
+            const minutes = Math.floor(treatmentSeconds / 60);
+            const seconds = treatmentSeconds % 60;
+            document.getElementById('timerDisplay').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            const progress = (treatmentSeconds / totalTreatmentTime) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+            
+            if (treatmentSeconds >= totalTreatmentTime) {
+                stopTreatment();
+                alert('Treatment completed successfully!');
+            }
+        }
+        
+        // Save treatment session
+        async function saveTreatmentSession() {
+            if (!selectedPatient || !selectedProtocol || treatmentSeconds < 60) return;
+            
+            try {
+                const sessionData = {
+                    patient_id: selectedPatient.id,
+                    clinic_id: 1,
+                    protocol_used: selectedProtocol.name,
+                    frequency_hz: parseFloat(document.getElementById('frequencySlider').value),
+                    amplitude: parseInt(document.getElementById('amplitudeSlider').value),
+                    duration_minutes: Math.round(treatmentSeconds / 60),
+                    status: 'completed',
+                    start_time: new Date(Date.now() - (treatmentSeconds * 1000)).toISOString(),
+                    end_time: new Date().toISOString(),
+                    session_notes: `Channels used: ${activeChannels.join(', ')}`
+                };
+                
+                const { error } = await supabase
+                    .from('treatment_sessions')
+                    .insert([sessionData]);
+                    
+                if (error) throw error;
+                
+                console.log('Treatment session saved successfully');
+                
+            } catch (error) {
+                console.error('Error saving treatment session:', error);
+            }
+        }
+        
+    </script>
+</body>
+</html>
