@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Management - Cellexon</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f8fafc; }
+        .header { background: #1e293b; color: white; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .card { background: white; border-radius: 8px; padding: 20px; margin: 20px 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .btn { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; }
+        .btn-primary { background: #10b981; color: white; }
+        .form-group { margin: 15px 0; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 500; }
+        .form-group input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
+        .patient-list { display: grid; gap: 15px; }
+        .patient-item { padding: 15px; border: 1px solid #e5e7eb; border-radius: 6px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <h1>Cellexon Patient Management</h1>
+            <p>Manage patient records and registrations</p>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="card">
+            <h2>Register New Patient</h2>
+            <form id="patientForm">
+                <div class="form-group">
+                    <label>First Name</label>
+                    <input type="text" id="firstName" required>
+                </div>
+                <div class="form-group">
+                    <label>Last Name</label>
+                    <input type="text" id="lastName" required>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="email" required>
+                </div>
+                <div class="form-group">
+                    <label>Date of Birth</label>
+                    <input type="date" id="dateOfBirth" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Register Patient</button>
+            </form>
+        </div>
+        
+        <div class="card">
+            <h2>Patient List</h2>
+            <div id="patientList" class="patient-list">
+                <p>No patients registered yet.</p>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { supabase } from './supabase-config.js';
+        
+        document.getElementById('patientForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const patientData = {
+                first_name: document.getElementById('firstName').value,
+                last_name: document.getElementById('lastName').value,
+                email: document.getElementById('email').value,
+                date_of_birth: document.getElementById('dateOfBirth').value,
+                patient_id: 'CEL' + Date.now(),
+                clinic_id: '00000000-0000-0000-0000-000000000001'
+            };
+            
+            const { data, error } = await supabase
+                .from('patients')
+                .insert([patientData]);
+                
+            if (error) {
+                alert('Error: ' + error.message);
+            } else {
+                alert('Patient registered successfully!');
+                document.getElementById('patientForm').reset();
+                loadPatients();
+            }
+        });
+        
+        async function loadPatients() {
+            const { data, error } = await supabase
+                .from('patients')
+                .select('*')
+                .limit(10);
+                
+            if (data && data.length > 0) {
+                document.getElementById('patientList').innerHTML = data.map(patient => `
+                    <div class="patient-item">
+                        <strong>${patient.first_name} ${patient.last_name}</strong><br>
+                        ID: ${patient.patient_id}<br>
+                        Email: ${patient.email}
+                    </div>
+                `).join('');
+            }
+        }
+        
+        loadPatients();
+    </script>
+</body>
+</html>
