@@ -6,80 +6,43 @@
     <title>Health Assessment - Celloxen</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', sans-serif; background: #0f172a; color: white; }
-        .header { background: linear-gradient(135deg, #1e293b, #334155); padding: 20px; border-bottom: 2px solid #10b981; }
-        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
-        .card { background: rgba(255, 255, 255, 0.05); border-radius: 12px; padding: 20px; border: 1px solid rgba(16, 185, 129, 0.3); margin: 10px 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f8fafc; }
+        .header { background: linear-gradient(135deg, #1e293b, #334155); color: white; padding: 20px; border-bottom: 2px solid #10b981; }
+        .container { max-width: 1000px; margin: 0 auto; padding: 20px; }
+        .card { background: white; border-radius: 12px; padding: 30px; margin: 20px 0; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .progress-bar { background: #e5e7eb; height: 8px; border-radius: 4px; margin: 20px 0; }
         .progress-fill { background: linear-gradient(90deg, #10b981, #059669); height: 100%; border-radius: 4px; transition: width 0.3s ease; }
         .category-tabs { display: flex; gap: 10px; margin: 20px 0; flex-wrap: wrap; }
-        .tab { padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer; background: rgba(255, 255, 255, 0.1); color: #94a3b8; font-weight: 500; transition: all 0.3s ease; }
+        .tab { padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer; background: #f3f4f6; color: #374151; font-weight: 500; }
         .tab.active { background: #10b981; color: white; }
         .tab.completed { background: #059669; color: white; }
-        .question-card { background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; padding: 20px; margin: 15px 0; }
-        .question-text { font-size: 1.1rem; font-weight: 500; margin-bottom: 15px; color: #e2e8f0; }
+        .question-card { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; margin: 15px 0; }
+        .question-text { font-size: 1.1rem; font-weight: 500; margin-bottom: 15px; color: #1f2937; }
         .options { display: grid; gap: 10px; }
-        .option { padding: 12px; border: 2px solid #374151; border-radius: 8px; cursor: pointer; transition: all 0.2s; background: rgba(255, 255, 255, 0.05); color: #cbd5e1; }
-        .option:hover { border-color: #10b981; background: rgba(16, 185, 129, 0.1); }
-        .option.selected { border-color: #10b981; background: rgba(16, 185, 129, 0.2); }
+        .option { padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
+        .option:hover { border-color: #10b981; background: #f0fdf4; }
+        .option.selected { border-color: #10b981; background: #dcfce7; }
         .btn { padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; font-weight: 500; margin: 5px; }
         .btn-primary { background: #10b981; color: white; }
         .btn-secondary { background: #6b7280; color: white; }
-        .btn-warning { background: #f59e0b; color: white; }
-        .btn-danger { background: #ef4444; color: white; }
-        .results-card { background: rgba(16, 185, 129, 0.1); border: 2px solid #10b981; }
+        .results-card { background: linear-gradient(135deg, #f0fdf4, #dcfce7); border: 2px solid #10b981; }
         .score-display { text-align: center; margin: 20px 0; }
-        .score-number { font-size: 3rem; font-weight: bold; color: #10b981; }
-        .score-label { font-size: 1.2rem; color: #cbd5e1; }
-        .recommendations { background: rgba(255, 255, 255, 0.05); border-radius: 8px; padding: 20px; margin: 15px 0; }
-        .recommendation-item { padding: 10px; margin: 8px 0; background: rgba(16, 185, 129, 0.1); border-left: 4px solid #10b981; border-radius: 4px; }
+        .score-number { font-size: 3rem; font-weight: bold; color: #059669; }
+        .score-label { font-size: 1.2rem; color: #374151; }
+        .recommendations { background: white; border-radius: 8px; padding: 20px; margin: 15px 0; }
+        .recommendation-item { padding: 10px; margin: 8px 0; background: #f0fdf4; border-left: 4px solid #10b981; border-radius: 4px; }
         .hidden { display: none; }
         .alert { padding: 10px; border-radius: 4px; margin: 10px 0; }
-        .alert-success { background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981; }
-        .alert-error { background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #ef4444; }
-        .patient-search { position: relative; width: 100%; }
-        .patient-search input { width: 100%; padding: 10px; border: 1px solid #374151; border-radius: 6px; background: #1f2937; color: white; }
-        .search-results { position: absolute; top: 100%; left: 0; right: 0; background: #1f2937; border: 1px solid #374151; border-radius: 6px; max-height: 200px; overflow-y: auto; z-index: 100; }
-        .search-result-item { padding: 10px; cursor: pointer; border-bottom: 1px solid #374151; }
-        .search-result-item:hover { background: rgba(16, 185, 129, 0.1); }
-        .patient-info-display { background: rgba(16, 185, 129, 0.1); padding: 15px; border-radius: 6px; margin-top: 15px; border: 1px solid #10b981; }
-        .detailed-findings { margin-top: 30px; }
-        .category-finding { background: rgba(255, 255, 255, 0.05); border-radius: 8px; padding: 20px; margin: 15px 0; }
-        .therapy-detail { background: rgba(16, 185, 129, 0.05); border-radius: 8px; padding: 15px; margin: 10px 0; border-left: 4px solid #10b981; }
-        .action-buttons { display: flex; gap: 10px; justify-content: center; margin-top: 20px; flex-wrap: wrap; }
-        
-        /* Print styles for A4 report */
-        @media print {
-            body { background: white; color: black; }
-            .header, .btn, .alert, .no-print { display: none !important; }
-            .card { background: white; border: none; box-shadow: none; }
-            .container { max-width: 100%; padding: 0; }
-            .print-header { display: block !important; }
-            .print-footer { display: block !important; }
-            @page { size: A4; margin: 2cm; }
-        }
-        
-        .print-header { display: none; text-align: center; margin-bottom: 30px; }
-        .print-footer { display: none; text-align: center; margin-top: 30px; font-size: 0.9rem; color: #666; }
-        .clinic-header { border-bottom: 2px solid #10b981; padding-bottom: 20px; margin-bottom: 30px; }
-        .patient-details { margin-bottom: 30px; }
-        .report-section { margin-bottom: 25px; }
-        .report-title { font-size: 1.5rem; font-weight: bold; color: #10b981; margin-bottom: 15px; }
+        .alert-success { background: #d1fae5; color: #065f46; border: 1px solid #10b981; }
+        .alert-error { background: #fee2e2; color: #991b1b; border: 1px solid #ef4444; }
     </style>
 </head>
 <body>
-    <div class="header no-print">
+    <div class="header">
         <div class="container">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <div>
-                    <h1>Celloxen Health Assessment</h1>
-                    <p>Comprehensive 5-category health evaluation system</p>
-                </div>
-                <div>
-                    <button class="btn btn-secondary" onclick="goBackToPatientSearch()" id="backToSearchBtn" style="display: none;">Back to Patient Search</button>
-                    <button class="btn btn-secondary" onclick="window.location.href='index.html'">Dashboard</button>
-                </div>
-            </div>
+            <h1>Celloxen Health Assessment</h1>
+            <p>Comprehensive 5-category health evaluation system</p>
+            <button class="btn btn-secondary" onclick="window.location.href='index.html'">Back to Dashboard</button>
         </div>
     </div>
     
@@ -89,14 +52,13 @@
         <!-- Patient Selection -->
         <div class="card" id="patientSelection">
             <h2>Select Patient for Assessment</h2>
-            <div style="display: grid; grid-template-columns: 1fr auto; gap: 15px; align-items: end;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; align-items: end;">
                 <div>
-                    <label style="color: #10b981;">Search Patient (type 3+ characters):</label>
-                    <div class="patient-search">
-                        <input type="text" id="patientSearchInput" placeholder="Type patient name or ID..." autocomplete="off">
-                        <div id="searchResults" class="search-results" style="display: none;"></div>
-                    </div>
-                    <div id="patientInfo" class="patient-info-display" style="display: none;"></div>
+                    <label>Select Patient:</label>
+                    <select id="patientSelect" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+                        <option value="">Select a patient...</option>
+                    </select>
+                    <div id="patientInfo" style="margin-top: 15px; padding: 10px; background: rgba(16, 185, 129, 0.1); border-radius: 6px; display: none;"></div>
                 </div>
                 <button class="btn btn-primary" onclick="startAssessment()">Start Assessment</button>
             </div>
@@ -106,14 +68,14 @@
         <div class="card hidden" id="assessmentInterface">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                 <h2>Health Assessment</h2>
-                <div id="patientInfoHeader" style="text-align: right; color: #94a3b8;"></div>
+                <div id="patientInfoHeader" style="text-align: right; color: #6b7280;"></div>
             </div>
             
             <div class="progress-bar">
                 <div class="progress-fill" id="progressFill" style="width: 0%;"></div>
             </div>
             <div style="text-align: center; margin: 10px 0;">
-                <span id="progressText" style="color: #94a3b8;">Category 1 of 5</span>
+                <span id="progressText">Category 1 of 5</span>
             </div>
             
             <div class="category-tabs" id="categoryTabs">
@@ -136,20 +98,7 @@
 
         <!-- Results Display -->
         <div class="card results-card hidden" id="resultsDisplay">
-            <!-- Print Header -->
-            <div class="print-header">
-                <div class="clinic-header">
-                    <h1 style="color: #10b981; margin-bottom: 10px;">CELLOXEN MEDICAL PLATFORM</h1>
-                    <h2 style="margin-bottom: 15px;">COMPREHENSIVE HEALTH ASSESSMENT REPORT</h2>
-                    <div id="clinicDetails" style="text-align: left; margin-top: 20px;"></div>
-                </div>
-                <div class="patient-details">
-                    <h3 style="color: #10b981; margin-bottom: 10px;">PATIENT INFORMATION</h3>
-                    <div id="printPatientDetails"></div>
-                </div>
-            </div>
-
-            <h2 style="text-align: center; color: #10b981;" class="no-print">Assessment Complete!</h2>
+            <h2 style="text-align: center; color: #059669;">Assessment Complete!</h2>
             
             <div class="score-display">
                 <div class="score-number" id="totalScore">0</div>
@@ -157,68 +106,45 @@
             </div>
             
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 20px 0;">
-                <div style="text-align: center; padding: 15px; background: rgba(255, 255, 255, 0.05); border-radius: 8px;">
+                <div style="text-align: center; padding: 15px; background: white; border-radius: 8px;">
                     <div style="font-size: 1.5rem; font-weight: bold; color: #10b981;" id="physicalScore">0</div>
-                    <div style="color: #cbd5e1;">Physical Health</div>
+                    <div>Physical Health</div>
                 </div>
-                <div style="text-align: center; padding: 15px; background: rgba(255, 255, 255, 0.05); border-radius: 8px;">
+                <div style="text-align: center; padding: 15px; background: white; border-radius: 8px;">
                     <div style="font-size: 1.5rem; font-weight: bold; color: #10b981;" id="mentalScore">0</div>
-                    <div style="color: #cbd5e1;">Mental Wellbeing</div>
+                    <div>Mental Wellbeing</div>
                 </div>
-                <div style="text-align: center; padding: 15px; background: rgba(255, 255, 255, 0.05); border-radius: 8px;">
+                <div style="text-align: center; padding: 15px; background: white; border-radius: 8px;">
                     <div style="font-size: 1.5rem; font-weight: bold; color: #10b981;" id="lifestyleScore">0</div>
-                    <div style="color: #cbd5e1;">Lifestyle</div>
+                    <div>Lifestyle</div>
                 </div>
-                <div style="text-align: center; padding: 15px; background: rgba(255, 255, 255, 0.05); border-radius: 8px;">
+                <div style="text-align: center; padding: 15px; background: white; border-radius: 8px;">
                     <div style="font-size: 1.5rem; font-weight: bold; color: #10b981;" id="environmentScore">0</div>
-                    <div style="color: #cbd5e1;">Environment</div>
+                    <div>Environment</div>
                 </div>
-                <div style="text-align: center; padding: 15px; background: rgba(255, 255, 255, 0.05); border-radius: 8px;">
+                <div style="text-align: center; padding: 15px; background: white; border-radius: 8px;">
                     <div style="font-size: 1.5rem; font-weight: bold; color: #10b981;" id="historyScore">0</div>
-                    <div style="color: #cbd5e1;">Medical History</div>
+                    <div>Medical History</div>
                 </div>
             </div>
             
-            <div class="recommendations report-section">
-                <h3 class="report-title">Recommended Therapy Protocols</h3>
+            <div class="recommendations">
+                <h3>Recommended Therapy Protocols</h3>
                 <div id="recommendationsList">
                     <!-- Recommendations will be populated here -->
                 </div>
             </div>
-
-            <!-- Detailed Findings Section -->
-            <div class="detailed-findings report-section">
-                <h3 class="report-title">Detailed Category Analysis</h3>
-                <div id="detailedFindings">
-                    <!-- Detailed findings will be populated here -->
-                </div>
-            </div>
             
-            <!-- Print Footer -->
-            <div class="print-footer">
-                <div style="border-top: 1px solid #ccc; padding-top: 15px;">
-                    <p>Report Generated: <span id="reportDate"></span></p>
-                    <p>Celloxen Medical Platform - Electromagnetic Frequency Therapy System</p>
-                </div>
-            </div>
-
-            <div class="action-buttons no-print">
-                <button class="btn btn-primary" onclick="saveAssessment()">Save Assessment</button>
-                <button class="btn btn-secondary" onclick="downloadPDF()">Download PDF</button>
-                <button class="btn btn-secondary" onclick="printReport()">Print Report</button>
-                <button class="btn btn-warning" onclick="startIrisAnalysis()">IRIS Analysis</button>
+            <div style="text-align: center; margin-top: 20px;">
+                <button class="btn btn-primary" onclick="saveAssessment()">Save Assessment Report</button>
                 <button class="btn btn-secondary" onclick="startNewAssessment()">New Assessment</button>
-                <button class="btn btn-danger" onclick="exitToPatientManagement()">Exit</button>
+                <button class="btn btn-secondary" onclick="printResults()">Print Results</button>
             </div>
         </div>
     </div>
 
     <script type="module">
         import { supabase } from './supabase-config.js';
-        
-        // Get current clinic ID (this should be set based on logged-in user)
-        let currentClinicId = 1; // You'll need to get this from session/auth
-        let currentClinic = null;
         
         // Assessment data structure
         const assessmentQuestions = {
@@ -258,206 +184,16 @@
                 { text: "Do you have a family history of serious health conditions?", options: ["Multiple conditions", "Several conditions", "Few conditions", "One condition", "None known"] }
             ]
         };
-
-        const therapyDatabase = {
-            detoxification: {
-                name: "Detoxification Protocol",
-                overview: "Comprehensive electromagnetic therapy designed to support the body's natural detoxification processes by stimulating lymphatic drainage and cellular cleansing.",
-                benefits: "Improved energy levels, enhanced immune function, reduced inflammation, better skin clarity, and overall wellness enhancement.",
-                duration: "6 weeks",
-                sessions: "12 sessions total",
-                frequency: "2 sessions per week",
-                sessionLength: "45 minutes per session"
-            },
-            energy_enhancement: {
-                name: "Energy Enhancement Protocol",
-                overview: "Targeted frequencies designed to optimise cellular energy production and combat fatigue through mitochondrial stimulation.",
-                benefits: "Increased vitality, improved stamina, enhanced mental clarity, better sleep quality, and reduced chronic fatigue symptoms.",
-                duration: "4 weeks", 
-                sessions: "8 sessions total",
-                frequency: "2 sessions per week",
-                sessionLength: "30 minutes per session"
-            },
-            pain_management: {
-                name: "Pain Management Protocol",
-                overview: "Specialised electromagnetic frequencies targeting pain receptors and inflammatory pathways to provide natural pain relief.",
-                benefits: "Reduced chronic pain, decreased inflammation, improved mobility, enhanced quality of life, and reduced dependency on pain medications.",
-                duration: "6 weeks",
-                sessions: "12 sessions total", 
-                frequency: "2 sessions per week",
-                sessionLength: "40 minutes per session"
-            },
-            stress_relief: {
-                name: "Stress Relief Protocol",
-                overview: "Calming electromagnetic frequencies designed to regulate the nervous system and promote deep relaxation and mental balance.",
-                benefits: "Reduced anxiety levels, improved mood stability, better stress management, enhanced sleep quality, and overall mental wellbeing.",
-                duration: "5 weeks",
-                sessions: "10 sessions total",
-                frequency: "2 sessions per week", 
-                sessionLength: "35 minutes per session"
-            },
-            sleep_enhancement: {
-                name: "Sleep Enhancement Protocol",
-                overview: "Therapeutic frequencies targeting circadian rhythm regulation and nervous system calming to improve sleep quality and duration.",
-                benefits: "Faster sleep onset, deeper sleep phases, improved sleep continuity, enhanced daytime alertness, and better overall rest quality.",
-                duration: "4 weeks",
-                sessions: "8 sessions total",
-                frequency: "2 sessions per week",
-                sessionLength: "30 minutes per session"
-            },
-            constitutional_support: {
-                name: "Constitutional Support Protocol",
-                overview: "Holistic electromagnetic therapy designed to strengthen overall constitutional health and support the body's natural healing mechanisms.",
-                benefits: "Enhanced immune function, improved vitality, better adaptation to stress, increased resilience, and overall health optimisation.",
-                duration: "8 weeks",
-                sessions: "16 sessions total",
-                frequency: "2 sessions per week",
-                sessionLength: "50 minutes per session"
-            }
-        };
         
         let currentCategory = 0;
         let selectedPatient = null;
         let answers = {};
         let categoryScores = { physical: 0, mental: 0, lifestyle: 0, environment: 0, history: 0 };
-        let allPatients = [];
-        let filteredPatients = [];
         
-        // Load clinic and setup on page load
+        // Load patients on page load
         document.addEventListener('DOMContentLoaded', function() {
-            loadClinicInfo();
-            setupPatientSearch();
+            loadPatients();
         });
-        
-        // Load clinic information
-        async function loadClinicInfo() {
-            try {
-                const { data, error } = await supabase
-                    .from('clinics')
-                    .select('*')
-                    .eq('id', currentClinicId)
-                    .single();
-                    
-                if (error) throw error;
-                currentClinic = data;
-                
-            } catch (error) {
-                console.error('Error loading clinic info:', error);
-                currentClinic = {
-                    clinic_name: "Demo Clinic",
-                    address: "123 Health Street, London, UK",
-                    phone: "+44 20 1234 5678",
-                    email: "info@democlinic.co.uk"
-                };
-            }
-        }
-        
-        // Setup patient search functionality
-        function setupPatientSearch() {
-            const searchInput = document.getElementById('patientSearchInput');
-            const searchResults = document.getElementById('searchResults');
-            
-            searchInput.addEventListener('input', function() {
-                const searchTerm = this.value.trim();
-                
-                if (searchTerm.length >= 3) {
-                    performPatientSearch(searchTerm);
-                } else {
-                    searchResults.style.display = 'none';
-                }
-            });
-            
-            // Close search results when clicking outside
-            document.addEventListener('click', function(e) {
-                if (!e.target.closest('.patient-search')) {
-                    searchResults.style.display = 'none';
-                }
-            });
-        }
-        
-        // Perform patient search with clinic filtering
-        async function performPatientSearch(searchTerm) {
-            try {
-                const { data, error } = await supabase
-                    .from('patients')
-                    .select(`
-                        id,
-                        first_name,
-                        last_name,
-                        patient_id,
-                        email,
-                        date_of_birth,
-                        gender,
-                        address,
-                        clinic_id,
-                        created_at,
-                        clinics (
-                            clinic_name,
-                            clinic_code,
-                            address,
-                            phone,
-                            email
-                        )
-                    `)
-                    .eq('clinic_id', currentClinicId)
-                    .or(`first_name.ilike.%${searchTerm}%,last_name.ilike.%${searchTerm}%,patient_id.ilike.%${searchTerm}%`)
-                    .order('created_at', { ascending: false })
-                    .limit(10);
-                    
-                if (error) throw error;
-                
-                displaySearchResults(data || []);
-                
-            } catch (error) {
-                console.error('Error searching patients:', error);
-                showAlert('Error searching patients: ' + error.message, 'error');
-            }
-        }
-        
-        // Display search results
-        function displaySearchResults(patients) {
-            const searchResults = document.getElementById('searchResults');
-            
-            if (patients.length === 0) {
-                searchResults.innerHTML = '<div class="search-result-item">No patients found</div>';
-            } else {
-                searchResults.innerHTML = patients.map(patient => `
-                    <div class="search-result-item" onclick="selectPatientFromSearch(${patient.id}, '${JSON.stringify(patient).replace(/'/g, "\\'")}')">
-                        <strong>${patient.first_name} ${patient.last_name}</strong><br>
-                        <small>ID: ${patient.patient_id} | ${patient.gender || 'N/A'}</small>
-                    </div>
-                `).join('');
-            }
-            
-            searchResults.style.display = 'block';
-        }
-        
-        // Select patient from search results
-        window.selectPatientFromSearch = function(patientId, patientDataString) {
-            try {
-                selectedPatient = JSON.parse(patientDataString);
-                
-                const searchInput = document.getElementById('patientSearchInput');
-                const searchResults = document.getElementById('searchResults');
-                const patientInfo = document.getElementById('patientInfo');
-                
-                searchInput.value = `${selectedPatient.first_name} ${selectedPatient.last_name} (${selectedPatient.patient_id})`;
-                searchResults.style.display = 'none';
-                
-                patientInfo.innerHTML = `
-                    <strong>Patient:</strong> ${selectedPatient.first_name} ${selectedPatient.last_name}<br>
-                    <strong>ID:</strong> ${selectedPatient.patient_id}<br>
-                    <strong>Gender:</strong> ${selectedPatient.gender || 'Not specified'}<br>
-                    <strong>DOB:</strong> ${selectedPatient.date_of_birth || 'Not provided'}<br>
-                    <strong>Clinic:</strong> ${selectedPatient.clinics?.clinic_name || 'Unknown'}
-                `;
-                patientInfo.style.display = 'block';
-                
-            } catch (error) {
-                console.error('Error selecting patient:', error);
-                showAlert('Error selecting patient', 'error');
-            }
-        };
         
         // Show alert messages
         function showAlert(message, type = 'success') {
@@ -468,24 +204,48 @@
             }, 5000);
         }
         
-        // Go back to patient search
-        window.goBackToPatientSearch = function() {
-            document.getElementById('assessmentInterface').classList.add('hidden');
-            document.getElementById('resultsDisplay').classList.add('hidden');
-            document.getElementById('patientSelection').classList.remove('hidden');
-            document.getElementById('backToSearchBtn').style.display = 'none';
-        };
+        // Load patients for selection
+        async function loadPatients() {
+            try {
+                const { data, error } = await supabase
+                    .from('patients')
+                    .select(`
+                        *,
+                        clinics (clinic_name, clinic_code)
+                    `)
+                    .order('created_at', { ascending: false });
+                    
+                if (error) throw error;
+                
+                const patientSelect = document.getElementById('patientSelect');
+                patientSelect.innerHTML = '<option value="">Select a patient...</option>';
+                
+                if (data && data.length > 0) {
+                    data.forEach(patient => {
+                        patientSelect.innerHTML += `<option value="${patient.id}" data-patient='${JSON.stringify(patient)}'>${patient.first_name} ${patient.last_name} (${patient.patient_id})</option>`;
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading patients:', error);
+                showAlert('Error loading patients: ' + error.message, 'error');
+            }
+        }
         
         // Start assessment
         window.startAssessment = function() {
-            if (!selectedPatient) {
+            const patientId = document.getElementById('patientSelect').value;
+            if (!patientId) {
                 showAlert('Please select a patient first', 'error');
                 return;
             }
             
+            const selectedOption = document.getElementById('patientSelect').selectedOptions[0];
+            selectedPatient = JSON.parse(selectedOption.dataset.patient);
+            
             const patientText = `${selectedPatient.first_name} ${selectedPatient.last_name} (${selectedPatient.patient_id})`;
+            document.getElementById('patientInfo').textContent = `Patient: ${patientText}`;
+            document.getElementById('patientInfo').style.display = 'block';
             document.getElementById('patientInfoHeader').textContent = `Patient: ${patientText}`;
-            document.getElementById('backToSearchBtn').style.display = 'inline-block';
             
             document.getElementById('patientSelection').classList.add('hidden');
             document.getElementById('assessmentInterface').classList.remove('hidden');
@@ -583,12 +343,14 @@
             document.getElementById('progressFill').style.width = progress + '%';
             document.getElementById('progressText').textContent = `Category ${currentCategory + 1} of 5`;
             
-            // Update tab states - only current category is highlighted
+            // Update tab states
             const tabs = document.querySelectorAll('.tab');
             tabs.forEach((tab, index) => {
                 tab.classList.remove('active', 'completed');
                 if (index === currentCategory) {
                     tab.classList.add('active');
+                } else if (index < currentCategory) {
+                    tab.classList.add('completed');
                 }
             });
         }
@@ -635,124 +397,47 @@
             document.getElementById('environmentScore').textContent = categoryScores.environment;
             document.getElementById('historyScore').textContent = categoryScores.history;
             
-            // Setup print details
-            setupPrintDetails();
-            
             generateRecommendations(overallScore);
-            generateDetailedFindings();
         }
         
-        // Setup print details
-        function setupPrintDetails() {
-            const clinicDetails = document.getElementById('clinicDetails');
-            if (currentClinic) {
-                clinicDetails.innerHTML = `
-                    <p><strong>Clinic:</strong> ${currentClinic.clinic_name}</p>
-                    <p><strong>Address:</strong> ${currentClinic.address}</p>
-                    <p><strong>Phone:</strong> ${currentClinic.phone}</p>
-                    <p><strong>Email:</strong> ${currentClinic.email}</p>
-                `;
-            }
-            
-            const printPatientDetails = document.getElementById('printPatientDetails');
-            if (selectedPatient) {
-                printPatientDetails.innerHTML = `
-                    <p><strong>Name:</strong> ${selectedPatient.first_name} ${selectedPatient.last_name}</p>
-                    <p><strong>Patient ID:</strong> ${selectedPatient.patient_id}</p>
-                    <p><strong>Date of Birth:</strong> ${selectedPatient.date_of_birth || 'Not provided'}</p>
-                    <p><strong>Gender:</strong> ${selectedPatient.gender || 'Not specified'}</p>
-                    <p><strong>Address:</strong> ${selectedPatient.address || 'Not provided'}</p>
-                `;
-            }
-            
-            document.getElementById('reportDate').textContent = new Date().toLocaleDateString('en-GB');
-        }
-        
-        // Generate therapy recommendations (max 2)
+        // Generate therapy recommendations
         function generateRecommendations(overallScore) {
             const recommendations = [];
             
             // Always include detoxification as mandatory
-            recommendations.push("detoxification");
+            recommendations.push("Detoxification Protocol - Mandatory foundational therapy");
             
-            // Find the lowest scoring category for second recommendation
-            const categoryNames = ['physical', 'mental', 'lifestyle', 'environment', 'history'];
-            let lowestCategory = categoryNames[0];
-            let lowestScore = categoryScores[lowestCategory];
+            if (categoryScores.physical < 70) {
+                recommendations.push("Energy Enhancement Protocol - Boost physical vitality and reduce fatigue");
+                recommendations.push("Pain Management Protocol - Address chronic pain and inflammation");
+            }
             
-            categoryNames.forEach(category => {
-                if (categoryScores[category] < lowestScore) {
-                    lowestScore = categoryScores[category];
-                    lowestCategory = category;
-                }
-            });
+            if (categoryScores.mental < 70) {
+                recommendations.push("Stress Relief Protocol - Reduce anxiety and promote mental calm");
+                recommendations.push("Mental Clarity Protocol - Improve focus and cognitive function");
+            }
             
-            // Add appropriate second therapy based on lowest scoring category
-            if (lowestCategory === 'physical' && categoryScores.physical < 70) {
-                recommendations.push(categoryScores.physical < 50 ? "pain_management" : "energy_enhancement");
-            } else if (lowestCategory === 'mental' && categoryScores.mental < 70) {
-                recommendations.push("stress_relief");
-            } else if (lowestCategory === 'lifestyle' && categoryScores.lifestyle < 70) {
-                recommendations.push("sleep_enhancement");
-            } else if ((lowestCategory === 'environment' || lowestCategory === 'history') && lowestScore < 70) {
-                recommendations.push("constitutional_support");
+            if (categoryScores.lifestyle < 70) {
+                recommendations.push("Sleep Enhancement Protocol - Improve sleep quality and recovery");
+                recommendations.push("Metabolic Support Protocol - Enhance nutrition and energy systems");
+            }
+            
+            if (categoryScores.environment < 70) {
+                recommendations.push("Environmental Harmony Protocol - Address environmental stress factors");
+            }
+            
+            if (categoryScores.history < 70) {
+                recommendations.push("Constitutional Support Protocol - Address underlying health patterns");
+            }
+            
+            if (overallScore >= 80) {
+                recommendations.push("Wellness Maintenance Protocol - Maintain optimal health levels");
             }
             
             const recommendationsList = document.getElementById('recommendationsList');
-            recommendationsList.innerHTML = recommendations.map(therapyKey => {
-                const therapy = therapyDatabase[therapyKey];
-                return `
-                    <div class="therapy-detail">
-                        <h4 style="color: #10b981; margin-bottom: 10px;">${therapy.name}</h4>
-                        <p><strong>Overview:</strong> ${therapy.overview}</p>
-                        <p><strong>Expected Benefits:</strong> ${therapy.benefits}</p>
-                        <p><strong>Treatment Duration:</strong> ${therapy.duration}</p>
-                        <p><strong>Sessions:</strong> ${therapy.sessions}</p>
-                        <p><strong>Frequency:</strong> ${therapy.frequency}</p>
-                        <p><strong>Session Length:</strong> ${therapy.sessionLength}</p>
-                    </div>
-                `;
-            }).join('');
-        }
-        
-        // Generate detailed findings for each category
-        function generateDetailedFindings() {
-            const categories = ['physical', 'mental', 'lifestyle', 'environment', 'history'];
-            const categoryTitles = ['Physical Health', 'Mental Wellbeing', 'Lifestyle Factors', 'Environmental Health', 'Medical History'];
-            
-            const detailedFindings = document.getElementById('detailedFindings');
-            
-            detailedFindings.innerHTML = categories.map((category, index) => {
-                const score = categoryScores[category];
-                const status = score >= 80 ? 'Excellent' : score >= 70 ? 'Good' : score >= 60 ? 'Fair' : score >= 50 ? 'Poor' : 'Very Poor';
-                const color = score >= 70 ? '#10b981' : score >= 50 ? '#f59e0b' : '#ef4444';
-                
-                let interpretation = '';
-                if (category === 'physical') {
-                    interpretation = score >= 70 ? 'Physical health indicators show good vitality and low pain levels.' : 'Physical health may benefit from targeted interventions to improve energy and reduce discomfort.';
-                } else if (category === 'mental') {
-                    interpretation = score >= 70 ? 'Mental wellbeing shows good stress management and mood stability.' : 'Mental health indicators suggest need for stress reduction and mood support interventions.';
-                } else if (category === 'lifestyle') {
-                    interpretation = score >= 70 ? 'Lifestyle factors indicate healthy habits supporting overall wellbeing.' : 'Lifestyle modifications recommended for improved nutrition, exercise, and sleep patterns.';
-                } else if (category === 'environment') {
-                    interpretation = score >= 70 ? 'Environmental health factors are supportive of overall wellness.' : 'Environmental factors may be impacting health and warrant attention.';
-                } else if (category === 'history') {
-                    interpretation = score >= 70 ? 'Medical history indicates good health foundation with minimal risk factors.' : 'Medical history suggests monitoring and support for chronic conditions or risk factors.';
-                }
-                
-                return `
-                    <div class="category-finding">
-                        <h4 style="color: ${color}; margin-bottom: 10px;">${categoryTitles[index]} - Score: ${score}/100 (${status})</h4>
-                        <p style="margin-bottom: 10px;"><strong>Assessment:</strong> ${interpretation}</p>
-                        <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 4px;">
-                            <strong>Category Responses:</strong><br>
-                            ${assessmentQuestions[category].map((q, i) => 
-                                `${i + 1}. ${q.text} → <em>${answers[category][i] !== undefined ? q.options[answers[category][i]] : 'Not answered'}</em>`
-                            ).join('<br>')}
-                        </div>
-                    </div>
-                `;
-            }).join('');
+            recommendationsList.innerHTML = recommendations.map(rec => 
+                `<div class="recommendation-item">${rec}</div>`
+            ).join('');
         }
         
         // Save assessment
@@ -764,7 +449,7 @@
             
             try {
                 const overallScore = Math.round((Object.values(categoryScores).reduce((a, b) => a + b, 0)) / 5);
-                const recommendations = Array.from(document.querySelectorAll('.therapy-detail h4')).map(item => item.textContent);
+                const recommendations = Array.from(document.querySelectorAll('.recommendation-item')).map(item => item.textContent);
                 
                 const reportData = {
                     patient_info: {
@@ -787,7 +472,7 @@
                         patient_id: selectedPatient.id,
                         clinic_id: selectedPatient.clinic_id,
                         report_type: 'health_assessment',
-                        report_title: 'Comprehensive Health Assessment Report',
+                        report_title: 'Health Assessment Report',
                         report_data: reportData,
                         recommendations: recommendations,
                         therapies_recommended: recommendations,
@@ -798,9 +483,28 @@
                     
                 if (error) throw error;
                 
-                // Show success banner
-                showAlert('✅ Assessment Report Saved Successfully! Report available in Patient Management records.', 'success');
-                console.log('Assessment saved:', data);
+                showAlert('Health assessment report saved successfully!', 'success');
+                
+                // Also save to health_assessments table for backward compatibility
+                const assessmentData = {
+                    patient_id: selectedPatient.id,
+                    clinic_id: selectedPatient.clinic_id,
+                    assessment_type: 'comprehensive',
+                    physical_score: categoryScores.physical,
+                    mental_score: categoryScores.mental,
+                    lifestyle_score: categoryScores.lifestyle,
+                    environmental_score: categoryScores.environment,
+                    medical_history_score: categoryScores.history,
+                    total_score: overallScore,
+                    assessment_responses: answers,
+                    completed_at: new Date().toISOString()
+                };
+                
+                const { error: healthError } = await supabase
+                    .from('health_assessments')
+                    .insert([assessmentData]);
+                    
+                if (healthError) console.warn('Warning: Could not save to health_assessments table:', healthError);
                 
             } catch (error) {
                 console.error('Error saving assessment:', error);
@@ -808,34 +512,15 @@
             }
         };
         
-        // Action button functions
-        window.downloadPDF = function() {
-            showAlert('PDF download functionality would be implemented here with professional A4 formatting', 'success');
-            // In a real implementation, you would use a library like jsPDF or html2pdf
-        };
-        
-        window.printReport = function() {
-            window.print();
-        };
-        
-        window.startIrisAnalysis = function() {
-            if (selectedPatient) {
-                const url = `iris-analysis.html?patient_id=${selectedPatient.id}`;
-                window.open(url, '_blank');
-            }
-        };
-        
+        // Utility functions
         window.startNewAssessment = function() {
-            if (confirm('Start a new assessment? Current progress will be lost.')) {
-                location.reload();
-            }
+            location.reload();
         };
         
-        window.exitToPatientManagement = function() {
-            window.location.href = 'patient-management.html';
+        window.printResults = function() {
+            window.print();
         };
         
     </script>
 </body>
 </html>
-
