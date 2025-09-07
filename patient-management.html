@@ -1,24 +1,324 @@
-document.getElementById('patientForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Management - Cellexon</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f8fafc; }
+        .header { background: #1e293b; color: white; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .card { background: white; border-radius: 8px; padding: 20px; margin: 20px 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .btn { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; margin: 5px; }
+        .btn-primary { background: #10b981; color: white; }
+        .btn-secondary { background: #6b7280; color: white; }
+        .form-group { margin: 15px 0; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 500; }
+        .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
+        .patient-list { display: grid; gap: 15px; }
+        .patient-item { padding: 15px; border: 1px solid #e5e7eb; border-radius: 6px; background: #f9fafb; }
+        .patient-id { color: #10b981; font-weight: bold; }
+        .alert { padding: 10px; border-radius: 4px; margin: 10px 0; }
+        .alert-success { background: #d1fae5; color: #065f46; border: 1px solid #10b981; }
+        .alert-error { background: #fee2e2; color: #991b1b; border: 1px solid #ef4444; }
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .stat-card { background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 20px; border-radius: 8px; text-align: center; }
+        .stat-number { font-size: 2rem; font-weight: bold; }
+        .stat-label { font-size: 0.9rem; opacity: 0.9; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <h1>Cellexon Patient Management</h1>
+            <p>Manage patient records and registrations</p>
+            <button class="btn btn-secondary" onclick="window.location.href='index.html'">Back to Dashboard</button>
+        </div>
+    </div>
     
-    const patientData = {
-        first_name: document.getElementById('firstName').value,
-        last_name: document.getElementById('lastName').value,
-        email: document.getElementById('email').value,
-        date_of_birth: document.getElementById('dateOfBirth').value,
-        patient_id: 'CEL' + Date.now(),
-        clinic_id: 1  // Default to first clinic
-    };
-    
-    const { data, error } = await supabase
-        .from('patients')
-        .insert([patientData]);
+    <div class="container">
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="totalPatients">0</div>
+                <div class="stat-label">Total Patients</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="todayRegistrations">0</div>
+                <div class="stat-label">Today's Registrations</div>
+            </div>
+        </div>
         
-    if (error) {
-        alert('Error: ' + error.message);
-    } else {
-        alert('Patient registered successfully!');
-        document.getElementById('patientForm').reset();
-        loadPatients();
-    }
-});
+        <div class="card">
+            <h2>Register New Patient</h2>
+            <div id="alertContainer"></div>
+            <form id="patientForm">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="form-group">
+                        <label>First Name</label>
+                        <input type="text" id="firstName" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Last Name</label>
+                        <input type="text" id="lastName" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="email" required>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="form-group">
+                        <label>Date of Birth</label>
+                        <input type="date" id="dateOfBirth" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Clinic</label>
+                        <select id="clinicSelect" required>
+                            <option value="">Select Clinic</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Register Patient</button>
+                <button type="button" class="btn btn-secondary" onclick="document.getElementById('patientForm').reset()">Clear Form</button>
+            </form>
+        </div>
+        
+        <div class="card">
+            <h2>Patient List</h2>
+            <div style="margin-bottom: 15px;">
+                <input type="text" id="searchInput" placeholder="Search patients..." style="width: 300px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                <button class="btn btn-secondary" onclick="searchPatients()">Search</button>
+                <button class="btn btn-primary" onclick="loadPatients()">Refresh</button>
+            </div>
+            <div id="patientList" class="patient-list">
+                <p>Loading patients...</p>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { supabase } from './supabase-config.js';
+        
+        let currentClinicId = 1; // Default clinic
+        
+        // Load clinics and patients on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadClinics();
+            loadPatients();
+            updateStats();
+        });
+        
+        // Show alert messages
+        function showAlert(message, type = 'success') {
+            const alertContainer = document.getElementById('alertContainer');
+            alertContainer.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+            setTimeout(() => {
+                alertContainer.innerHTML = '';
+            }, 5000);
+        }
+        
+        // Load available clinics
+        async function loadClinics() {
+            try {
+                const { data, error } = await supabase
+                    .from('clinics')
+                    .select('*')
+                    .eq('is_active', true);
+                    
+                if (error) throw error;
+                
+                const clinicSelect = document.getElementById('clinicSelect');
+                clinicSelect.innerHTML = '<option value="">Select Clinic</option>';
+                
+                if (data && data.length > 0) {
+                    data.forEach(clinic => {
+                        clinicSelect.innerHTML += `<option value="${clinic.id}">${clinic.clinic_name}</option>`;
+                    });
+                    // Set default clinic
+                    clinicSelect.value = data[0].id;
+                    currentClinicId = data[0].id;
+                }
+            } catch (error) {
+                console.error('Error loading clinics:', error);
+                showAlert('Error loading clinics: ' + error.message, 'error');
+            }
+        }
+        
+        // Handle form submission
+        document.getElementById('patientForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            try {
+                const selectedClinicId = document.getElementById('clinicSelect').value;
+                if (!selectedClinicId) {
+                    showAlert('Please select a clinic', 'error');
+                    return;
+                }
+                
+                const patientData = {
+                    first_name: document.getElementById('firstName').value,
+                    last_name: document.getElementById('lastName').value,
+                    email: document.getElementById('email').value,
+                    date_of_birth: document.getElementById('dateOfBirth').value,
+                    patient_id: 'CEL' + Date.now(),
+                    clinic_id: parseInt(selectedClinicId)
+                };
+                
+                const { data, error } = await supabase
+                    .from('patients')
+                    .insert([patientData])
+                    .select();
+                    
+                if (error) throw error;
+                
+                showAlert(`Patient registered successfully! Patient ID: ${patientData.patient_id}`, 'success');
+                document.getElementById('patientForm').reset();
+                document.getElementById('clinicSelect').value = selectedClinicId; // Keep clinic selected
+                loadPatients();
+                updateStats();
+                
+            } catch (error) {
+                console.error('Error registering patient:', error);
+                showAlert('Error registering patient: ' + error.message, 'error');
+            }
+        });
+        
+        // Load patients
+        window.loadPatients = async function() {
+            try {
+                const { data, error } = await supabase
+                    .from('patients')
+                    .select(`
+                        *,
+                        clinics (clinic_name)
+                    `)
+                    .order('created_at', { ascending: false })
+                    .limit(50);
+                    
+                if (error) throw error;
+                
+                const patientList = document.getElementById('patientList');
+                
+                if (data && data.length > 0) {
+                    patientList.innerHTML = data.map(patient => `
+                        <div class="patient-item">
+                            <div style="display: flex; justify-content: between; align-items: start;">
+                                <div style="flex: 1;">
+                                    <strong>${patient.first_name} ${patient.last_name}</strong><br>
+                                    <span class="patient-id">ID: ${patient.patient_id}</span><br>
+                                    Email: ${patient.email || 'Not provided'}<br>
+                                    DOB: ${patient.date_of_birth || 'Not provided'}<br>
+                                    Clinic: ${patient.clinics?.clinic_name || 'Unknown'}<br>
+                                    <small>Registered: ${new Date(patient.created_at).toLocaleDateString()}</small>
+                                </div>
+                                <div>
+                                    <button class="btn btn-primary" onclick="viewPatient('${patient.id}')">View</button>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    patientList.innerHTML = '<p>No patients registered yet.</p>';
+                }
+                
+            } catch (error) {
+                console.error('Error loading patients:', error);
+                document.getElementById('patientList').innerHTML = '<p>Error loading patients. Please try again.</p>';
+                showAlert('Error loading patients: ' + error.message, 'error');
+            }
+        };
+        
+        // Search patients
+        window.searchPatients = async function() {
+            const searchTerm = document.getElementById('searchInput').value.trim();
+            
+            if (!searchTerm) {
+                loadPatients();
+                return;
+            }
+            
+            try {
+                const { data, error } = await supabase
+                    .from('patients')
+                    .select(`
+                        *,
+                        clinics (clinic_name)
+                    `)
+                    .or(`first_name.ilike.%${searchTerm}%,last_name.ilike.%${searchTerm}%,patient_id.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%`)
+                    .order('created_at', { ascending: false });
+                    
+                if (error) throw error;
+                
+                const patientList = document.getElementById('patientList');
+                
+                if (data && data.length > 0) {
+                    patientList.innerHTML = data.map(patient => `
+                        <div class="patient-item">
+                            <div style="display: flex; justify-content: between; align-items: start;">
+                                <div style="flex: 1;">
+                                    <strong>${patient.first_name} ${patient.last_name}</strong><br>
+                                    <span class="patient-id">ID: ${patient.patient_id}</span><br>
+                                    Email: ${patient.email || 'Not provided'}<br>
+                                    DOB: ${patient.date_of_birth || 'Not provided'}<br>
+                                    Clinic: ${patient.clinics?.clinic_name || 'Unknown'}<br>
+                                    <small>Registered: ${new Date(patient.created_at).toLocaleDateString()}</small>
+                                </div>
+                                <div>
+                                    <button class="btn btn-primary" onclick="viewPatient('${patient.id}')">View</button>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    patientList.innerHTML = `<p>No patients found matching "${searchTerm}".</p>`;
+                }
+                
+            } catch (error) {
+                console.error('Error searching patients:', error);
+                showAlert('Error searching patients: ' + error.message, 'error');
+            }
+        };
+        
+        // Update statistics
+        async function updateStats() {
+            try {
+                // Total patients
+                const { count: totalCount, error: totalError } = await supabase
+                    .from('patients')
+                    .select('*', { count: 'exact', head: true });
+                    
+                if (totalError) throw totalError;
+                
+                // Today's registrations
+                const today = new Date().toISOString().split('T')[0];
+                const { count: todayCount, error: todayError } = await supabase
+                    .from('patients')
+                    .select('*', { count: 'exact', head: true })
+                    .gte('created_at', today);
+                    
+                if (todayError) throw todayError;
+                
+                document.getElementById('totalPatients').textContent = totalCount || 0;
+                document.getElementById('todayRegistrations').textContent = todayCount || 0;
+                
+            } catch (error) {
+                console.error('Error updating stats:', error);
+            }
+        }
+        
+        // View patient details
+        window.viewPatient = function(patientId) {
+            alert(`Patient details for ID: ${patientId}\n\nThis would open a detailed patient view in a real system.`);
+        };
+        
+        // Search on Enter key
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchPatients();
+            }
+        });
+        
+    </script>
+</body>
+</html>
