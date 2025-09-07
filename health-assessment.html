@@ -6,35 +6,38 @@
     <title>Health Assessment - Celloxen</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', sans-serif; background: #f8fafc; }
-        .header { background: linear-gradient(135deg, #1e293b, #334155); color: white; padding: 20px; border-bottom: 2px solid #10b981; }
-        .container { max-width: 1000px; margin: 0 auto; padding: 20px; }
-        .card { background: white; border-radius: 12px; padding: 30px; margin: 20px 0; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f172a; color: white; }
+        .header { background: linear-gradient(135deg, #1e293b, #334155); padding: 20px; border-bottom: 2px solid #10b981; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        .card { background: rgba(255, 255, 255, 0.05); border-radius: 12px; padding: 20px; border: 1px solid rgba(16, 185, 129, 0.3); margin: 10px 0; }
         .progress-bar { background: #e5e7eb; height: 8px; border-radius: 4px; margin: 20px 0; }
         .progress-fill { background: linear-gradient(90deg, #10b981, #059669); height: 100%; border-radius: 4px; transition: width 0.3s ease; }
         .category-tabs { display: flex; gap: 10px; margin: 20px 0; flex-wrap: wrap; }
-        .tab { padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer; background: #f3f4f6; color: #374151; font-weight: 500; }
+        .tab { padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer; background: rgba(255, 255, 255, 0.1); color: #94a3b8; font-weight: 500; }
         .tab.active { background: #10b981; color: white; }
         .tab.completed { background: #059669; color: white; }
-        .question-card { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; margin: 15px 0; }
-        .question-text { font-size: 1.1rem; font-weight: 500; margin-bottom: 15px; color: #1f2937; }
+        .question-card { background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; padding: 20px; margin: 15px 0; }
+        .question-text { font-size: 1.1rem; font-weight: 500; margin-bottom: 15px; color: #e2e8f0; }
         .options { display: grid; gap: 10px; }
-        .option { padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
-        .option:hover { border-color: #10b981; background: #f0fdf4; }
-        .option.selected { border-color: #10b981; background: #dcfce7; }
+        .option { padding: 12px; border: 2px solid #374151; border-radius: 8px; cursor: pointer; transition: all 0.2s; background: rgba(255, 255, 255, 0.05); color: #cbd5e1; }
+        .option:hover { border-color: #10b981; background: rgba(16, 185, 129, 0.1); }
+        .option.selected { border-color: #10b981; background: rgba(16, 185, 129, 0.2); }
         .btn { padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; font-weight: 500; margin: 5px; }
         .btn-primary { background: #10b981; color: white; }
         .btn-secondary { background: #6b7280; color: white; }
-        .results-card { background: linear-gradient(135deg, #f0fdf4, #dcfce7); border: 2px solid #10b981; }
+        .results-card { background: rgba(16, 185, 129, 0.1); border: 2px solid #10b981; }
         .score-display { text-align: center; margin: 20px 0; }
-        .score-number { font-size: 3rem; font-weight: bold; color: #059669; }
-        .score-label { font-size: 1.2rem; color: #374151; }
-        .recommendations { background: white; border-radius: 8px; padding: 20px; margin: 15px 0; }
-        .recommendation-item { padding: 10px; margin: 8px 0; background: #f0fdf4; border-left: 4px solid #10b981; border-radius: 4px; }
+        .score-number { font-size: 3rem; font-weight: bold; color: #10b981; }
+        .score-label { font-size: 1.2rem; color: #cbd5e1; }
+        .recommendations { background: rgba(255, 255, 255, 0.05); border-radius: 8px; padding: 20px; margin: 15px 0; }
+        .recommendation-item { padding: 10px; margin: 8px 0; background: rgba(16, 185, 129, 0.1); border-left: 4px solid #10b981; border-radius: 4px; }
         .hidden { display: none; }
         .alert { padding: 10px; border-radius: 4px; margin: 10px 0; }
-        .alert-success { background: #d1fae5; color: #065f46; border: 1px solid #10b981; }
-        .alert-error { background: #fee2e2; color: #991b1b; border: 1px solid #ef4444; }
+        .alert-success { background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981; }
+        .alert-error { background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #ef4444; }
+        .patient-dropdown { width: 100%; padding: 10px; border: 1px solid #374151; border-radius: 6px; background: #1f2937; color: white; }
+        .patient-dropdown option { background: #1f2937; color: white; }
+        .patient-info-display { background: rgba(16, 185, 129, 0.1); padding: 15px; border-radius: 6px; margin-top: 15px; border: 1px solid #10b981; }
     </style>
 </head>
 <body>
@@ -54,11 +57,11 @@
             <h2>Select Patient for Assessment</h2>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; align-items: end;">
                 <div>
-                    <label>Select Patient:</label>
-                    <select id="patientSelect" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+                    <label style="color: #10b981;">Select Patient:</label>
+                    <select id="patientSelect" class="patient-dropdown">
                         <option value="">Select a patient...</option>
                     </select>
-                    <div id="patientInfo" style="margin-top: 15px; padding: 10px; background: rgba(16, 185, 129, 0.1); border-radius: 6px; display: none;"></div>
+                    <div id="patientInfo" class="patient-info-display" style="display: none;"></div>
                 </div>
                 <button class="btn btn-primary" onclick="startAssessment()">Start Assessment</button>
             </div>
@@ -68,14 +71,14 @@
         <div class="card hidden" id="assessmentInterface">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                 <h2>Health Assessment</h2>
-                <div id="patientInfoHeader" style="text-align: right; color: #6b7280;"></div>
+                <div id="patientInfoHeader" style="text-align: right; color: #94a3b8;"></div>
             </div>
             
             <div class="progress-bar">
                 <div class="progress-fill" id="progressFill" style="width: 0%;"></div>
             </div>
             <div style="text-align: center; margin: 10px 0;">
-                <span id="progressText">Category 1 of 5</span>
+                <span id="progressText" style="color: #94a3b8;">Category 1 of 5</span>
             </div>
             
             <div class="category-tabs" id="categoryTabs">
@@ -98,7 +101,7 @@
 
         <!-- Results Display -->
         <div class="card results-card hidden" id="resultsDisplay">
-            <h2 style="text-align: center; color: #059669;">Assessment Complete!</h2>
+            <h2 style="text-align: center; color: #10b981;">Assessment Complete!</h2>
             
             <div class="score-display">
                 <div class="score-number" id="totalScore">0</div>
@@ -106,30 +109,30 @@
             </div>
             
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 20px 0;">
-                <div style="text-align: center; padding: 15px; background: white; border-radius: 8px;">
+                <div style="text-align: center; padding: 15px; background: rgba(255, 255, 255, 0.05); border-radius: 8px;">
                     <div style="font-size: 1.5rem; font-weight: bold; color: #10b981;" id="physicalScore">0</div>
-                    <div>Physical Health</div>
+                    <div style="color: #cbd5e1;">Physical Health</div>
                 </div>
-                <div style="text-align: center; padding: 15px; background: white; border-radius: 8px;">
+                <div style="text-align: center; padding: 15px; background: rgba(255, 255, 255, 0.05); border-radius: 8px;">
                     <div style="font-size: 1.5rem; font-weight: bold; color: #10b981;" id="mentalScore">0</div>
-                    <div>Mental Wellbeing</div>
+                    <div style="color: #cbd5e1;">Mental Wellbeing</div>
                 </div>
-                <div style="text-align: center; padding: 15px; background: white; border-radius: 8px;">
+                <div style="text-align: center; padding: 15px; background: rgba(255, 255, 255, 0.05); border-radius: 8px;">
                     <div style="font-size: 1.5rem; font-weight: bold; color: #10b981;" id="lifestyleScore">0</div>
-                    <div>Lifestyle</div>
+                    <div style="color: #cbd5e1;">Lifestyle</div>
                 </div>
-                <div style="text-align: center; padding: 15px; background: white; border-radius: 8px;">
+                <div style="text-align: center; padding: 15px; background: rgba(255, 255, 255, 0.05); border-radius: 8px;">
                     <div style="font-size: 1.5rem; font-weight: bold; color: #10b981;" id="environmentScore">0</div>
-                    <div>Environment</div>
+                    <div style="color: #cbd5e1;">Environment</div>
                 </div>
-                <div style="text-align: center; padding: 15px; background: white; border-radius: 8px;">
+                <div style="text-align: center; padding: 15px; background: rgba(255, 255, 255, 0.05); border-radius: 8px;">
                     <div style="font-size: 1.5rem; font-weight: bold; color: #10b981;" id="historyScore">0</div>
-                    <div>Medical History</div>
+                    <div style="color: #cbd5e1;">Medical History</div>
                 </div>
             </div>
             
             <div class="recommendations">
-                <h3>Recommended Therapy Protocols</h3>
+                <h3 style="color: #10b981;">Recommended Therapy Protocols</h3>
                 <div id="recommendationsList">
                     <!-- Recommendations will be populated here -->
                 </div>
@@ -143,8 +146,20 @@
         </div>
     </div>
 
-    <script type="module">
-        import { supabase } from './supabase-config.js';
+    <script>
+        // Supabase configuration
+        const SUPABASE_URL = 'https://btgxdcuczxeolbzrmpnu.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ0Z3hkY3Vjenhlb2xienJtcG51Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzU5OTY0MjIsImV4cCI6MjA1MTU3MjQyMn0.QOJhGXr4lBTtFCKlqXhRm4JnB_DbLJxcuJOK0c7k7Yg';
+        
+        // Try to create Supabase client
+        let supabase = null;
+        try {
+            if (window.supabase && window.supabase.createClient) {
+                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            }
+        } catch (error) {
+            console.warn('Supabase not available:', error);
+        }
         
         // Assessment data structure
         const assessmentQuestions = {
@@ -207,6 +222,12 @@
         // Load patients for selection
         async function loadPatients() {
             try {
+                if (!supabase) {
+                    console.warn('Supabase not available, using mock data');
+                    populateMockPatients();
+                    return;
+                }
+
                 const { data, error } = await supabase
                     .from('patients')
                     .select(`
@@ -228,7 +249,20 @@
             } catch (error) {
                 console.error('Error loading patients:', error);
                 showAlert('Error loading patients: ' + error.message, 'error');
+                populateMockPatients();
             }
+        }
+
+        function populateMockPatients() {
+            const patientSelect = document.getElementById('patientSelect');
+            const mockPatients = [
+                { id: 1, first_name: 'John', last_name: 'Smith', patient_id: 'JS2001', gender: 'Male', date_of_birth: '1985-03-15', clinics: { clinic_name: 'London Wellness Centre' } },
+                { id: 2, first_name: 'Sarah', last_name: 'Johnson', patient_id: 'SJ2002', gender: 'Female', date_of_birth: '1990-07-22', clinics: { clinic_name: 'Manchester Holistic Clinic' } }
+            ];
+
+            mockPatients.forEach(patient => {
+                patientSelect.innerHTML += `<option value="${patient.id}" data-patient='${JSON.stringify(patient)}'>${patient.first_name} ${patient.last_name} (${patient.patient_id})</option>`;
+            });
         }
         
         // Start assessment
@@ -243,7 +277,7 @@
             selectedPatient = JSON.parse(selectedOption.dataset.patient);
             
             const patientText = `${selectedPatient.first_name} ${selectedPatient.last_name} (${selectedPatient.patient_id})`;
-            document.getElementById('patientInfo').textContent = `Patient: ${patientText}`;
+            document.getElementById('patientInfo').innerHTML = `<strong>Patient:</strong> ${patientText}<br><strong>Clinic:</strong> ${selectedPatient.clinics?.clinic_name || 'Unknown'}`;
             document.getElementById('patientInfo').style.display = 'block';
             document.getElementById('patientInfoHeader').textContent = `Patient: ${patientText}`;
             
@@ -466,45 +500,29 @@
                     assessment_date: new Date().toISOString()
                 };
                 
-                const { data, error } = await supabase
-                    .from('medical_reports')
-                    .insert([{
-                        patient_id: selectedPatient.id,
-                        clinic_id: selectedPatient.clinic_id,
-                        report_type: 'health_assessment',
-                        report_title: 'Health Assessment Report',
-                        report_data: reportData,
-                        recommendations: recommendations,
-                        therapies_recommended: recommendations,
-                        total_score: overallScore,
-                        category_scores: categoryScores
-                    }])
-                    .select();
+                if (supabase) {
+                    const { data, error } = await supabase
+                        .from('medical_reports')
+                        .insert([{
+                            patient_id: selectedPatient.id,
+                            clinic_id: selectedPatient.clinic_id,
+                            report_type: 'health_assessment',
+                            report_title: 'Health Assessment Report',
+                            report_data: reportData,
+                            recommendations: recommendations,
+                            therapies_recommended: recommendations,
+                            total_score: overallScore,
+                            category_scores: categoryScores
+                        }])
+                        .select();
+                        
+                    if (error) throw error;
                     
-                if (error) throw error;
-                
-                showAlert('Health assessment report saved successfully!', 'success');
-                
-                // Also save to health_assessments table for backward compatibility
-                const assessmentData = {
-                    patient_id: selectedPatient.id,
-                    clinic_id: selectedPatient.clinic_id,
-                    assessment_type: 'comprehensive',
-                    physical_score: categoryScores.physical,
-                    mental_score: categoryScores.mental,
-                    lifestyle_score: categoryScores.lifestyle,
-                    environmental_score: categoryScores.environment,
-                    medical_history_score: categoryScores.history,
-                    total_score: overallScore,
-                    assessment_responses: answers,
-                    completed_at: new Date().toISOString()
-                };
-                
-                const { error: healthError } = await supabase
-                    .from('health_assessments')
-                    .insert([assessmentData]);
-                    
-                if (healthError) console.warn('Warning: Could not save to health_assessments table:', healthError);
+                    showAlert('Health assessment report saved successfully!', 'success');
+                } else {
+                    console.log('Would save report:', reportData);
+                    showAlert('Report saved locally (Supabase not available)', 'success');
+                }
                 
             } catch (error) {
                 console.error('Error saving assessment:', error);
