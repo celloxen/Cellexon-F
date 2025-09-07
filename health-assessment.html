@@ -59,7 +59,7 @@
                 <div>
                     <label style="color: #10b981;">Select Patient:</label>
                     <select id="patientSelect" class="patient-dropdown">
-                        <option value="">Select a patient...</option>
+                        <option value="">Loading patients...</option>
                     </select>
                     <div id="patientInfo" class="patient-info-display" style="display: none;"></div>
                 </div>
@@ -146,20 +146,8 @@
         </div>
     </div>
 
-    <script>
-        // Supabase configuration
-        const SUPABASE_URL = 'https://btgxdcuczxeolbzrmpnu.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ0Z3hkY3Vjenhlb2xienJtcG51Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzU5OTY0MjIsImV4cCI6MjA1MTU3MjQyMn0.QOJhGXr4lBTtFCKlqXhRm4JnB_DbLJxcuJOK0c7k7Yg';
-        
-        // Try to create Supabase client
-        let supabase = null;
-        try {
-            if (window.supabase && window.supabase.createClient) {
-                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-            }
-        } catch (error) {
-            console.warn('Supabase not available:', error);
-        }
+    <script type="module">
+        import { supabase } from './supabase-config.js';
         
         // Assessment data structure
         const assessmentQuestions = {
@@ -207,6 +195,7 @@
         
         // Load patients on page load
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('Health Assessment loaded, loading patients...');
             loadPatients();
         });
         
@@ -222,47 +211,62 @@
         // Load patients for selection
         async function loadPatients() {
             try {
-                if (!supabase) {
-                    console.warn('Supabase not available, using mock data');
-                    populateMockPatients();
-                    return;
-                }
-
+                console.log('Loading patients from Supabase...');
+                
                 const { data, error } = await supabase
                     .from('patients')
                     .select(`
-                        *,
-                        clinics (clinic_name, clinic_code)
+                        id,
+                        first_name,
+                        last_name,
+                        patient_id,
+                        email,
+                        date_of_birth,
+                        gender,
+                        address,
+                        clinic_id,
+                        created_at,
+                        clinics (
+                            clinic_name,
+                            clinic_code,
+                            address,
+                            phone,
+                            email
+                        )
                     `)
                     .order('created_at', { ascending: false });
                     
-                if (error) throw error;
+                console.log('Supabase response:', { data, error });
+                
+                if (error) {
+                    console.error('Supabase error:', error);
+                    throw error;
+                }
                 
                 const patientSelect = document.getElementById('patientSelect');
                 patientSelect.innerHTML = '<option value="">Select a patient...</option>';
                 
                 if (data && data.length > 0) {
+                    console.log(`Found ${data.length} patients`);
                     data.forEach(patient => {
-                        patientSelect.innerHTML += `<option value="${patient.id}" data-patient='${JSON.stringify(patient)}'>${patient.first_name} ${patient.last_name} (${patient.patient_id})</option>`;
+                        const patientData = JSON.stringify(patient).replace(/"/g, '&quot;');
+                        patientSelect.innerHTML += `<option value="${patient.id}" data-patient='${patientData}'>${patient.first_name} ${patient.last_name} (${patient.patient_id})</option>`;
                     });
+                    
+                    showAlert(`Loaded ${data.length} patients successfully`, 'success');
+                } else {
+                    console.log('No patients found');
+                    patientSelect.innerHTML += '<option value="" disabled>No patients found</option>';
+                    showAlert('No patients found in database', 'error');
                 }
+                
             } catch (error) {
                 console.error('Error loading patients:', error);
                 showAlert('Error loading patients: ' + error.message, 'error');
-                populateMockPatients();
+                
+                const patientSelect = document.getElementById('patientSelect');
+                patientSelect.innerHTML = '<option value="">Error loading patients</option>';
             }
-        }
-
-        function populateMockPatients() {
-            const patientSelect = document.getElementById('patientSelect');
-            const mockPatients = [
-                { id: 1, first_name: 'John', last_name: 'Smith', patient_id: 'JS2001', gender: 'Male', date_of_birth: '1985-03-15', clinics: { clinic_name: 'London Wellness Centre' } },
-                { id: 2, first_name: 'Sarah', last_name: 'Johnson', patient_id: 'SJ2002', gender: 'Female', date_of_birth: '1990-07-22', clinics: { clinic_name: 'Manchester Holistic Clinic' } }
-            ];
-
-            mockPatients.forEach(patient => {
-                patientSelect.innerHTML += `<option value="${patient.id}" data-patient='${JSON.stringify(patient)}'>${patient.first_name} ${patient.last_name} (${patient.patient_id})</option>`;
-            });
         }
         
         // Start assessment
@@ -274,7 +278,7 @@
             }
             
             const selectedOption = document.getElementById('patientSelect').selectedOptions[0];
-            selectedPatient = JSON.parse(selectedOption.dataset.patient);
+            selectedPatient = JSON.parse(selectedOption.dataset.patient.replace(/&quot;/g, '"'));
             
             const patientText = `${selectedPatient.first_name} ${selectedPatient.last_name} (${selectedPatient.patient_id})`;
             document.getElementById('patientInfo').innerHTML = `<strong>Patient:</strong> ${patientText}<br><strong>Clinic:</strong> ${selectedPatient.clinics?.clinic_name || 'Unknown'}`;
@@ -500,29 +504,25 @@
                     assessment_date: new Date().toISOString()
                 };
                 
-                if (supabase) {
-                    const { data, error } = await supabase
-                        .from('medical_reports')
-                        .insert([{
-                            patient_id: selectedPatient.id,
-                            clinic_id: selectedPatient.clinic_id,
-                            report_type: 'health_assessment',
-                            report_title: 'Health Assessment Report',
-                            report_data: reportData,
-                            recommendations: recommendations,
-                            therapies_recommended: recommendations,
-                            total_score: overallScore,
-                            category_scores: categoryScores
-                        }])
-                        .select();
-                        
-                    if (error) throw error;
+                const { data, error } = await supabase
+                    .from('medical_reports')
+                    .insert([{
+                        patient_id: selectedPatient.id,
+                        clinic_id: selectedPatient.clinic_id,
+                        report_type: 'health_assessment',
+                        report_title: 'Health Assessment Report',
+                        report_data: reportData,
+                        recommendations: recommendations,
+                        therapies_recommended: recommendations,
+                        total_score: overallScore,
+                        category_scores: categoryScores
+                    }])
+                    .select();
                     
-                    showAlert('Health assessment report saved successfully!', 'success');
-                } else {
-                    console.log('Would save report:', reportData);
-                    showAlert('Report saved locally (Supabase not available)', 'success');
-                }
+                if (error) throw error;
+                
+                showAlert('Health assessment report saved successfully!', 'success');
+                console.log('Assessment saved:', data);
                 
             } catch (error) {
                 console.error('Error saving assessment:', error);
