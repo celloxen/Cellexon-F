@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vital Signs Monitoring - Cellexon</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f172a; color: white; }
+        .header { background: linear-gradient(135deg, #1e293b, #334155); padding: 20px; border-bottom: 2px solid #10b981; }
+        .container { max-width: 1600px; margin: 0 auto; padding: 20px; }
+        .monitoring-grid { display: grid; grid-template-columns: 1fr 2fr 1fr; gap: 20px; }
+        .card { background: rgba(255, 255, 255, 0.05); border-radius: 12px; padding: 20px; border: 1px solid rgba(16, 185, 129, 0.3); margin: 10px 0; }
+        .vital-card { background: rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 15px; margin: 8px 0; border-left: 4px solid #10b981; }
+        .vital-value { font-size: 2rem; font-weight: bold; color: #10b981; margin: 10px 0; }
+        .vital-label { font-size: 0.9rem; color: #94a3b8; margin-bottom: 5px; }
+        .vital-unit { font-size: 1rem; color: #cbd5e1; margin-left: 5px; }
+        .vital-trend { font-size: 0.8rem; margin-top: 5px; }
+        .trend-up { color: #ef4444; }
+        .trend-down { color: #10b981; }
+        .trend-stable { color: #f59e0b; }
+        .alert-critical { background: rgba(239, 68, 68, 0.2); border-color: #ef4444; animation: pulse 2s infinite; }
+        .alert-warning { background: rgba(245, 158, 11, 0.2); border-color: #f59e0b; }
+        .alert-normal { background: rgba(16, 185, 129, 0.1); border-color: #10b981; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .btn { padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; font-weight: 500; margin: 5px; }
+        .btn-primary { background: #10b981; color: white; }
+        .btn-secondary { background: #6b7280; color: white; }
+        .btn-danger { background: #ef4444; color: white; }
+        .btn-warning { background: #f59e0b; color: white; }
+        .status-indicator { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; }
+        .status-connected { background: #10b981; }
+        .status-disconnected { background: #ef4444; }
+        .status-warning { background: #f59e0b; }
+        .chart-container { background: rgba(0, 0, 0, 0.3); border-radius: 8px; padding: 15px; margin: 10px 0; height: 200px; }
+        .waveform { width: 100%; height: 150px; border: 1px solid #374151; border-radius: 4px; background: #000; position: relative; overflow: hidden; }
+        .waveform-line { position: absolute; top: 50%; left: 0; width: 100%; height: 2px; background: #10b981; transform: translateY(-50%); }
+        .device-status { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin: 15px 0; }
+        .device-item { background: rgba(255, 255, 255, 0.05); padding: 10px; border-radius: 6px; text-align: center; }
+        .device-connected { border: 1px solid #10b981; }
+        .device-error { border: 1px solid #ef4444; }
+        .emergency-panel { background: rgba(239, 68, 68, 0.1); border: 2px solid #ef4444; border-radius: 8px; padding: 20px; margin: 15px 0; text-align: center; }
+        .readings-log { max-height: 300px; overflow-y: auto; font-family: monospace; font-size: 0.85rem; }
+        .log-entry { padding: 5px; border-bottom: 1px solid #374151; }
+        .log-normal { color: #10b981; }
+        .log-warning { color: #f59e0b; }
+        .log-critical { color: #ef4444; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <h1>Cellexon Vital Signs Monitoring</h1>
+            <p>Real-time Patient Monitoring During Treatment Sessions</p>
+            <button class="btn btn-secondary" onclick="window.location.href='index.html'">Back to Dashboard</button>
+        </div>
+    </div>
+    
+    <div class="container">
+        <!-- Patient & Session Setup -->
+        <div class="card">
+            <h2>Patient & Session Setup</h2>
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px;">
+                <div>
+                    <label>Select Patient:</label>
+                    <select id="patientSelect" style="width: 100%; padding: 10px; border: 1px solid #374151; border-radius: 6px; background: #1f2937; color: white;">
+                        <option value="">Select patient...</option>
+                    </select>
+                    <div id="patientInfo" style="margin-top: 10px; padding: 10px; background: rgba(16, 185, 129, 0.1); border-radius: 6px; display: none;"></div>
+                </div>
+                <div>
+                    <label>Treatment Session:</label>
+                    <select id="sessionSelect" style="width: 100%; padding: 10px; border: 1px solid #374151; border-radius: 6px; background: #1f2937; color: white;" disabled>
+                        <option value="">Select treatment session...</option>
+                    </select>
+                    <div id="sessionInfo" style="margin-top: 10px; font-size: 0.9rem; color: #94a3b8;"></div>
+                </div>
+                <div>
+                    <label>Monitoring Status:</label>
+                    <div style="margin-top: 10px;">
+                        <button class="btn btn-primary" id="startMonitoringBtn" onclick="startMonitoring()" disabled>Start Monitoring</button>
+                        <button class="btn btn-danger" id="stopMonitoringBtn" onclick="stopMonitoring()" disabled>Stop Monitoring</button>
+                    </div>
+                    <div id="monitoringStatus" style="margin-top: 10px; font-size: 0.9rem;">
+                        <span class="status-indicator status-disconnected"></span>Monitoring Stopped
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="monitoring-grid">
+            <!-- Device Status Panel -->
+            <div>
+                <div class="card">
+                    <h3>Device Status</h3>
+                    <div class="device-status">
+                        <div class="device-item device-connected" id="ecgDevice">
+                            <div><span class="status-indicator status-connected"></span>ECG Monitor</div>
+                            <div style="font-size: 0.8rem; margin-top: 5px;">Witleaf M001-D</div>
+                        </div>
+                        <div class="device-item device-connected" id="bpDevice">
+                            <div><span class="status-indicator status-connected"></span>Blood Pressure</div>
+                            <div style="font-size: 0.8rem; margin-top: 5px;">Digital Cuff</div>
+                        </div>
+                        <div class="device-item device-connected" id="pulseDevice">
+                            <div><span class="status-indicator status-connected"></span>Pulse Oximeter</div>
+                            <div style="font-size: 0.8rem; margin-top: 5px;">SpO2 Sensor</div>
+                        </div>
+                        <div class="device-item device-connected" id="tempDevice">
+                            <div><span class="status-indicator status-connected"></span>Temperature</div>
+                            <div style="font-size: 0.8rem; margin-top: 5px;">Digital Probe</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Emergency Controls -->
+                <div class="emergency-panel" id="emergencyPanel" style="display: none;">
+                    <h3>Emergency Alert</h3>
+                    <p style="margin: 10px 0;">Critical vital signs detected!</p>
+                    <button class="btn btn-danger" onclick="emergencyStop()">EMERGENCY STOP</button>
+                    <button class="btn btn-warning" onclick="contactEmergency()">Contact Emergency</button>
+                </div>
+                
+                <div class="card">
+                    <h3>Safety Thresholds</h3>
+                    <div style="font-size: 0.85rem; line-height: 1.4;">
+                        <div style="margin: 8px 0;"><strong>Heart Rate:</strong> 50-120 BPM</div>
+                        <div style="margin: 8px 0;"><strong>Blood Pressure:</strong> 90/60 - 160/100 mmHg</div>
+                        <div style="margin: 8px 0;"><strong>SpO2:</strong> >95%</div>
+                        <div style="margin: 8px 0;"><strong>Temperature:</strong> 36.0-37.5°C</div>
+                        <div style="margin: 8px 0;"><strong>Respiratory Rate:</strong> 12-20 /min</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Monitoring Display -->
+            <div>
+                <div class="card">
+                    <h3>Real-time Vital Signs</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div class="vital-card alert-normal" id="heartRateCard">
+                            <div class="vital-label">Heart Rate</div>
+                            <div class="vital-value" id="heartRateValue">--</div>
+                            <div class="vital-unit">BPM</div>
+                            <div class="vital-trend trend-stable" id="heartRateTrend">Stable</div>
+                        </div>
+                        
+                        <div class="vital-card alert-normal" id="bloodPressureCard">
+                            <div class="vital-label">Blood Pressure</div>
+                            <div class="vital-value" id="bloodPressureValue">--/--</div>
+                            <div class="vital-unit">mmHg</div>
+                            <div class="vital-trend trend-stable" id="bloodPressureTrend">Normal</div>
+                        </div>
+                        
+                        <div class="vital-card alert-normal" id="oxygenCard">
+                            <div class="vital-label">Oxygen Saturation</div>
+                            <div class="vital-value" id="oxygenValue">--</div>
+                            <div class="vital-unit">%</div>
+                            <div class="vital-trend trend-stable" id="oxygenTrend">Normal</div>
+                        </div>
+                        
+                        <div class="vital-card alert-normal" id="temperatureCard">
+                            <div class="vital-label">Temperature</div>
+                            <div class="vital-value" id="temperatureValue">--</div>
+                            <div class="vital-unit">°C</div>
+                            <div class="vital-trend trend-stable" id="temperatureTrend">Normal</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- ECG Waveform -->
+                <div class="card">
+                    <h3>ECG Waveform</h3>
+                    <div class="chart-container">
+                        <div class="waveform" id="ecgWaveform">
+                            <canvas id="ecgCanvas" width="800" height="150"></canvas>
+                        </div>
+                        <div style="text-align: center; margin-top: 10px; font-size: 0.9rem; color: #94a3b8;">
+                            Lead II - Real-time ECG monitoring
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Additional Vitals -->
+                <div class="card">
+                    <h3>Additional Measurements</h3>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
+                        <div class="vital-card alert-normal">
+                            <div class="vital-label">Respiratory Rate</div>
+                            <div class="vital-value" id="respiratoryValue">--</div>
+                            <div class="vital-unit">/min</div>
+                        </div>
+                        
+                        <div class="vital-card alert-normal">
+                            <div class="vital-label">Stress Level</div>
+                            <div class="vital-value" id="stressValue">--</div>
+                            <div class="vital-unit">%</div>
+                        </div>
+                        
+                        <div class="vital-card alert-normal">
+                            <div class="vital-label">Treatment Time</div>
+                            <div class="vital-value" id="treatmentTime">00:00</div>
+                            <div class="vital-unit">min</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Readings Log & History -->
+            <div>
+                <div class="card">
+                    <h3>Readings Log</h3>
+                    <div class="readings-log" id="readingsLog">
+                        <div class="log-entry log-normal">System initialized - Ready for monitoring</div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h3>Session Summary</h3>
+                    <div id="sessionSummary">
+                        <div style="margin: 8px 0;"><strong>Session Duration:</strong> <span id="summaryDuration">Not started</span></div>
+                        <div style="margin: 8px 0;"><strong>Average HR:</strong> <span id="summaryAvgHR">--</span> BPM</div>
+                        <div style="margin: 8px 0;"><strong>Average BP:</strong> <span id="summaryAvgBP">--</span> mmHg</div>
+                        <div style="margin: 8px 0;"><strong>Alerts:</strong> <span id="summaryAlerts">0</span></div>
+                        <div style="margin: 8px 0;"><strong>Status:</strong> <span id="summaryStatus">Standby</span></div>
+                    </div>
+                    
+                    <div style="margin-top: 15px;">
+                        <button class="btn btn-primary" onclick="saveSession()" disabled id="saveSessionBtn">Save Session</button>
+                        <button class="btn btn-secondary" onclick="exportData()">Export Data</button>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h3>Alert History</h3>
+                    <div id="alertHistory" style="max-height: 200px; overflow-y: auto; font-size: 0.85rem;">
+                        <div style="color: #94a3b8; text-align: center; padding: 20px;">No alerts recorded</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { supabase } from './supabase-config.js';
+        
+        let selectedPatient = null;
+        let monitoringActive = false;
+        let monitoringInterval = null;
+        let sessionStartTime = null;
+        let vitalSignsData = [];
+        let alertCount = 0;
+        let ecgCanvas = null;
+        let ecgContext = null;
+        let ecgData = [];
+        
+        // Simulated vital signs ranges for demo
+        const vitalRanges = {
+            heartRate: { min: 60, max: 100, current: 75 },
+            systolic: { min: 110, max: 140, current: 120 },
+            diastolic: { min: 70, max: 90, current: 80 },
+            oxygen: { min: 96, max: 100, current: 98 },
+            temperature: { min: 36.2, max: 37.0, current: 36.6 },
+            respiratory: { min: 14, max: 18, current: 16 }
+        };
+        
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            loadPatients();
+            initializeECG();
+        });
+        
+        // Load patients
+        async function loadPatients() {
+            try {
+                const { data, error } = await supabase
+                    .from('patients')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+                    
+                if (error) throw error;
+                
+                const patientSelect = document.getElementById('patientSelect');
+                patientSelect.innerHTML = '<option value="">Select patient...</option>';
+                
+                if (data && data.length > 0) {
+                    data.forEach(patient => {
+                        patientSelect.innerHTML += `<option value="${patient.id}" data-patient='${JSON.stringify(patient)}'>${patient.first_name} ${patient.last_name} (${patient.patient_id})</option>`;
+                    });
+                }
+                
+                // Setup patient selection
+                patientSelect.addEventListener('change', function() {
+                    const selectedOption = this.selectedOptions[0];
+                    if (selectedOption.value) {
+                        selectedPatient = JSON.parse(selectedOption.dataset.patient);
+                        showPatientInfo(selectedPatient);
+                        loadTreatmentSessions(selectedPatient.id);
+                    } else {
+                        hidePatientInfo();
+                        selectedPatient = null;
+                    }
+                });
+                
+            } catch (error) {
+                console.error('Error loading patients:', error);
+            }
+        }
+        
+        // Show patient information
+        function showPatientInfo(patient) {
+            document.getElementById('patientInfo').style.display = 'block';
+            document.getElementById('patientInfo').innerHTML = `
+                <strong>${patient.first_name} ${patient.last_name}</strong><br>
+                ID: ${patient.patient_id}<br>
+                Age: ${calculateAge(patient.date_of_birth)}
+            `;
+        }
+        
+        function hidePatientInfo() {
+            document.getElementById('patientInfo').style.display = 'none';
+        }
+        
+        // Load treatment sessions
+        async function loadTreatmentSessions(patientId) {
+            try {
+                const { data, error } = await supabase
+                    .from('treatment_sessions')
+                    .select('*')
+                    .eq('patient_id', patientId)
+                    .eq('status', 'in_progress')
+                    .order('start_time', { ascending: false });
+                    
+                const sessionSelect = document.getElementById('sessionSelect');
+                sessionSelect.innerHTML = '<option value="">Select treatment session...</option>';
+                sessionSelect.disabled = false;
+                
+                if (data && data.length > 0) {
+                    data.forEach(session => {
+                        sessionSelect.innerHTML += `<option value="${session.id}">${session.protocol_used} - ${new Date(session.start_time).toLocaleTimeString()}</option>`;
+                    });
+                } else {
+                    sessionSelect.innerHTML += '<option value="demo">Demo Session - Stress Relief Protocol</option>';
+                }
+                
+                sessionSelect.addEventListener('change', function() {
+                    if (this.value) {
+                        document.getElementById('startMonitoringBtn').disabled = false;
+                        document.getElementById('sessionInfo').textContent = 'Session selected - Ready to monitor';
+                    }
+                });
+                
+            } catch (error) {
+                console.error('Error loading sessions:', error);
+                // Fallback to demo session
+                const sessionSelect = document.getElementById('sessionSelect');
+                sessionSelect.innerHTML = '<option value="demo">Demo Session - Stress Relief Protocol</option>';
+                sessionSelect.disabled = false;
+            }
+        }
+        
+        // Calculate age
+        function calculateAge(birthDate) {
+            const today = new Date();
+            const birth = new Date(birthDate);
+            let age = today.getFullYear() - birth.getFullYear();
+            const monthDiff = today.getMonth() - birth.getMonth();
+            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+                age--;
+            }
+            return age;
+        }
+        
+        // Initialize ECG canvas
+        function initializeECG() {
+            ecgCanvas = document.getElementById('ecgCanvas');
+            ecgContext = ecgCanvas.getContext('2d');
+            ecgContext.strokeStyle = '#10b981';
+            ecgContext.lineWidth = 2;
+        }
+        
+        // Monitoring controls
+        window.startMonitoring = function() {
+            if (!selectedPatient) {
+                alert('Please select a patient first');
+                return;
+            }
+            
+            monitoringActive = true;
+            sessionStartTime = new Date();
+            
+            document.getElementById('startMonitoringBtn').disabled = true;
+            document.getElementById('stopMonitoringBtn').disabled = false;
+            document.getElementById('saveSessionBtn').disabled = false;
+            
+            document.getElementById('monitoringStatus').innerHTML = 
+                '<span class="status-indicator status-connected"></span>Monitoring Active';
+            
+            document.getElementById('summaryStatus').textContent = 'Active';
+            
+            // Start monitoring interval
+            monitoringInterval = setInterval(updateVitalSigns, 2000);
+            
+            addLogEntry('Monitoring started for ' + selectedPatient.first_name + ' ' + selectedPatient.last_name, 'normal');
+        };
+        
+        window.stopMonitoring = function() {
+            monitoringActive = false;
+            
+            if (monitoringInterval) {
+                clearInterval(monitoringInterval);
+                monitoringInterval = null;
+            }
+            
+            document.getElementById('startMonitoringBtn').disabled = false;
+            document.getElementById('stopMonitoringBtn').disabled = true;
+            
+            document.getElementById('monitoringStatus').innerHTML = 
+                '<span class="status-indicator status-disconnected"></span>Monitoring Stopped';
+            
+            document.getElementById('summaryStatus').textContent = 'Completed';
+            
+            addLogEntry('Monitoring session completed', 'normal');
+            updateSessionSummary();
+        };
+        
+        // Update vital signs with realistic simulation
+        function updateVitalSigns() {
+            if (!monitoringActive) return;
+            
+            // Generate realistic vital signs with small variations
+            const heartRate = generateVitalSign('heartRate', 2);
+            const systolic = generateVitalSign('systolic', 3);
+            const diastolic = generateVitalSign('diastolic', 2);
+            const oxygen = generateVitalSign('oxygen', 1);
+            const temperature = generateVitalSign('temperature', 0.1);
+            const respiratory = generateVitalSign('respiratory', 1);
+            
+            // Update displays
+            document.getElementById('heartRateValue').textContent = heartRate;
+            document.getElementById('bloodPressureValue').textContent = `${systolic}/${diastolic}`;
+            document.getElementById('oxygenValue').textContent = oxygen;
+            document.getElementById('temperatureValue').textContent = temperature.toFixed(1);
+            document.getElementById('respiratoryValue').textContent = respiratory;
+            
+            // Update treatment time
+            if (sessionStartTime) {
+                const elapsed = Math.floor((new Date() - sessionStartTime) / 1000);
+                const minutes = Math.floor(elapsed / 60);
+                const seconds = elapsed % 60;
+                document.getElementById('treatmentTime').textContent = 
+                    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
+            
+            // Check for alerts
+            checkVitalAlerts(heartRate, systolic, diastolic, oxygen, temperature);
+            
+            // Store data for summary
+            vitalSignsData.push({
+                timestamp: new Date(),
+                heartRate, systolic, diastolic, oxygen, temperature, respiratory
+            });
+            
+            // Update ECG
+            updateECG(heartRate);
+            
+            // Log readings periodically
+            if (vitalSignsData.length % 5 === 0) {
+                addLogEntry(`HR: ${heartRate}, BP: ${systolic}/${diastolic}, SpO2: ${oxygen}%, Temp: ${temperature.toFixed(1)}°C`, 'normal');
+            }
+        }
+        
+        function generateVitalSign(type, variance) {
+            const range = vitalRanges[type];
+            const change = (Math.random() - 0.5) * variance;
+            range.current = Math.max(range.min, Math.min(range.max, range.current + change));
+            return Math.round(range.current * 10) / 10;
+        }
+        
+        // Check for vital sign alerts
+        function checkVitalAlerts(hr, systolic, diastolic, oxygen, temp) {
+            let alertLevel = 'normal';
+            
+            // Critical alerts
+            if (hr < 50 || hr > 120 || systolic > 160 || diastolic > 100 || oxygen < 90 || temp > 38.5) {
+                alertLevel = 'critical';
+                showEmergencyAlert();
+                addAlertToHistory(`CRITICAL: Vital signs outside safe range`, 'critical');
+            }
+            // Warning alerts
+            else if (hr < 60 || hr > 100 || systolic > 140 || diastolic > 90 || oxygen < 95 || temp > 37.5) {
+                alertLevel = 'warning';
+                addAlertToHistory(`WARNING: Elevated vital signs detected`, 'warning');
+            }
+            
+            // Update card styles
+            updateVitalCardStatus('heartRateCard', hr < 60 || hr > 100 ? (hr < 50 || hr > 120 ? 'critical' : 'warning') : 'normal');
+            updateVitalCardStatus('bloodPressureCard', systolic > 140 || diastolic > 90 ? (systolic > 160 || diastolic > 100 ? 'critical' : 'warning') : 'normal');
+            updateVitalCardStatus('oxygenCard', oxygen < 95 ? (oxygen < 90 ? 'critical' : 'warning') : 'normal');
+            updateVitalCardStatus('temperatureCard', temp > 37.5 ? (temp > 38.5 ? 'critical' : 'warning') : 'normal');
+        }
+        
+        function updateVitalCardStatus(cardId, status) {
+            const card = document.getElementById(cardId);
+            card.className = `vital-card alert-${status}`;
+        }
+        
+        function showEmergencyAlert() {
+            document.getElementById('emergencyPanel').style.display = 'block';
+            alertCount++;
+        }
+        
+        function addAlertToHistory(message, type) {
+            const alertHistory = document.getElementById('alertHistory');
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `log-entry log-${type}`;
+            alertDiv.innerHTML = `<strong>${new Date().toLocaleTimeString()}</strong> - ${message}`;
+            alertHistory.insertBefore(alertDiv, alertHistory.firstChild);
+        }
+        
+        // ECG simulation
+        function updateECG(heartRate) {
+            if (!ecgContext) return;
+            
+            ecgContext.clearRect(0, 0, ecgCanvas.width, ecgCanvas.height);
+            
+            // Draw ECG grid
+            ecgContext.strokeStyle = '#374151';
+            ecgContext.lineWidth = 1;
+            for (let x = 0; x < ecgCanvas.width; x += 20) {
+                ecgContext.beginPath();
+                ecgContext.moveTo(x, 0);
+                ecgContext.lineTo(x, ecgCanvas.height);
+                ecgContext.stroke();
+            }
+            
+            // Draw ECG waveform
+            ecgContext.strokeStyle = '#10b981';
+            ecgContext.lineWidth = 2;
+            ecgContext.beginPath();
+            
+            const beatInterval = 60000 / heartRate; // ms per beat
+            const currentTime = Date.now();
+            
+            for (let x = 0; x < ecgCanvas.width; x += 2) {
+                const time = currentTime - (ecgCanvas.width - x) * 50;
+                const beatPhase = (time % beatInterval) / beatInterval;
+                
+                let y = ecgCanvas.height / 2;
+                
+                // Simple ECG waveform simulation
+                if (beatPhase < 0.1) {
+                    y += Math.sin(beatPhase * 20 * Math.PI) * 30;
+                } else if (beatPhase < 0.2) {
+                    y -= Math.sin((beatPhase - 0.1) * 10 * Math.PI) * 60;
+                } else if (beatPhase < 0.3) {
+                    y += Math.sin((beatPhase - 0.2) * 10 * Math.PI) * 40;
+                }
+                
+                if (x === 0) {
+                    ecgContext.moveTo(x, y);
+                } else {
+                    ecgContext.lineTo(x, y);
+                }
+            }
+            
+            ecgContext.stroke();
+        }
+        
+        // Logging functions
+        function addLogEntry(message, type) {
+            const log = document.getElementById('readingsLog');
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+            entry.innerHTML = `<strong>${new Date().toLocaleTimeString()}</strong> - ${message}`;
+            log.insertBefore(entry, log.firstChild);
+            
+            // Keep only last 50 entries
+            while (log.children.length > 50) {
+                log.removeChild(log.lastChild);
+            }
+        }
+        
+        // Session summary
+        function updateSessionSummary() {
+            if (vitalSignsData.length === 0) return;
+            
+            const avgHR = Math.round(vitalSignsData.reduce((sum, data) => sum + data.heartRate, 0) / vitalSignsData.length);
+            const avgSystolic = Math.round(vitalSignsData.reduce((sum, data) => sum + data.systolic, 0) / vitalSignsData.length);
+            const avgDiastolic = Math.round(vitalSignsData.reduce((sum, data) => sum + data.diastolic, 0) / vitalSignsData.length);
+            
+            const duration = sessionStartTime ? Math.floor((new Date() - sessionStartTime) / 60000) : 0;
+            
+            document.getElementById('summaryDuration').textContent = `${duration} minutes`;
+            document.getElementById('summaryAvgHR').textContent = avgHR;
+            document.getElementById('summaryAvgBP').textContent = `${avgSystolic}/${avgDiastolic}`;
+            document.getElementById('summaryAlerts').textContent = alertCount;
+        }
+        
+        // Emergency functions
+        window.emergencyStop = function() {
+            stopMonitoring();
+            addLogEntry('EMERGENCY STOP activated', 'critical');
+            alert('Emergency stop activated. Treatment session terminated.');
+            document.getElementById('emergencyPanel').style.display = 'none';
+        };
+        
+        window.contactEmergency = function() {
+            addLogEntry('Emergency services contacted', 'critical');
+            alert('Emergency services have been notified.');
+        };
+        
+        // Save and export functions
+        window.saveSession = async function() {
+            if (!selectedPatient || vitalSignsData.length === 0) {
+                alert('No session data to save');
+                return;
+            }
+            
+            try {
+                const sessionData = {
+                    patient_id: selectedPatient.id,
+                    clinic_id: 1,
+                    session_type: 'vital_signs_monitoring',
+                    start_time: sessionStartTime.toISOString(),
+                    end_time: new Date().toISOString(),
+                    vital_signs_data: JSON.stringify(vitalSignsData),
+                    alert_count: alertCount,
+                    session_notes: `Monitoring session completed. ${alertCount} alerts recorded.`
+                };
+                
+                alert('Vital signs session data saved successfully!');
+                addLogEntry('Session data saved to database', 'normal');
+                
+            } catch (error) {
+                console.error('Error saving session:', error);
+                alert('Error saving session data: ' + error.message);
+            }
+        };
+        
+        window.exportData = function() {
+            if (vitalSignsData.length === 0) {
+                alert('No data to export');
+                return;
+            }
+            
+            const csvContent = "data:text/csv;charset=utf-8," + 
+                "Timestamp,Heart Rate,Systolic,Diastolic,Oxygen,Temperature,Respiratory\n" +
+                vitalSignsData.map(data => 
+                    `${data.timestamp.toISOString()},${data.heartRate},${data.systolic},${data.diastolic},${data.oxygen},${data.temperature},${data.respiratory}`
+                ).join('\n');
+            
+            const link = document.createElement('a');
+            link.setAttribute('href', encodeURI(csvContent));
+            link.setAttribute('download', `vital_signs_${selectedPatient?.patient_id || 'unknown'}_${new Date().toISOString().split('T')[0]}.csv`);
+            link.click();
+            
+            addLogEntry('Data exported to CSV file', 'normal');
+        };
+        
+    </script>
+</body>
+</html>
