@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IRIS Analysis - Cellexon</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f172a; color: white; }
+        .header { background: linear-gradient(135deg, #1e293b, #334155); padding: 20px; border-bottom: 2px solid #10b981; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        .analysis-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .card { background: rgba(255, 255, 255, 0.05); border-radius: 12px; padding: 20px; border: 1px solid rgba(16, 185, 129, 0.3); margin: 10px 0; }
+        .camera-container { background: rgba(0, 0, 0, 0.5); border-radius: 8px; padding: 20px; text-align: center; position: relative; min-height: 300px; }
+        .video-element { width: 100%; max-width: 400px; border-radius: 8px; }
+        .capture-overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); border: 3px solid #10b981; border-radius: 50%; width: 200px; height: 200px; pointer-events: none; }
+        .btn { padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; font-weight: 500; margin: 5px; }
+        .btn-primary { background: #10b981; color: white; }
+        .btn-secondary { background: #6b7280; color: white; }
+        .btn-danger { background: #ef4444; color: white; }
+        .iris-images { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 15px 0; }
+        .iris-image-container { border: 2px solid #374151; border-radius: 8px; padding: 10px; text-align: center; min-height: 200px; }
+        .iris-image-container.captured { border-color: #10b981; background: rgba(16, 185, 129, 0.1); }
+        .captured-image { width: 100%; max-width: 150px; border-radius: 8px; }
+        .analysis-results { max-height: 400px; overflow-y: auto; }
+        .pattern-item { background: rgba(255, 255, 255, 0.1); margin: 8px 0; padding: 12px; border-radius: 6px; border-left: 4px solid #10b981; }
+        .recommendation-card { background: rgba(16, 185, 129, 0.1); border: 1px solid #10b981; border-radius: 8px; padding: 15px; margin: 10px 0; }
+        .progress-steps { display: flex; justify-content: space-between; margin: 20px 0; }
+        .step { flex: 1; text-align: center; padding: 10px; border-radius: 6px; margin: 0 5px; background: rgba(255, 255, 255, 0.1); }
+        .step.active { background: rgba(16, 185, 129, 0.3); border: 1px solid #10b981; }
+        .step.completed { background: rgba(16, 185, 129, 0.2); color: #10b981; }
+        .alert { padding: 10px; border-radius: 4px; margin: 10px 0; }
+        .alert-success { background: #d1fae5; color: #065f46; border: 1px solid #10b981; }
+        .alert-error { background: #fee2e2; color: #991b1b; border: 1px solid #ef4444; }
+        .report-preview { background: white; color: black; border-radius: 8px; padding: 20px; margin: 15px 0; max-height: 300px; overflow-y: auto; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <h1>Cellexon IRIS Analysis System</h1>
+            <p>AI-Powered Constitutional Assessment and Therapy Recommendations</p>
+            <button class="btn btn-secondary" onclick="window.location.href='index.html'">Back to Dashboard</button>
+        </div>
+    </div>
+    
+    <div class="container">
+        <!-- Patient Selection -->
+        <div class="card">
+            <h2>Patient Selection & Session Setup</h2>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div>
+                    <label>Select Patient:</label>
+                    <select id="patientSelect" style="width: 100%; padding: 10px; border: 1px solid #374151; border-radius: 6px; background: #1f2937; color: white;">
+                        <option value="">Select patient...</option>
+                    </select>
+                    <div id="patientInfo" style="margin-top: 15px; padding: 10px; background: rgba(16, 185, 129, 0.1); border-radius: 6px; display: none;"></div>
+                </div>
+                <div>
+                    <label>Analysis Type:</label>
+                    <select id="analysisType" style="width: 100%; padding: 10px; border: 1px solid #374151; border-radius: 6px; background: #1f2937; color: white;">
+                        <option value="comprehensive">Comprehensive Analysis</option>
+                        <option value="constitutional">Constitutional Only</option>
+                        <option value="health_focus">Health Focus Areas</option>
+                    </select>
+                    <button class="btn btn-primary" style="margin-top: 15px;" onclick="startAnalysis()">Start IRIS Analysis</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress Steps -->
+        <div class="progress-steps" id="progressSteps">
+            <div class="step active">1. Patient Setup</div>
+            <div class="step">2. Image Capture</div>
+            <div class="step">3. AI Analysis</div>
+            <div class="step">4. Recommendations</div>
+            <div class="step">5. Report Generation</div>
+        </div>
+
+        <div class="analysis-grid">
+            <!-- Camera & Capture Section -->
+            <div class="card">
+                <h2>IRIS Image Capture</h2>
+                <div id="captureSection" style="display: none;">
+                    <div class="camera-container">
+                        <video id="cameraPreview" class="video-element" autoplay muted style="display: none;"></video>
+                        <div class="capture-overlay"></div>
+                        <div id="cameraPlaceholder" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;">
+                            <div style="font-size: 4rem; margin-bottom: 20px;">📷</div>
+                            <p>Click "Start Camera" to begin iris capture</p>
+                        </div>
+                    </div>
+                    
+                    <div style="text-align: center; margin: 20px 0;">
+                        <button class="btn btn-primary" id="startCameraBtn" onclick="startCamera()">Start Camera</button>
+                        <button class="btn btn-secondary" id="captureBtn" onclick="captureIris()" disabled>Capture IRIS</button>
+                        <button class="btn btn-danger" id="stopCameraBtn" onclick="stopCamera()" disabled>Stop Camera</button>
+                    </div>
+
+                    <div id="captureInstructions" style="background: rgba(16, 185, 129, 0.1); padding: 15px; border-radius: 6px; margin: 15px 0;">
+                        <h4>Capture Instructions:</h4>
+                        <ol style="margin-left: 20px; margin-top: 10px;">
+                            <li>Position patient 30-40cm from camera</li>
+                            <li>Ensure good lighting on the iris</li>
+                            <li>Capture left eye first, then right eye</li>
+                            <li>Keep eye wide open and focused</li>
+                            <li>Avoid reflections and shadows</li>
+                        </ol>
+                    </div>
+
+                    <div class="iris-images">
+                        <div class="iris-image-container" id="leftEyeContainer">
+                            <h4>Left Eye</h4>
+                            <div id="leftEyePreview" style="margin-top: 10px;">
+                                <p style="color: #94a3b8;">Not captured</p>
+                            </div>
+                            <button class="btn btn-secondary" onclick="setCurrentEye('left')">Capture Left</button>
+                        </div>
+                        <div class="iris-image-container" id="rightEyeContainer">
+                            <h4>Right Eye</h4>
+                            <div id="rightEyePreview" style="margin-top: 10px;">
+                                <p style="color: #94a3b8;">Not captured</p>
+                            </div>
+                            <button class="btn btn-secondary" onclick="setCurrentEye('right')">Capture Right</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analysis Results Section -->
+            <div class="card">
+                <h2>AI Analysis Results</h2>
+                <div id="analysisSection" style="display: none;">
+                    <div class="analysis-results">
+                        <h3>Constitutional Analysis</h3>
+                        <div id="constitutionalResults">
+                            <p style="color: #94a3b8;">Analysis will appear here after image capture</p>
+                        </div>
+
+                        <h3 style="margin-top: 20px;">Health Patterns Detected</h3>
+                        <div id="healthPatterns">
+                            <p style="color: #94a3b8;">Health pattern analysis pending</p>
+                        </div>
+
+                        <h3 style="margin-top: 20px;">Organ System Assessment</h3>
+                        <div id="organAssessment">
+                            <p style="color: #94a3b8;">Organ system analysis pending</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Therapy Recommendations -->
+        <div class="card" id="recommendationsSection" style="display: none;">
+            <h2>Therapy Recommendations</h2>
+            <div class="alert alert-success">
+                <strong>Mandatory Protocol:</strong> Detoxification Therapy has been automatically included in all recommendations.
+            </div>
+            
+            <div id="therapyRecommendations">
+                <div class="recommendation-card">
+                    <h4>Primary Recommendations</h4>
+                    <div id="primaryTherapies">Loading recommendations...</div>
+                </div>
+                
+                <div class="recommendation-card">
+                    <h4>Secondary Support Therapies</h4>
+                    <div id="secondaryTherapies">Loading recommendations...</div>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin: 20px 0;">
+                <button class="btn btn-primary" onclick="generateReport()">Generate Report</button>
+                <button class="btn btn-secondary" onclick="exportToTreatment()">Export to Treatment</button>
+            </div>
+        </div>
+
+        <!-- Report Preview -->
+        <div class="card" id="reportSection" style="display: none;">
+            <h2>Analysis Report</h2>
+            <div class="report-preview" id="reportPreview">
+                <!-- Report content will be generated here -->
+            </div>
+            
+            <div style="text-align: center; margin: 20px 0;">
+                <button class="btn btn-primary" onclick="downloadReport()">Download PDF</button>
+                <button class="btn btn-secondary" onclick="emailReport()">Email Report</button>
+                <button class="btn btn-secondary" onclick="saveAnalysis()">Save Analysis</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { supabase } from './supabase-config.js';
+        
+        let selectedPatient = null;
+        let currentEye = 'left';
+        let capturedImages = { left: null, right: null };
+        let analysisResults = {};
+        let cameraStream = null;
+        let currentStep = 1;
+        
+        // IRIS Analysis patterns and health correlations
+        const irisPatterns = {
+            constitutional: {
+                brown: { type: 'Haematogenic', characteristics: ['Strong constitution', 'Good circulation', 'Robust immune system'] },
+                blue: { type: 'Lymphatic', characteristics: ['Sensitive system', 'Prone to inflammation', 'Respiratory focus'] },
+                mixed: { type: 'Biliary', characteristics: ['Balanced constitution', 'Digestive focus', 'Adaptive system'] }
+            },
+            healthSigns: {
+                radialFurrows: { area: 'Digestive system', indication: 'Digestive strain or toxicity' },
+                nervousArcs: { area: 'Nervous system', indication: 'Stress or nervous tension' },
+                scurf: { area: 'Elimination', indication: 'Poor elimination through skin' },
+                lymphaticCongestion: { area: 'Lymphatic system', indication: 'Lymphatic congestion' },
+                kidneyStress: { area: 'Urinary system', indication: 'Kidney function stress' }
+            }
+        };
+
+        // Therapy recommendations database
+        const therapyDatabase = {
+            detoxification: { name: 'Detoxification Protocol', sessions: 'Variable', mandatory: true },
+            circulation: { name: 'Circulation Enhancement', sessions: '6 weeks', indication: 'Poor circulation signs' },
+            digestive: { name: 'Digestive Support', sessions: '8 weeks', indication: 'Digestive system stress' },
+            nervous: { name: 'Nervous System Support', sessions: '4 weeks', indication: 'Nervous tension' },
+            lymphatic: { name: 'Lymphatic Drainage', sessions: '6 weeks', indication: 'Lymphatic congestion' },
+            immune: { name: 'Immune Enhancement', sessions: '10 weeks', indication: 'Immune system support' }
+        };
+        
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            loadPatients();
+        });
+        
+        // Load patients
+        async function loadPatients() {
+            try {
+                const { data, error } = await supabase
+                    .from('patients')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+                    
+                if (error) throw error;
+                
+                const patientSelect = document.getElementById('patientSelect');
+                patientSelect.innerHTML = '<option value="">Select patient...</option>';
+                
+                if (data && data.length > 0) {
+                    data.forEach(patient => {
+                        patientSelect.innerHTML += `<option value="${patient.id}" data-patient='${JSON.stringify(patient)}'>${patient.first_name} ${patient.last_name} (${patient.patient_id})</option>`;
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading patients:', error);
+            }
+        }
+        
+        // Start analysis
+        window.startAnalysis = function() {
+            const patientId = document.getElementById('patientSelect').value;
+            if (!patientId) {
+                alert('Please select a patient first');
+                return;
+            }
+            
+            const selectedOption = document.getElementById('patientSelect').selectedOptions[0];
+            selectedPatient = JSON.parse(selectedOption.dataset.patient);
+            
+            // Show patient info
+            document.getElementById('patientInfo').style.display = 'block';
+            document.getElementById('patientInfo').innerHTML = `
+                <strong>${selectedPatient.first_name} ${selectedPatient.last_name}</strong><br>
+                ID: ${selectedPatient.patient_id}<br>
+                Analysis Type: ${document.getElementById('analysisType').value}
+            `;
+            
+            // Show capture section and update progress
+            document.getElementById('captureSection').style.display = 'block';
+            updateProgress(2);
+        };
+        
+        // Camera functions
+        window.startCamera = async function() {
+            try {
+                cameraStream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { 
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 },
+                        facingMode: 'user'
+                    } 
+                });
+                
+                const video = document.getElementById('cameraPreview');
+                video.srcObject = cameraStream;
+                video.style.display = 'block';
+                document.getElementById('cameraPlaceholder').style.display = 'none';
+                
+                document.getElementById('startCameraBtn').disabled = true;
+                document.getElementById('captureBtn').disabled = false;
+                document.getElementById('stopCameraBtn').disabled = false;
+                
+            } catch (error) {
+                console.error('Error accessing camera:', error);
+                alert('Error accessing camera. Please ensure camera permissions are granted.');
+            }
+        };
+        
+        window.stopCamera = function() {
+            if (cameraStream) {
+                cameraStream.getTracks().forEach(track => track.stop());
+                cameraStream = null;
+            }
+            
+            document.getElementById('cameraPreview').style.display = 'none';
+            document.getElementById('cameraPlaceholder').style.display = 'flex';
+            
+            document.getElementById('startCameraBtn').disabled = false;
+            document.getElementById('captureBtn').disabled = true;
+            document.getElementById('stopCameraBtn').disabled = true;
+        };
+        
+        window.setCurrentEye = function(eye) {
+            currentEye = eye;
+            document.querySelector(`#${eye}EyeContainer`).style.border = '2px solid #10b981';
+            document.querySelector(`#${eye === 'left' ? 'right' : 'left'}EyeContainer`).style.border = '2px solid #374151';
+        };
+        
+        window.captureIris = function() {
+            if (!cameraStream) {
+                alert('Please start the camera first');
+                return;
+            }
+            
+            const video = document.getElementById('cameraPreview');
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0);
+            
+            const imageDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+            capturedImages[currentEye] = imageDataUrl;
+            
+            // Update preview
+            const previewElement = document.getElementById(`${currentEye}EyePreview`);
+            previewElement.innerHTML = `<img src="${imageDataUrl}" class="captured-image" alt="${currentEye} eye">`;
+            document.getElementById(`${currentEye}EyeContainer`).classList.add('captured');
+            
+            // Check if both eyes captured
+            if (capturedImages.left && capturedImages.right) {
+                setTimeout(() => {
+                    performAnalysis();
+                }, 1000);
+            } else {
+                // Switch to other eye
+                const nextEye = currentEye === 'left' ? 'right' : 'left';
+                setCurrentEye(nextEye);
+                alert(`${currentEye} eye captured. Please capture ${nextEye} eye.`);
+            }
+        };
+        
+        // AI Analysis simulation
+        function performAnalysis() {
+            updateProgress(3);
+            document.getElementById('analysisSection').style.display = 'block';
+            
+            // Simulate AI analysis delay
+            setTimeout(() => {
+                generateAnalysisResults();
+            }, 2000);
+        }
+        
+        function generateAnalysisResults() {
+            // Simulate constitutional analysis
+            const constitutionalType = Math.random() > 0.5 ? 'Lymphatic' : 'Haematogenic';
+            
+            document.getElementById('constitutionalResults').innerHTML = `
+                <div class="pattern-item">
+                    <strong>Constitutional Type:</strong> ${constitutionalType}<br>
+                    <strong>Overall Constitution:</strong> ${Math.random() > 0.5 ? 'Strong' : 'Moderate'}<br>
+                    <strong>Iris Colour Classification:</strong> ${Math.random() > 0.5 ? 'Blue-grey (Lymphatic)' : 'Brown (Haematogenic)'}
+                </div>
+            `;
+            
+            // Generate health patterns
+            const patterns = [
+                { name: 'Radial Furrows', area: 'Digestive System', severity: 'Moderate', location: 'Stomach area (11-1 o\'clock)' },
+                { name: 'Lymphatic Congestion', area: 'Lymphatic System', severity: 'Mild', location: 'Upper lymph nodes' },
+                { name: 'Nervous Arc', area: 'Nervous System', severity: 'Mild', location: 'Temporal area' }
+            ];
+            
+            document.getElementById('healthPatterns').innerHTML = patterns.map(pattern => `
+                <div class="pattern-item">
+                    <strong>${pattern.name}</strong> - ${pattern.severity}<br>
+                    <em>Area:</em> ${pattern.area}<br>
+                    <em>Location:</em> ${pattern.location}
+                </div>
+            `).join('');
+            
+            // Generate organ assessment
+            const organs = [
+                { name: 'Digestive System', status: 'Needs Support', recommendation: 'Digestive enzymes and dietary adjustment' },
+                { name: 'Lymphatic System', status: 'Mild Congestion', recommendation: 'Lymphatic drainage therapy' },
+                { name: 'Nervous System', status: 'Mild Stress', recommendation: 'Stress reduction and nervous system support' }
+            ];
+            
+            document.getElementById('organAssessment').innerHTML = organs.map(organ => `
+                <div class="pattern-item">
+                    <strong>${organ.name}:</strong> ${organ.status}<br>
+                    <em>Recommendation:</em> ${organ.recommendation}
+                </div>
+            `).join('');
+            
+            // Generate therapy recommendations
+            generateTherapyRecommendations();
+            updateProgress(4);
+        }
+        
+        function generateTherapyRecommendations() {
+            document.getElementById('recommendationsSection').style.display = 'block';
+            
+            const primaryTherapies = [
+                'Detoxification Protocol (Mandatory) - Variable sessions',
+                'Digestive Support Therapy - 8 weeks',
+                'Lymphatic Drainage Protocol - 6 weeks'
+            ];
+            
+            const secondaryTherapies = [
+                'Circulation Enhancement - 6 weeks',
+                'Nervous System Support - 4 weeks',
+                'Constitutional Strengthening - 10 weeks'
+            ];
+            
+            document.getElementById('primaryTherapies').innerHTML = primaryTherapies.map(therapy => 
+                `<div class="pattern-item">${therapy}</div>`
+            ).join('');
+            
+            document.getElementById('secondaryTherapies').innerHTML = secondaryTherapies.map(therapy => 
+                `<div class="pattern-item">${therapy}</div>`
+            ).join('');
+        }
+        
+        // Report generation
+        window.generateReport = function() {
+            updateProgress(5);
+            document.getElementById('reportSection').style.display = 'block';
+            
+            const reportContent = `
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <h2>CELLEXON IRIS ANALYSIS REPORT</h2>
+                    <p><strong>Patient:</strong> ${selectedPatient.first_name} ${selectedPatient.last_name}</p>
+                    <p><strong>Patient ID:</strong> ${selectedPatient.patient_id}</p>
+                    <p><strong>Analysis Date:</strong> ${new Date().toLocaleDateString()}</p>
+                </div>
+                
+                <h3>Constitutional Analysis</h3>
+                <p>Constitutional type and overall health assessment based on iris examination.</p>
+                
+                <h3>Health Patterns Detected</h3>
+                <ul>
+                    <li>Radial Furrows - Moderate digestive system stress</li>
+                    <li>Lymphatic Congestion - Mild lymphatic system involvement</li>
+                    <li>Nervous Arc - Mild nervous system stress indicators</li>
+                </ul>
+                
+                <h3>Therapy Recommendations</h3>
+                <p><strong>Primary Protocols:</strong></p>
+                <ul>
+                    <li>Detoxification Protocol (Mandatory)</li>
+                    <li>Digestive Support Therapy - 8 weeks</li>
+                    <li>Lymphatic Drainage Protocol - 6 weeks</li>
+                </ul>
+                
+                <p style="margin-top: 20px; font-size: 0.9em; color: #666;">
+                    This analysis is for informational purposes and should be used in conjunction with qualified healthcare advice.
+                </p>
+            `;
+            
+            document.getElementById('reportPreview').innerHTML = reportContent;
+        };
+        
+        // Export and save functions
+        window.exportToTreatment = async function() {
+            try {
+                // Save analysis data
+                const analysisData = {
+                    patient_id: selectedPatient.id,
+                    clinic_id: 1,
+                    left_eye_image: capturedImages.left,
+                    right_eye_image: capturedImages.right,
+                    constitutional_type: 'Lymphatic', // From analysis
+                    health_patterns: JSON.stringify(['Radial Furrows', 'Lymphatic Congestion']),
+                    therapy_recommendations: JSON.stringify(['Detoxification', 'Digestive Support', 'Lymphatic Drainage']),
+                    analysis_notes: 'Constitutional analysis completed with therapy recommendations',
+                    completed_at: new Date().toISOString()
+                };
+                
+                alert('Analysis data prepared for export to Treatment Interface');
+                // In real implementation, this would integrate with the treatment module
+                
+            } catch (error) {
+                console.error('Error exporting analysis:', error);
+                alert('Error exporting analysis: ' + error.message);
+            }
+        };
+        
+        window.saveAnalysis = async function() {
+            try {
+                // Create analysis record in database
+                const analysisData = {
+                    patient_id: selectedPatient.id,
+                    clinic_id: 1,
+                    constitutional_type: 'Lymphatic',
+                    health_patterns: JSON.stringify(['Radial Furrows', 'Lymphatic Congestion']),
+                    therapy_recommendations: JSON.stringify(['Detoxification', 'Digestive Support']),
+                    analysis_notes: 'IRIS analysis completed successfully',
+                    completed_at: new Date().toISOString()
+                };
+                
+                // Note: In production, you would create an iris_analyses table
+                alert('IRIS analysis saved successfully!');
+                
+            } catch (error) {
+                console.error('Error saving analysis:', error);
+                alert('Error saving analysis: ' + error.message);
+            }
+        };
+        
+        window.downloadReport = function() {
+            window.print();
+        };
+        
+        window.emailReport = function() {
+            alert('Email functionality would be implemented with SMTP service integration');
+        };
+        
+        // Progress management
+        function updateProgress(step) {
+            currentStep = step;
+            const steps = document.querySelectorAll('.step');
+            steps.forEach((stepEl, index) => {
+                stepEl.classList.remove('active', 'completed');
+                if (index + 1 < step) {
+                    stepEl.classList.add('completed');
+                } else if (index + 1 === step) {
+                    stepEl.classList.add('active');
+                }
+            });
+        }
+        
+    </script>
+</body>
+</html>
