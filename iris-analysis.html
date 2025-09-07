@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IRIS Analysis - Cellexon</title>
+    <title>IRIS Analysis - Celloxen</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', sans-serif; background: #0f172a; color: white; }
@@ -30,29 +30,32 @@
         .step.active { background: rgba(16, 185, 129, 0.3); border: 1px solid #10b981; }
         .step.completed { background: rgba(16, 185, 129, 0.2); color: #10b981; }
         .alert { padding: 10px; border-radius: 4px; margin: 10px 0; }
-        .alert-success { background: #d1fae5; color: #065f46; border: 1px solid #10b981; }
-        .alert-error { background: #fee2e2; color: #991b1b; border: 1px solid #ef4444; }
+        .alert-success { background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981; }
+        .alert-error { background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #ef4444; }
         .report-preview { background: white; color: black; border-radius: 8px; padding: 20px; margin: 15px 0; max-height: 300px; overflow-y: auto; }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
     <div class="header">
         <div class="container">
-            <h1>Cellexon IRIS Analysis System</h1>
+            <h1>Celloxen IRIS Analysis System</h1>
             <p>AI-Powered Constitutional Assessment and Therapy Recommendations</p>
             <button class="btn btn-secondary" onclick="window.location.href='index.html'">Back to Dashboard</button>
         </div>
     </div>
     
     <div class="container">
+        <div id="alertContainer"></div>
+        
         <!-- Patient Selection -->
-        <div class="card">
-            <h2>Patient Selection & Session Setup</h2>
+        <div class="card" id="patientSelection">
+            <h2>Select Patient for IRIS Analysis</h2>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                 <div>
                     <label>Select Patient:</label>
                     <select id="patientSelect" style="width: 100%; padding: 10px; border: 1px solid #374151; border-radius: 6px; background: #1f2937; color: white;">
-                        <option value="">Select patient...</option>
+                        <option value="">Select a patient...</option>
                     </select>
                     <div id="patientInfo" style="margin-top: 15px; padding: 10px; background: rgba(16, 185, 129, 0.1); border-radius: 6px; display: none;"></div>
                 </div>
@@ -178,15 +181,15 @@
 
         <!-- Report Preview -->
         <div class="card" id="reportSection" style="display: none;">
-            <h2>Analysis Report</h2>
+            <h2>IRIS Analysis Report</h2>
             <div class="report-preview" id="reportPreview">
                 <!-- Report content will be generated here -->
             </div>
             
             <div style="text-align: center; margin: 20px 0;">
-                <button class="btn btn-primary" onclick="downloadReport()">Download PDF</button>
+                <button class="btn btn-primary" onclick="saveAnalysisReport()">Save Report</button>
+                <button class="btn btn-secondary" onclick="downloadReport()">Download PDF</button>
                 <button class="btn btn-secondary" onclick="emailReport()">Email Report</button>
-                <button class="btn btn-secondary" onclick="saveAnalysis()">Save Analysis</button>
             </div>
         </div>
     </div>
@@ -200,6 +203,7 @@
         let analysisResults = {};
         let cameraStream = null;
         let currentStep = 1;
+        let finalRecommendations = [];
         
         // IRIS Analysis patterns and health correlations
         const irisPatterns = {
@@ -232,18 +236,30 @@
             loadPatients();
         });
         
+        // Show alert messages
+        function showAlert(message, type = 'success') {
+            const alertContainer = document.getElementById('alertContainer');
+            alertContainer.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+            setTimeout(() => {
+                alertContainer.innerHTML = '';
+            }, 5000);
+        }
+        
         // Load patients
         async function loadPatients() {
             try {
                 const { data, error } = await supabase
                     .from('patients')
-                    .select('*')
+                    .select(`
+                        *,
+                        clinics (clinic_name, clinic_code)
+                    `)
                     .order('created_at', { ascending: false });
                     
                 if (error) throw error;
                 
                 const patientSelect = document.getElementById('patientSelect');
-                patientSelect.innerHTML = '<option value="">Select patient...</option>';
+                patientSelect.innerHTML = '<option value="">Select a patient...</option>';
                 
                 if (data && data.length > 0) {
                     data.forEach(patient => {
@@ -252,6 +268,7 @@
                 }
             } catch (error) {
                 console.error('Error loading patients:', error);
+                showAlert('Error loading patients: ' + error.message, 'error');
             }
         }
         
@@ -259,7 +276,7 @@
         window.startAnalysis = function() {
             const patientId = document.getElementById('patientSelect').value;
             if (!patientId) {
-                alert('Please select a patient first');
+                showAlert('Please select a patient first', 'error');
                 return;
             }
             
@@ -301,7 +318,7 @@
                 
             } catch (error) {
                 console.error('Error accessing camera:', error);
-                alert('Error accessing camera. Please ensure camera permissions are granted.');
+                showAlert('Error accessing camera. Please ensure camera permissions are granted.', 'error');
             }
         };
         
@@ -327,7 +344,7 @@
         
         window.captureIris = function() {
             if (!cameraStream) {
-                alert('Please start the camera first');
+                showAlert('Please start the camera first', 'error');
                 return;
             }
             
@@ -356,7 +373,7 @@
                 // Switch to other eye
                 const nextEye = currentEye === 'left' ? 'right' : 'left';
                 setCurrentEye(nextEye);
-                alert(`${currentEye} eye captured. Please capture ${nextEye} eye.`);
+                showAlert(`${currentEye} eye captured. Please capture ${nextEye} eye.`, 'success');
             }
         };
         
@@ -373,24 +390,37 @@
         
         function generateAnalysisResults() {
             // Simulate constitutional analysis
-            const constitutionalType = Math.random() > 0.5 ? 'Lymphatic' : 'Haematogenic';
+            const constitutionalTypes = ['Lymphatic', 'Haematogenic', 'Biliary'];
+            const constitutionalType = constitutionalTypes[Math.floor(Math.random() * constitutionalTypes.length)];
+            const constitution = Math.random() > 0.5 ? 'Strong' : 'Moderate';
+            const irisColor = Math.random() > 0.5 ? 'Blue-grey (Lymphatic)' : 'Brown (Haematogenic)';
+            
+            analysisResults = {
+                constitutional_type: constitutionalType,
+                constitution: constitution,
+                iris_color: irisColor,
+                patterns: [
+                    { name: 'Radial Furrows', area: 'Digestive System', severity: 'Moderate', location: 'Stomach area (11-1 o\'clock)' },
+                    { name: 'Lymphatic Congestion', area: 'Lymphatic System', severity: 'Mild', location: 'Upper lymph nodes' },
+                    { name: 'Nervous Arc', area: 'Nervous System', severity: 'Mild', location: 'Temporal area' }
+                ],
+                organs: [
+                    { name: 'Digestive System', status: 'Needs Support', recommendation: 'Digestive enzymes and dietary adjustment' },
+                    { name: 'Lymphatic System', status: 'Mild Congestion', recommendation: 'Lymphatic drainage therapy' },
+                    { name: 'Nervous System', status: 'Mild Stress', recommendation: 'Stress reduction and nervous system support' }
+                ]
+            };
             
             document.getElementById('constitutionalResults').innerHTML = `
                 <div class="pattern-item">
                     <strong>Constitutional Type:</strong> ${constitutionalType}<br>
-                    <strong>Overall Constitution:</strong> ${Math.random() > 0.5 ? 'Strong' : 'Moderate'}<br>
-                    <strong>Iris Colour Classification:</strong> ${Math.random() > 0.5 ? 'Blue-grey (Lymphatic)' : 'Brown (Haematogenic)'}
+                    <strong>Overall Constitution:</strong> ${constitution}<br>
+                    <strong>Iris Colour Classification:</strong> ${irisColor}
                 </div>
             `;
             
             // Generate health patterns
-            const patterns = [
-                { name: 'Radial Furrows', area: 'Digestive System', severity: 'Moderate', location: 'Stomach area (11-1 o\'clock)' },
-                { name: 'Lymphatic Congestion', area: 'Lymphatic System', severity: 'Mild', location: 'Upper lymph nodes' },
-                { name: 'Nervous Arc', area: 'Nervous System', severity: 'Mild', location: 'Temporal area' }
-            ];
-            
-            document.getElementById('healthPatterns').innerHTML = patterns.map(pattern => `
+            document.getElementById('healthPatterns').innerHTML = analysisResults.patterns.map(pattern => `
                 <div class="pattern-item">
                     <strong>${pattern.name}</strong> - ${pattern.severity}<br>
                     <em>Area:</em> ${pattern.area}<br>
@@ -399,13 +429,7 @@
             `).join('');
             
             // Generate organ assessment
-            const organs = [
-                { name: 'Digestive System', status: 'Needs Support', recommendation: 'Digestive enzymes and dietary adjustment' },
-                { name: 'Lymphatic System', status: 'Mild Congestion', recommendation: 'Lymphatic drainage therapy' },
-                { name: 'Nervous System', status: 'Mild Stress', recommendation: 'Stress reduction and nervous system support' }
-            ];
-            
-            document.getElementById('organAssessment').innerHTML = organs.map(organ => `
+            document.getElementById('organAssessment').innerHTML = analysisResults.organs.map(organ => `
                 <div class="pattern-item">
                     <strong>${organ.name}:</strong> ${organ.status}<br>
                     <em>Recommendation:</em> ${organ.recommendation}
@@ -432,6 +456,8 @@
                 'Constitutional Strengthening - 10 weeks'
             ];
             
+            finalRecommendations = [...primaryTherapies, ...secondaryTherapies];
+            
             document.getElementById('primaryTherapies').innerHTML = primaryTherapies.map(therapy => 
                 `<div class="pattern-item">${therapy}</div>`
             ).join('');
@@ -447,84 +473,134 @@
             document.getElementById('reportSection').style.display = 'block';
             
             const reportContent = `
-                <div style="text-align: center; margin-bottom: 20px;">
-                    <h2>CELLEXON IRIS ANALYSIS REPORT</h2>
-                    <p><strong>Patient:</strong> ${selectedPatient.first_name} ${selectedPatient.last_name}</p>
-                    <p><strong>Patient ID:</strong> ${selectedPatient.patient_id}</p>
-                    <p><strong>Analysis Date:</strong> ${new Date().toLocaleDateString()}</p>
+                <div style="text-align: center; margin-bottom: 20px; border-bottom: 2px solid #10b981; padding-bottom: 15px;">
+                    <h2 style="color: #10b981;">CELLOXEN IRIS ANALYSIS REPORT</h2>
+                    <h3 style="color: #374151;">Constitutional Assessment & Therapy Recommendations</h3>
                 </div>
                 
-                <h3>Constitutional Analysis</h3>
-                <p>Constitutional type and overall health assessment based on iris examination.</p>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                    <div>
+                        <h4 style="color: #10b981;">Patient Information</h4>
+                        <p><strong>Name:</strong> ${selectedPatient.first_name} ${selectedPatient.last_name}</p>
+                        <p><strong>Patient ID:</strong> ${selectedPatient.patient_id}</p>
+                        <p><strong>Date of Birth:</strong> ${selectedPatient.date_of_birth || 'Not provided'}</p>
+                        <p><strong>Gender:</strong> ${selectedPatient.gender || 'Not specified'}</p>
+                    </div>
+                    <div>
+                        <h4 style="color: #10b981;">Clinic Information</h4>
+                        <p><strong>Clinic:</strong> ${selectedPatient.clinics?.clinic_name || 'Unknown'}</p>
+                        <p><strong>Analysis Date:</strong> ${new Date().toLocaleDateString()}</p>
+                        <p><strong>Analysis Type:</strong> ${document.getElementById('analysisType').value}</p>
+                    </div>
+                </div>
                 
-                <h3>Health Patterns Detected</h3>
+                <h4 style="color: #10b981;">Constitutional Analysis</h4>
+                <p><strong>Type:</strong> ${analysisResults.constitutional_type}</p>
+                <p><strong>Constitution:</strong> ${analysisResults.constitution}</p>
+                <p><strong>Iris Classification:</strong> ${analysisResults.iris_color}</p>
+                
+                <h4 style="color: #10b981; margin-top: 20px;">Health Patterns Detected</h4>
                 <ul>
-                    <li>Radial Furrows - Moderate digestive system stress</li>
-                    <li>Lymphatic Congestion - Mild lymphatic system involvement</li>
-                    <li>Nervous Arc - Mild nervous system stress indicators</li>
+                    ${analysisResults.patterns.map(pattern => 
+                        `<li>${pattern.name} - ${pattern.severity} (${pattern.area})</li>`
+                    ).join('')}
                 </ul>
                 
-                <h3>Therapy Recommendations</h3>
-                <p><strong>Primary Protocols:</strong></p>
-                <ul>
-                    <li>Detoxification Protocol (Mandatory)</li>
-                    <li>Digestive Support Therapy - 8 weeks</li>
-                    <li>Lymphatic Drainage Protocol - 6 weeks</li>
-                </ul>
+                <h4 style="color: #10b981; margin-top: 20px;">Therapy Recommendations</h4>
+                <div style="background: #f0fdf4; padding: 15px; border-radius: 6px; border-left: 4px solid #10b981;">
+                    <p><strong>Primary Protocols:</strong></p>
+                    <ul>
+                        <li>Detoxification Protocol (Mandatory)</li>
+                        <li>Digestive Support Therapy - 8 weeks</li>
+                        <li>Lymphatic Drainage Protocol - 6 weeks</li>
+                    </ul>
+                    
+                    <p style="margin-top: 15px;"><strong>Secondary Support:</strong></p>
+                    <ul>
+                        <li>Circulation Enhancement - 6 weeks</li>
+                        <li>Nervous System Support - 4 weeks</li>
+                        <li>Constitutional Strengthening - 10 weeks</li>
+                    </ul>
+                </div>
                 
-                <p style="margin-top: 20px; font-size: 0.9em; color: #666;">
+                <p style="margin-top: 20px; font-size: 0.9rem; color: #666; border-top: 1px solid #ddd; padding-top: 10px;">
                     This analysis is for informational purposes and should be used in conjunction with qualified healthcare advice.
+                    Generated by Celloxen IRIS Analysis System.
                 </p>
             `;
             
             document.getElementById('reportPreview').innerHTML = reportContent;
         };
         
-        // Export and save functions
-        window.exportToTreatment = async function() {
+        // Save analysis report
+        window.saveAnalysisReport = async function() {
+            if (!selectedPatient) {
+                showAlert('No patient selected for analysis', 'error');
+                return;
+            }
+            
             try {
-                // Save analysis data
-                const analysisData = {
+                const reportData = {
+                    patient_info: {
+                        name: `${selectedPatient.first_name} ${selectedPatient.last_name}`,
+                        patient_id: selectedPatient.patient_id,
+                        date_of_birth: selectedPatient.date_of_birth,
+                        gender: selectedPatient.gender,
+                        clinic: selectedPatient.clinics
+                    },
+                    constitutional_analysis: analysisResults,
+                    captured_images: capturedImages,
+                    therapy_recommendations: finalRecommendations,
+                    analysis_date: new Date().toISOString(),
+                    analysis_type: document.getElementById('analysisType').value
+                };
+                
+                const { data, error } = await supabase
+                    .from('medical_reports')
+                    .insert([{
+                        patient_id: selectedPatient.id,
+                        clinic_id: selectedPatient.clinic_id,
+                        report_type: 'iris_analysis',
+                        report_title: 'IRIS Analysis Report',
+                        report_data: reportData,
+                        recommendations: finalRecommendations,
+                        therapies_recommended: finalRecommendations
+                    }])
+                    .select();
+                    
+                if (error) throw error;
+                
+                showAlert('IRIS analysis report saved successfully!', 'success');
+                
+                // Also save to iris_analyses table for backward compatibility
+                const irisData = {
                     patient_id: selectedPatient.id,
-                    clinic_id: 1,
+                    clinic_id: selectedPatient.clinic_id,
                     left_eye_image: capturedImages.left,
                     right_eye_image: capturedImages.right,
-                    constitutional_type: 'Lymphatic', // From analysis
-                    health_patterns: JSON.stringify(['Radial Furrows', 'Lymphatic Congestion']),
-                    therapy_recommendations: JSON.stringify(['Detoxification', 'Digestive Support', 'Lymphatic Drainage']),
-                    analysis_notes: 'Constitutional analysis completed with therapy recommendations',
+                    constitutional_type: analysisResults.constitutional_type,
+                    health_patterns: JSON.stringify(analysisResults.patterns),
+                    therapy_recommendations: JSON.stringify(finalRecommendations),
+                    analysis_notes: 'IRIS analysis completed with constitutional assessment',
                     completed_at: new Date().toISOString()
                 };
                 
-                alert('Analysis data prepared for export to Treatment Interface');
-                // In real implementation, this would integrate with the treatment module
-                
-            } catch (error) {
-                console.error('Error exporting analysis:', error);
-                alert('Error exporting analysis: ' + error.message);
-            }
-        };
-        
-        window.saveAnalysis = async function() {
-            try {
-                // Create analysis record in database
-                const analysisData = {
-                    patient_id: selectedPatient.id,
-                    clinic_id: 1,
-                    constitutional_type: 'Lymphatic',
-                    health_patterns: JSON.stringify(['Radial Furrows', 'Lymphatic Congestion']),
-                    therapy_recommendations: JSON.stringify(['Detoxification', 'Digestive Support']),
-                    analysis_notes: 'IRIS analysis completed successfully',
-                    completed_at: new Date().toISOString()
-                };
-                
-                // Note: In production, you would create an iris_analyses table
-                alert('IRIS analysis saved successfully!');
+                const { error: irisError } = await supabase
+                    .from('iris_analyses')
+                    .insert([irisData]);
+                    
+                if (irisError) console.warn('Warning: Could not save to iris_analyses table:', irisError);
                 
             } catch (error) {
                 console.error('Error saving analysis:', error);
-                alert('Error saving analysis: ' + error.message);
+                showAlert('Error saving analysis: ' + error.message, 'error');
             }
+        };
+        
+        // Export and utility functions
+        window.exportToTreatment = function() {
+            showAlert('Analysis data prepared for export to Treatment Interface', 'success');
+            // In real implementation, this would integrate with the treatment module
         };
         
         window.downloadReport = function() {
@@ -532,7 +608,7 @@
         };
         
         window.emailReport = function() {
-            alert('Email functionality would be implemented with SMTP service integration');
+            showAlert('Email functionality would be implemented with SMTP service integration', 'success');
         };
         
         // Progress management
