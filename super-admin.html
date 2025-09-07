@@ -30,7 +30,9 @@
         .form-group { margin: 15px 0; }
         .form-group label { display: block; margin-bottom: 5px; font-weight: 500; color: #cbd5e1; }
         .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #374151; border-radius: 6px; background: #374151; color: white; }
+        .form-group input:read-only { background: #2d3748; color: #a0aec0; }
         .form-group textarea { resize: vertical; min-height: 80px; }
+        .form-help { font-size: 0.8rem; color: #a0aec0; margin-top: 5px; }
         .alert { padding: 10px; border-radius: 4px; margin: 10px 0; }
         .alert-success { background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981; }
         .alert-error { background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #ef4444; }
@@ -290,32 +292,33 @@
                         
                         <div class="form-group">
                             <label>Clinic Name</label>
-                            <input type="text" id="clinicName" value="${clinic?.clinic_name || ''}" required>
+                            <input type="text" id="clinicName" value="${clinic?.clinic_name || ''}" required placeholder="Enter clinic name">
                         </div>
                         
                         <div class="form-group">
                             <label>Clinic Code</label>
-                            <input type="text" id="clinicCode" value="${clinic?.clinic_code || ''}" required maxlength="10" style="text-transform: uppercase;">
+                            <input type="text" id="clinicCode" value="${clinic?.clinic_code || 'Auto-generated'}" readonly>
+                            <div class="form-help">${isEdit ? 'Clinic code cannot be changed after creation' : 'Code will be automatically generated (e.g., CLN001, CLN002)'}</div>
                         </div>
                         
                         <div class="form-group">
                             <label>Owner Name</label>
-                            <input type="text" id="ownerName" value="${clinic?.owner_name || ''}" required>
+                            <input type="text" id="ownerName" value="${clinic?.owner_name || ''}" required placeholder="Enter owner/manager name">
                         </div>
                         
                         <div class="form-group">
                             <label>Email</label>
-                            <input type="email" id="clinicEmail" value="${clinic?.email || ''}" required>
+                            <input type="email" id="clinicEmail" value="${clinic?.email || ''}" required placeholder="Enter clinic email address">
                         </div>
                         
                         <div class="form-group">
                             <label>Phone</label>
-                            <input type="tel" id="clinicPhone" value="${clinic?.phone || ''}" placeholder="Optional">
+                            <input type="tel" id="clinicPhone" value="${clinic?.phone || ''}" placeholder="Enter phone number (optional)">
                         </div>
                         
                         <div class="form-group">
                             <label>Address</label>
-                            <textarea id="clinicAddress" placeholder="Optional">${clinic?.address || ''}</textarea>
+                            <textarea id="clinicAddress" placeholder="Enter clinic address (optional)">${clinic?.address || ''}</textarea>
                         </div>
                         
                         ${isEdit ? `
@@ -341,11 +344,70 @@
             
             // Setup form handler
             document.getElementById('clinicForm').addEventListener('submit', handleClinicSubmit);
-            
-            // Auto-uppercase clinic code
-            document.getElementById('clinicCode').addEventListener('input', function() {
-                this.value = this.value.toUpperCase();
-            });
+        }
+        
+        // Generate unique clinic code
+        async function generateClinicCode() {
+            try {
+                // Get the count of existing clinics to generate next code
+                const { count, error } = await supabase
+                    .from('clinics')
+                    .select('*', { count: 'exact', head: true });
+                    
+                if (error) throw error;
+                
+                // Generate code like CLN001, CLN002, etc.
+                const nextNumber = (count || 0) + 1;
+                const clinicCode = 'CLN' + nextNumber.toString().padStart(3, '0');
+                
+                // Check if code already exists (in case of deletions)
+                const { data: existingClinic } = await supabase
+                    .from('clinics')
+                    .select('clinic_code')
+                    .eq('clinic_code', clinicCode)
+                    .maybeSingle();
+                    
+                if (existingClinic) {
+                    // If code exists, find next available
+                    return await findNextAvailableCode();
+                }
+                
+                return clinicCode;
+                
+            } catch (error) {
+                console.error('Error generating clinic code:', error);
+                // Fallback to timestamp-based code
+                return 'CLN' + Date.now().toString().slice(-6);
+            }
+        }
+        
+        // Find next available clinic code
+        async function findNextAvailableCode() {
+            try {
+                const { data: allClinics, error } = await supabase
+                    .from('clinics')
+                    .select('clinic_code')
+                    .order('clinic_code');
+                    
+                if (error) throw error;
+                
+                const existingCodes = allClinics.map(c => c.clinic_code);
+                
+                // Find first available number
+                for (let i = 1; i <= 999; i++) {
+                    const testCode = 'CLN' + i.toString().padStart(3, '0');
+                    if (!existingCodes.includes(testCode)) {
+                        return testCode;
+                    }
+                }
+                
+                // Fallback if all codes 1-999 are used
+                return 'CLN' + Date.now().toString().slice(-6);
+                
+            } catch (error) {
+                console.error('Error finding available code:', error);
+                return 'CLN' + Date.now().toString().slice(-6);
+            }
         }
         
         // Handle clinic form submission
@@ -358,7 +420,6 @@
                 
                 const clinicData = {
                     clinic_name: document.getElementById('clinicName').value,
-                    clinic_code: document.getElementById('clinicCode').value,
                     owner_name: document.getElementById('ownerName').value,
                     email: document.getElementById('clinicEmail').value,
                     phone: document.getElementById('clinicPhone').value || null,
@@ -366,6 +427,7 @@
                 };
                 
                 if (isEdit) {
+                    // For editing, keep existing clinic code
                     clinicData.is_active = document.getElementById('clinicStatus').value === 'true';
                     
                     const { error } = await supabase
@@ -376,12 +438,16 @@
                     if (error) throw error;
                     showAlert('Clinic updated successfully!');
                 } else {
+                    // For new clinics, generate clinic code
+                    const clinicCode = await generateClinicCode();
+                    clinicData.clinic_code = clinicCode;
+                    
                     const { error } = await supabase
                         .from('clinics')
                         .insert([clinicData]);
                         
                     if (error) throw error;
-                    showAlert('Clinic added successfully!');
+                    showAlert(`Clinic added successfully! Clinic Code: ${clinicCode}`);
                 }
                 
                 closeClinicModal();
