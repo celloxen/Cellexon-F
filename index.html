@@ -30,7 +30,7 @@
             <div class="system-title">CELLEXON</div>
             <div class="system-subtitle">Medical Device Platform</div>
             <div class="system-info">
-                <p><strong>System Status:</strong> All Modules Operational</p>
+                <p><strong>System Status:</strong> 5 Modules Operational</p>
                 <p><strong>Version:</strong> 1.0.0 | <strong>Build:</strong> Production</p>
                 <p><strong>Database:</strong> Connected | <strong>Hosting:</strong> Vercel</p>
             </div>
@@ -38,8 +38,8 @@
         
         <div class="status">
             <h2>Platform Successfully Deployed</h2>
-            <p>Cellexon medical platform is now live with 4 fully operational modules.</p>
-            <p>Database: Connected | Hosting: Vercel | Status: All Systems Go</p>
+            <p>Cellexon medical platform is now live with 5 fully operational modules providing complete patient care workflow.</p>
+            <p>Database: Connected | Hosting: Vercel | Status: All Systems Operational</p>
         </div>
         
         <div class="modules-grid">
@@ -67,10 +67,10 @@
                 <div class="module-status">✅ Active</div>
             </div>
             
-            <div class="module-card" onclick="alert('IRIS Analysis module coming soon - Will include iris image capture and AI analysis')">
+            <div class="module-card active" onclick="window.open('iris-analysis.html', '_blank')">
                 <div class="module-title">IRIS Analysis</div>
-                <div class="module-description">Iris image capture and AI-powered analysis. Constitutional assessment and treatment recommendations based on iris patterns and holistic health principles.</div>
-                <div class="module-status">🔄 Coming Soon</div>
+                <div class="module-description">Iris image capture and AI-powered constitutional analysis. Professional iris interpretation with health pattern detection and therapy recommendations.</div>
+                <div class="module-status">✅ Active</div>
             </div>
             
             <div class="module-card" onclick="alert('Vital Signs module coming soon - Will include real-time monitoring during treatments')">
@@ -83,15 +83,16 @@
         <div class="footer">
             <div class="footer-text">
                 <p>Cellexon Medical Platform - Electromagnetic Frequency Therapy System</p>
-                <p>4 Active Modules | Built with Vercel, Supabase, and Modern Web Technologies</p>
+                <p>5 Active Modules | Built with Vercel, Supabase, and Modern Web Technologies</p>
                 <p>Version 1.0.0 - Production Ready | Complete Patient Care Workflow</p>
+                <p>Registration → Assessment → IRIS Analysis → Treatment → Monitoring</p>
             </div>
         </div>
     </div>
 
     <script>
         console.log('Cellexon Medical Platform loaded successfully');
-        console.log('Active Modules: 4/6 (Patient Management, Super Admin, Health Assessment, Treatment Interface)');
+        console.log('Active Modules: 5/6 (Patient Management, Super Admin, Health Assessment, Treatment Interface, IRIS Analysis)');
         console.log('Platform: Production Ready');
         console.log('Database: Supabase Connected');
         console.log('Hosting: Vercel Deployed');
@@ -99,12 +100,11 @@
         document.addEventListener('DOMContentLoaded', function() {
             console.log('All active modules loaded and ready');
             
-            // Module status check
             const activeModules = document.querySelectorAll('.module-card.active').length;
             console.log(`System health check: ${activeModules} modules operational`);
             
             setTimeout(() => {
-                console.log('Complete patient workflow available: Registration → Assessment → Treatment');
+                console.log('Complete patient workflow: Registration → Assessment → IRIS Analysis → Treatment');
             }, 1000);
         });
     </script>
