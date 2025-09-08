@@ -4,9 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Super Admin - Celloxen</title>
+    
+    <!-- Authentication Guard -->
+    <script src="auth-guard.js"></script>
+    
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', sans-serif; background: #0f172a; color: white; }
+        body { 
+            visibility: hidden; /* Hide until authenticated */
+            font-family: 'Segoe UI', sans-serif; 
+            background: #0f172a; 
+            color: white; 
+        }
+        
+        body.auth-verified {
+            visibility: visible;
+        }
+        
         .header { background: linear-gradient(135deg, #1e293b, #334155); padding: 20px; border-bottom: 2px solid #10b981; }
         .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
         .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin: 20px 0; }
@@ -36,14 +50,24 @@
         .alert { padding: 10px; border-radius: 4px; margin: 10px 0; }
         .alert-success { background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981; }
         .alert-error { background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #ef4444; }
+        .user-info { display: flex; align-items: center; gap: 20px; }
+        .admin-badge { background: #ef4444; padding: 6px 12px; border-radius: 6px; font-size: 14px; font-weight: 500; }
+        .logout-btn { background: #ef4444; color: white; border: none; padding: 10px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; }
+        .logout-btn:hover { background: #dc2626; }
     </style>
 </head>
 <body>
     <div class="header">
-        <div class="container">
-            <h1>Celloxen Super Admin Dashboard</h1>
-            <p>Global platform management and oversight</p>
-            <button class="btn btn-secondary" onclick="window.location.href='index.html'">Back to Main</button>
+        <div class="container" style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h1>Celloxen Super Admin Dashboard</h1>
+                <p>Global platform management and oversight</p>
+            </div>
+            <div class="user-info">
+                <span id="welcomeText">Welcome, Super Admin</span>
+                <span class="admin-badge">SUPER ADMIN</span>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
         </div>
     </div>
     
@@ -115,17 +139,77 @@
         </div>
     </div>
 
-    <script type="module">
-        import { supabase } from './supabase-config.js';
+    <!-- Direct Supabase Integration -->
+    <script src="https://unpkg.com/@supabase/supabase-js@1.35.7/dist/umd/supabase.js"></script>
+    
+    <script>
+        // Initialize Supabase directly
+        const supabaseUrl = 'https://defifwzgazqlrigwumqn.supabase.co';
+        const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlZmlmd3pnYXpxbHJpZ3d1bXFuIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NzI1MzQyNiwiZXhwIjoyMDcyODI5NDI2fQ.Z2rYuNduatwFsIfiA4aO-g__GNtQKAXBEyHBLG4r5W8';
+        
+        let supabase;
+        
+        try {
+            supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
+            console.log('Super Admin Supabase client initialized successfully');
+        } catch (error) {
+            console.error('Failed to initialize Supabase:', error);
+        }
         
         let currentClinics = [];
         
-        // Load dashboard data
+        // Authentication check for super admin dashboard
         document.addEventListener('DOMContentLoaded', function() {
+            const allowedUserTypes = ['super_admin']; // Only super admin can access this dashboard
+            
+            const authData = CelloxenAuthGuard.getCurrentUser();
+            
+            if (!authData) {
+                window.location.href = 'unified-login.html';
+                return;
+            }
+            
+            if (!allowedUserTypes.includes(authData.userType)) {
+                document.body.innerHTML = `
+                    <div style="text-align: center; padding: 50px; font-family: 'Segoe UI', sans-serif; background: #0f172a; color: white; min-height: 100vh; display: flex; align-items: center; justify-content: center;">
+                        <div>
+                            <h2 style="color: #ef4444;">Access Denied</h2>
+                            <p style="color: #6b7280; margin: 20px 0;">Only super administrators can access this dashboard.</p>
+                            <button onclick="window.location.href='unified-login.html'" 
+                                    style="background: #10b981; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer;">
+                                Return to Login
+                            </button>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Authentication successful - show page and update user info
+            document.body.classList.add('auth-verified');
+            
+            // Update header with user information
+            const welcomeElement = document.getElementById('welcomeText');
+            if (welcomeElement) {
+                welcomeElement.textContent = `Welcome, ${authData.username}`;
+            }
+            
+            console.log('Super Admin Dashboard accessed by:', authData.username);
+            
+            // Load dashboard data
             loadDashboardData();
             loadClinics();
             loadAllPatients();
         });
+        
+        // Logout function
+        function logout() {
+            if (confirm('Are you sure you want to logout from Super Admin dashboard?')) {
+                localStorage.removeItem('celloxen_auth');
+                localStorage.removeItem('celloxen_session');
+                window.location.href = 'unified-login.html';
+            }
+        }
         
         // Show alert messages
         function showAlert(message, type = 'success') {
@@ -139,6 +223,11 @@
         // Load dashboard statistics
         async function loadDashboardData() {
             try {
+                if (!supabase) {
+                    console.error('Supabase client not initialized');
+                    return;
+                }
+                
                 // Get clinic count
                 const { count: clinicCount } = await supabase
                     .from('clinics')
@@ -149,10 +238,16 @@
                     .from('patients')
                     .select('*', { count: 'exact', head: true });
                     
-                // Get user count
-                const { count: userCount } = await supabase
-                    .from('users')
-                    .select('*', { count: 'exact', head: true });
+                // Get user count (if users table exists)
+                let userCount = 0;
+                try {
+                    const { count } = await supabase
+                        .from('users')
+                        .select('*', { count: 'exact', head: true });
+                    userCount = count || 0;
+                } catch (e) {
+                    console.log('Users table not found or empty');
+                }
                     
                 // Get active clinic count
                 const { count: activeClinicCount } = await supabase
@@ -162,17 +257,23 @@
                 
                 document.getElementById('totalClinics').textContent = clinicCount || 0;
                 document.getElementById('totalPatients').textContent = patientCount || 0;
-                document.getElementById('totalUsers').textContent = userCount || 0;
+                document.getElementById('totalUsers').textContent = userCount;
                 document.getElementById('activeClinics').textContent = activeClinicCount || 0;
                 
             } catch (error) {
                 console.error('Error loading dashboard data:', error);
+                showAlert('Error loading dashboard data: ' + error.message, 'error');
             }
         }
         
         // Load clinics
         async function loadClinics() {
             try {
+                if (!supabase) {
+                    console.error('Supabase client not initialized');
+                    return;
+                }
+                
                 const { data, error } = await supabase
                     .from('clinics')
                     .select('*')
@@ -185,7 +286,7 @@
                 
             } catch (error) {
                 console.error('Error loading clinics:', error);
-                document.getElementById('clinicList').innerHTML = '<p>Error loading clinics.</p>';
+                document.getElementById('clinicList').innerHTML = '<p>Error loading clinics: ' + error.message + '</p>';
             }
         }
         
@@ -198,16 +299,16 @@
                     <div class="clinic-item">
                         <div style="display: flex; justify-content: space-between; align-items: start;">
                             <div>
-                                <h3>${clinic.clinic_name}</h3>
-                                <p>Code: ${clinic.clinic_code}</p>
-                                <p>Owner: ${clinic.owner_name}</p>
-                                <p>Email: ${clinic.email}</p>
+                                <h3>${clinic.clinic_name || 'Unnamed Clinic'}</h3>
+                                <p>Code: ${clinic.clinic_code || 'No code'}</p>
+                                <p>Owner: ${clinic.owner_name || 'Not specified'}</p>
+                                <p>Email: ${clinic.email || 'Not specified'}</p>
                                 <p>Phone: ${clinic.phone || 'Not provided'}</p>
                                 <p>Address: ${clinic.address || 'Not provided'}</p>
                                 <p class="${clinic.is_active ? 'status-active' : 'status-inactive'}">
                                     Status: ${clinic.is_active ? 'Active' : 'Inactive'}
                                 </p>
-                                <small>Created: ${new Date(clinic.created_at).toLocaleDateString()}</small>
+                                <small>Created: ${clinic.created_at ? new Date(clinic.created_at).toLocaleDateString() : 'Unknown'}</small>
                             </div>
                             <div>
                                 <button class="btn btn-primary" onclick="editClinic(${clinic.id})">Edit</button>
@@ -227,6 +328,11 @@
         // Load all patients
         async function loadAllPatients() {
             try {
+                if (!supabase) {
+                    console.error('Supabase client not initialized');
+                    return;
+                }
+                
                 const { data, error } = await supabase
                     .from('patients')
                     .select(`
@@ -243,11 +349,11 @@
                 if (data && data.length > 0) {
                     patientsList.innerHTML = data.map(patient => `
                         <tr>
-                            <td>${patient.patient_id}</td>
-                            <td>${patient.first_name} ${patient.last_name}</td>
+                            <td>${patient.patient_id || 'No ID'}</td>
+                            <td>${patient.first_name || ''} ${patient.last_name || ''}</td>
                             <td>${patient.email || 'Not provided'}</td>
                             <td>${patient.clinics?.clinic_name || 'Unknown'}</td>
-                            <td>${new Date(patient.created_at).toLocaleDateString()}</td>
+                            <td>${patient.created_at ? new Date(patient.created_at).toLocaleDateString() : 'Unknown'}</td>
                         </tr>
                     `).join('');
                 } else {
@@ -256,7 +362,7 @@
                 
             } catch (error) {
                 console.error('Error loading patients:', error);
-                document.getElementById('allPatientsList').innerHTML = '<tr><td colspan="5">Error loading patients.</td></tr>';
+                document.getElementById('allPatientsList').innerHTML = '<tr><td colspan="5">Error loading patients: ' + error.message + '</td></tr>';
             }
         }
         
@@ -349,6 +455,10 @@
         // Generate unique clinic code
         async function generateClinicCode() {
             try {
+                if (!supabase) {
+                    throw new Error('Supabase client not initialized');
+                }
+                
                 // Get the count of existing clinics to generate next code
                 const { count, error } = await supabase
                     .from('clinics')
@@ -415,6 +525,10 @@
             e.preventDefault();
             
             try {
+                if (!supabase) {
+                    throw new Error('Supabase client not initialized');
+                }
+                
                 const clinicId = document.getElementById('clinicId').value;
                 const isEdit = !!clinicId;
                 
@@ -467,6 +581,10 @@
             }
             
             try {
+                if (!supabase) {
+                    throw new Error('Supabase client not initialized');
+                }
+                
                 const { error } = await supabase
                     .from('clinics')
                     .delete()
@@ -496,6 +614,10 @@
         // Toggle clinic status
         window.toggleClinicStatus = async function(clinicId, currentStatus) {
             try {
+                if (!supabase) {
+                    throw new Error('Supabase client not initialized');
+                }
+                
                 const { error } = await supabase
                     .from('clinics')
                     .update({ is_active: !currentStatus })
