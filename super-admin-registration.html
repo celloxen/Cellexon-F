@@ -618,18 +618,21 @@
                     clinicsList.innerHTML = data.map(clinic => `
                         <div class="clinic-card">
                             <div class="clinic-header">
-                                <div class="clinic-name">${clinic.clinic_name}</div>
+                                <div class="clinic-name">${clinic.clinic_name || clinic.business_name}</div>
                                 <div class="clinic-code">${clinic.clinic_code}</div>
                             </div>
                             <div class="clinic-details">
-                                <div><strong>Trading Name:</strong> ${clinic.clinic_trading_name || 'N/A'}</div>
-                                <div><strong>Type:</strong> ${clinic.business_type}</div>
-                                <div><strong>Contact:</strong> ${clinic.owner_name}</div>
+                                <div><strong>Trading Name:</strong> ${clinic.clinic_trading_name || clinic.business_name || 'N/A'}</div>
+                                <div><strong>Type:</strong> ${clinic.business_type || 'Not specified'}</div>
+                                <div><strong>Contact:</strong> ${clinic.owner_name || clinic.authorised_person}</div>
                                 <div><strong>Email:</strong> ${clinic.email}</div>
-                                <div><strong>Device:</strong> ${clinic.device_serial_number}</div>
-                                <div><strong>Username:</strong> ${clinic.username}</div>
+                                <div><strong>Phone:</strong> ${clinic.phone || clinic.telephone || 'Not specified'}</div>
+                                <div><strong>Device:</strong> ${clinic.device_serial_number || 'Not assigned'}</div>
+                                <div><strong>Username:</strong> ${clinic.username || 'Not generated'}</div>
+                                <div><strong>Address:</strong> ${clinic.address || clinic.business_address || 'Not specified'}</div>
                                 <div><strong>Regulated:</strong> ${clinic.healthcare_regulation || 'Not specified'}</div>
                                 <div><strong>Insurance:</strong> ${clinic.professional_insurance || 'Not specified'}</div>
+                                <div><strong>Status:</strong> ${clinic.is_active ? 'Active' : 'Inactive'}</div>
                             </div>
                         </div>
                     `).join('');
