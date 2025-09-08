@@ -1,13 +1,37 @@
-// CELLOXEN AUTHENTICATION GUARD SYSTEM
-// File Path: auth-guard.js
-// Include this file in ALL protected pages
+// CELLOXEN AUTHENTICATION GUARD SYSTEM WITH ROLE-BASED ACCESS CONTROL
+// File: auth-guard.js
+// This file must be included in ALL protected pages
 
 class CelloxenAuthGuard {
     constructor() {
-        this.currentPath = window.location.pathname;
-        this.loginPage = '/unified-login.html';
+        this.currentPath = window.location.pathname.split('/').pop();
+        this.loginPage = 'unified-login.html';
         this.sessionTimeout = 2 * 60 * 60 * 1000; // 2 hours in milliseconds
         this.warningTime = 10 * 60 * 1000; // 10 minutes before logout warning
+        
+        // Define page access rules
+        this.pageAccessRules = {
+            // Super Admin Only Pages
+            'super-admin-dashboard.html': ['super_admin'],
+            'super-admin-registration.html': ['super_admin'],
+            
+            // Clinic Admin Pages (Super Admin also has access)
+            'clinic-dashboard.html': ['super_admin', 'clinic_admin'],
+            'patient-management.html': ['super_admin', 'clinic_admin'],
+            'health-assessment.html': ['super_admin', 'clinic_admin'],
+            'iris-analysis.html': ['super_admin', 'clinic_admin'],
+            'treatment-interface.html': ['super_admin', 'clinic_admin'],
+            'vital-signs.html': ['super_admin', 'clinic_admin'],
+            
+            // Public Pages (no authentication required)
+            'unified-login.html': ['public'],
+            'index.html': ['public']
+        };
+        
+        // Don't run auth guard on login page
+        if (this.currentPath === 'unified-login.html' || this.currentPath === '') {
+            return;
+        }
         
         // Hide page content immediately
         this.hidePageContent();
@@ -33,7 +57,7 @@ class CelloxenAuthGuard {
             left: 0;
             width: 100%;
             height: 100%;
-            background: #f8fafc;
+            background: white;
             z-index: 99999;
             display: flex;
             justify-content: center;
@@ -72,25 +96,24 @@ class CelloxenAuthGuard {
         }
     }
     
-    // Show 404 page with login link
-    show404Page() {
+    // Show access denied page
+    showAccessDenied() {
         const overlay = document.getElementById('celloxen-auth-overlay');
         if (overlay) {
             overlay.innerHTML = `
-                <div style="text-align: center; max-width: 500px; padding: 40px;">
-                    <div style="font-size: 72px; color: #ef4444; margin-bottom: 20px;">404</div>
+                <div style="text-align: center; max-width: 500px; padding: 40px; background: white; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.1);">
+                    <div style="font-size: 72px; color: #ef4444; margin-bottom: 20px;">⛔</div>
                     <h2 style="color: #1f2937; margin-bottom: 16px;">Access Denied</h2>
                     <p style="color: #6b7280; margin-bottom: 32px; line-height: 1.6;">
-                        You don't have permission to access this page or your session has expired.
-                        Please log in to continue using the Celloxen platform.
+                        You don't have permission to access this page. This area requires specific administrator privileges.
                     </p>
                     <button onclick="window.location.href='${this.loginPage}'" 
                             style="background: #10b981; color: white; border: none; padding: 12px 24px; border-radius: 6px; font-size: 16px; cursor: pointer; font-weight: 500; margin-right: 12px;">
                         Go to Login
                     </button>
-                    <button onclick="window.location.href='/'" 
+                    <button onclick="window.history.back()" 
                             style="background: #6b7280; color: white; border: none; padding: 12px 24px; border-radius: 6px; font-size: 16px; cursor: pointer; font-weight: 500;">
-                        Home
+                        Go Back
                     </button>
                 </div>
             `;
@@ -104,7 +127,7 @@ class CelloxenAuthGuard {
             
             if (!authData) {
                 console.log('Celloxen Auth: No authentication data found');
-                this.redirectToLogin();
+                this.redirectToLogin('Please login to access this page');
                 return false;
             }
             
@@ -112,19 +135,22 @@ class CelloxenAuthGuard {
             if (this.isSessionExpired(authData)) {
                 console.log('Celloxen Auth: Session expired');
                 this.clearAuthData();
-                this.redirectToLogin('Your session has expired. Please log in again.');
+                this.redirectToLogin('Your session has expired. Please login again.');
                 return false;
             }
             
             // Check user permissions for current page
             if (!this.hasPageAccess(authData)) {
                 console.log('Celloxen Auth: Insufficient permissions for this page');
-                this.show404Page();
+                this.showAccessDenied();
                 return false;
             }
             
             // Update last activity time
             this.updateLastActivity();
+            
+            // Set user context for the page
+            this.setUserContext(authData);
             
             // Authentication successful
             console.log('Celloxen Auth: Authentication verified for user:', authData.username, '(', authData.userType, ')');
@@ -134,7 +160,7 @@ class CelloxenAuthGuard {
             
         } catch (error) {
             console.error('Celloxen Auth: Authentication check failed:', error);
-            this.redirectToLogin('Authentication error. Please log in again.');
+            this.redirectToLogin('Authentication error. Please login again.');
             return false;
         }
     }
@@ -168,42 +194,43 @@ class CelloxenAuthGuard {
         const userType = authData.userType;
         const currentPage = this.currentPath.toLowerCase();
         
-        // Define page access rules for Celloxen platform
-        const accessRules = {
-            'super_admin': [
-                '/super-admin-registration.html',
-                '/admin-dashboard.html',
-                '/clinic-management.html',
-                '/system-settings.html',
-                '/global-analytics.html'
-            ],
-            'clinic': [
-                '/patient-management.html',
-                '/health-assessment.html',
-                '/treatment-interface.html',
-                '/iris-analysis.html',
-                '/vital-signs.html',
-                '/clinic-dashboard.html',
-                '/clinic-reports.html',
-                '/session-tracking.html'
-            ]
-        };
+        // Check if page is in access rules
+        const allowedRoles = this.pageAccessRules[currentPage];
         
-        // Super admin has access to everything
-        if (userType === 'super_admin') {
+        // If page not defined in rules, deny access (secure by default)
+        if (!allowedRoles) {
+            console.log('Page not defined in access rules:', currentPage);
+            return false;
+        }
+        
+        // Check if page is public
+        if (allowedRoles.includes('public')) {
             return true;
         }
         
-        // Check if clinic user has access to current page
-        if (userType === 'clinic') {
-            return accessRules.clinic.some(allowedPage => 
-                currentPage.includes(allowedPage.toLowerCase()) || 
-                currentPage.includes(allowedPage.replace('.html', '').toLowerCase()) ||
-                currentPage === '/' || currentPage === '/index.html'
-            );
-        }
+        // Check if user's role has access
+        return allowedRoles.includes(userType);
+    }
+    
+    // Set user context for the page
+    setUserContext(authData) {
+        // Make auth data available to the page
+        window.celloxenAuth = {
+            username: authData.username,
+            userType: authData.userType,
+            clinicId: authData.clinicId,
+            clinicCode: authData.clinicCode,
+            fullName: authData.fullName,
+            sessionId: authData.sessionId
+        };
         
-        return false;
+        // Store in session storage for page-to-page context
+        if (authData.userType === 'clinic_admin') {
+            sessionStorage.setItem('currentClinicId', authData.clinicId);
+            sessionStorage.setItem('viewMode', 'clinic_admin');
+        } else if (authData.userType === 'super_admin') {
+            sessionStorage.setItem('viewMode', 'super_admin');
+        }
     }
     
     // Update last activity timestamp
@@ -218,9 +245,8 @@ class CelloxenAuthGuard {
     // Clear authentication data
     clearAuthData() {
         localStorage.removeItem('celloxen_auth');
-        localStorage.removeItem('celloxen_session');
-        localStorage.removeItem('celloxen_clinic_data');
         sessionStorage.clear();
+        delete window.celloxenAuth;
     }
     
     // Redirect to login page
@@ -230,7 +256,7 @@ class CelloxenAuthGuard {
         }
         
         // Prevent redirect loops
-        if (!this.currentPath.includes('unified-login.html')) {
+        if (this.currentPath !== 'unified-login.html') {
             window.location.href = this.loginPage;
         }
     }
@@ -255,7 +281,7 @@ class CelloxenAuthGuard {
                 const timeUntilExpiry = this.sessionTimeout - (now - lastActivity);
                 
                 // Show warning at 10 minutes before expiry
-                if (timeUntilExpiry <= this.warningTime && timeUntilExpiry > 0) {
+                if (timeUntilExpiry <= this.warningTime && timeUntilExpiry > (this.warningTime - 60000)) {
                     this.showSessionWarning(Math.floor(timeUntilExpiry / 60000));
                 }
             }
@@ -339,8 +365,10 @@ class CelloxenAuthGuard {
     
     // Logout function
     logout() {
-        this.clearAuthData();
-        window.location.href = this.loginPage;
+        if (confirm('Are you sure you want to logout?')) {
+            this.clearAuthData();
+            window.location.href = this.loginPage;
+        }
     }
     
     // Show message to user
@@ -391,12 +419,31 @@ class CelloxenAuthGuard {
         
         return (now - lastActivity) <= sessionTimeout;
     }
+    
+    // Static method to check if user is super admin
+    static isSuperAdmin() {
+        const authData = CelloxenAuthGuard.getCurrentUser();
+        return authData && authData.userType === 'super_admin';
+    }
+    
+    // Static method to check if user is clinic admin
+    static isClinicAdmin() {
+        const authData = CelloxenAuthGuard.getCurrentUser();
+        return authData && authData.userType === 'clinic_admin';
+    }
+    
+    // Static method to get current clinic ID (for clinic admins)
+    static getCurrentClinicId() {
+        const authData = CelloxenAuthGuard.getCurrentUser();
+        return authData ? authData.clinicId : null;
+    }
 }
 
 // Initialize auth guard when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
-    // Only initialize on protected pages (not login page)
-    if (!window.location.pathname.includes('unified-login.html')) {
+    // Only initialize on protected pages (not login or index page)
+    const currentPath = window.location.pathname.split('/').pop();
+    if (currentPath !== 'unified-login.html' && currentPath !== 'index.html' && currentPath !== '') {
         window.celloxenAuth = new CelloxenAuthGuard();
     }
 });
