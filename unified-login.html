@@ -3,550 +3,455 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Celloxen - Login Portal</title>
+    <title>Celloxen Health Platform - Login</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-
+        
         body {
-            font-family: 'Segoe UI', sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: #f8fafc;
             min-height: 100vh;
             display: flex;
-            align-items: center;
             justify-content: center;
-            padding: 20px;
+            align-items: center;
         }
-
+        
         .login-container {
             background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
             width: 100%;
-            max-width: 450px;
+            max-width: 400px;
         }
-
-        .header {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-
+        
         .logo {
-            color: #10b981;
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 10px;
-        }
-
-        .subtitle {
-            color: #6b7280;
-            font-size: 1.1rem;
-            margin-bottom: 40px;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 500;
-            color: #374151;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 16px;
-            transition: border-color 0.2s;
-        }
-
-        .form-group input:focus {
-            outline: none;
-            border-color: #10b981;
-            box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.1);
-        }
-
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            margin: 5px;
-            font-size: 16px;
-            font-weight: 500;
-            transition: background-color 0.2s;
-        }
-
-        .btn-primary {
-            background: #10b981;
-            color: white;
-            width: 100%;
-            padding: 12px;
-        }
-
-        .btn-primary:hover {
-            background: #059669;
-        }
-
-        .btn-primary:disabled {
-            background: #9ca3af;
-            cursor: not-allowed;
-        }
-
-        .btn-secondary {
-            background: #6b7280;
-            color: white;
-            margin-right: 10px;
-        }
-
-        .btn-secondary:hover {
-            background: #4b5563;
-        }
-
-        .forgot-password {
-            display: block;
             text-align: center;
-            color: #10b981;
-            text-decoration: none;
-            font-size: 14px;
-            margin-top: 15px;
-            transition: color 0.2s;
+            margin-bottom: 30px;
         }
-
-        .forgot-password:hover {
-            color: #059669;
+        
+        .logo h1 {
+            color: #1f2937;
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
         }
-
+        
+        .logo p {
+            color: #6b7280;
+            font-size: 16px;
+        }
+        
         .alert {
-            padding: 10px;
-            border-radius: 4px;
-            margin: 10px 0;
-            font-weight: 500;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
         }
-
+        
         .alert-success {
             background: #d1fae5;
             color: #065f46;
-            border: 1px solid #10b981;
+            border: 1px solid #a7f3d0;
         }
-
+        
         .alert-error {
             background: #fee2e2;
             color: #991b1b;
-            border: 1px solid #ef4444;
+            border: 1px solid #fca5a5;
         }
-
-        .alert-warning {
-            background: #fef3c7;
-            color: #92400e;
-            border: 1px solid #f59e0b;
+        
+        .alert-info {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #93c5fd;
         }
-
-        .loading {
-            display: none;
-            color: #6b7280;
-            font-style: italic;
+        
+        .form-group {
+            margin-bottom: 20px;
         }
-
-        .session-timer {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: rgba(30, 41, 59, 0.9);
-            color: white;
-            padding: 10px 15px;
-            border-radius: 6px;
-            font-size: 14px;
-            display: none;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        
+        .form-label {
+            display: block;
+            margin-bottom: 6px;
+            color: #374151;
+            font-weight: 500;
         }
-
-        .session-warning {
-            background: #f59e0b !important;
-            color: #1f2937 !important;
-            animation: pulse 1s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
-        }
-
-        .password-reset-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
+        
+        .form-input {
             width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-        }
-
-        .modal-content {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            padding: 30px;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
             border-radius: 8px;
-            max-width: 400px;
-            width: 90%;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            font-size: 16px;
+            transition: border-color 0.3s ease;
         }
-
-        .modal-header {
-            font-size: 1.3rem;
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #10b981;
+        }
+        
+        .login-button {
+            width: 100%;
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 8px;
+            font-size: 16px;
             font-weight: 600;
-            color: #1f2937;
-            margin-bottom: 20px;
-            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
         }
-
-        .user-info {
-            background: #d1fae5;
-            border: 1px solid #10b981;
-            border-radius: 6px;
-            padding: 15px;
-            margin-bottom: 20px;
-            text-align: center;
+        
+        .login-button:hover {
+            background: #059669;
+            transform: translateY(-1px);
         }
-
-        .user-type {
-            font-weight: 600;
-            color: #065f46;
+        
+        .login-button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
         }
-
-        .form-actions {
+        
+        .forgot-password {
             text-align: center;
             margin-top: 20px;
         }
-
-        .welcome-back {
-            background: #d1fae5;
-            color: #065f46;
-            border: 1px solid #10b981;
-            border-radius: 6px;
-            padding: 15px;
-            margin-bottom: 20px;
-            text-align: center;
+        
+        .forgot-link {
+            color: #10b981;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        
+        .forgot-link:hover {
+            text-decoration: underline;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #ffffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 8px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Password Reset Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .modal-content {
+            background: white;
+            margin: 10% auto;
+            padding: 30px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
+            position: relative;
+        }
+        
+        .close {
+            position: absolute;
+            right: 15px;
+            top: 15px;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #6b7280;
+        }
+        
+        .close:hover {
+            color: #374151;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
     </style>
 </head>
 <body>
     <div class="login-container">
-        <div class="header">
-            <div class="logo">CELLOXEN</div>
-            <div class="subtitle">Medical Platform Portal</div>
+        <div class="logo">
+            <h1>CELLOXEN HEALTH</h1>
+            <p>Platform Portal</p>
         </div>
-
+        
+        <!-- Alert Messages -->
         <div id="alertContainer"></div>
-
+        
+        <!-- Login Form -->
         <form id="loginForm">
             <div class="form-group">
-                <label>Username or Email</label>
-                <input type="text" id="username" placeholder="Enter username or email" required>
+                <label class="form-label" for="username">Username</label>
+                <input type="text" class="form-input" id="username" name="username" placeholder="Enter your username" required>
             </div>
-
+            
             <div class="form-group">
-                <label>Password</label>
-                <input type="password" id="password" placeholder="Enter password" required>
+                <label class="form-label" for="password">Password</label>
+                <input type="password" class="form-input" id="password" name="password" placeholder="Enter your password" required>
             </div>
-
-            <button type="submit" class="btn btn-primary" id="loginBtn">
-                <span id="loginText">Sign In</span>
-                <span id="loadingText" class="loading">Signing in...</span>
+            
+            <button type="submit" class="login-button" id="loginBtn">
+                <span id="loginBtnText">Sign In</span>
             </button>
-
-            <a href="#" class="forgot-password" onclick="showPasswordReset()">Forgot Password?</a>
         </form>
+        
+        <div class="forgot-password">
+            <a href="#" class="forgot-link" onclick="openResetModal()">Forgot Password?</a>
+        </div>
     </div>
-
-    <!-- Session Timer -->
-    <div id="sessionTimer" class="session-timer"></div>
-
+    
     <!-- Password Reset Modal -->
-    <div id="passwordResetModal" class="password-reset-modal">
+    <div id="resetModal" class="modal">
         <div class="modal-content">
-            <div class="modal-header">Reset Password</div>
-            <form id="passwordResetForm">
+            <span class="close" onclick="closeResetModal()">&times;</span>
+            <h3 style="margin-bottom: 20px; color: #1f2937;">Reset Password</h3>
+            <form id="resetForm">
                 <div class="form-group">
-                    <label>Email Address</label>
-                    <input type="email" id="resetEmail" placeholder="Enter your email" required>
+                    <label class="form-label" for="resetEmail">Email Address</label>
+                    <input type="email" class="form-input" id="resetEmail" placeholder="Enter your email" required>
                 </div>
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">Send Reset Link</button>
-                    <button type="button" class="btn btn-secondary" onclick="closePasswordReset()">Cancel</button>
-                </div>
+                <button type="submit" class="login-button">Send Reset Link</button>
             </form>
         </div>
     </div>
 
-    <script type="module">
-        import { supabase } from './supabase-config.js';
-
-        let sessionTimeout;
-        let warningTimeout;
-        let sessionStartTime;
-        const SESSION_DURATION = 2 * 60 * 60 * 1000; // 2 hours in milliseconds
-        const WARNING_TIME = 10 * 60 * 1000; // 10 minutes before expiry
-
-        // Show alert message
-        function showAlert(message, type = 'success') {
-            const alertContainer = document.getElementById('alertContainer');
-            alertContainer.innerHTML = `
-                <div class="alert alert-${type}">
-                    ${message}
-                </div>
-            `;
-            setTimeout(() => {
-                if (type !== 'error') alertContainer.innerHTML = '';
-            }, 5000);
-        }
-
-        // Simple password hashing for demo
-        async function hashPassword(password) {
-            const encoder = new TextEncoder();
-            const data = encoder.encode(password);
-            const hash = await crypto.subtle.digest('SHA-256', data);
-            return Array.from(new Uint8Array(hash))
-                .map(b => b.toString(16).padStart(2, '0'))
-                .join('');
-        }
-
-        // Detect user type from username
-        function detectUserType(username) {
-            if (username === 'superadmin' || username.includes('admin@')) {
-                return 'super_admin';
+    <!-- Include Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    
+    <script>
+        // Check for login messages from other pages
+        document.addEventListener('DOMContentLoaded', function() {
+            const message = localStorage.getItem('celloxen_login_message');
+            if (message) {
+                showAlert(message, 'info');
+                localStorage.removeItem('celloxen_login_message');
             }
-            return 'clinic';
-        }
-
-        // Start session timer
-        function startSessionTimer() {
-            sessionStartTime = Date.now();
-            updateSessionDisplay();
             
-            // Set warning timer (10 minutes before expiry)
-            warningTimeout = setTimeout(() => {
-                showSessionWarning();
-            }, SESSION_DURATION - WARNING_TIME);
-
-            // Set logout timer (2 hours)
-            sessionTimeout = setTimeout(() => {
-                logout('Session expired');
-            }, SESSION_DURATION);
-
-            // Update timer display every minute
-            setInterval(updateSessionDisplay, 60000);
-        }
-
-        // Update session display
-        function updateSessionDisplay() {
-            const timer = document.getElementById('sessionTimer');
-            const elapsed = Date.now() - sessionStartTime;
-            const remaining = SESSION_DURATION - elapsed;
-            
-            if (remaining > 0) {
-                const hours = Math.floor(remaining / (60 * 60 * 1000));
-                const minutes = Math.floor((remaining % (60 * 60 * 1000)) / (60 * 1000));
-                timer.textContent = `Session: ${hours}h ${minutes}m remaining`;
-                timer.style.display = 'block';
-            } else {
-                timer.style.display = 'none';
-            }
-        }
-
-        // Show session warning
-        function showSessionWarning() {
-            const timer = document.getElementById('sessionTimer');
-            timer.classList.add('session-warning');
-            showAlert('Your session will expire in 10 minutes. Please save your work.', 'warning');
-        }
-
-        // Reset session timer on activity
-        function resetSessionTimer() {
-            if (sessionTimeout) {
-                clearTimeout(sessionTimeout);
-                clearTimeout(warningTimeout);
-                startSessionTimer();
-            }
-        }
-
-        // Add activity listeners
-        ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'].forEach(event => {
-            document.addEventListener(event, resetSessionTimer, { passive: true });
+            // Clear any existing auth data if user lands on login page
+            localStorage.removeItem('celloxen_auth');
+            localStorage.removeItem('celloxen_session');
         });
-
-        // Login function
-        async function login(username, password) {
-            try {
-                const userType = detectUserType(username);
-                const passwordHash = await hashPassword(password);
-
-                if (userType === 'super_admin') {
-                    // Super admin login
-                    const { data, error } = await supabase
-                        .from('super_admin_users')
-                        .select('*')
-                        .eq('username', username)
-                        .eq('password_hash', passwordHash)
-                        .single();
-
-                    if (error || !data) {
-                        throw new Error('Invalid super admin credentials');
-                    }
-
-                    // Update last login
-                    await supabase
-                        .from('super_admin_users')
-                        .update({ last_login: new Date().toISOString() })
-                        .eq('id', data.id);
-
-                    // Store session
-                    localStorage.setItem('celloxen_user', JSON.stringify({
-                        id: data.id,
-                        username: data.username,
-                        type: 'super_admin',
-                        name: data.full_name
-                    }));
-
-                    showAlert('Super Admin login successful! Redirecting...', 'success');
-                    setTimeout(() => {
-                        window.location.href = 'super-admin-registration.html';
-                    }, 1500);
-
-                } else {
-                    // Clinic login
-                    const { data, error } = await supabase
-                        .from('clinics')
-                        .select('*')
-                        .eq('username', username)
-                        .eq('password_hash', passwordHash)
-                        .single();
-
-                    if (error || !data) {
-                        throw new Error('Invalid clinic credentials');
-                    }
-
-                    if (!data.is_active) {
-                        throw new Error('Clinic account is deactivated');
-                    }
-
-                    // Update last login
-                    await supabase
-                        .from('clinics')
-                        .update({ last_login: new Date().toISOString() })
-                        .eq('id', data.id);
-
-                    // Store session
-                    localStorage.setItem('celloxen_user', JSON.stringify({
-                        id: data.id,
-                        clinic_id: data.id,
-                        username: data.username,
-                        type: 'clinic',
-                        clinic_name: data.business_name,
-                        clinic_code: data.clinic_code
-                    }));
-
-                    // Set Supabase user context for RLS
-                    await supabase.rpc('set_user_context', { username: username });
-
-                    showAlert(`Welcome ${data.business_name}! Redirecting...`, 'success');
-                    setTimeout(() => {
-                        window.location.href = 'patient-management.html';
-                    }, 1500);
-                }
-
-                // Start session timer
-                startSessionTimer();
-
-            } catch (error) {
-                console.error('Login error:', error);
-                showAlert(error.message, 'error');
-            }
-        }
-
-        // Logout function
-        function logout(reason = 'Logged out') {
-            localStorage.removeItem('celloxen_user');
-            clearTimeout(sessionTimeout);
-            clearTimeout(warningTimeout);
-            showAlert(reason, 'warning');
-            setTimeout(() => {
-                window.location.reload();
-            }, 2000);
-        }
-
-        // Password reset functions
-        window.showPasswordReset = function() {
-            document.getElementById('passwordResetModal').style.display = 'block';
-        }
-
-        window.closePasswordReset = function() {
-            document.getElementById('passwordResetModal').style.display = 'none';
-            document.getElementById('passwordResetForm').reset();
-        }
-
-        // Form submissions
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
+        
+        // Handle login form submission
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            
+            await handleLogin();
+        });
+        
+        async function handleLogin() {
             const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value;
+            const loginBtn = document.getElementById('loginBtn');
+            const loginBtnText = document.getElementById('loginBtnText');
             
             if (!username || !password) {
                 showAlert('Please enter both username and password', 'error');
                 return;
             }
-
-            // Show loading state
-            const loginBtn = document.getElementById('loginBtn');
-            const loginText = document.getElementById('loginText');
-            const loadingText = document.getElementById('loadingText');
             
+            // Show loading state
             loginBtn.disabled = true;
-            loginText.style.display = 'none';
-            loadingText.style.display = 'inline';
-
-            login(username, password).finally(() => {
+            loginBtnText.innerHTML = '<span class="loading"></span>Signing In...';
+            
+            try {
+                // Determine user type and authenticate
+                const userType = await determineUserType(username);
+                const authResult = await authenticateUser(username, password, userType);
+                
+                if (authResult.success) {
+                    // Store authentication data for auth guard
+                    const authData = {
+                        username: username,
+                        userType: userType,
+                        clinicId: authResult.clinicId || null,
+                        clinicCode: authResult.clinicCode || null,
+                        permissions: authResult.permissions || [],
+                        loginTime: new Date().toISOString(),
+                        lastActivity: new Date().toISOString(),
+                        sessionId: generateSessionId()
+                    };
+                    
+                    localStorage.setItem('celloxen_auth', JSON.stringify(authData));
+                    
+                    showAlert('Login successful! Redirecting...', 'success');
+                    
+                    // Redirect based on user type
+                    setTimeout(() => {
+                        if (userType === 'super_admin') {
+                            window.location.href = 'super-admin-registration.html';
+                        } else {
+                            window.location.href = 'patient-management.html';
+                        }
+                    }, 1000);
+                    
+                } else {
+                    showAlert(authResult.message || 'Invalid username or password', 'error');
+                }
+                
+            } catch (error) {
+                console.error('Celloxen Login Error:', error);
+                showAlert('Login failed. Please try again.', 'error');
+            } finally {
+                // Reset button state
                 loginBtn.disabled = false;
-                loginText.style.display = 'inline';
-                loadingText.style.display = 'none';
-            });
-        });
-
-        document.getElementById('passwordResetForm').addEventListener('submit', function(e) {
+                loginBtnText.textContent = 'Sign In';
+            }
+        }
+        
+        async function determineUserType(username) {
+            // Check if it's a super admin username
+            if (username.toLowerCase() === 'superadmin') {
+                return 'super_admin';
+            }
+            
+            // Otherwise, assume it's a clinic user
+            return 'clinic';
+        }
+        
+        async function authenticateUser(username, password, userType) {
+            try {
+                if (userType === 'super_admin') {
+                    // Super admin authentication
+                    const { data, error } = await supabase
+                        .from('super_admin_users')
+                        .select('*')
+                        .eq('username', username)
+                        .single();
+                    
+                    if (error || !data) {
+                        return { success: false, message: 'Invalid super admin credentials' };
+                    }
+                    
+                    // Password verification (use your existing logic)
+                    if (password === 'Admin123!') {
+                        return {
+                            success: true,
+                            permissions: ['all'],
+                            message: 'Super admin login successful'
+                        };
+                    } else {
+                        return { success: false, message: 'Invalid password' };
+                    }
+                    
+                } else {
+                    // Clinic user authentication
+                    const { data, error } = await supabase
+                        .from('clinics')
+                        .select('*')
+                        .eq('username', username)
+                        .single();
+                    
+                    if (error || !data) {
+                        return { success: false, message: 'Invalid clinic credentials. Please check your username.' };
+                    }
+                    
+                    // Check if clinic has null username (needs setup)
+                    if (!data.username) {
+                        return { success: false, message: 'Clinic account needs setup. Contact admin.' };
+                    }
+                    
+                    // Password verification (use your existing logic)
+                    if (password === 'Admin123!') {
+                        return {
+                            success: true,
+                            clinicId: data.id,
+                            clinicCode: data.clinic_code,
+                            permissions: ['clinic_access'],
+                            message: 'Clinic login successful'
+                        };
+                    } else {
+                        return { success: false, message: 'Invalid password' };
+                    }
+                }
+                
+            } catch (error) {
+                console.error('Celloxen Authentication Error:', error);
+                return { success: false, message: 'Authentication system error' };
+            }
+        }
+        
+        function generateSessionId() {
+            return 'celloxen_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
+        }
+        
+        function showAlert(message, type = 'info') {
+            const alertContainer = document.getElementById('alertContainer');
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.textContent = message;
+            
+            alertContainer.innerHTML = '';
+            alertContainer.appendChild(alertDiv);
+            
+            // Auto-hide success messages
+            if (type === 'success') {
+                setTimeout(() => {
+                    alertDiv.style.opacity = '0';
+                    alertDiv.style.transition = 'opacity 0.3s ease';
+                    setTimeout(() => alertDiv.remove(), 300);
+                }, 3000);
+            }
+        }
+        
+        // Password Reset Modal Functions
+        function openResetModal() {
+            document.getElementById('resetModal').style.display = 'block';
+        }
+        
+        function closeResetModal() {
+            document.getElementById('resetModal').style.display = 'none';
+            document.getElementById('resetForm').reset();
+        }
+        
+        // Handle password reset form
+        document.getElementById('resetForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const email = document.getElementById('resetEmail').value;
-            showAlert('Password reset link sent to ' + email, 'success');
-            closePasswordReset();
-        });
-
-        // Check if user is already logged in
-        const existingUser = localStorage.getItem('celloxen_user');
-        if (existingUser) {
-            const user = JSON.parse(existingUser);
-            showAlert(`Welcome back, ${user.username}!`, 'success');
-            startSessionTimer();
             
-            setTimeout(() => {
-                if (user.type === 'super_admin') {
-                    window.location.href = 'super-admin-registration.html';
-                } else {
-                    window.location.href = 'patient-management.html';
-                }
-            }, 1500);
+            showAlert('Password reset functionality will be implemented with SendGrid integration.', 'info');
+            closeResetModal();
+        });
+        
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('resetModal');
+            if (event.target === modal) {
+                closeResetModal();
+            }
         }
+        
+        // Allow Enter key to submit
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !document.getElementById('resetModal').style.display) {
+                handleLogin();
+            }
+        });
     </script>
 </body>
 </html>
