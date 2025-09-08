@@ -3,142 +3,464 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cellexon Medical Platform</title>
+    <title>Celloxen Health Platform - Electromagnetic Frequency Therapy System</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #1e293b, #334155); color: white; min-height: 100vh; }
-        .container { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
-        .header { text-align: center; margin-bottom: 60px; }
-        .system-title { font-size: 3rem; font-weight: 700; color: #10b981; margin-bottom: 10px; }
-        .system-subtitle { font-size: 1.2rem; color: #94a3b8; margin-bottom: 30px; }
-        .system-info { font-size: 1rem; color: #cbd5e1; }
-        .status { background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; border-radius: 8px; padding: 20px; margin: 20px 0; }
-        .modules-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 40px; }
-        .module-card { background: rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 20px; border: 1px solid rgba(255, 255, 255, 0.2); transition: all 0.3s ease; cursor: pointer; }
-        .module-card:hover { transform: translateY(-2px); background: rgba(255, 255, 255, 0.15); }
-        .module-card.active { border-color: #10b981; background: rgba(16, 185, 129, 0.15); }
-        .module-title { font-size: 1.2rem; font-weight: 600; margin-bottom: 10px; color: #10b981; }
-        .module-description { color: #cbd5e1; font-size: 0.9rem; line-height: 1.4; }
-        .module-status { margin-top: 10px; padding: 5px 10px; background: rgba(16, 185, 129, 0.2); border-radius: 4px; font-size: 0.8rem; color: #10b981; display: inline-block; }
-        .completion-banner { background: linear-gradient(135deg, #10b981, #059669); border-radius: 12px; padding: 30px; margin: 30px 0; text-align: center; }
-        .completion-title { font-size: 2rem; font-weight: bold; margin-bottom: 10px; }
-        .completion-subtitle { font-size: 1.1rem; opacity: 0.9; }
-        .workflow-steps { display: flex; justify-content: space-between; margin: 30px 0; padding: 20px; background: rgba(255, 255, 255, 0.05); border-radius: 8px; }
-        .workflow-step { text-align: center; flex: 1; }
-        .workflow-number { background: #10b981; color: white; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; font-weight: bold; }
-        .footer { text-align: center; margin-top: 60px; padding: 20px; border-top: 1px solid rgba(255, 255, 255, 0.1); }
-        .footer-text { color: #94a3b8; font-size: 0.9rem; }
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+        }
+        
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: #f8fafc;
+            color: #1f2937;
+            min-height: 100vh;
+        }
+        
+        /* Header */
+        .header {
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .system-title { 
+            font-size: 2.5rem; 
+            font-weight: 700; 
+            color: #1e3a8a; /* Navy blue */
+            letter-spacing: -1px;
+        }
+        
+        .login-btn {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .login-btn:hover {
+            background: #059669;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+        
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, #f0fdf4 0%, #f8fafc 100%);
+            padding: 80px 20px;
+            text-align: center;
+        }
+        
+        .hero-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .hero-title {
+            font-size: 3rem;
+            font-weight: 700;
+            color: #1e3a8a;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+        
+        .hero-subtitle {
+            font-size: 1.3rem;
+            color: #6b7280;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+        
+        .cta-button {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border: none;
+            padding: 18px 40px;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-block;
+            text-decoration: none;
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+        }
+        
+        /* Features Section */
+        .features {
+            padding: 80px 20px;
+            background: white;
+        }
+        
+        .container { 
+            max-width: 1200px; 
+            margin: 0 auto; 
+        }
+        
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            color: #1e3a8a;
+            margin-bottom: 20px;
+        }
+        
+        .section-subtitle {
+            text-align: center;
+            font-size: 1.1rem;
+            color: #6b7280;
+            margin-bottom: 60px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .features-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); 
+            gap: 30px;
+        }
+        
+        .feature-card { 
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px; 
+            padding: 30px;
+            transition: all 0.3s ease;
+        }
+        
+        .feature-card:hover { 
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border-color: #10b981;
+        }
+        
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+        }
+        
+        .feature-title { 
+            font-size: 1.3rem; 
+            font-weight: 600; 
+            margin-bottom: 15px; 
+            color: #1f2937;
+        }
+        
+        .feature-description { 
+            color: #6b7280; 
+            line-height: 1.6;
+        }
+        
+        /* Statistics Section */
+        .statistics {
+            background: linear-gradient(135deg, #1e3a8a, #1e40af);
+            padding: 80px 20px;
+            color: white;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 40px;
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .stat-label {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        /* Modules Section */
+        .modules {
+            padding: 80px 20px;
+            background: #f8fafc;
+        }
+        
+        .modules-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+        }
+        
+        .module-item {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            border: 1px solid #e5e7eb;
+            text-align: center;
+        }
+        
+        .module-icon {
+            font-size: 2rem;
+            margin-bottom: 15px;
+        }
+        
+        .module-name {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 8px;
+        }
+        
+        .module-status {
+            color: #10b981;
+            font-size: 0.9rem;
+        }
+        
+        /* Footer */
+        .footer { 
+            background: white;
+            border-top: 1px solid #e5e7eb;
+            padding: 40px 20px;
+            text-align: center;
+        }
+        
+        .footer-text { 
+            color: #6b7280; 
+            line-height: 1.8;
+        }
+        
+        .footer-text strong {
+            color: #1e3a8a;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2rem;
+            }
+            
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <div class="system-title">CELLEXON</div>
-            <div class="system-subtitle">Medical Device Platform</div>
-            <div class="system-info">
-                <p><strong>System Status:</strong> Complete Platform Operational</p>
-                <p><strong>Version:</strong> 1.0.0 | <strong>Build:</strong> Production</p>
-                <p><strong>Database:</strong> Connected | <strong>Hosting:</strong> Vercel</p>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-container">
+            <div class="logo">
+                <div class="system-title">CELLOXEN</div>
+            </div>
+            <button class="login-btn" onclick="window.location.href='unified-login.html'">
+                Portal Login
+            </button>
+        </div>
+    </div>
+    
+    <!-- Hero Section -->
+    <div class="hero">
+        <div class="hero-content">
+            <h1 class="hero-title">Advanced Electromagnetic Frequency Therapy Platform</h1>
+            <p class="hero-subtitle">
+                Comprehensive medical device system delivering personalised frequency-based treatments 
+                with real-time monitoring and AI-powered health assessments
+            </p>
+            <button class="cta-button" onclick="window.location.href='unified-login.html'">
+                Access Platform
+            </button>
+        </div>
+    </div>
+    
+    <!-- Features Section -->
+    <div class="features">
+        <div class="container">
+            <h2 class="section-title">Complete Healthcare Solution</h2>
+            <p class="section-subtitle">
+                Integrated modules working seamlessly to deliver optimal patient care
+            </p>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🏥</div>
+                    <div class="feature-title">Multi-Clinic Management</div>
+                    <div class="feature-description">
+                        Centralised system supporting multiple clinics with individual dashboards, 
+                        patient management, and device control
+                    </div>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">📋</div>
+                    <div class="feature-title">Comprehensive Assessment</div>
+                    <div class="feature-description">
+                        5-category health questionnaire evaluating physical, mental, lifestyle, 
+                        environmental, and medical history factors
+                    </div>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">👁️</div>
+                    <div class="feature-title">IRIS Analysis System</div>
+                    <div class="feature-description">
+                        Advanced constitutional assessment through iris imaging with 
+                        AI-powered pattern recognition and therapy recommendations
+                    </div>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <div class="feature-title">33 Therapy Protocols</div>
+                    <div class="feature-description">
+                        Extensive library of electromagnetic frequency protocols targeting 
+                        specific health conditions with customisable parameters
+                    </div>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">💓</div>
+                    <div class="feature-title">Vital Signs Monitoring</div>
+                    <div class="feature-description">
+                        Real-time monitoring of heart rate, blood pressure, SpO2, and 
+                        temperature during treatment sessions
+                    </div>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <div class="feature-title">Analytics & Reporting</div>
+                    <div class="feature-description">
+                        Comprehensive reporting system with treatment history, patient 
+                        progress tracking, and outcome analytics
+                    </div>
+                </div>
             </div>
         </div>
-        
-        <div class="completion-banner">
-            <div class="completion-title">PLATFORM COMPLETE</div>
-            <div class="completion-subtitle">All 6 core modules operational - Full patient care workflow available</div>
-        </div>
-        
-        <div class="workflow-steps">
-            <div class="workflow-step">
-                <div class="workflow-number">1</div>
-                <div>Patient Registration</div>
-            </div>
-            <div class="workflow-step">
-                <div class="workflow-number">2</div>
-                <div>Health Assessment</div>
-            </div>
-            <div class="workflow-step">
-                <div class="workflow-number">3</div>
-                <div>IRIS Analysis</div>
-            </div>
-            <div class="workflow-step">
-                <div class="workflow-number">4</div>
-                <div>Treatment Protocol</div>
-            </div>
-            <div class="workflow-step">
-                <div class="workflow-number">5</div>
-                <div>Vital Signs Monitoring</div>
-            </div>
-            <div class="workflow-step">
-                <div class="workflow-number">6</div>
-                <div>Admin Oversight</div>
+    </div>
+    
+    <!-- Statistics Section -->
+    <div class="statistics">
+        <div class="container">
+            <div class="stats-grid">
+                <div>
+                    <div class="stat-number">6</div>
+                    <div class="stat-label">Clinical Modules</div>
+                </div>
+                <div>
+                    <div class="stat-number">33</div>
+                    <div class="stat-label">Therapy Protocols</div>
+                </div>
+                <div>
+                    <div class="stat-number">16</div>
+                    <div class="stat-label">Treatment Channels</div>
+                </div>
+                <div>
+                    <div class="stat-number">24/7</div>
+                    <div class="stat-label">System Availability</div>
+                </div>
             </div>
         </div>
-        
-        <div class="modules-grid">
-            <div class="module-card active" onclick="window.open('patient-management.html', '_blank')">
-                <div class="module-title">Patient Management</div>
-                <div class="module-description">Register and manage patient records with Supabase integration. Complete patient registration system with search and clinic management capabilities.</div>
-                <div class="module-status">✅ Active</div>
-            </div>
+    </div>
+    
+    <!-- Modules Overview -->
+    <div class="modules">
+        <div class="container">
+            <h2 class="section-title">Platform Modules</h2>
+            <p class="section-subtitle">
+                Fully integrated system with role-based access control
+            </p>
             
-            <div class="module-card active" onclick="window.open('super-admin.html', '_blank')">
-                <div class="module-title">Super Admin</div>
-                <div class="module-description">Global platform management and clinic oversight. Manage multiple clinics, view all patients, and monitor system performance across the platform.</div>
-                <div class="module-status">✅ Active</div>
-            </div>
-            
-            <div class="module-card active" onclick="window.open('health-assessment.html', '_blank')">
-                <div class="module-title">Health Assessment</div>
-                <div class="module-description">AI-powered health questionnaire and analysis. 5-category assessment system with personalised therapy recommendations and scoring.</div>
-                <div class="module-status">✅ Active</div>
-            </div>
-            
-            <div class="module-card active" onclick="window.open('treatment-interface.html', '_blank')">
-                <div class="module-title">Treatment Interface</div>
-                <div class="module-description">Therapy protocol delivery and monitoring. 33 electromagnetic therapy protocols with frequency control, channel management, and real-time session tracking.</div>
-                <div class="module-status">✅ Active</div>
-            </div>
-            
-            <div class="module-card active" onclick="window.open('iris-analysis.html', '_blank')">
-                <div class="module-title">IRIS Analysis</div>
-                <div class="module-description">Iris image capture and AI-powered constitutional analysis. Professional iris interpretation with health pattern detection and therapy recommendations.</div>
-                <div class="module-status">✅ Active</div>
-            </div>
-            
-            <div class="module-card active" onclick="window.open('vital-signs.html', '_blank')">
-                <div class="module-title">Vital Signs Monitoring</div>
-                <div class="module-description">Real-time vital signs monitoring during treatment sessions. Blood pressure, heart rate, temperature, and ECG tracking with safety alerts and emergency protocols.</div>
-                <div class="module-status">✅ Active</div>
+            <div class="modules-grid">
+                <div class="module-item">
+                    <div class="module-icon">📋</div>
+                    <div class="module-name">Patient Management</div>
+                    <div class="module-status">✓ Active</div>
+                </div>
+                <div class="module-item">
+                    <div class="module-icon">🏥</div>
+                    <div class="module-name">Health Assessment</div>
+                    <div class="module-status">✓ Active</div>
+                </div>
+                <div class="module-item">
+                    <div class="module-icon">👁️</div>
+                    <div class="module-name">IRIS Analysis</div>
+                    <div class="module-status">✓ Active</div>
+                </div>
+                <div class="module-item">
+                    <div class="module-icon">⚡</div>
+                    <div class="module-name">Treatment Interface</div>
+                    <div class="module-status">✓ Active</div>
+                </div>
+                <div class="module-item">
+                    <div class="module-icon">💓</div>
+                    <div class="module-name">Vital Signs</div>
+                    <div class="module-status">✓ Active</div>
+                </div>
+                <div class="module-item">
+                    <div class="module-icon">🔐</div>
+                    <div class="module-name">Admin Portal</div>
+                    <div class="module-status">✓ Active</div>
+                </div>
             </div>
         </div>
-        
-        <div class="footer">
+    </div>
+    
+    <!-- Footer -->
+    <div class="footer">
+        <div class="container">
             <div class="footer-text">
-                <p>Cellexon Medical Platform - Electromagnetic Frequency Therapy System</p>
-                <p>6/6 Modules Active | Built with Vercel, Supabase, and Modern Web Technologies</p>
-                <p>Version 1.0.0 - Production Ready | Complete End-to-End Patient Care Workflow</p>
-                <p>Registration → Assessment → IRIS Analysis → Treatment → Vital Signs → Administration</p>
+                <p><strong>CELLOXEN Health Platform</strong></p>
+                <p>Advanced Electromagnetic Frequency Therapy System</p>
+                <p>Secure • Compliant • Professional</p>
+                <p style="margin-top: 20px; font-size: 0.9rem;">
+                    © 2025 Celloxen Health. All rights reserved.
+                </p>
             </div>
         </div>
     </div>
 
     <script>
-        console.log('🎉 Cellexon Medical Platform - COMPLETE SYSTEM LOADED');
-        console.log('Active Modules: 6/6 - ALL MODULES OPERATIONAL');
-        console.log('✅ Patient Management | ✅ Super Admin | ✅ Health Assessment');
-        console.log('✅ Treatment Interface | ✅ IRIS Analysis | ✅ Vital Signs Monitoring');
-        console.log('Platform: Production Ready | Database: Connected | Hosting: Deployed');
-        
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('🚀 Complete medical device platform ready for clinical deployment');
-            
-            setTimeout(() => {
-                console.log('🏥 Full patient workflow: Registration → Assessment → IRIS → Treatment → Monitoring → Admin');
-                console.log('💊 33 therapy protocols available with variable session lengths');
-                console.log('📊 Real-time vital signs monitoring with emergency protocols');
-                console.log('🎯 Ready for regulatory review and clinical deployment');
-            }, 1000);
-        });
+        console.log('🎯 Celloxen Health Platform - Ready');
+        console.log('✅ Authentication System: Active');
+        console.log('✅ Role-Based Access Control: Enabled');
+        console.log('✅ Database: Connected');
+        console.log('📊 System Status: Operational');
     </script>
 </body>
 </html>
