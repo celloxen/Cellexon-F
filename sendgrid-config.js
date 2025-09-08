@@ -5,9 +5,9 @@
 const SENDGRID_CONFIG = {
     apiKey: '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', 
     fromEmail: 'health@celloxen.com',
-    fromName: 'Celloxen Medical Platform',
+    fromName: 'Celloxen Health',
     templateIds: {
-        clinicInvitation: 'd-your-template-id-here' // Replace with your SendGrid template ID
+        clinicInvitation: 'd-17fd0b493bfd42169098221b446a7aa8'
     }
 };
 
@@ -59,9 +59,9 @@ async function sendClinicInvitationEmail(clinicData) {
         device_serial: clinicData.device_serial_number,
         username: clinicData.username,
         password: clinicData.password,
-        login_url: 'https://your-domain.com/unified-login.html',
-        support_email: 'support@celloxen.com',
-        portal_url: 'https://your-domain.com/patient-management.html'
+        login_url: 'https://celloxen.com/unified-login.html',
+        support_email: 'health@celloxen.com',
+        portal_url: 'https://celloxen.com/patient-management.html'
     };
 
     return await sendEmail(
@@ -82,9 +82,9 @@ async function sendPasswordResetEmail(email, resetToken, clinicName) {
 
     // For now, we'll use a simple email format since we need a password reset template
     const emailBody = `
-        <h2>Password Reset Request - Celloxen Medical Platform</h2>
+        <h2>Password Reset Request - Celloxen Health Platform</h2>
         <p>Dear ${clinicName},</p>
-        <p>You have requested to reset your password for the Celloxen Medical Platform.</p>
+        <p>You have requested to reset your password for the Celloxen Health Platform.</p>
         <p><a href="${templateData.reset_url}" style="background: #10b981; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px;">Reset Password</a></p>
         <p>This link will expire in 24 hours.</p>
         <p>If you did not request this reset, please ignore this email.</p>
