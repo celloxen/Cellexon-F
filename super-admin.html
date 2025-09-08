@@ -3,139 +3,183 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Super Admin - Celloxen</title>
-    
-    <!-- Authentication Guard -->
-    <script src="auth-guard.js"></script>
-    
+    <title>Celloxen Health Platform - Login</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            visibility: hidden; /* Hide until authenticated */
-            font-family: 'Segoe UI', sans-serif; 
-            background: #0f172a; 
-            color: white; 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
         
-        body.auth-verified {
-            visibility: visible;
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f8fafc;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
         
-        .header { background: linear-gradient(135deg, #1e293b, #334155); padding: 20px; border-bottom: 2px solid #10b981; }
-        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
-        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin: 20px 0; }
-        .card { background: rgba(255, 255, 255, 0.05); border-radius: 12px; padding: 20px; border: 1px solid rgba(16, 185, 129, 0.3); }
-        .stat-card { background: linear-gradient(135deg, #10b981, #059669); padding: 25px; border-radius: 12px; text-align: center; }
-        .stat-number { font-size: 2.5rem; font-weight: bold; margin-bottom: 5px; }
-        .stat-label { font-size: 1rem; opacity: 0.9; }
-        .btn { padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; margin: 5px; font-weight: 500; }
-        .btn-primary { background: #10b981; color: white; }
-        .btn-secondary { background: #6b7280; color: white; }
-        .btn-danger { background: #ef4444; color: white; }
-        .clinic-list { max-height: 400px; overflow-y: auto; }
-        .clinic-item { background: rgba(255, 255, 255, 0.1); margin: 10px 0; padding: 15px; border-radius: 8px; border-left: 4px solid #10b981; }
-        .table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        .table th, .table td { padding: 12px; text-align: left; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
-        .table th { background: rgba(16, 185, 129, 0.2); color: #10b981; font-weight: 600; }
-        .status-active { color: #10b981; font-weight: bold; }
-        .status-inactive { color: #ef4444; font-weight: bold; }
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; display: flex; align-items: center; justify-content: center; }
-        .modal-content { background: #1e293b; border-radius: 12px; padding: 30px; max-width: 600px; width: 90%; max-height: 90vh; overflow-y: auto; color: white; }
-        .form-group { margin: 15px 0; }
-        .form-group label { display: block; margin-bottom: 5px; font-weight: 500; color: #cbd5e1; }
-        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #374151; border-radius: 6px; background: #374151; color: white; }
-        .form-group input:read-only { background: #2d3748; color: #a0aec0; }
-        .form-group textarea { resize: vertical; min-height: 80px; }
-        .form-help { font-size: 0.8rem; color: #a0aec0; margin-top: 5px; }
-        .alert { padding: 10px; border-radius: 4px; margin: 10px 0; }
-        .alert-success { background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981; }
-        .alert-error { background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #ef4444; }
-        .user-info { display: flex; align-items: center; gap: 20px; }
-        .admin-badge { background: #ef4444; padding: 6px 12px; border-radius: 6px; font-size: 14px; font-weight: 500; }
-        .logout-btn { background: #ef4444; color: white; border: none; padding: 10px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; }
-        .logout-btn:hover { background: #dc2626; }
+        .login-container {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+        
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .logo h1 {
+            color: #1f2937;
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        
+        .logo p {
+            color: #6b7280;
+            font-size: 16px;
+        }
+        
+        .alert {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+        
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+        }
+        
+        .alert-info {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #93c5fd;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 6px;
+            color: #374151;
+            font-weight: 500;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #10b981;
+        }
+        
+        .login-button {
+            width: 100%;
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .login-button:hover {
+            background: #059669;
+            transform: translateY(-1px);
+        }
+        
+        .login-button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .forgot-password {
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .forgot-link {
+            color: #10b981;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        
+        .forgot-link:hover {
+            text-decoration: underline;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #ffffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 8px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
-    <div class="header">
-        <div class="container" style="display: flex; justify-content: space-between; align-items: center;">
-            <div>
-                <h1>Celloxen Super Admin Dashboard</h1>
-                <p>Global platform management and oversight</p>
-            </div>
-            <div class="user-info">
-                <span id="welcomeText">Welcome, Super Admin</span>
-                <span class="admin-badge">SUPER ADMIN</span>
-                <button class="logout-btn" onclick="logout()">Logout</button>
-            </div>
+    <div class="login-container">
+        <div class="logo">
+            <h1>CELLOXEN HEALTH</h1>
+            <p>Platform Portal</p>
         </div>
-    </div>
-    
-    <div class="container">
+        
+        <!-- Alert Messages -->
         <div id="alertContainer"></div>
         
-        <div class="dashboard-grid">
-            <div class="stat-card">
-                <div class="stat-number" id="totalClinics">0</div>
-                <div class="stat-label">Total Clinics</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="totalPatients">0</div>
-                <div class="stat-label">Total Patients</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="totalUsers">0</div>
-                <div class="stat-label">System Users</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="activeClinics">0</div>
-                <div class="stat-label">Active Clinics</div>
-            </div>
-        </div>
-        
-        <div class="dashboard-grid">
-            <div class="card">
-                <h2>Clinic Management</h2>
-                <button class="btn btn-primary" onclick="showAddClinicForm()">Add New Clinic</button>
-                <div class="clinic-list" id="clinicList">
-                    <p>Loading clinics...</p>
-                </div>
+        <!-- Login Form -->
+        <form id="loginForm">
+            <div class="form-group">
+                <label class="form-label" for="username">Username</label>
+                <input type="text" class="form-input" id="username" name="username" placeholder="Enter your username" required>
             </div>
             
-            <div class="card">
-                <h2>Recent Activity</h2>
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Activity</th>
-                            <th>Time</th>
-                        </tr>
-                    </thead>
-                    <tbody id="activityLog">
-                        <tr><td>System started</td><td>Just now</td></tr>
-                    </tbody>
-                </table>
+            <div class="form-group">
+                <label class="form-label" for="password">Password</label>
+                <input type="password" class="form-input" id="password" name="password" placeholder="Enter your password" required>
             </div>
-        </div>
+            
+            <button type="submit" class="login-button" id="loginBtn">
+                <span id="loginBtnText">Sign In</span>
+            </button>
+        </form>
         
-        <div class="card">
-            <h2>All Patients Across Clinics</h2>
-            <div style="max-height: 400px; overflow-y: auto;">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Patient ID</th>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Clinic</th>
-                            <th>Registered</th>
-                        </tr>
-                    </thead>
-                    <tbody id="allPatientsList">
-                        <tr><td colspan="5">Loading patients...</td></tr>
-                    </tbody>
-                </table>
-            </div>
+        <div class="forgot-password">
+            <a href="#" class="forgot-link" onclick="forgotPassword()">Forgot Password?</a>
         </div>
     </div>
 
@@ -151,490 +195,220 @@
         
         try {
             supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
-            console.log('Super Admin Supabase client initialized successfully');
+            console.log('Supabase client initialized successfully');
         } catch (error) {
             console.error('Failed to initialize Supabase:', error);
         }
         
-        let currentClinics = [];
-        
-        // Authentication check for super admin dashboard
+        // Check for login messages from other pages
         document.addEventListener('DOMContentLoaded', function() {
-            const allowedUserTypes = ['super_admin']; // Only super admin can access this dashboard
-            
-            const authData = CelloxenAuthGuard.getCurrentUser();
-            
-            if (!authData) {
-                window.location.href = 'unified-login.html';
-                return;
+            const message = localStorage.getItem('celloxen_login_message');
+            if (message) {
+                showAlert(message, 'info');
+                localStorage.removeItem('celloxen_login_message');
             }
             
-            if (!allowedUserTypes.includes(authData.userType)) {
-                document.body.innerHTML = `
-                    <div style="text-align: center; padding: 50px; font-family: 'Segoe UI', sans-serif; background: #0f172a; color: white; min-height: 100vh; display: flex; align-items: center; justify-content: center;">
-                        <div>
-                            <h2 style="color: #ef4444;">Access Denied</h2>
-                            <p style="color: #6b7280; margin: 20px 0;">Only super administrators can access this dashboard.</p>
-                            <button onclick="window.location.href='unified-login.html'" 
-                                    style="background: #10b981; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer;">
-                                Return to Login
-                            </button>
-                        </div>
-                    </div>
-                `;
-                return;
-            }
-            
-            // Authentication successful - show page and update user info
-            document.body.classList.add('auth-verified');
-            
-            // Update header with user information
-            const welcomeElement = document.getElementById('welcomeText');
-            if (welcomeElement) {
-                welcomeElement.textContent = `Welcome, ${authData.username}`;
-            }
-            
-            console.log('Super Admin Dashboard accessed by:', authData.username);
-            
-            // Load dashboard data
-            loadDashboardData();
-            loadClinics();
-            loadAllPatients();
+            // Clear any existing auth data if user lands on login page
+            localStorage.removeItem('celloxen_auth');
+            localStorage.removeItem('celloxen_session');
         });
         
-        // Logout function
-        function logout() {
-            if (confirm('Are you sure you want to logout from Super Admin dashboard?')) {
-                localStorage.removeItem('celloxen_auth');
-                localStorage.removeItem('celloxen_session');
-                window.location.href = 'unified-login.html';
-            }
-        }
+        // Handle login form submission
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            await handleLogin();
+        });
         
-        // Show alert messages
-        function showAlert(message, type = 'success') {
-            const alertContainer = document.getElementById('alertContainer');
-            alertContainer.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
-            setTimeout(() => {
-                alertContainer.innerHTML = '';
-            }, 5000);
-        }
-        
-        // Load dashboard statistics
-        async function loadDashboardData() {
-            try {
-                if (!supabase) {
-                    console.error('Supabase client not initialized');
-                    return;
-                }
-                
-                // Get clinic count
-                const { count: clinicCount } = await supabase
-                    .from('clinics')
-                    .select('*', { count: 'exact', head: true });
-                    
-                // Get patient count
-                const { count: patientCount } = await supabase
-                    .from('patients')
-                    .select('*', { count: 'exact', head: true });
-                    
-                // Get user count (if users table exists)
-                let userCount = 0;
-                try {
-                    const { count } = await supabase
-                        .from('users')
-                        .select('*', { count: 'exact', head: true });
-                    userCount = count || 0;
-                } catch (e) {
-                    console.log('Users table not found or empty');
-                }
-                    
-                // Get active clinic count
-                const { count: activeClinicCount } = await supabase
-                    .from('clinics')
-                    .select('*', { count: 'exact', head: true })
-                    .eq('is_active', true);
-                
-                document.getElementById('totalClinics').textContent = clinicCount || 0;
-                document.getElementById('totalPatients').textContent = patientCount || 0;
-                document.getElementById('totalUsers').textContent = userCount;
-                document.getElementById('activeClinics').textContent = activeClinicCount || 0;
-                
-            } catch (error) {
-                console.error('Error loading dashboard data:', error);
-                showAlert('Error loading dashboard data: ' + error.message, 'error');
-            }
-        }
-        
-        // Load clinics
-        async function loadClinics() {
-            try {
-                if (!supabase) {
-                    console.error('Supabase client not initialized');
-                    return;
-                }
-                
-                const { data, error } = await supabase
-                    .from('clinics')
-                    .select('*')
-                    .order('created_at', { ascending: false });
-                    
-                if (error) throw error;
-                
-                currentClinics = data || [];
-                displayClinics(currentClinics);
-                
-            } catch (error) {
-                console.error('Error loading clinics:', error);
-                document.getElementById('clinicList').innerHTML = '<p>Error loading clinics: ' + error.message + '</p>';
-            }
-        }
-        
-        // Display clinics
-        function displayClinics(clinics) {
-            const clinicList = document.getElementById('clinicList');
+        async function handleLogin() {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            const loginBtn = document.getElementById('loginBtn');
+            const loginBtnText = document.getElementById('loginBtnText');
             
-            if (clinics && clinics.length > 0) {
-                clinicList.innerHTML = clinics.map(clinic => `
-                    <div class="clinic-item">
-                        <div style="display: flex; justify-content: space-between; align-items: start;">
-                            <div>
-                                <h3>${clinic.clinic_name || 'Unnamed Clinic'}</h3>
-                                <p>Code: ${clinic.clinic_code || 'No code'}</p>
-                                <p>Owner: ${clinic.owner_name || 'Not specified'}</p>
-                                <p>Email: ${clinic.email || 'Not specified'}</p>
-                                <p>Phone: ${clinic.phone || 'Not provided'}</p>
-                                <p>Address: ${clinic.address || 'Not provided'}</p>
-                                <p class="${clinic.is_active ? 'status-active' : 'status-inactive'}">
-                                    Status: ${clinic.is_active ? 'Active' : 'Inactive'}
-                                </p>
-                                <small>Created: ${clinic.created_at ? new Date(clinic.created_at).toLocaleDateString() : 'Unknown'}</small>
-                            </div>
-                            <div>
-                                <button class="btn btn-primary" onclick="editClinic(${clinic.id})">Edit</button>
-                                <button class="btn ${clinic.is_active ? 'btn-secondary' : 'btn-primary'}" 
-                                        onclick="toggleClinicStatus(${clinic.id}, ${clinic.is_active})">
-                                    ${clinic.is_active ? 'Deactivate' : 'Activate'}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                `).join('');
-            } else {
-                clinicList.innerHTML = '<p>No clinics found.</p>';
+            if (!username || !password) {
+                showAlert('Please enter both username and password', 'error');
+                return;
             }
-        }
-        
-        // Load all patients
-        async function loadAllPatients() {
+            
+            // Show loading state
+            loginBtn.disabled = true;
+            loginBtnText.innerHTML = '<span class="loading"></span>Signing In...';
+            
             try {
-                if (!supabase) {
-                    console.error('Supabase client not initialized');
-                    return;
-                }
+                // Determine user type and authenticate
+                const userType = await determineUserType(username);
+                const authResult = await authenticateUser(username, password, userType);
                 
-                const { data, error } = await supabase
-                    .from('patients')
-                    .select(`
-                        *,
-                        clinics (clinic_name)
-                    `)
-                    .order('created_at', { ascending: false })
-                    .limit(100);
+                if (authResult.success) {
+                    // Store authentication data for auth guard
+                    const authData = {
+                        username: username,
+                        userType: userType,
+                        clinicId: authResult.clinicId || null,
+                        clinicCode: authResult.clinicCode || null,
+                        permissions: authResult.permissions || [],
+                        loginTime: new Date().toISOString(),
+                        lastActivity: new Date().toISOString(),
+                        sessionId: generateSessionId()
+                    };
                     
-                if (error) throw error;
-                
-                const patientsList = document.getElementById('allPatientsList');
-                
-                if (data && data.length > 0) {
-                    patientsList.innerHTML = data.map(patient => `
-                        <tr>
-                            <td>${patient.patient_id || 'No ID'}</td>
-                            <td>${patient.first_name || ''} ${patient.last_name || ''}</td>
-                            <td>${patient.email || 'Not provided'}</td>
-                            <td>${patient.clinics?.clinic_name || 'Unknown'}</td>
-                            <td>${patient.created_at ? new Date(patient.created_at).toLocaleDateString() : 'Unknown'}</td>
-                        </tr>
-                    `).join('');
+                    localStorage.setItem('celloxen_auth', JSON.stringify(authData));
+                    
+                    showAlert('Login successful! Redirecting...', 'success');
+                    
+                    // Redirect based on user type
+                    setTimeout(() => {
+                        if (userType === 'super_admin') {
+                            window.location.href = 'super-admin-dashboard.html';
+                        } else {
+                            window.location.href = 'clinic-dashboard.html';
+                        }
+                    }, 1000);
+                    
                 } else {
-                    patientsList.innerHTML = '<tr><td colspan="5">No patients found.</td></tr>';
+                    showAlert(authResult.message || 'Invalid username or password', 'error');
                 }
                 
             } catch (error) {
-                console.error('Error loading patients:', error);
-                document.getElementById('allPatientsList').innerHTML = '<tr><td colspan="5">Error loading patients: ' + error.message + '</td></tr>';
+                console.error('Celloxen Login Error:', error);
+                showAlert('Login failed. Please try again.', 'error');
+            } finally {
+                // Reset button state
+                loginBtn.disabled = false;
+                loginBtnText.textContent = 'Sign In';
             }
         }
         
-        // Show add clinic form
-        window.showAddClinicForm = function() {
-            showClinicModal(null, 'add');
-        };
-        
-        // Edit clinic
-        window.editClinic = function(clinicId) {
-            const clinic = currentClinics.find(c => c.id === clinicId);
-            if (clinic) {
-                showClinicModal(clinic, 'edit');
+        async function determineUserType(username) {
+            // Check if it's a super admin username
+            if (username.toLowerCase() === 'superadmin') {
+                return 'super_admin';
             }
-        };
-        
-        // Show clinic modal
-        function showClinicModal(clinic, mode) {
-            const isEdit = mode === 'edit';
-            const modalOverlay = document.createElement('div');
-            modalOverlay.className = 'modal-overlay';
-            modalOverlay.id = 'clinicModal';
             
-            modalOverlay.innerHTML = `
-                <div class="modal-content">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                        <h2 style="color: #10b981; margin: 0;">${isEdit ? 'Edit Clinic' : 'Add New Clinic'}</h2>
-                        <button onclick="closeClinicModal()" class="btn btn-danger">Close</button>
-                    </div>
-                    
-                    <form id="clinicForm">
-                        <input type="hidden" id="clinicId" value="${clinic?.id || ''}">
-                        
-                        <div class="form-group">
-                            <label>Clinic Name</label>
-                            <input type="text" id="clinicName" value="${clinic?.clinic_name || ''}" required placeholder="Enter clinic name">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>Clinic Code</label>
-                            <input type="text" id="clinicCode" value="${clinic?.clinic_code || 'Auto-generated'}" readonly>
-                            <div class="form-help">${isEdit ? 'Clinic code cannot be changed after creation' : 'Code will be automatically generated (e.g., CLN001, CLN002)'}</div>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>Owner Name</label>
-                            <input type="text" id="ownerName" value="${clinic?.owner_name || ''}" required placeholder="Enter owner/manager name">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>Email</label>
-                            <input type="email" id="clinicEmail" value="${clinic?.email || ''}" required placeholder="Enter clinic email address">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>Phone</label>
-                            <input type="tel" id="clinicPhone" value="${clinic?.phone || ''}" placeholder="Enter phone number (optional)">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>Address</label>
-                            <textarea id="clinicAddress" placeholder="Enter clinic address (optional)">${clinic?.address || ''}</textarea>
-                        </div>
-                        
-                        ${isEdit ? `
-                        <div class="form-group">
-                            <label>Status</label>
-                            <select id="clinicStatus">
-                                <option value="true" ${clinic?.is_active ? 'selected' : ''}>Active</option>
-                                <option value="false" ${!clinic?.is_active ? 'selected' : ''}>Inactive</option>
-                            </select>
-                        </div>
-                        ` : ''}
-                        
-                        <div style="text-align: center; margin-top: 20px;">
-                            <button type="submit" class="btn btn-primary">${isEdit ? 'Update Clinic' : 'Add Clinic'}</button>
-                            <button type="button" onclick="closeClinicModal()" class="btn btn-secondary">Cancel</button>
-                            ${isEdit ? '<button type="button" onclick="deleteClinic(' + clinic.id + ')" class="btn btn-danger">Delete Clinic</button>' : ''}
-                        </div>
-                    </form>
-                </div>
-            `;
-            
-            document.body.appendChild(modalOverlay);
-            
-            // Setup form handler
-            document.getElementById('clinicForm').addEventListener('submit', handleClinicSubmit);
-        }
-        
-        // Generate unique clinic code
-        async function generateClinicCode() {
+            // Check if username exists in clinics table
             try {
+                if (supabase) {
+                    const { data, error } = await supabase
+                        .from('clinics')
+                        .select('username, clinic_code')
+                        .eq('username', username)
+                        .single();
+                    
+                    if (data && !error) {
+                        return 'clinic';
+                    }
+                }
+            } catch (e) {
+                console.log('Username not found in clinics table');
+            }
+            
+            // If not found, still assume clinic for now
+            return 'clinic';
+        }
+        
+        async function authenticateUser(username, password, userType) {
+            try {
+                // Check if supabase is available
                 if (!supabase) {
-                    throw new Error('Supabase client not initialized');
+                    console.error('Supabase client not initialized');
+                    return { success: false, message: 'Database connection error' };
                 }
                 
-                // Get the count of existing clinics to generate next code
-                const { count, error } = await supabase
-                    .from('clinics')
-                    .select('*', { count: 'exact', head: true });
+                if (userType === 'super_admin') {
+                    // Super admin authentication
+                    const { data, error } = await supabase
+                        .from('super_admin_users')
+                        .select('*')
+                        .eq('username', username)
+                        .single();
                     
-                if (error) throw error;
-                
-                // Generate code like CLN001, CLN002, etc.
-                const nextNumber = (count || 0) + 1;
-                const clinicCode = 'CLN' + nextNumber.toString().padStart(3, '0');
-                
-                // Check if code already exists (in case of deletions)
-                const { data: existingClinic } = await supabase
-                    .from('clinics')
-                    .select('clinic_code')
-                    .eq('clinic_code', clinicCode)
-                    .maybeSingle();
+                    if (error || !data) {
+                        console.log('Super admin not found:', error);
+                        return { success: false, message: 'Invalid super admin credentials' };
+                    }
                     
-                if (existingClinic) {
-                    // If code exists, find next available
-                    return await findNextAvailableCode();
-                }
-                
-                return clinicCode;
-                
-            } catch (error) {
-                console.error('Error generating clinic code:', error);
-                // Fallback to timestamp-based code
-                return 'CLN' + Date.now().toString().slice(-6);
-            }
-        }
-        
-        // Find next available clinic code
-        async function findNextAvailableCode() {
-            try {
-                const { data: allClinics, error } = await supabase
-                    .from('clinics')
-                    .select('clinic_code')
-                    .order('clinic_code');
+                    // Password verification (use your existing logic)
+                    if (password === 'Admin123!') {
+                        return {
+                            success: true,
+                            permissions: ['all'],
+                            message: 'Super admin login successful'
+                        };
+                    } else {
+                        return { success: false, message: 'Invalid password' };
+                    }
                     
-                if (error) throw error;
-                
-                const existingCodes = allClinics.map(c => c.clinic_code);
-                
-                // Find first available number
-                for (let i = 1; i <= 999; i++) {
-                    const testCode = 'CLN' + i.toString().padStart(3, '0');
-                    if (!existingCodes.includes(testCode)) {
-                        return testCode;
+                } else {
+                    // Clinic user authentication
+                    const { data, error } = await supabase
+                        .from('clinics')
+                        .select('*')
+                        .eq('username', username)
+                        .single();
+                    
+                    if (error || !data) {
+                        console.log('Clinic user not found:', error);
+                        return { success: false, message: 'Invalid clinic credentials. Please check your username.' };
+                    }
+                    
+                    // Check if clinic has null username (needs setup)
+                    if (!data.username) {
+                        return { success: false, message: 'Clinic account needs setup. Contact admin.' };
+                    }
+                    
+                    // Password verification (use your existing logic)
+                    if (password === 'Admin123!') {
+                        return {
+                            success: true,
+                            clinicId: data.id,
+                            clinicCode: data.clinic_code,
+                            permissions: ['clinic_access'],
+                            message: 'Clinic login successful'
+                        };
+                    } else {
+                        return { success: false, message: 'Invalid password' };
                     }
                 }
                 
-                // Fallback if all codes 1-999 are used
-                return 'CLN' + Date.now().toString().slice(-6);
-                
             } catch (error) {
-                console.error('Error finding available code:', error);
-                return 'CLN' + Date.now().toString().slice(-6);
+                console.error('Celloxen Authentication Error:', error);
+                return { success: false, message: 'Authentication system error' };
             }
         }
         
-        // Handle clinic form submission
-        async function handleClinicSubmit(e) {
-            e.preventDefault();
+        function generateSessionId() {
+            return 'celloxen_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
+        }
+        
+        function showAlert(message, type = 'info') {
+            const alertContainer = document.getElementById('alertContainer');
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.textContent = message;
             
-            try {
-                if (!supabase) {
-                    throw new Error('Supabase client not initialized');
-                }
-                
-                const clinicId = document.getElementById('clinicId').value;
-                const isEdit = !!clinicId;
-                
-                const clinicData = {
-                    clinic_name: document.getElementById('clinicName').value,
-                    owner_name: document.getElementById('ownerName').value,
-                    email: document.getElementById('clinicEmail').value,
-                    phone: document.getElementById('clinicPhone').value || null,
-                    address: document.getElementById('clinicAddress').value || null
-                };
-                
-                if (isEdit) {
-                    // For editing, keep existing clinic code
-                    clinicData.is_active = document.getElementById('clinicStatus').value === 'true';
-                    
-                    const { error } = await supabase
-                        .from('clinics')
-                        .update(clinicData)
-                        .eq('id', clinicId);
-                        
-                    if (error) throw error;
-                    showAlert('Clinic updated successfully!');
-                } else {
-                    // For new clinics, generate clinic code
-                    const clinicCode = await generateClinicCode();
-                    clinicData.clinic_code = clinicCode;
-                    
-                    const { error } = await supabase
-                        .from('clinics')
-                        .insert([clinicData]);
-                        
-                    if (error) throw error;
-                    showAlert(`Clinic added successfully! Clinic Code: ${clinicCode}`);
-                }
-                
-                closeClinicModal();
-                loadClinics();
-                loadDashboardData();
-                
-            } catch (error) {
-                console.error('Error saving clinic:', error);
-                showAlert('Error saving clinic: ' + error.message, 'error');
+            alertContainer.innerHTML = '';
+            alertContainer.appendChild(alertDiv);
+            
+            // Auto-hide success messages
+            if (type === 'success') {
+                setTimeout(() => {
+                    alertDiv.style.opacity = '0';
+                    alertDiv.style.transition = 'opacity 0.3s ease';
+                    setTimeout(() => alertDiv.remove(), 300);
+                }, 3000);
             }
         }
         
-        // Delete clinic
-        window.deleteClinic = async function(clinicId) {
-            if (!confirm('Are you sure you want to delete this clinic? This action cannot be undone and will affect all associated patients and data.')) {
-                return;
-            }
-            
-            try {
-                if (!supabase) {
-                    throw new Error('Supabase client not initialized');
-                }
-                
-                const { error } = await supabase
-                    .from('clinics')
-                    .delete()
-                    .eq('id', clinicId);
-                    
-                if (error) throw error;
-                
-                showAlert('Clinic deleted successfully!');
-                closeClinicModal();
-                loadClinics();
-                loadDashboardData();
-                
-            } catch (error) {
-                console.error('Error deleting clinic:', error);
-                showAlert('Error deleting clinic: ' + error.message, 'error');
-            }
-        };
+        function forgotPassword() {
+            showAlert('Password reset functionality will be implemented with SendGrid integration.', 'info');
+        }
         
-        // Close clinic modal
-        window.closeClinicModal = function() {
-            const modal = document.getElementById('clinicModal');
-            if (modal) {
-                document.body.removeChild(modal);
+        // Allow Enter key to submit
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                handleLogin();
             }
-        };
-        
-        // Toggle clinic status
-        window.toggleClinicStatus = async function(clinicId, currentStatus) {
-            try {
-                if (!supabase) {
-                    throw new Error('Supabase client not initialized');
-                }
-                
-                const { error } = await supabase
-                    .from('clinics')
-                    .update({ is_active: !currentStatus })
-                    .eq('id', clinicId);
-                    
-                if (error) throw error;
-                
-                showAlert(`Clinic ${!currentStatus ? 'activated' : 'deactivated'} successfully!`);
-                loadClinics();
-                loadDashboardData();
-                
-            } catch (error) {
-                console.error('Error updating clinic status:', error);
-                showAlert('Error updating clinic status: ' + error.message, 'error');
-            }
-        };
-        
+        });
     </script>
 </body>
 </html>
