@@ -13,16 +13,15 @@
         
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #1e293b, #334155);
-            color: white;
+            background: #f8fafc;
+            color: #1f2937;
             min-height: 100vh;
         }
         
         /* Header Styles */
         .header {
-            background: rgba(0, 0, 0, 0.3);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(16, 185, 129, 0.3);
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             padding: 20px 0;
             position: sticky;
             top: 0;
@@ -54,11 +53,10 @@
             display: flex;
             align-items: center;
             gap: 20px;
-            color: #cbd5e1;
         }
         
         .user-badge {
-            background: rgba(16, 185, 129, 0.2);
+            background: #f0fdf4;
             color: #10b981;
             padding: 8px 16px;
             border-radius: 8px;
@@ -97,18 +95,17 @@
         }
         
         .stat-card {
-            background: rgba(255, 255, 255, 0.1);
+            background: white;
             border-radius: 12px;
             padding: 25px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            border-left: 4px solid #10b981;
+            transition: transform 0.3s, box-shadow 0.3s;
         }
         
         .stat-card:hover {
             transform: translateY(-2px);
-            background: rgba(255, 255, 255, 0.15);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
         }
         
         .stat-number {
@@ -119,7 +116,7 @@
         }
         
         .stat-label {
-            color: #94a3b8;
+            color: #6b7280;
             font-size: 0.95rem;
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -128,7 +125,7 @@
         .stat-change {
             margin-top: 10px;
             font-size: 0.9rem;
-            color: #10b981;
+            color: #059669;
         }
         
         /* Module Grid */
@@ -138,10 +135,10 @@
         
         .section-title {
             font-size: 1.5rem;
-            color: #10b981;
+            color: #1f2937;
             margin-bottom: 20px;
             padding-bottom: 10px;
-            border-bottom: 2px solid rgba(16, 185, 129, 0.3);
+            border-bottom: 2px solid #10b981;
         }
         
         .modules-grid {
@@ -151,26 +148,25 @@
         }
         
         .module-card {
-            background: rgba(255, 255, 255, 0.1);
+            background: white;
             border-radius: 12px;
             padding: 20px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.3s;
+            border: 2px solid transparent;
         }
         
         .module-card:hover {
-            transform: translateY(-2px);
-            background: rgba(255, 255, 255, 0.15);
             border-color: #10b981;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
         }
         
         .module-icon {
             width: 50px;
             height: 50px;
-            background: rgba(16, 185, 129, 0.2);
+            background: #f0fdf4;
             border-radius: 10px;
             display: flex;
             align-items: center;
@@ -182,12 +178,12 @@
         .module-title {
             font-size: 1.1rem;
             font-weight: 600;
-            color: white;
+            color: #1f2937;
             margin-bottom: 8px;
         }
         
         .module-description {
-            color: #cbd5e1;
+            color: #6b7280;
             font-size: 0.9rem;
             line-height: 1.4;
         }
@@ -196,7 +192,7 @@
             margin-top: 10px;
             display: inline-block;
             padding: 4px 10px;
-            background: rgba(16, 185, 129, 0.2);
+            background: #f0fdf4;
             color: #10b981;
             border-radius: 4px;
             font-size: 0.8rem;
@@ -205,11 +201,10 @@
         
         /* Quick Actions */
         .quick-actions {
-            background: rgba(255, 255, 255, 0.05);
+            background: white;
             border-radius: 12px;
             padding: 25px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
             margin-bottom: 30px;
         }
         
@@ -234,25 +229,22 @@
         
         .action-btn:hover {
             background: #059669;
-            transform: translateY(-1px);
         }
         
         .action-btn.secondary {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: #6b7280;
         }
         
         .action-btn.secondary:hover {
-            background: rgba(255, 255, 255, 0.2);
+            background: #4b5563;
         }
         
         /* Recent Activity */
         .activity-section {
-            background: rgba(255, 255, 255, 0.05);
+            background: white;
             border-radius: 12px;
             padding: 25px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         }
         
         .activity-list {
@@ -261,7 +253,7 @@
         
         .activity-item {
             padding: 15px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid #e5e7eb;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -272,17 +264,17 @@
         }
         
         .activity-text {
-            color: #cbd5e1;
+            color: #374151;
         }
         
         .activity-time {
-            color: #64748b;
+            color: #9ca3af;
             font-size: 0.9rem;
         }
         
         /* Alert Banner */
         .alert-banner {
-            background: rgba(254, 243, 199, 0.1);
+            background: #fef3c7;
             border: 1px solid #fbbf24;
             border-radius: 8px;
             padding: 15px 20px;
@@ -293,13 +285,13 @@
         }
         
         .alert-icon {
-            color: #fbbf24;
+            color: #f59e0b;
             font-size: 1.5rem;
         }
         
         .alert-text {
             flex: 1;
-            color: #fbbf24;
+            color: #92400e;
         }
         
         /* Loading Overlay */
@@ -309,7 +301,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(15, 23, 42, 0.9);
+            background: rgba(255, 255, 255, 0.9);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -320,7 +312,7 @@
         .loading-spinner {
             width: 50px;
             height: 50px;
-            border: 4px solid rgba(255, 255, 255, 0.1);
+            border: 4px solid #e5e7eb;
             border-top: 4px solid #10b981;
             border-radius: 50%;
             animation: spin 1s linear infinite;
@@ -343,7 +335,7 @@
         <div class="header-container">
             <div class="logo">
                 <h1>CELLOXEN</h1>
-                <span style="color: #94a3b8;">Super Admin Portal</span>
+                <span style="color: #6b7280;">Super Admin Portal</span>
             </div>
             <div class="user-info">
                 <span>Welcome, <strong id="adminName">System Administrator</strong></span>
