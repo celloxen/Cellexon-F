@@ -36,7 +36,7 @@
         }
         
         .logo h1 {
-            color: #10b981;
+            color: #1e3a8a;
             font-size: 2.5rem;
             font-weight: 700;
             margin-bottom: 8px;
@@ -211,33 +211,6 @@
             position: relative;
         }
         
-        .login-type-indicator {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 25px;
-            padding: 4px;
-            background: #f3f4f6;
-            border-radius: 8px;
-        }
-        
-        .type-button {
-            flex: 1;
-            padding: 10px;
-            border: none;
-            background: transparent;
-            color: #6b7280;
-            font-weight: 500;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .type-button.active {
-            background: white;
-            color: #10b981;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        
         .info-box {
             background: #f9fafb;
             border: 1px solid #e5e7eb;
@@ -262,16 +235,6 @@
         
         <!-- Alert Messages -->
         <div id="alertContainer"></div>
-        
-        <!-- Login Type Indicator -->
-        <div class="login-type-indicator">
-            <button class="type-button active" id="clinicLoginBtn" onclick="setLoginType('clinic')">
-                Clinic Login
-            </button>
-            <button class="type-button" id="adminLoginBtn" onclick="setLoginType('admin')">
-                Admin Login
-            </button>
-        </div>
         
         <!-- Login Form -->
         <form id="loginForm">
@@ -320,15 +283,12 @@
         </div>
         
         <div class="info-box" id="loginInfo">
-            <strong>Clinic Users:</strong> Use your clinic username and password<br>
-            <strong>Administrators:</strong> Use super admin credentials
+            <strong>Clinic Users:</strong> Use your clinic username and password
         </div>
     </div>
 
     <script type="module">
         import { supabase } from './supabase-config.js';
-        
-        let loginType = 'clinic'; // Default to clinic login
         
         // Check for any messages from other pages
         document.addEventListener('DOMContentLoaded', function() {
@@ -342,28 +302,6 @@
             localStorage.removeItem('celloxen_auth');
             sessionStorage.clear();
         });
-        
-        // Set login type
-        window.setLoginType = function(type) {
-            loginType = type;
-            
-            // Update UI
-            if (type === 'admin') {
-                document.getElementById('adminLoginBtn').classList.add('active');
-                document.getElementById('clinicLoginBtn').classList.remove('active');
-                document.getElementById('loginInfo').innerHTML = `
-                    <strong>Super Admin Login</strong><br>
-                    Access to all system management features and global oversight
-                `;
-            } else {
-                document.getElementById('clinicLoginBtn').classList.add('active');
-                document.getElementById('adminLoginBtn').classList.remove('active');
-                document.getElementById('loginInfo').innerHTML = `
-                    <strong>Clinic Login</strong><br>
-                    Access to your clinic's patient management and treatment modules
-                `;
-            }
-        };
         
         // Toggle password visibility
         window.togglePassword = function() {
@@ -401,44 +339,25 @@
             loginBtnText.innerHTML = '<span class="loading"></span>Signing In...';
             
             try {
-                let authResult = null;
-                
-                if (loginType === 'admin') {
+                // First, check if it's a super admin (hidden check)
+                if (username.toLowerCase() === 'superadmin') {
                     // Authenticate as super admin
-                    authResult = await authenticateSuperAdmin(username, password);
+                    const authResult = await authenticateSuperAdmin(username, password);
+                    
+                    if (authResult.success) {
+                        handleSuccessfulLogin(authResult, 'super-admin-dashboard.html');
+                    } else {
+                        showAlert(authResult.message || 'Invalid credentials', 'error');
+                    }
                 } else {
                     // Authenticate as clinic admin
-                    authResult = await authenticateClinicAdmin(username, password);
-                }
-                
-                if (authResult.success) {
-                    // Store authentication data
-                    const authData = {
-                        username: authResult.username,
-                        userType: authResult.userType,
-                        clinicId: authResult.clinicId || null,
-                        clinicCode: authResult.clinicCode || null,
-                        fullName: authResult.fullName || username,
-                        loginTime: new Date().toISOString(),
-                        lastActivity: new Date().toISOString(),
-                        sessionId: generateSessionId()
-                    };
+                    const authResult = await authenticateClinicAdmin(username, password);
                     
-                    localStorage.setItem('celloxen_auth', JSON.stringify(authData));
-                    
-                    showAlert('Login successful! Redirecting...', 'success');
-                    
-                    // Redirect based on user type
-                    setTimeout(() => {
-                        if (authResult.userType === 'super_admin') {
-                            window.location.href = 'super-admin-dashboard.html';
-                        } else {
-                            window.location.href = 'clinic-dashboard.html';
-                        }
-                    }, 1000);
-                    
-                } else {
-                    showAlert(authResult.message || 'Invalid username or password', 'error');
+                    if (authResult.success) {
+                        handleSuccessfulLogin(authResult, 'clinic-dashboard.html');
+                    } else {
+                        showAlert(authResult.message || 'Invalid username or password', 'error');
+                    }
                 }
                 
             } catch (error) {
@@ -451,7 +370,31 @@
             }
         }
         
-        // Authenticate super admin
+        // Handle successful login
+        function handleSuccessfulLogin(authResult, redirectUrl) {
+            // Store authentication data
+            const authData = {
+                username: authResult.username,
+                userType: authResult.userType,
+                clinicId: authResult.clinicId || null,
+                clinicCode: authResult.clinicCode || null,
+                fullName: authResult.fullName || authResult.username,
+                loginTime: new Date().toISOString(),
+                lastActivity: new Date().toISOString(),
+                sessionId: generateSessionId()
+            };
+            
+            localStorage.setItem('celloxen_auth', JSON.stringify(authData));
+            
+            showAlert('Login successful! Redirecting...', 'success');
+            
+            // Redirect to appropriate dashboard
+            setTimeout(() => {
+                window.location.href = redirectUrl;
+            }, 1000);
+        }
+        
+        // Authenticate super admin (hidden)
         async function authenticateSuperAdmin(username, password) {
             try {
                 const { data, error } = await supabase
@@ -462,7 +405,7 @@
                     .single();
                 
                 if (error || !data) {
-                    return { success: false, message: 'Invalid admin credentials' };
+                    return { success: false, message: 'Invalid credentials' };
                 }
                 
                 // Check password (in production, this should be properly hashed)
