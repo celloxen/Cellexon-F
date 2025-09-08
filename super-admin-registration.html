@@ -545,7 +545,13 @@
                         professional_insurance: formData.professionalInsurance
                     });
 
-                if (error) throw error;
+                if (error) {
+                    console.error('Supabase error details:', error);
+                    console.error('Error message:', error.message);
+                    console.error('Error details:', error.details);
+                    console.error('Error hint:', error.hint);
+                    throw error;
+                }
 
                 // Prepare email data
                 const emailData = {
