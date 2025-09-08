@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Admin Dashboard - Celloxen Health Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f8fafc;
+            color: #1f2937;
+            min-height: 100vh;
+        }
+        
+        /* Header Styles */
+        .header {
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 20px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .logo h1 {
+            color: #10b981;
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .user-badge {
+            background: #f0fdf4;
+            color: #10b981;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 500;
+            border: 1px solid #10b981;
+        }
+        
+        .logout-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.3s;
+        }
+        
+        .logout-btn:hover {
+            background: #dc2626;
+        }
+        
+        /* Main Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+        
+        /* Statistics Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            border-left: 4px solid #10b981;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #10b981;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            color: #6b7280;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .stat-change {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: #059669;
+        }
+        
+        /* Module Grid */
+        .modules-section {
+            margin-bottom: 30px;
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            color: #1f2937;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #10b981;
+        }
+        
+        .modules-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        
+        .module-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+        
+        .module-card:hover {
+            border-color: #10b981;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+        }
+        
+        .module-icon {
+            width: 50px;
+            height: 50px;
+            background: #f0fdf4;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+        
+        .module-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 8px;
+        }
+        
+        .module-description {
+            color: #6b7280;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+        
+        .module-status {
+            margin-top: 10px;
+            display: inline-block;
+            padding: 4px 10px;
+            background: #f0fdf4;
+            color: #10b981;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        /* Quick Actions */
+        .quick-actions {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: 30px;
+        }
+        
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .action-btn {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 15px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.3s;
+            text-align: center;
+        }
+        
+        .action-btn:hover {
+            background: #059669;
+        }
+        
+        .action-btn.secondary {
+            background: #6b7280;
+        }
+        
+        .action-btn.secondary:hover {
+            background: #4b5563;
+        }
+        
+        /* Recent Activity */
+        .activity-section {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        .activity-list {
+            margin-top: 20px;
+        }
+        
+        .activity-item {
+            padding: 15px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+        
+        .activity-text {
+            color: #374151;
+        }
+        
+        .activity-time {
+            color: #9ca3af;
+            font-size: 0.9rem;
+        }
+        
+        /* Alert Banner */
+        .alert-banner {
+            background: #fef3c7;
+            border: 1px solid #fbbf24;
+            border-radius: 8px;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .alert-icon {
+            color: #f59e0b;
+            font-size: 1.5rem;
+        }
+        
+        .alert-text {
+            flex: 1;
+            color: #92400e;
+        }
+        
+        /* Loading Overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            display: none;
+        }
+        
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #e5e7eb;
+            border-top: 4px solid #10b981;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <!-- Header -->
+    <div class="header">
+        <div class="header-container">
+            <div class="logo">
+                <h1>CELLOXEN</h1>
+                <span style="color: #6b7280;">Super Admin Portal</span>
+            </div>
+            <div class="user-info">
+                <span>Welcome, <strong id="adminName">System Administrator</strong></span>
+                <span class="user-badge">SUPER ADMIN</span>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Alert Banner (if needed) -->
+        <div class="alert-banner" id="alertBanner" style="display: none;">
+            <span class="alert-icon">⚠️</span>
+            <span class="alert-text" id="alertText"></span>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" id="totalClinics">0</div>
+                <div class="stat-label">Total Clinics</div>
+                <div class="stat-change">↑ Active clinics in system</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalPatients">0</div>
+                <div class="stat-label">Total Patients</div>
+                <div class="stat-change">↑ Across all clinics</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="activeSessions">0</div>
+                <div class="stat-label">Active Sessions</div>
+                <div class="stat-change">↑ Currently running</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalReports">0</div>
+                <div class="stat-label">Total Reports</div>
+                <div class="stat-change">↑ Generated this month</div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <h2 class="section-title">Quick Actions</h2>
+            <div class="actions-grid">
+                <button class="action-btn" onclick="navigateTo('super-admin-registration.html')">
+                    Register New Clinic
+                </button>
+                <button class="action-btn" onclick="navigateTo('patient-management.html')">
+                    View All Patients
+                </button>
+                <button class="action-btn secondary" onclick="generateSystemReport()">
+                    Generate System Report
+                </button>
+                <button class="action-btn secondary" onclick="viewSystemLogs()">
+                    View System Logs
+                </button>
+            </div>
+        </div>
+
+        <!-- System Management Modules -->
+        <div class="modules-section">
+            <h2 class="section-title">System Management</h2>
+            <div class="modules-grid">
+                <div class="module-card" onclick="navigateTo('super-admin-registration.html')">
+                    <div class="module-icon">🏥</div>
+                    <div class="module-title">Clinic Management</div>
+                    <div class="module-description">Register and manage clinics, assign devices, manage clinic administrators</div>
+                    <div class="module-status">Full Access</div>
+                </div>
+                
+                <div class="module-card" onclick="viewAllPatients()">
+                    <div class="module-icon">👥</div>
+                    <div class="module-title">Global Patient View</div>
+                    <div class="module-description">View and manage all patients across all clinics in the system</div>
+                    <div class="module-status">Full Access</div>
+                </div>
+                
+                <div class="module-card" onclick="viewSystemAnalytics()">
+                    <div class="module-icon">📊</div>
+                    <div class="module-title">System Analytics</div>
+                    <div class="module-description">View system-wide analytics, usage statistics, and performance metrics</div>
+                    <div class="module-status">Full Access</div>
+                </div>
+                
+                <div class="module-card" onclick="manageUsers()">
+                    <div class="module-icon">🔐</div>
+                    <div class="module-title">User Management</div>
+                    <div class="module-description">Manage user accounts, permissions, and access control</div>
+                    <div class="module-status">Full Access</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Clinical Modules -->
+        <div class="modules-section">
+            <h2 class="section-title">Clinical Modules</h2>
+            <div class="modules-grid">
+                <div class="module-card" onclick="navigateTo('patient-management.html')">
+                    <div class="module-icon">📋</div>
+                    <div class="module-title">Patient Management</div>
+                    <div class="module-description">Register patients, manage records, view patient history</div>
+                    <div class="module-status">Full Access</div>
+                </div>
+                
+                <div class="module-card" onclick="navigateTo('health-assessment.html')">
+                    <div class="module-icon">🏥</div>
+                    <div class="module-title">Health Assessment</div>
+                    <div class="module-description">5-category health questionnaire with AI recommendations</div>
+                    <div class="module-status">Full Access</div>
+                </div>
+                
+                <div class="module-card" onclick="navigateTo('iris-analysis.html')">
+                    <div class="module-icon">👁️</div>
+                    <div class="module-title">IRIS Analysis</div>
+                    <div class="module-description">IRIS image capture and constitutional analysis</div>
+                    <div class="module-status">Full Access</div>
+                </div>
+                
+                <div class="module-card" onclick="navigateTo('treatment-interface.html')">
+                    <div class="module-icon">⚡</div>
+                    <div class="module-title">Treatment Interface</div>
+                    <div class="module-description">33 therapy protocols with frequency control</div>
+                    <div class="module-status">Full Access</div>
+                </div>
+                
+                <div class="module-card" onclick="navigateTo('vital-signs.html')">
+                    <div class="module-icon">💓</div>
+                    <div class="module-title">Vital Signs Monitoring</div>
+                    <div class="module-description">Real-time vital signs monitoring during treatment</div>
+                    <div class="module-status">Full Access</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="activity-section">
+            <h2 class="section-title">Recent System Activity</h2>
+            <div class="activity-list" id="activityList">
+                <div class="activity-item">
+                    <span class="activity-text">System initialized - Ready for operation</span>
+                    <span class="activity-time">Just now</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Include auth guard -->
+    <script src="auth-guard.js"></script>
+    
+    <script type="module">
+        import { supabase } from './supabase-config.js';
+        
+        // Check authentication on page load
+        document.addEventListener('DOMContentLoaded', async function() {
+            checkAuthentication();
+            loadDashboardData();
+        });
+        
+        // Check if user is authenticated and is super admin
+        function checkAuthentication() {
+            const authData = localStorage.getItem('celloxen_auth');
+            if (!authData) {
+                window.location.href = 'unified-login.html';
+                return;
+            }
+            
+            const auth = JSON.parse(authData);
+            if (auth.userType !== 'super_admin') {
+                alert('Access denied. Super Admin privileges required.');
+                window.location.href = 'unified-login.html';
+                return;
+            }
+            
+            // Update admin name
+            document.getElementById('adminName').textContent = auth.fullName || 'System Administrator';
+        }
+        
+        // Load dashboard statistics
+        async function loadDashboardData() {
+            try {
+                showLoading(true);
+                
+                // Load total clinics
+                const { count: clinicsCount } = await supabase
+                    .from('clinics')
+                    .select('*', { count: 'exact', head: true });
+                document.getElementById('totalClinics').textContent = clinicsCount || 0;
+                
+                // Load total patients
+                const { count: patientsCount } = await supabase
+                    .from('patients')
+                    .select('*', { count: 'exact', head: true });
+                document.getElementById('totalPatients').textContent = patientsCount || 0;
+                
+                // Load active sessions (sessions from today)
+                const today = new Date().toISOString().split('T')[0];
+                const { count: sessionsCount } = await supabase
+                    .from('treatment_sessions')
+                    .select('*', { count: 'exact', head: true })
+                    .gte('created_at', today);
+                document.getElementById('activeSessions').textContent = sessionsCount || 0;
+                
+                // Load total reports
+                const { count: reportsCount } = await supabase
+                    .from('medical_reports')
+                    .select('*', { count: 'exact', head: true });
+                document.getElementById('totalReports').textContent = reportsCount || 0;
+                
+                // Load recent activity
+                await loadRecentActivity();
+                
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+                showAlert('Error loading dashboard data. Please refresh the page.');
+            } finally {
+                showLoading(false);
+            }
+        }
+        
+        // Load recent activity
+        async function loadRecentActivity() {
+            try {
+                // Get recent clinics
+                const { data: recentClinics } = await supabase
+                    .from('clinics')
+                    .select('clinic_name, created_at')
+                    .order('created_at', { ascending: false })
+                    .limit(3);
+                
+                // Get recent patients
+                const { data: recentPatients } = await supabase
+                    .from('patients')
+                    .select('first_name, last_name, created_at')
+                    .order('created_at', { ascending: false })
+                    .limit(3);
+                
+                const activityList = document.getElementById('activityList');
+                activityList.innerHTML = '';
+                
+                // Add clinic activities
+                if (recentClinics && recentClinics.length > 0) {
+                    recentClinics.forEach(clinic => {
+                        const item = createActivityItem(
+                            `New clinic registered: ${clinic.clinic_name}`,
+                            clinic.created_at
+                        );
+                        activityList.appendChild(item);
+                    });
+                }
+                
+                // Add patient activities
+                if (recentPatients && recentPatients.length > 0) {
+                    recentPatients.forEach(patient => {
+                        const item = createActivityItem(
+                            `New patient registered: ${patient.first_name} ${patient.last_name}`,
+                            patient.created_at
+                        );
+                        activityList.appendChild(item);
+                    });
+                }
+                
+                // If no activity
+                if (activityList.children.length === 0) {
+                    activityList.innerHTML = `
+                        <div class="activity-item">
+                            <span class="activity-text">No recent activity</span>
+                            <span class="activity-time">-</span>
+                        </div>
+                    `;
+                }
+                
+            } catch (error) {
+                console.error('Error loading recent activity:', error);
+            }
+        }
+        
+        // Create activity item element
+        function createActivityItem(text, timestamp) {
+            const div = document.createElement('div');
+            div.className = 'activity-item';
+            div.innerHTML = `
+                <span class="activity-text">${text}</span>
+                <span class="activity-time">${formatTime(timestamp)}</span>
+            `;
+            return div;
+        }
+        
+        // Format timestamp
+        function formatTime(timestamp) {
+            const date = new Date(timestamp);
+            const now = new Date();
+            const diff = now - date;
+            const minutes = Math.floor(diff / 60000);
+            const hours = Math.floor(diff / 3600000);
+            const days = Math.floor(diff / 86400000);
+            
+            if (minutes < 1) return 'Just now';
+            if (minutes < 60) return `${minutes} min ago`;
+            if (hours < 24) return `${hours} hours ago`;
+            return `${days} days ago`;
+        }
+        
+        // Navigation functions
+        window.navigateTo = function(page) {
+            window.location.href = page;
+        };
+        
+        window.viewAllPatients = function() {
+            sessionStorage.setItem('viewMode', 'super_admin');
+            window.location.href = 'patient-management.html';
+        };
+        
+        window.viewSystemAnalytics = function() {
+            showAlert('System Analytics module coming soon!');
+        };
+        
+        window.manageUsers = function() {
+            showAlert('User Management module coming soon!');
+        };
+        
+        window.generateSystemReport = function() {
+            showAlert('System report generation started...');
+        };
+        
+        window.viewSystemLogs = function() {
+            showAlert('System logs viewer coming soon!');
+        };
+        
+        // Logout function
+        window.logout = function() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('celloxen_auth');
+                sessionStorage.clear();
+                window.location.href = 'unified-login.html';
+            }
+        };
+        
+        // Show/hide loading overlay
+        function showLoading(show) {
+            document.getElementById('loadingOverlay').style.display = show ? 'flex' : 'none';
+        }
+        
+        // Show alert banner
+        function showAlert(message, type = 'info') {
+            const banner = document.getElementById('alertBanner');
+            const text = document.getElementById('alertText');
+            text.textContent = message;
+            banner.style.display = 'flex';
+            
+            setTimeout(() => {
+                banner.style.display = 'none';
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
