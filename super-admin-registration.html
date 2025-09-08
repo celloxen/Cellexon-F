@@ -612,13 +612,13 @@
                     clinicsList.innerHTML = data.map(clinic => `
                         <div class="clinic-card">
                             <div class="clinic-header">
-                                <div class="clinic-name">${clinic.business_name}</div>
+                                <div class="clinic-name">${clinic.clinic_name}</div>
                                 <div class="clinic-code">${clinic.clinic_code}</div>
                             </div>
                             <div class="clinic-details">
                                 <div><strong>Trading Name:</strong> ${clinic.clinic_trading_name || 'N/A'}</div>
                                 <div><strong>Type:</strong> ${clinic.business_type}</div>
-                                <div><strong>Contact:</strong> ${clinic.authorised_person}</div>
+                                <div><strong>Contact:</strong> ${clinic.owner_name}</div>
                                 <div><strong>Email:</strong> ${clinic.email}</div>
                                 <div><strong>Device:</strong> ${clinic.device_serial_number}</div>
                                 <div><strong>Username:</strong> ${clinic.username}</div>
