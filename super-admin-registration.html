@@ -667,6 +667,11 @@
         document.getElementById('clinicRegistrationForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
+            // Debug: Log all form field values before processing
+            console.log('Form submission triggered');
+            console.log('Legal Entity Name element:', document.getElementById('legalEntityName'));
+            console.log('Legal Entity Name value:', document.getElementById('legalEntityName').value);
+            
             const formData = {
                 legalEntityName: document.getElementById('legalEntityName').value,
                 businessType: document.getElementById('businessType').value,
@@ -680,6 +685,17 @@
                 healthcareRegulation: document.getElementById('healthcareRegulation').value,
                 professionalInsurance: document.getElementById('professionalInsurance').value
             };
+
+            console.log('Complete form data object:', formData);
+            
+            // Check for empty required fields
+            const requiredFields = ['legalEntityName', 'primaryContactName', 'primaryContactEmail'];
+            const emptyFields = requiredFields.filter(field => !formData[field] || formData[field].trim() === '');
+            
+            if (emptyFields.length > 0) {
+                showAlert('Missing required fields: ' + emptyFields.join(', '), 'error');
+                return;
+            }
 
             registerClinic(formData);
         });
