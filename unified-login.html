@@ -149,48 +149,6 @@
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
-        
-        /* Password Reset Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 9999;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            animation: fadeIn 0.3s ease;
-        }
-        
-        .modal-content {
-            background: white;
-            margin: 10% auto;
-            padding: 30px;
-            border-radius: 12px;
-            width: 90%;
-            max-width: 400px;
-            position: relative;
-        }
-        
-        .close {
-            position: absolute;
-            right: 15px;
-            top: 15px;
-            font-size: 24px;
-            font-weight: bold;
-            cursor: pointer;
-            color: #6b7280;
-        }
-        
-        .close:hover {
-            color: #374151;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
     </style>
 </head>
 <body>
@@ -221,30 +179,27 @@
         </form>
         
         <div class="forgot-password">
-            <a href="#" class="forgot-link" onclick="openResetModal()">Forgot Password?</a>
-        </div>
-    </div>
-    
-    <!-- Password Reset Modal -->
-    <div id="resetModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeResetModal()">&times;</span>
-            <h3 style="margin-bottom: 20px; color: #1f2937;">Reset Password</h3>
-            <form id="resetForm">
-                <div class="form-group">
-                    <label class="form-label" for="resetEmail">Email Address</label>
-                    <input type="email" class="form-input" id="resetEmail" placeholder="Enter your email" required>
-                </div>
-                <button type="submit" class="login-button">Send Reset Link</button>
-            </form>
+            <a href="#" class="forgot-link" onclick="forgotPassword()">Forgot Password?</a>
         </div>
     </div>
 
-    <!-- Include Supabase -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="supabase-config.js"></script>
+    <!-- Direct Supabase Integration -->
+    <script src="https://unpkg.com/@supabase/supabase-js@1.35.7/dist/umd/supabase.js"></script>
     
     <script>
+        // Initialize Supabase directly
+        const supabaseUrl = 'https://defifwzgazqlrigwumqn.supabase.co';
+        const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlZmlmd3pnYXpxbHJpZ3d1bXFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjU2Mzk1NzcsImV4cCI6MjA0MTIxNTU3N30.WKdjgFLOUMCnWmMsxKFZq4dFPHXa2NjUJ7vfEYOeCMA';
+        
+        let supabase;
+        
+        try {
+            supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
+            console.log('Supabase client initialized successfully');
+        } catch (error) {
+            console.error('Failed to initialize Supabase:', error);
+        }
+        
         // Check for login messages from other pages
         document.addEventListener('DOMContentLoaded', function() {
             const message = localStorage.getItem('celloxen_login_message');
@@ -330,12 +285,35 @@
                 return 'super_admin';
             }
             
-            // Otherwise, assume it's a clinic user
+            // Check if username exists in clinics table
+            try {
+                if (supabase) {
+                    const { data, error } = await supabase
+                        .from('clinics')
+                        .select('username, clinic_code')
+                        .eq('username', username)
+                        .single();
+                    
+                    if (data && !error) {
+                        return 'clinic';
+                    }
+                }
+            } catch (e) {
+                console.log('Username not found in clinics table');
+            }
+            
+            // If not found, still assume clinic for now
             return 'clinic';
         }
         
         async function authenticateUser(username, password, userType) {
             try {
+                // Check if supabase is available
+                if (!supabase) {
+                    console.error('Supabase client not initialized');
+                    return { success: false, message: 'Database connection error' };
+                }
+                
                 if (userType === 'super_admin') {
                     // Super admin authentication
                     const { data, error } = await supabase
@@ -345,6 +323,7 @@
                         .single();
                     
                     if (error || !data) {
+                        console.log('Super admin not found:', error);
                         return { success: false, message: 'Invalid super admin credentials' };
                     }
                     
@@ -368,6 +347,7 @@
                         .single();
                     
                     if (error || !data) {
+                        console.log('Clinic user not found:', error);
                         return { success: false, message: 'Invalid clinic credentials. Please check your username.' };
                     }
                     
@@ -419,36 +399,13 @@
             }
         }
         
-        // Password Reset Modal Functions
-        function openResetModal() {
-            document.getElementById('resetModal').style.display = 'block';
-        }
-        
-        function closeResetModal() {
-            document.getElementById('resetModal').style.display = 'none';
-            document.getElementById('resetForm').reset();
-        }
-        
-        // Handle password reset form
-        document.getElementById('resetForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const email = document.getElementById('resetEmail').value;
-            
+        function forgotPassword() {
             showAlert('Password reset functionality will be implemented with SendGrid integration.', 'info');
-            closeResetModal();
-        });
-        
-        // Close modal when clicking outside
-        window.onclick = function(event) {
-            const modal = document.getElementById('resetModal');
-            if (event.target === modal) {
-                closeResetModal();
-            }
         }
         
         // Allow Enter key to submit
         document.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter' && !document.getElementById('resetModal').style.display) {
+            if (e.key === 'Enter') {
                 handleLogin();
             }
         });
