@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Celloxen - Login Portal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #f8fafc;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 40px;
+            width: 100%;
+            max-width: 450px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .logo {
+            color: #10b981;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #6b7280;
+            font-size: 1.1rem;
+            margin-bottom: 40px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #374151;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #10b981;
+            box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.1);
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 16px;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+
+        .btn-primary {
+            background: #10b981;
+            color: white;
+            width: 100%;
+            padding: 12px;
+        }
+
+        .btn-primary:hover {
+            background: #059669;
+        }
+
+        .btn-primary:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+            margin-right: 10px;
+        }
+
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+
+        .forgot-password {
+            display: block;
+            text-align: center;
+            color: #10b981;
+            text-decoration: none;
+            font-size: 14px;
+            margin-top: 15px;
+            transition: color 0.2s;
+        }
+
+        .forgot-password:hover {
+            color: #059669;
+        }
+
+        .alert {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-weight: 500;
+        }
+
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #10b981;
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #ef4444;
+        }
+
+        .alert-warning {
+            background: #fef3c7;
+            color: #92400e;
+            border: 1px solid #f59e0b;
+        }
+
+        .loading {
+            display: none;
+            color: #6b7280;
+            font-style: italic;
+        }
+
+        .session-timer {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(30, 41, 59, 0.9);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 6px;
+            font-size: 14px;
+            display: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .session-warning {
+            background: #f59e0b !important;
+            color: #1f2937 !important;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .password-reset-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .modal-header {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .user-info {
+            background: #d1fae5;
+            border: 1px solid #10b981;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .user-type {
+            font-weight: 600;
+            color: #065f46;
+        }
+
+        .form-actions {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .welcome-back {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #10b981;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="header">
+            <div class="logo">CELLOXEN</div>
+            <div class="subtitle">Medical Platform Portal</div>
+        </div>
+
+        <div id="alertContainer"></div>
+
+        <form id="loginForm">
+            <div class="form-group">
+                <label>Username or Email</label>
+                <input type="text" id="username" placeholder="Enter username or email" required>
+            </div>
+
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="password" placeholder="Enter password" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary" id="loginBtn">
+                <span id="loginText">Sign In</span>
+                <span id="loadingText" class="loading">Signing in...</span>
+            </button>
+
+            <a href="#" class="forgot-password" onclick="showPasswordReset()">Forgot Password?</a>
+        </form>
+    </div>
+
+    <!-- Session Timer -->
+    <div id="sessionTimer" class="session-timer"></div>
+
+    <!-- Password Reset Modal -->
+    <div id="passwordResetModal" class="password-reset-modal">
+        <div class="modal-content">
+            <div class="modal-header">Reset Password</div>
+            <form id="passwordResetForm">
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" id="resetEmail" placeholder="Enter your email" required>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Send Reset Link</button>
+                    <button type="button" class="btn btn-secondary" onclick="closePasswordReset()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script type="module">
+        import { supabase } from './supabase-config.js';
+
+        let sessionTimeout;
+        let warningTimeout;
+        let sessionStartTime;
+        const SESSION_DURATION = 2 * 60 * 60 * 1000; // 2 hours in milliseconds
+        const WARNING_TIME = 10 * 60 * 1000; // 10 minutes before expiry
+
+        // Show alert message
+        function showAlert(message, type = 'success') {
+            const alertContainer = document.getElementById('alertContainer');
+            alertContainer.innerHTML = `
+                <div class="alert alert-${type}">
+                    ${message}
+                </div>
+            `;
+            setTimeout(() => {
+                if (type !== 'error') alertContainer.innerHTML = '';
+            }, 5000);
+        }
+
+        // Simple password hashing for demo
+        async function hashPassword(password) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(password);
+            const hash = await crypto.subtle.digest('SHA-256', data);
+            return Array.from(new Uint8Array(hash))
+                .map(b => b.toString(16).padStart(2, '0'))
+                .join('');
+        }
+
+        // Detect user type from username
+        function detectUserType(username) {
+            if (username === 'superadmin' || username.includes('admin@')) {
+                return 'super_admin';
+            }
+            return 'clinic';
+        }
+
+        // Start session timer
+        function startSessionTimer() {
+            sessionStartTime = Date.now();
+            updateSessionDisplay();
+            
+            // Set warning timer (10 minutes before expiry)
+            warningTimeout = setTimeout(() => {
+                showSessionWarning();
+            }, SESSION_DURATION - WARNING_TIME);
+
+            // Set logout timer (2 hours)
+            sessionTimeout = setTimeout(() => {
+                logout('Session expired');
+            }, SESSION_DURATION);
+
+            // Update timer display every minute
+            setInterval(updateSessionDisplay, 60000);
+        }
+
+        // Update session display
+        function updateSessionDisplay() {
+            const timer = document.getElementById('sessionTimer');
+            const elapsed = Date.now() - sessionStartTime;
+            const remaining = SESSION_DURATION - elapsed;
+            
+            if (remaining > 0) {
+                const hours = Math.floor(remaining / (60 * 60 * 1000));
+                const minutes = Math.floor((remaining % (60 * 60 * 1000)) / (60 * 1000));
+                timer.textContent = `Session: ${hours}h ${minutes}m remaining`;
+                timer.style.display = 'block';
+            } else {
+                timer.style.display = 'none';
+            }
+        }
+
+        // Show session warning
+        function showSessionWarning() {
+            const timer = document.getElementById('sessionTimer');
+            timer.classList.add('session-warning');
+            showAlert('Your session will expire in 10 minutes. Please save your work.', 'warning');
+        }
+
+        // Reset session timer on activity
+        function resetSessionTimer() {
+            if (sessionTimeout) {
+                clearTimeout(sessionTimeout);
+                clearTimeout(warningTimeout);
+                startSessionTimer();
+            }
+        }
+
+        // Add activity listeners
+        ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'].forEach(event => {
+            document.addEventListener(event, resetSessionTimer, { passive: true });
+        });
+
+        // Login function
+        async function login(username, password) {
+            try {
+                const userType = detectUserType(username);
+                const passwordHash = await hashPassword(password);
+
+                if (userType === 'super_admin') {
+                    // Super admin login
+                    const { data, error } = await supabase
+                        .from('super_admin_users')
+                        .select('*')
+                        .eq('username', username)
+                        .eq('password_hash', passwordHash)
+                        .single();
+
+                    if (error || !data) {
+                        throw new Error('Invalid super admin credentials');
+                    }
+
+                    // Update last login
+                    await supabase
+                        .from('super_admin_users')
+                        .update({ last_login: new Date().toISOString() })
+                        .eq('id', data.id);
+
+                    // Store session
+                    localStorage.setItem('celloxen_user', JSON.stringify({
+                        id: data.id,
+                        username: data.username,
+                        type: 'super_admin',
+                        name: data.full_name
+                    }));
+
+                    showAlert('Super Admin login successful! Redirecting...', 'success');
+                    setTimeout(() => {
+                        window.location.href = 'super-admin-registration.html';
+                    }, 1500);
+
+                } else {
+                    // Clinic login
+                    const { data, error } = await supabase
+                        .from('clinics')
+                        .select('*')
+                        .eq('username', username)
+                        .eq('password_hash', passwordHash)
+                        .single();
+
+                    if (error || !data) {
+                        throw new Error('Invalid clinic credentials');
+                    }
+
+                    if (!data.is_active) {
+                        throw new Error('Clinic account is deactivated');
+                    }
+
+                    // Update last login
+                    await supabase
+                        .from('clinics')
+                        .update({ last_login: new Date().toISOString() })
+                        .eq('id', data.id);
+
+                    // Store session
+                    localStorage.setItem('celloxen_user', JSON.stringify({
+                        id: data.id,
+                        clinic_id: data.id,
+                        username: data.username,
+                        type: 'clinic',
+                        clinic_name: data.business_name,
+                        clinic_code: data.clinic_code
+                    }));
+
+                    // Set Supabase user context for RLS
+                    await supabase.rpc('set_user_context', { username: username });
+
+                    showAlert(`Welcome ${data.business_name}! Redirecting...`, 'success');
+                    setTimeout(() => {
+                        window.location.href = 'patient-management.html';
+                    }, 1500);
+                }
+
+                // Start session timer
+                startSessionTimer();
+
+            } catch (error) {
+                console.error('Login error:', error);
+                showAlert(error.message, 'error');
+            }
+        }
+
+        // Logout function
+        function logout(reason = 'Logged out') {
+            localStorage.removeItem('celloxen_user');
+            clearTimeout(sessionTimeout);
+            clearTimeout(warningTimeout);
+            showAlert(reason, 'warning');
+            setTimeout(() => {
+                window.location.reload();
+            }, 2000);
+        }
+
+        // Password reset functions
+        window.showPasswordReset = function() {
+            document.getElementById('passwordResetModal').style.display = 'block';
+        }
+
+        window.closePasswordReset = function() {
+            document.getElementById('passwordResetModal').style.display = 'none';
+            document.getElementById('passwordResetForm').reset();
+        }
+
+        // Form submissions
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            
+            if (!username || !password) {
+                showAlert('Please enter both username and password', 'error');
+                return;
+            }
+
+            // Show loading state
+            const loginBtn = document.getElementById('loginBtn');
+            const loginText = document.getElementById('loginText');
+            const loadingText = document.getElementById('loadingText');
+            
+            loginBtn.disabled = true;
+            loginText.style.display = 'none';
+            loadingText.style.display = 'inline';
+
+            login(username, password).finally(() => {
+                loginBtn.disabled = false;
+                loginText.style.display = 'inline';
+                loadingText.style.display = 'none';
+            });
+        });
+
+        document.getElementById('passwordResetForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const email = document.getElementById('resetEmail').value;
+            showAlert('Password reset link sent to ' + email, 'success');
+            closePasswordReset();
+        });
+
+        // Check if user is already logged in
+        const existingUser = localStorage.getItem('celloxen_user');
+        if (existingUser) {
+            const user = JSON.parse(existingUser);
+            showAlert(`Welcome back, ${user.username}!`, 'success');
+            startSessionTimer();
+            
+            setTimeout(() => {
+                if (user.type === 'super_admin') {
+                    window.location.href = 'super-admin-registration.html';
+                } else {
+                    window.location.href = 'patient-management.html';
+                }
+            }, 1500);
+        }
+    </script>
+</body>
+</html>
