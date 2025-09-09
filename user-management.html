@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management - Celloxen Super Admin</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f8fafc;
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            padding: 20px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo h1 {
+            color: #1e3a8a;
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+        
+        .tabs-container {
+            background: white;
+            border-radius: 12px;
+            padding: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .tab-btn {
+            padding: 12px 24px;
+            border: none;
+            background: transparent;
+            color: #6b7280;
+            font-weight: 500;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        
+        .tab-btn.active {
+            background: #10b981;
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin: 20px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        .search-section {
+            display: grid;
+            grid-template-columns: 1fr auto auto;
+            gap: 15px;
+            align-items: end;
+        }
+        
+        .search-input {
+            padding: 10px 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .user-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        .user-table th {
+            background: #f9fafb;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #374151;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .user-table td {
+            padding: 12px;
+            border-bottom: 1px solid #f3f4f6;
+        }
+        
+        .user-table tr:hover {
+            background: #f9fafb;
+        }
+        
+        .role-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        
+        .role-super-admin {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .role-clinic-admin {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        
+        .status-active {
+            color: #10b981;
+        }
+        
+        .status-inactive {
+            color: #ef4444;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: #10b981;
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+        
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 0.85rem;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 5px;
+            color: #374151;
+            font-weight: 500;
+        }
+        
+        .form-input, .form-select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e5e7eb;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .modal-title {
+            font-size: 1.5rem;
+            color: #1f2937;
+            font-weight: 600;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #6b7280;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-container">
+            <div class="logo">
+                <h1>CELLOXEN - User Management</h1>
+            </div>
+            <div>
+                <button class="btn btn-secondary" onclick="window.location.href='super-admin-dashboard.html'">
+                    Back to Dashboard
+                </button>
+                <button class="btn btn-danger" onclick="logout()">Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Tabs -->
+        <div class="tabs-container">
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab('all')">All Users</button>
+                <button class="tab-btn" onclick="switchTab('clinic')">Clinic Admins</button>
+                <button class="tab-btn" onclick="switchTab('super')">Super Admins</button>
+            </div>
+        </div>
+
+        <!-- All Users Tab -->
+        <div id="allTab" class="tab-content active">
+            <div class="card">
+                <div class="search-section">
+                    <input type="text" class="search-input" placeholder="Search users..." onkeyup="searchUsers()">
+                    <button class="btn btn-primary" onclick="showAddUserModal()">Add New User</button>
+                    <button class="btn btn-secondary" onclick="refreshUsers()">Refresh</button>
+                </div>
+                
+                <table class="user-table">
+                    <thead>
+                        <tr>
+                            <th>Username</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Clinic</th>
+                            <th>Status</th>
+                            <th>Last Login</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="userTableBody">
+                        <tr>
+                            <td colspan="8" style="text-align: center; padding: 40px;">Loading users...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Clinic Admins Tab -->
+        <div id="clinicTab" class="tab-content">
+            <div class="card">
+                <table class="user-table">
+                    <thead>
+                        <tr>
+                            <th>Username</th>
+                            <th>Clinic Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="clinicTableBody">
+                        <tr>
+                            <td colspan="6" style="text-align: center; padding: 40px;">Loading clinic admins...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Super Admins Tab -->
+        <div id="superTab" class="tab-content">
+            <div class="card">
+                <button class="btn btn-primary" onclick="showAddSuperAdminModal()" style="margin-bottom: 20px;">
+                    Add Super Admin
+                </button>
+                <table class="user-table">
+                    <thead>
+                        <tr>
+                            <th>Username</th>
+                            <th>Full Name</th>
+                            <th>Email</th>
+                            <th>Status</th>
+                            <th>Last Login</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="superTableBody">
+                        <tr>
+                            <td colspan="6" style="text-align: center; padding: 40px;">Loading super admins...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add User Modal -->
+    <div id="addUserModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Add New User</h2>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <form id="addUserForm">
+                <div class="form-group">
+                    <label class="form-label">User Type</label>
+                    <select class="form-select" id="userType" onchange="toggleUserFields()">
+                        <option value="clinic_admin">Clinic Admin</option>
+                        <option value="super_admin">Super Admin</option>
+                    </select>
+                </div>
+                
+                <div class="form-group" id="clinicField">
+                    <label class="form-label">Select Clinic</label>
+                    <select class="form-select" id="clinicSelect">
+                        <option value="">Select a clinic...</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Username</label>
+                    <input type="text" class="form-input" id="newUsername" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Full Name</label>
+                    <input type="text" class="form-input" id="newFullName" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" class="form-input" id="newEmail" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <input type="text" class="form-input" id="newPassword" required>
+                </div>
+                
+                <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add User</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="auth-guard.js"></script>
+    <script type="module">
+        import { supabase } from './supabase-config.js';
+        
+        let allUsers = [];
+        let clinicAdmins = [];
+        let superAdmins = [];
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuthentication();
+            loadUsers();
+        });
+        
+        function checkAuthentication() {
+            const authData = localStorage.getItem('celloxen_auth');
+            if (!authData) {
+                window.location.href = 'unified-login.html';
+                return;
+            }
+            
+            const auth = JSON.parse(authData);
+            if (auth.userType !== 'super_admin') {
+                alert('Access denied. Super Admin privileges required.');
+                window.location.href = 'unified-login.html';
+            }
+        }
+        
+        async function loadUsers() {
+            try {
+                // Load clinic admins
+                const { data: clinics, error: clinicError } = await supabase
+                    .from('clinics')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+                
+                if (!clinicError) {
+                    clinicAdmins = clinics || [];
+                    displayClinicAdmins();
+                }
+                
+                // Load super admins
+                const { data: supers, error: superError } = await supabase
+                    .from('super_admin_users')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+                
+                if (!superError) {
+                    superAdmins = supers || [];
+                    displaySuperAdmins();
+                }
+                
+                // Combine all users
+                displayAllUsers();
+                
+            } catch (error) {
+                console.error('Error loading users:', error);
+            }
+        }
+        
+        function displayAllUsers() {
+            const tbody = document.getElementById('userTableBody');
+            const allUsersList = [
+                ...clinicAdmins.map(u => ({...u, role: 'clinic_admin'})),
+                ...superAdmins.map(u => ({...u, role: 'super_admin'}))
+            ];
+            
+            if (allUsersList.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">No users found</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = allUsersList.map(user => `
+                <tr>
+                    <td><strong>${user.username}</strong></td>
+                    <td>${user.full_name || user.authorised_person || user.owner_name || '-'}</td>
+                    <td>${user.email}</td>
+                    <td>
+                        <span class="role-badge ${user.role === 'super_admin' ? 'role-super-admin' : 'role-clinic-admin'}">
+                            ${user.role === 'super_admin' ? 'Super Admin' : 'Clinic Admin'}
+                        </span>
+                    </td>
+                    <td>${user.clinic_name || '-'}</td>
+                    <td>
+                        <span class="${user.is_active !== false ? 'status-active' : 'status-inactive'}">
+                            ${user.is_active !== false ? '● Active' : '● Inactive'}
+                        </span>
+                    </td>
+                    <td>${user.last_login ? new Date(user.last_login).toLocaleDateString() : 'Never'}</td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn btn-primary btn-small" onclick="resetPassword(${user.id})">
+                                Reset Password
+                            </button>
+                            <button class="btn btn-danger btn-small" onclick="toggleUserStatus(${user.id})">
+                                ${user.is_active !== false ? 'Deactivate' : 'Activate'}
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+        
+        function displayClinicAdmins() {
+            const tbody = document.getElementById('clinicTableBody');
+            
+            if (clinicAdmins.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No clinic admins found</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = clinicAdmins.map(admin => `
+                <tr>
+                    <td><strong>${admin.username}</strong></td>
+                    <td>${admin.clinic_name || admin.business_name}</td>
+                    <td>${admin.email}</td>
+                    <td>${admin.phone || admin.telephone || '-'}</td>
+                    <td>
+                        <span class="${admin.is_active ? 'status-active' : 'status-inactive'}">
+                            ${admin.is_active ? '● Active' : '● Inactive'}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn btn-primary btn-small" onclick="editClinicAdmin(${admin.id})">
+                                Edit
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+        
+        function displaySuperAdmins() {
+            const tbody = document.getElementById('superTableBody');
+            
+            if (superAdmins.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No super admins found</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = superAdmins.map(admin => `
+                <tr>
+                    <td><strong>${admin.username}</strong></td>
+                    <td>${admin.full_name}</td>
+                    <td>${admin.email}</td>
+                    <td>
+                        <span class="${admin.is_active ? 'status-active' : 'status-inactive'}">
+                            ${admin.is_active ? '● Active' : '● Inactive'}
+                        </span>
+                    </td>
+                    <td>${admin.last_login ? new Date(admin.last_login).toLocaleDateString() : 'Never'}</td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn btn-primary btn-small" onclick="editSuperAdmin(${admin.id})">
+                                Edit
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+        
+        window.switchTab = function(tab) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(tab + 'Tab').classList.add('active');
+        };
+        
+        window.showAddUserModal = function() {
+            document.getElementById('addUserModal').style.display = 'flex';
+        };
+        
+        window.closeModal = function() {
+            document.getElementById('addUserModal').style.display = 'none';
+        };
+        
+        window.resetPassword = function(userId) {
+            const newPassword = prompt('Enter new password:');
+            if (newPassword) {
+                alert(`Password reset for user ID ${userId} to: ${newPassword}`);
+            }
+        };
+        
+        window.refreshUsers = function() {
+            loadUsers();
+        };
+        
+        window.logout = function() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('celloxen_auth');
+                sessionStorage.clear();
+                window.location.href = 'unified-login.html';
+            }
+        };
+    </script>
+</body>
+</html>
