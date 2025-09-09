@@ -15,6 +15,11 @@ class CelloxenAuthGuard {
             'super-admin-dashboard.html': ['super_admin'],
             'super-admin-registration.html': ['super_admin'],
             'leads-management.html': ['super_admin'],
+            'global-patients.html': ['super_admin'],
+            'system-analytics.html': ['super_admin'],
+            'user-management.html': ['super_admin'],
+            'system-reports.html': ['super_admin'],
+            'system-logs.html': ['super_admin'],
             
             // Clinic Admin Pages (Super Admin also has access)
             'clinic-dashboard.html': ['super_admin', 'clinic_admin'],
