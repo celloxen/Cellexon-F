@@ -251,6 +251,11 @@
             font-weight: 500;
         }
         
+        .status-badge.coming-soon {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
         /* Quick Actions */
         .quick-actions {
             background: white;
@@ -402,7 +407,7 @@
                 <button class="action-btn" onclick="navigateTo('super-admin-registration.html')">
                     Register New Clinic
                 </button>
-                <button class="action-btn" onclick="navigateTo('patient-management.html')">
+                <button class="action-btn" onclick="navigateToPatients()">
                     View All Patients
                 </button>
                 <button class="action-btn" onclick="navigateTo('leads-management.html')">
@@ -473,7 +478,7 @@
                         View system-wide analytics, usage statistics, and performance metrics.
                     </div>
                     <div class="module-status">
-                        <span class="status-badge">Coming Soon</span>
+                        <span class="status-badge">Active</span>
                     </div>
                 </div>
 
@@ -487,21 +492,21 @@
                         Manage user accounts, permissions, and access control across the platform.
                     </div>
                     <div class="module-status">
-                        <span class="status-badge">Coming Soon</span>
+                        <span class="status-badge">Active</span>
                     </div>
                 </div>
 
                 <!-- Financial Overview -->
-                <div class="module-card" onclick="showComingSoon()">
+                <div class="module-card" onclick="navigateTo('financial-overview.html')">
                     <div class="module-header">
                         <div class="module-icon">💰</div>
                         <div class="module-title">Financial Overview</div>
                     </div>
                     <div class="module-description">
-                        Monitor revenue, subscriptions, and financial performance across all clinics.
+                        Generate invoices, track payments, monitor revenue and financial performance.
                     </div>
                     <div class="module-status">
-                        <span class="status-badge">Coming Soon</span>
+                        <span class="status-badge">Active</span>
                     </div>
                 </div>
             </div>
@@ -611,27 +616,23 @@
             }
         }
         
-        // Navigation function
+        // Fixed Navigation function
         window.navigateTo = function(page) {
-    // Ensure proper navigation with full path
-    if (page) {
-        window.location.href = '/' + page;
-    }
-};
-        
-        // Show coming soon message
-        window.showComingSoon = function() {
-            alert('This module is coming soon! We are working on implementing this feature.');
+            // Check if page exists
+            if (page) {
+                window.location.href = page;
+            } else {
+                console.error('Page not specified');
+            }
         };
         
-        // Generate system report (placeholder)
-        window.generateSystemReport = function() {
-            alert('System report generation will be available soon. This will provide comprehensive analytics and insights.');
-        };
-        
-        // View system logs (placeholder)
-        window.viewSystemLogs = function() {
-            alert('System logs viewer will be available soon. This will show all platform activity and audit trails.');
+        // Special navigation for patients to ensure super admin view
+        window.navigateToPatients = function() {
+            // Set super admin view mode
+            sessionStorage.setItem('viewMode', 'super_admin');
+            sessionStorage.setItem('showAllPatients', 'true');
+            // Navigate to patient management
+            window.location.href = 'patient-management.html';
         };
         
         // Logout function
