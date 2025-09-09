@@ -613,8 +613,11 @@
         
         // Navigation function
         window.navigateTo = function(page) {
-            window.location.href = page;
-        };
+    // Ensure proper navigation with full path
+    if (page) {
+        window.location.href = '/' + page;
+    }
+};
         
         // Show coming soon message
         window.showComingSoon = function() {
