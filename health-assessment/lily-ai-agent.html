@@ -513,7 +513,7 @@
     <div id="reportContent" style="display: none;"></div>
 
     <script>
-        // Complete Lily Health Consultant with Full Integration
+        // Complete Lily Health Consultant with All Bug Fixes
         class LilyHealthConsultant {
             constructor() {
                 this.supabase = supabase.createClient(
@@ -529,6 +529,9 @@
                 this.selectedCategories = [];
                 this.predictiveQuestions = [];
                 this.predictiveResponses = [];
+                this.contraindicationResponses = [];
+                this.contraindicationQuestions = [];
+                this.currentContraindicationIndex = 0;
                 this.init();
             }
             
@@ -574,7 +577,7 @@
                 }
                 
                 await this.addMessage(greeting, 'lily');
-                await this.delay(2500);
+                await this.delay(3500);
                 await this.addMessage("May I please have your name so I can address you properly throughout our consultation?", 'lily');
             }
             
@@ -620,6 +623,12 @@
                 messagesContainer.appendChild(messageWrapper);
                 messagesContainer.scrollTop = messagesContainer.scrollHeight;
                 
+                // Add natural typing delay
+                if (sender === 'lily' && text.length > 0) {
+                    const typingDelay = Math.min(text.length * 15, 2500);
+                    await this.delay(typingDelay);
+                }
+                
                 this.conversationLog.push({
                     timestamp: new Date().toISOString(),
                     sender: sender,
@@ -630,7 +639,7 @@
                 return messageWrapper;
             }
             
-            async showProcessing(duration = 2000) {
+            async showProcessing(duration = 3000) {
                 const processingMsg = await this.addMessage('', 'processing');
                 await this.delay(duration);
                 processingMsg.remove();
@@ -657,6 +666,12 @@
                     case 'category_selection':
                         await this.handleCategorySelection(input);
                         break;
+                    case 'category_confirmation':
+                        await this.handleCategoryConfirmation(input);
+                        break;
+                    case 'contraindication_screening':
+                        await this.handleContraindicationResponse(input);
+                        break;
                     case 'answering_questions':
                         await this.handleQuestionResponse(input);
                         break;
@@ -676,7 +691,7 @@
             async handlePractitionerName(name) {
                 this.sessionData.practitionerName = name;
                 await this.addMessage(`Thank you, ${name}. It's a pleasure to work with you today.`, 'lily');
-                await this.delay(1500);
+                await this.delay(2000);
                 await this.addMessage("Now, may I have the patient's full name please?", 'lily');
                 this.currentStep = 'patient_name';
             }
@@ -684,7 +699,7 @@
             async handlePatientName(patientName) {
                 this.sessionData.patientName = patientName;
                 await this.addMessage(`Thank you. I shall be assessing ${patientName} today.`, 'lily');
-                await this.delay(1500);
+                await this.delay(2000);
                 await this.addMessage("May I ask the patient's age?", 'lily');
                 this.currentStep = 'patient_age';
             }
@@ -716,16 +731,20 @@
                     this.sessionData.patientGender = choice;
                     await this.showProcessing();
                     await this.addMessage(`Excellent. Let me confirm the details:`, 'lily');
-                    await this.delay(1000);
+                    await this.delay(1500);
                     await this.addMessage(`Practitioner: ${this.sessionData.practitionerName}
 Patient: ${this.sessionData.patientName}
 Age: ${this.sessionData.patientAge}
 Gender: ${this.sessionData.patientGender}`, 'lily');
-                    await this.delay(2000);
+                    await this.delay(2500);
                     await this.addMessage(`${this.sessionData.practitionerName}, do you wish to proceed with the health assessment for ${this.sessionData.patientName}?`, 'lily', ['Yes, proceed', 'No, not today']);
                     this.currentStep = 'confirmation';
                 } else if (this.currentStep === 'category_selection') {
                     await this.handleCategorySelection(choice);
+                } else if (this.currentStep === 'category_confirmation') {
+                    await this.handleCategoryConfirmation(choice);
+                } else if (this.currentStep === 'contraindication_screening') {
+                    await this.handleContraindicationResponse(choice);
                 } else if (this.currentStep === 'answering_questions') {
                     await this.handleQuestionResponse(choice);
                 } else if (this.currentStep === 'answering_predictive') {
@@ -740,7 +759,7 @@ Gender: ${this.sessionData.patientGender}`, 'lily');
             async handleConfirmation(input) {
                 if (input.toLowerCase().includes('yes') || input.toLowerCase().includes('proceed')) {
                     await this.addMessage(`Wonderful! I shall now begin the comprehensive health assessment for ${this.sessionData.patientName}.`, 'lily');
-                    await this.delay(2000);
+                    await this.delay(2500);
                     await this.startCategorySelection();
                 } else {
                     await this.addMessage(`I understand. I wish you and ${this.sessionData.patientName} a lovely day. Please feel free to return when you're ready for the assessment.`, 'lily');
@@ -750,40 +769,139 @@ Gender: ${this.sessionData.patientGender}`, 'lily');
             }
             
             async startCategorySelection() {
-                await this.addMessage("First, I need to understand the primary areas of concern. Please select all relevant categories:", 'lily', [
+                await this.addMessage("First, I need to understand the primary areas of concern. Please select the most relevant category:", 'lily', [
                     'Musculoskeletal & Pain Management',
                     'Cardiovascular & Circulation', 
                     'Digestive & Metabolism',
                     'Respiratory & Immune',
-                    'Neurological & Mental Health',
-                    'Continue to assessment'
+                    'Neurological & Mental Health'
                 ]);
                 this.currentStep = 'category_selection';
             }
             
             async handleCategorySelection(input) {
-                if (input === 'Continue to assessment') {
-                    await this.startGeneralAssessment();
+                if (!this.selectedCategories.includes(input)) {
+                    this.selectedCategories.push(input);
+                }
+                
+                await this.addMessage(`I've noted ${input} as an area of concern.`, 'lily');
+                await this.delay(2000);
+                await this.addMessage(`${this.sessionData.practitionerName}, are there any other areas of concern for ${this.sessionData.patientName}?`, 'lily', [
+                    'Yes - select another category',
+                    'No - continue to assessment'
+                ]);
+                this.currentStep = 'category_confirmation';
+            }
+            
+            async handleCategoryConfirmation(input) {
+                if (input.includes('Yes')) {
+                    await this.startCategorySelection();
                 } else {
-                    if (!this.selectedCategories.includes(input)) {
-                        this.selectedCategories.push(input);
-                    }
-                    
-                    await this.addMessage(`Category noted: ${input}. Select any other areas of concern or continue to assessment.`, 'lily', [
-                        'Continue to assessment',
-                        'Musculoskeletal & Pain Management',
-                        'Cardiovascular & Circulation',
-                        'Digestive & Metabolism',
-                        'Respiratory & Immune',
-                        'Neurological & Mental Health'
-                    ]);
+                    await this.startContraindicationScreening();
                 }
             }
             
-            async startGeneralAssessment() {
-                await this.addMessage(`Thank you, ${this.sessionData.practitionerName}. I will now begin the comprehensive assessment for ${this.sessionData.patientName}.`, 'lily');
+            async startContraindicationScreening() {
+                await this.addMessage(`Before we proceed, I need to check for any contraindications that might affect therapy selection.`, 'lily');
+                await this.delay(2500);
+                await this.addMessage(`This is very important for ${this.sessionData.patientName}'s safety.`, 'lily');
                 await this.delay(2000);
-                await this.addMessage("I'll ask 20 general health questions first. Please answer each one honestly.", 'lily');
+                
+                this.contraindicationQuestions = [
+                    {
+                        question: "Does the patient have a pacemaker or any electronic implants?",
+                        options: ["Yes", "No"]
+                    },
+                    {
+                        question: "Is the patient currently pregnant?",
+                        options: ["Yes", "No", "Not applicable"]
+                    },
+                    {
+                        question: "Does the patient have any active cancer or tumours?",
+                        options: ["Yes - active treatment", "Yes - in remission", "No"]
+                    },
+                    {
+                        question: "Does the patient have severe skin conditions in potential treatment areas?",
+                        options: ["Yes - severe", "Yes - mild", "No"]
+                    },
+                    {
+                        question: "Has the patient had recent surgery (within 3 months)?",
+                        options: ["Yes", "No"]
+                    },
+                    {
+                        question: "Does the patient have any metal implants, joints, or pins?",
+                        options: ["Yes - multiple", "Yes - single area", "No"]
+                    },
+                    {
+                        question: "Is the patient taking blood thinning medications?",
+                        options: ["Yes", "No", "Not sure"]
+                    }
+                ];
+                
+                this.currentContraindicationIndex = 0;
+                await this.askContraindicationQuestion();
+            }
+            
+            async askContraindicationQuestion() {
+                if (this.currentContraindicationIndex < this.contraindicationQuestions.length) {
+                    const q = this.contraindicationQuestions[this.currentContraindicationIndex];
+                    const questionNumber = this.currentContraindicationIndex + 1;
+                    await this.addMessage(`Contraindication Check ${questionNumber} of ${this.contraindicationQuestions.length}: ${q.question}`, 'lily', q.options);
+                    this.currentStep = 'contraindication_screening';
+                } else {
+                    await this.evaluateContraindications();
+                }
+            }
+            
+            async handleContraindicationResponse(response) {
+                this.contraindicationResponses.push({
+                    question: this.contraindicationQuestions[this.currentContraindicationIndex].question,
+                    response: response
+                });
+                
+                this.currentContraindicationIndex++;
+                await this.askContraindicationQuestion();
+            }
+            
+            async evaluateContraindications() {
+                let hasAbsoluteContraindication = false;
+                let contraindicationWarnings = [];
+                
+                this.contraindicationResponses.forEach(item => {
+                    if (item.question.includes('pacemaker') && item.response === 'Yes') {
+                        hasAbsoluteContraindication = true;
+                        contraindicationWarnings.push('Electronic implants detected - electromagnetic therapies contraindicated');
+                    }
+                    if (item.question.includes('pregnant') && item.response === 'Yes') {
+                        hasAbsoluteContraindication = true;
+                        contraindicationWarnings.push('Pregnancy detected - most therapies contraindicated');
+                    }
+                    if (item.question.includes('cancer') && item.response.includes('active')) {
+                        contraindicationWarnings.push('Active cancer treatment - requires oncologist clearance');
+                    }
+                });
+                
+                if (contraindicationWarnings.length > 0) {
+                    await this.addMessage(`⚠️ Important contraindications identified:`, 'lily');
+                    await this.delay(1500);
+                    for (const warning of contraindicationWarnings) {
+                        await this.addMessage(`• ${warning}`, 'lily');
+                        await this.delay(1000);
+                    }
+                    await this.addMessage(`These will be noted in the final report. Medical clearance may be required.`, 'lily');
+                    await this.delay(2500);
+                }
+                
+                await this.startGeneralAssessment();
+            }
+            
+            async startGeneralAssessment() {
+                await this.addMessage(`Thank you for that important information, ${this.sessionData.practitionerName}.`, 'lily');
+                await this.delay(2000);
+                await this.addMessage(`I will now begin the comprehensive assessment for ${this.sessionData.patientName}.`, 'lily');
+                await this.delay(2500);
+                await this.addMessage("I'll ask 20 general health questions first. Please answer each one honestly based on the patient's current condition.", 'lily');
+                await this.delay(2000);
                 
                 // Load questions from database
                 const questions = await this.questionFlow.loadGeneralQuestions();
@@ -816,11 +934,22 @@ Gender: ${this.sessionData.patientGender}`, 'lily');
             
             async handleQuestionResponse(response) {
                 const question = this.questionFlow.currentQuestions[this.currentQuestionIndex];
-                const optionKey = Object.keys(question.options).find(key => 
-                    question.options[key] === response
-                );
                 
-                // Save response to database
+                // Find the correct option key by matching the response text
+                let optionKey = null;
+                for (const [key, value] of Object.entries(question.options)) {
+                    if (value === response) {
+                        optionKey = key;
+                        break;
+                    }
+                }
+                
+                if (!optionKey) {
+                    console.error('Could not match response to option');
+                    optionKey = 'c'; // Default to middle option
+                }
+                
+                // Save response with correct key
                 await this.questionFlow.saveResponse(
                     this.sessionId,
                     question.id,
@@ -833,47 +962,52 @@ Gender: ${this.sessionData.patientGender}`, 'lily');
             }
             
             async completeGeneralAssessment() {
-                await this.addMessage("Thank you for completing the general assessment. Let me analyse your responses...", 'lily');
-                await this.showProcessing(3000);
+                await this.addMessage("Thank you for completing the initial assessment. Let me carefully analyse these responses...", 'lily');
+                await this.showProcessing(4000);
                 
                 // Calculate scores
                 this.questionFlow.calculateCategoryScores();
                 const scores = this.questionFlow.categoryScores;
                 
-                await this.addMessage(`Initial assessment complete for ${this.sessionData.patientName}. Health scores:
-- Physical Health: ${scores.physical}%
-- Mental Health: ${scores.mental}%
-- Lifestyle: ${scores.lifestyle}%
-- Environment: ${scores.environment}%
-- Medical History: ${scores.history}%
-Overall Score: ${this.questionFlow.totalScore}%`, 'lily');
+                // Provide detailed interpretation
+                let interpretation = `Based on my analysis of ${this.sessionData.patientName}'s responses:\n\n`;
                 
-                // Check contraindications
-                const contraindications = this.questionFlow.checkContraindications(this.sessionData);
-                if (contraindications.length > 0) {
-                    await this.handleContraindications(contraindications);
-                } else {
-                    await this.proceedToPredictiveQuestions();
-                }
+                Object.entries(scores).forEach(([category, score]) => {
+                    let status = '';
+                    if (score >= 80) status = 'Excellent condition';
+                    else if (score >= 60) status = 'Good, minor attention needed';
+                    else if (score >= 40) status = 'Moderate, requires attention';
+                    else status = 'Poor, immediate attention required';
+                    
+                    interpretation += `• ${this.formatCategoryName(category)}: ${score}% - ${status}\n`;
+                });
+                
+                interpretation += `\nOverall Health Score: ${this.questionFlow.totalScore}%`;
+                
+                await this.addMessage(interpretation, 'lily');
+                await this.delay(3500);
+                
+                // Provide detailed explanation
+                await this.addMessage(`This initial assessment gives us a baseline understanding of ${this.sessionData.patientName}'s health status across multiple dimensions.`, 'lily');
+                await this.delay(2500);
+                
+                await this.proceedToPredictiveQuestions();
             }
             
-            async handleContraindications(contraindications) {
-                await this.addMessage(`⚠️ IMPORTANT: I have identified potential contraindications for ${this.sessionData.patientName}:`, 'lily');
-                
-                const contraindicationsList = contraindications.map(c => 
-                    `• ${c.condition}: ${c.reason}`
-                ).join('\n');
-                
-                await this.addMessage(contraindicationsList, 'lily');
-                await this.addMessage(`${this.sessionData.practitionerName}, please ensure the patient obtains proper medical clearance before proceeding with any therapies.`, 'lily');
-                
-                // Continue to predictive questions even with contraindications
-                await this.proceedToPredictiveQuestions();
+            formatCategoryName(category) {
+                const names = {
+                    physical: 'Physical Health',
+                    mental: 'Mental Health',
+                    lifestyle: 'Lifestyle Factors',
+                    environment: 'Environmental Health',
+                    history: 'Medical History'
+                };
+                return names[category] || category;
             }
             
             async proceedToPredictiveQuestions() {
                 await this.addMessage("Now I will generate personalised follow-up questions based on the initial assessment...", 'lily');
-                await this.showProcessing(3000);
+                await this.showProcessing(3500);
                 
                 // Initialize AI service
                 const aiService = new LilyAIService();
@@ -885,8 +1019,10 @@ Overall Score: ${this.questionFlow.totalScore}%`, 'lily');
                 this.predictiveQuestions = predictiveQuestions;
                 this.currentQuestionIndex = 0;
                 
-                await this.addMessage(`${this.sessionData.practitionerName}, I've prepared 20 targeted questions based on ${this.sessionData.patientName}'s initial responses. These will help determine the most suitable therapy protocols.`, 'lily');
-                await this.delay(2000);
+                await this.addMessage(`${this.sessionData.practitionerName}, I've prepared 20 targeted questions specifically for ${this.sessionData.patientName} based on their initial responses.`, 'lily');
+                await this.delay(2500);
+                await this.addMessage(`These questions will help me determine the most suitable therapy protocols for their specific needs.`, 'lily');
+                await this.delay(2500);
                 
                 this.currentStep = 'answering_predictive';
                 await this.askPredictiveQuestion();
@@ -930,22 +1066,28 @@ Overall Score: ${this.questionFlow.totalScore}%`, 'lily');
             }
             
             async completePredictiveAssessment() {
-                await this.addMessage("Excellent! I've completed the comprehensive assessment. Now I'll analyse all responses and generate your personalised report...", 'lily');
-                await this.showProcessing(4500);
+                await this.addMessage("Excellent! I've completed the comprehensive assessment.", 'lily');
+                await this.delay(2000);
+                await this.addMessage("Now I'll analyse all 40 responses to generate personalised therapy recommendations...", 'lily');
+                await this.showProcessing(5000);
                 
                 // Generate therapy recommendations
                 await this.questionFlow.generateTherapyRecommendations();
                 const recommendations = this.questionFlow.recommendedTherapies;
                 
                 if (recommendations.length > 0) {
-                    await this.addMessage(`Based on my analysis, I recommend the following therapy protocols for ${this.sessionData.patientName}:`, 'lily');
+                    await this.addMessage(`Based on my comprehensive analysis, I recommend the following therapy protocols for ${this.sessionData.patientName}:`, 'lily');
+                    await this.delay(2500);
                     
                     for (const therapy of recommendations) {
                         const priorityEmoji = therapy.priority === 'essential' ? '🔴' : '🟡';
                         await this.addMessage(`${priorityEmoji} ${therapy.category}
 Priority: ${therapy.priority.toUpperCase()}
 Reason: ${therapy.reason}
-Protocol Codes: ${therapy.codes.join(', ')}`, 'lily');
+Protocol Codes: ${therapy.codes.join(', ')}
+Recommended Frequency: 2-3 times per week
+Initial Course Duration: 6-8 weeks`, 'lily');
+                        await this.delay(2000);
                     }
                 }
                 
@@ -953,8 +1095,8 @@ Protocol Codes: ${therapy.codes.join(', ')}`, 'lily');
             }
             
             async generateFinalReport() {
-                await this.addMessage("I'm now generating the comprehensive PDF report...", 'lily');
-                await this.showProcessing(3000);
+                await this.addMessage("I'm now generating the comprehensive PDF report with all findings and recommendations...", 'lily');
+                await this.showProcessing(4000);
                 
                 // Initialize PDF generator
                 const pdfGenerator = new LilyPDFGenerator();
@@ -975,7 +1117,7 @@ Protocol Codes: ${therapy.codes.join(', ')}`, 'lily');
                 const assessmentResults = {
                     categoryScores: this.questionFlow.categoryScores,
                     totalScore: this.questionFlow.totalScore,
-                    contraindications: this.questionFlow.contraindications
+                    contraindications: this.contraindicationResponses
                 };
                 
                 // Generate HTML report
@@ -999,7 +1141,7 @@ The comprehensive health assessment for ${this.sessionData.patientName} has been
 
 📄 The detailed PDF report has been generated and saved.
 
-${this.questionFlow.contraindications.length > 0 ? '⚠️ Important: Contraindications have been identified. Please review the report carefully and ensure medical clearance is obtained before proceeding with therapies.' : '✅ No contraindications identified.'}
+${this.contraindicationResponses.length > 0 ? '⚠️ Important: Contraindications have been identified. Please review the report carefully.' : '✅ No major contraindications identified.'}
 
 Would you like to:`, 'lily', [
                     'Download PDF Report',
@@ -1023,9 +1165,9 @@ Would you like to:`, 'lily', [
                             assessment_categories: this.selectedCategories,
                             general_responses: Object.fromEntries(this.questionFlow.responses),
                             predictive_responses: this.predictiveResponses,
+                            contraindications_found: this.contraindicationResponses,
                             category_scores: this.questionFlow.categoryScores,
                             total_score: this.questionFlow.totalScore,
-                            contraindications_found: this.questionFlow.contraindications,
                             recommended_therapies: this.questionFlow.recommendedTherapies,
                             final_report: reportHTML,
                             session_status: 'completed',
@@ -1094,8 +1236,11 @@ Would you like to:`, 'lily', [
             }
             
             async endSession() {
-                await this.addMessage(`Thank you for using the Celloxen Health Assessment System, ${this.sessionData.practitionerName}. I hope this assessment proves valuable for ${this.sessionData.patientName}'s health journey. Have a wonderful day!`, 'lily');
-                await this.addMessage("Session ended. You may close this window.", 'lily');
+                await this.addMessage(`Thank you for using the Celloxen Health Assessment System, ${this.sessionData.practitionerName}.`, 'lily');
+                await this.delay(2000);
+                await this.addMessage(`I hope this assessment proves valuable for ${this.sessionData.patientName}'s health journey.`, 'lily');
+                await this.delay(2000);
+                await this.addMessage("Have a wonderful day! Goodbye.", 'lily');
                 this.disableInput();
             }
             
