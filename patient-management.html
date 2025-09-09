@@ -64,7 +64,7 @@
         <div class="container">
             <h1>Celloxen Patient Management</h1>
             <p>Manage patient records and medical reports</p>
-            <button class="btn btn-secondary" onclick="window.location.href='index.html'">Back to Dashboard</button>
+            <button class="btn btn-secondary" onclick="navigateBack()">Back to Dashboard</button>
         </div>
     </div>
     
@@ -149,18 +149,61 @@
         </div>
     </div>
 
+    <script>
+        // Navigation function that checks user type
+        function navigateBack() {
+            const authData = localStorage.getItem('celloxen_auth');
+            if (!authData) {
+                window.location.href = 'unified-login.html';
+                return;
+            }
+            
+            const auth = JSON.parse(authData);
+            
+            // Navigate based on user type
+            if (auth.userType === 'super_admin') {
+                window.location.href = 'super-admin-dashboard.html';
+            } else if (auth.userType === 'clinic_admin' || auth.userType === 'clinic') {
+                window.location.href = 'clinic-dashboard.html';
+            } else {
+                // Default fallback
+                window.location.href = 'index.html';
+            }
+        }
+    </script>
+
     <script type="module">
         import { supabase } from './supabase-config.js';
         
-        let currentClinicId = 1;
+        let currentClinicId = null;
+        let currentUserType = null;
         let currentPatients = [];
         let currentPatientReports = {};
         
         document.addEventListener('DOMContentLoaded', function() {
+            checkAuthenticationAndSetup();
             loadClinics();
             loadPatients();
             updateStats();
         });
+        
+        // Check authentication and setup based on user type
+        function checkAuthenticationAndSetup() {
+            const authData = localStorage.getItem('celloxen_auth');
+            if (!authData) {
+                window.location.href = 'unified-login.html';
+                return;
+            }
+            
+            const auth = JSON.parse(authData);
+            currentUserType = auth.userType;
+            currentClinicId = auth.clinicId;
+            
+            // If clinic admin, store clinic context
+            if (currentUserType === 'clinic_admin' || currentUserType === 'clinic') {
+                sessionStorage.setItem('currentClinicId', currentClinicId);
+            }
+        }
         
         function showAlert(message, type = 'success') {
             const alertContainer = document.getElementById('alertContainer');
@@ -172,10 +215,17 @@
         
         async function loadClinics() {
             try {
-                const { data, error } = await supabase
-                    .from('clinics')
-                    .select('*')
-                    .eq('is_active', true);
+                let query = supabase.from('clinics').select('*');
+                
+                // If clinic admin, only load their clinic
+                if ((currentUserType === 'clinic_admin' || currentUserType === 'clinic') && currentClinicId) {
+                    query = query.eq('id', currentClinicId);
+                } else {
+                    // Super admin sees all active clinics
+                    query = query.eq('is_active', true);
+                }
+                
+                const { data, error } = await query;
                     
                 if (error) throw error;
                 
@@ -186,8 +236,15 @@
                     data.forEach(clinic => {
                         clinicSelect.innerHTML += `<option value="${clinic.id}" data-clinic='${JSON.stringify(clinic)}'>${clinic.clinic_name}</option>`;
                     });
-                    clinicSelect.value = data[0].id;
-                    currentClinicId = data[0].id;
+                    
+                    // Auto-select clinic for clinic admins
+                    if ((currentUserType === 'clinic_admin' || currentUserType === 'clinic') && currentClinicId) {
+                        clinicSelect.value = currentClinicId;
+                        clinicSelect.disabled = true; // Disable selection for clinic admins
+                    } else if (data.length === 1) {
+                        // Auto-select if only one clinic
+                        clinicSelect.value = data[0].id;
+                    }
                 }
             } catch (error) {
                 console.error('Error loading clinics:', error);
@@ -225,7 +282,14 @@
                 
                 showAlert(`Patient registered successfully! Patient ID: ${patientData.patient_id}`, 'success');
                 document.getElementById('patientForm').reset();
-                document.getElementById('clinicSelect').value = selectedClinicId;
+                
+                // Restore clinic selection for clinic admins
+                if ((currentUserType === 'clinic_admin' || currentUserType === 'clinic') && currentClinicId) {
+                    document.getElementById('clinicSelect').value = currentClinicId;
+                } else {
+                    document.getElementById('clinicSelect').value = selectedClinicId;
+                }
+                
                 loadPatients();
                 updateStats();
                 
@@ -237,7 +301,7 @@
         
         window.loadPatients = async function() {
             try {
-                const { data, error } = await supabase
+                let query = supabase
                     .from('patients')
                     .select(`
                         *,
@@ -245,6 +309,13 @@
                     `)
                     .order('created_at', { ascending: false })
                     .limit(50);
+                
+                // Filter by clinic for clinic admins
+                if ((currentUserType === 'clinic_admin' || currentUserType === 'clinic') && currentClinicId) {
+                    query = query.eq('clinic_id', currentClinicId);
+                }
+                    
+                const { data, error } = await query;
                     
                 if (error) throw error;
                 
@@ -457,40 +528,7 @@
                                                 <span class="report-date">${new Date(report.generated_at || report.created_at).toLocaleDateString()}</span>
                                             </div>
                                             <p>Overall Score: ${report.total_score || 'N/A'}/100</p>
-                                            <div class="report-details" style="display: none;" id="report-details-${report.id}">
-                                                ${report.category_scores ? `
-                                                    <div class="score-display">
-                                                        <div class="score-item">
-                                                            <div class="score-value">${report.category_scores.physical || 0}</div>
-                                                            <div class="score-label">Physical</div>
-                                                        </div>
-                                                        <div class="score-item">
-                                                            <div class="score-value">${report.category_scores.mental || 0}</div>
-                                                            <div class="score-label">Mental</div>
-                                                        </div>
-                                                        <div class="score-item">
-                                                            <div class="score-value">${report.category_scores.lifestyle || 0}</div>
-                                                            <div class="score-label">Lifestyle</div>
-                                                        </div>
-                                                        <div class="score-item">
-                                                            <div class="score-value">${report.category_scores.environment || 0}</div>
-                                                            <div class="score-label">Environment</div>
-                                                        </div>
-                                                        <div class="score-item">
-                                                            <div class="score-value">${report.category_scores.history || 0}</div>
-                                                            <div class="score-label">History</div>
-                                                        </div>
-                                                    </div>
-                                                ` : ''}
-                                                ${report.recommendations?.length ? `
-                                                    <h5>Therapy Recommendations:</h5>
-                                                    <div class="recommendation-list">
-                                                        ${report.recommendations.map(rec => `<div class="recommendation-item">${rec}</div>`).join('')}
-                                                    </div>
-                                                ` : ''}
-                                            </div>
-                                            <button class="btn btn-primary" onclick="toggleReportDetails(${report.id})">View Details</button>
-                                            <button class="btn btn-secondary" onclick="downloadReport(${report.id}, 'health_assessment')">Download</button>
+                                            <button class="btn btn-primary" onclick="viewFullReport(${report.id})">View Report</button>
                                         </div>
                                     `).join('') : 
                                     '<p style="color: #6b7280;">No health assessment reports found.</p>'
@@ -508,44 +546,10 @@
                                                 <strong>${report.report_title || 'IRIS Analysis Report'}</strong>
                                                 <span class="report-date">${new Date(report.generated_at || report.created_at).toLocaleDateString()}</span>
                                             </div>
-                                            <p>Constitutional Analysis</p>
-                                            <div class="report-details" style="display: none;" id="iris-details-${report.id}">
-                                                ${report.report_data ? `
-                                                    <p><strong>Constitutional Type:</strong> ${report.report_data.constitutional_type || 'Not specified'}</p>
-                                                    <p><strong>Iris Colour:</strong> ${report.report_data.iris_colour || 'Not specified'}</p>
-                                                    ${report.recommendations?.length ? `
-                                                        <h5>Recommendations:</h5>
-                                                        <div class="recommendation-list">
-                                                            ${report.recommendations.map(rec => `<div class="recommendation-item">${rec}</div>`).join('')}
-                                                        </div>
-                                                    ` : ''}
-                                                ` : ''}
-                                            </div>
-                                            <button class="btn btn-primary" onclick="toggleIrisDetails(${report.id})">View Details</button>
-                                            <button class="btn btn-secondary" onclick="downloadReport(${report.id}, 'iris_analysis')">Download</button>
+                                            <button class="btn btn-primary" onclick="viewFullReport(${report.id})">View Report</button>
                                         </div>
                                     `).join('') : 
                                     '<p style="color: #6b7280;">No IRIS analysis reports found.</p>'
-                                }
-                            </div>
-                        </div>
-                        
-                        <div style="margin-bottom: 20px;">
-                            <h4>Combined Reports</h4>
-                            <div id="combinedReports">
-                                ${currentPatientReports.combined_reports?.length ? 
-                                    currentPatientReports.combined_reports.map(report => `
-                                        <div class="report-item">
-                                            <div class="report-header">
-                                                <strong>Celloxen Analysis Holistic Health Assessment Report</strong>
-                                                <span class="report-date">${new Date(report.generated_at || report.created_at).toLocaleDateString()}</span>
-                                            </div>
-                                            <p>Complete assessment with therapy recommendations</p>
-                                            <button class="btn btn-primary" onclick="viewFullReport(${report.id})">View Report</button>
-                                            <button class="btn btn-secondary" onclick="downloadReport(${report.id}, 'combined')">Download PDF</button>
-                                        </div>
-                                    `).join('') : 
-                                    '<p style="color: #6b7280;">No combined reports found.</p>'
                                 }
                             </div>
                         </div>
@@ -580,39 +584,6 @@
             document.getElementById(tabName + 'Tab').classList.add('active');
         };
         
-        window.toggleReportDetails = function(reportId) {
-            const details = document.getElementById(`report-details-${reportId}`);
-            if (details.style.display === 'none') {
-                details.style.display = 'block';
-            } else {
-                details.style.display = 'none';
-            }
-        };
-        
-        window.toggleIrisDetails = function(reportId) {
-            const details = document.getElementById(`iris-details-${reportId}`);
-            if (details.style.display === 'none') {
-                details.style.display = 'block';
-            } else {
-                details.style.display = 'none';
-            }
-        };
-        
-        window.viewFullReport = function(reportId) {
-            const modalOverlay = document.createElement('div');
-            modalOverlay.className = 'report-modal';
-            modalOverlay.innerHTML = `
-                <div class="report-modal-content">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                        <h2 style="color: #10b981;">Celloxen Analysis Report</h2>
-                        <button onclick="this.closest('.report-modal').remove()" class="btn btn-danger">Close</button>
-                    </div>
-                    <div class="loading">Loading comprehensive report...</div>
-                </div>
-            `;
-            document.body.appendChild(modalOverlay);
-        };
-        
         async function handlePatientUpdate(e) {
             e.preventDefault();
             
@@ -643,54 +614,6 @@
                 showAlert('Error updating patient: ' + error.message, 'error');
             }
         }
-        
-        window.generateCombinedReport = async function(patientId) {
-            try {
-                const patient = currentPatients.find(p => p.id === patientId);
-                
-                const combinedData = {
-                    patient_info: {
-                        name: `${patient.first_name} ${patient.last_name}`,
-                        patient_id: patient.patient_id,
-                        date_of_birth: patient.date_of_birth,
-                        gender: patient.gender,
-                        address: patient.address,
-                        clinic: patient.clinics
-                    },
-                    health_assessments: currentPatientReports.health_assessments,
-                    iris_analyses: currentPatientReports.iris_analyses,
-                    recommendations: []
-                };
-                
-                const { data, error } = await supabase
-                    .from('medical_reports')
-                    .insert([{
-                        patient_id: patientId,
-                        clinic_id: patient.clinic_id,
-                        report_type: 'combined',
-                        report_title: 'Celloxen Analysis Holistic Health Assessment Report',
-                        report_data: combinedData,
-                        recommendations: ['Comprehensive therapy plan based on assessment and analysis'],
-                        therapies_recommended: ['Comprehensive therapy plan']
-                    }])
-                    .select();
-                
-                if (error) throw error;
-                
-                showAlert('Combined report generated successfully!', 'success');
-                await loadPatientReports(patientId);
-                closePatientModal();
-                viewPatient(patientId);
-                
-            } catch (error) {
-                console.error('Error generating combined report:', error);
-                showAlert('Error generating combined report: ' + error.message, 'error');
-            }
-        };
-        
-        window.downloadReport = function(reportId, reportType) {
-            showAlert(`Downloading ${reportType} report ${reportId}. This would generate and download a PDF in a real system.`, 'success');
-        };
         
         window.deletePatient = async function(patientId) {
             if (!confirm('Are you sure you want to delete this patient? This action cannot be undone.')) {
@@ -753,19 +676,37 @@
             window.open('vital-signs.html', '_blank');
         };
         
+        window.viewFullReport = function(reportId) {
+            alert(`View full report ${reportId} - This would open a detailed report view`);
+        };
+        
+        window.generateCombinedReport = async function(patientId) {
+            alert('Generating combined report...');
+        };
+        
         async function updateStats() {
             try {
-                const { count: totalCount, error: totalError } = await supabase
-                    .from('patients')
-                    .select('*', { count: 'exact', head: true });
+                let query = supabase.from('patients').select('*', { count: 'exact', head: true });
+                
+                // Filter by clinic for clinic admins
+                if ((currentUserType === 'clinic_admin' || currentUserType === 'clinic') && currentClinicId) {
+                    query = query.eq('clinic_id', currentClinicId);
+                }
+                
+                const { count: totalCount, error: totalError } = await query;
                     
                 if (totalError) throw totalError;
                 
                 const today = new Date().toISOString().split('T')[0];
-                const { count: todayCount, error: todayError } = await supabase
-                    .from('patients')
+                let todayQuery = supabase.from('patients')
                     .select('*', { count: 'exact', head: true })
                     .gte('created_at', today);
+                
+                if ((currentUserType === 'clinic_admin' || currentUserType === 'clinic') && currentClinicId) {
+                    todayQuery = todayQuery.eq('clinic_id', currentClinicId);
+                }
+                
+                const { count: todayCount, error: todayError } = await todayQuery;
                     
                 if (todayError) throw todayError;
                 
