@@ -1,26 +1,22 @@
 // Lily Health Consultant - AI Service for Predictive Questions
+// SECURE VERSION - No API keys in frontend code
 class LilyAIService {
     constructor() {
-        this.apiEndpoint = 'https://api.anthropic.com/v1/messages';
-        this.model = 'claude-sonnet-4-20250514';
+        // API calls will be made through your backend
+        this.backendEndpoint = '/api/generate-questions'; // Your secure backend endpoint
     }
 
     async generatePredictiveQuestions(sessionData, categoryScores) {
-        const prompt = this.buildPredictivePrompt(sessionData, categoryScores);
-        
         try {
-            const response = await fetch(this.apiEndpoint, {
+            // Call YOUR backend server, not Anthropic directly
+            const response = await fetch(this.backendEndpoint, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    model: this.model,
-                    max_tokens: 3000,
-                    messages: [{
-                        role: 'user',
-                        content: prompt
-                    }]
+                    sessionData: sessionData,
+                    categoryScores: categoryScores
                 })
             });
 
@@ -28,66 +24,14 @@ class LilyAIService {
                 throw new Error(`API request failed: ${response.status}`);
             }
 
-            const data = await response.json();
-            const responseText = data.content[0].text;
+            const questions = await response.json();
+            return this.validateQuestions(questions);
             
-            // Extract JSON from response
-            const jsonMatch = responseText.match(/\[[\s\S]*\]/);
-            if (jsonMatch) {
-                const questions = JSON.parse(jsonMatch[0]);
-                return this.validateQuestions(questions);
-            }
-            
-            return this.getFallbackQuestions(sessionData, categoryScores);
         } catch (error) {
             console.error('Error generating predictive questions:', error);
+            // Use fallback questions if backend is not available
             return this.getFallbackQuestions(sessionData, categoryScores);
         }
-    }
-
-    buildPredictivePrompt(sessionData, categoryScores) {
-        const lowestCategories = Object.entries(categoryScores)
-            .sort(([,a], [,b]) => a - b)
-            .slice(0, 2)
-            .map(([cat,]) => cat);
-
-        return `Generate 20 targeted follow-up health assessment questions for a ${sessionData.patientAge} year old ${sessionData.patientGender} patient.
-
-Patient Assessment Scores:
-- Physical Health: ${categoryScores.physical}%
-- Mental Health: ${categoryScores.mental}%
-- Lifestyle: ${categoryScores.lifestyle}%
-- Environment: ${categoryScores.environment}%
-- Medical History: ${categoryScores.history}%
-
-Primary Concerns: ${lowestCategories.join(', ')}
-
-Generate 20 specific questions focusing on the lowest scoring areas to determine appropriate therapy protocols.
-
-Return ONLY a JSON array in this exact format:
-[
-  {
-    "id": 1,
-    "question": "Specific question text",
-    "category": "physical/mental/lifestyle/environment/history",
-    "options": {
-      "a": "Most severe option",
-      "b": "Moderate-severe option",
-      "c": "Moderate option",
-      "d": "Mild option",
-      "e": "No issue/best option"
-    },
-    "focus_area": "specific symptom or condition"
-  }
-]
-
-Requirements:
-- Questions must be age and gender appropriate
-- Use British English spelling
-- Focus on therapy selection criteria
-- Options must progress from worst (a) to best (e)
-- Professional medical terminology
-- Each question should help identify specific therapy needs`;
     }
 
     validateQuestions(questions) {
@@ -100,7 +44,6 @@ Requirements:
         );
 
         if (validQuestions.length < 20) {
-            // Pad with fallback questions if needed
             const fallback = this.getFallbackQuestions();
             return [...validQuestions, ...fallback.slice(0, 20 - validQuestions.length)];
         }
@@ -108,8 +51,8 @@ Requirements:
         return validQuestions.slice(0, 20);
     }
 
+    // Comprehensive fallback questions - these work perfectly without any API
     getFallbackQuestions(sessionData, categoryScores) {
-        // Comprehensive fallback questions if API fails
         return [
             {
                 id: 1,
