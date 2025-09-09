@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lily Health Consultant - Celloxen Health Platform</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/lily-question-flow.js"></script>
     <style>
         * {
             margin: 0;
@@ -328,6 +329,21 @@
             width: 100%;
         }
         
+        .question-progress {
+            background: #e2e8f0;
+            height: 4px;
+            border-radius: 2px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        
+        .question-progress-bar {
+            background: linear-gradient(90deg, #10b981, #059669);
+            height: 100%;
+            border-radius: 2px;
+            transition: width 0.5s ease;
+        }
+        
         .input-area {
             padding: 20px 25px;
             background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
@@ -501,7 +517,7 @@
     </div>
 
     <script>
-        // Lily Health Consultant with Modern Design
+        // Lily Health Consultant with Question Flow Integration
         class LilyHealthConsultant {
             constructor() {
                 this.supabase = supabase.createClient(
@@ -512,6 +528,9 @@
                 this.currentStep = 'practitioner_greeting';
                 this.conversationLog = [];
                 this.sessionData = {};
+                this.questionFlow = new LilyQuestionFlow(this.supabase);
+                this.currentQuestionIndex = 0;
+                this.selectedCategories = [];
                 this.init();
             }
             
@@ -619,6 +638,12 @@
                     case 'confirmation':
                         await this.handleConfirmation(input);
                         break;
+                    case 'category_selection':
+                        await this.handleCategorySelection(input);
+                        break;
+                    case 'answering_questions':
+                        await this.handleQuestionResponse(input);
+                        break;
                     default:
                         await this.handleGeneralResponse(input);
                 }
@@ -677,6 +702,10 @@ Gender: ${this.sessionData.patientGender}`, 'lily');
                     await this.delay(2000);
                     await this.addMessage(`${this.sessionData.practitionerName}, do you wish to proceed with the health assessment for ${this.sessionData.patientName}?`, 'lily', ['Yes, proceed', 'No, not today']);
                     this.currentStep = 'confirmation';
+                } else if (this.currentStep === 'category_selection') {
+                    await this.handleCategorySelection(choice);
+                } else if (this.currentStep === 'answering_questions') {
+                    await this.handleQuestionResponse(choice);
                 }
                 
                 this.enableInput();
@@ -701,9 +730,122 @@ Gender: ${this.sessionData.patientGender}`, 'lily');
                     'Digestive & Metabolism',
                     'Respiratory & Immune',
                     'Neurological & Mental Health',
-                    'Other (Please specify)'
+                    'Continue to assessment'
                 ]);
                 this.currentStep = 'category_selection';
+            }
+            
+            async handleCategorySelection(input) {
+                if (input === 'Continue to assessment') {
+                    await this.startGeneralAssessment();
+                } else {
+                    if (!this.selectedCategories.includes(input)) {
+                        this.selectedCategories.push(input);
+                    }
+                    
+                    await this.addMessage(`Category noted: ${input}. Select any other areas of concern or continue to assessment.`, 'lily', [
+                        'Continue to assessment',
+                        'Musculoskeletal & Pain Management',
+                        'Cardiovascular & Circulation',
+                        'Digestive & Metabolism',
+                        'Respiratory & Immune',
+                        'Neurological & Mental Health'
+                    ]);
+                }
+            }
+            
+            async startGeneralAssessment() {
+                await this.addMessage(`Thank you, ${this.sessionData.practitionerName}. I will now begin the comprehensive assessment for ${this.sessionData.patientName}.`, 'lily');
+                await this.delay(2000);
+                await this.addMessage("I'll ask 20 general health questions first. Please answer each one honestly.", 'lily');
+                
+                // Load questions from database
+                const questions = await this.questionFlow.loadGeneralQuestions();
+                if (questions.length > 0) {
+                    this.currentQuestionIndex = 0;
+                    await this.askNextQuestion();
+                }
+            }
+            
+            async askNextQuestion() {
+                const questions = this.questionFlow.currentQuestions;
+                if (this.currentQuestionIndex < questions.length) {
+                    const question = questions[this.currentQuestionIndex];
+                    const questionNumber = this.currentQuestionIndex + 1;
+                    
+                    // Add progress indicator
+                    const progressPercentage = (questionNumber / 20) * 100;
+                    const progressHtml = `
+                        <div class="question-progress">
+                            <div class="question-progress-bar" style="width: ${progressPercentage}%"></div>
+                        </div>
+                        Question ${questionNumber} of 20: ${question.question_text}
+                    `;
+                    
+                    await this.addMessage(progressHtml, 'lily', Object.values(question.options));
+                    this.currentStep = 'answering_questions';
+                } else {
+                    await this.completeGeneralAssessment();
+                }
+            }
+            
+            async handleQuestionResponse(response) {
+                const question = this.questionFlow.currentQuestions[this.currentQuestionIndex];
+                const optionKey = Object.keys(question.options).find(key => 
+                    question.options[key] === response
+                );
+                
+                // Save response to database
+                await this.questionFlow.saveResponse(
+                    this.sessionId,
+                    question.id,
+                    optionKey,
+                    response
+                );
+                
+                this.currentQuestionIndex++;
+                await this.askNextQuestion();
+            }
+            
+            async completeGeneralAssessment() {
+                await this.addMessage("Thank you for completing the general assessment. Let me analyse your responses...", 'lily');
+                await this.showProcessing(3000);
+                
+                // Calculate scores
+                this.questionFlow.calculateCategoryScores();
+                const scores = this.questionFlow.categoryScores;
+                
+                await this.addMessage(`Initial assessment complete for ${this.sessionData.patientName}. Health scores:
+- Physical Health: ${scores.physical}%
+- Mental Health: ${scores.mental}%
+- Lifestyle: ${scores.lifestyle}%
+- Environment: ${scores.environment}%
+- Medical History: ${scores.history}%
+Overall Score: ${this.questionFlow.totalScore}%`, 'lily');
+                
+                // Check contraindications
+                const contraindications = this.questionFlow.checkContraindications(this.sessionData);
+                if (contraindications.length > 0) {
+                    await this.handleContraindications(contraindications);
+                } else {
+                    await this.proceedToPredictiveQuestions();
+                }
+            }
+            
+            async handleContraindications(contraindications) {
+                await this.addMessage(`⚠️ IMPORTANT: I have identified potential contraindications for ${this.sessionData.patientName}:`, 'lily');
+                
+                const contraindicationsList = contraindications.map(c => 
+                    `• ${c.condition}: ${c.reason}`
+                ).join('\n');
+                
+                await this.addMessage(contraindicationsList, 'lily');
+                await this.addMessage(`${this.sessionData.practitionerName}, please ensure the patient obtains proper medical clearance before proceeding with any therapies.`, 'lily');
+            }
+            
+            async proceedToPredictiveQuestions() {
+                await this.addMessage("Now I will generate personalised follow-up questions based on the initial assessment...", 'lily');
+                // Continue with predictive questions (to be implemented)
             }
             
             async handleGeneralResponse(input) {
