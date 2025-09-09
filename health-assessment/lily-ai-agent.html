@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lily AI Health Consultant - Celloxen Health Platform</title>
+    <title>Lily Health Consultant - Celloxen Health Platform</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * {
@@ -292,7 +292,7 @@
         <div class="header-container">
             <div class="logo">CELLOXEN</div>
             <div class="lily-info">
-                <h1>Lily - AI Health Consultant</h1>
+                <h1>Lily - Celloxen Health Consultant</h1>
                 <p>Intelligent Assessment & Therapy Recommendation System</p>
             </div>
         </div>
@@ -300,8 +300,8 @@
     
     <div class="container">
         <div class="session-info">
-            <h3>Lily AI Health Assessment Session</h3>
-            <p>Advanced AI-powered health assessment with personalised therapy recommendations. Session ID: <span id="sessionId"></span></p>
+            <h3>Lily Health Assessment Session</h3>
+            <p>Advanced health assessment with personalised therapy recommendations. Session ID: <span id="sessionId"></span></p>
         </div>
         
         <div class="chat-card">
@@ -328,11 +328,14 @@
         </div>
     </div>
 
-    <script src="../supabase-config.js"></script>
     <script>
-        // Lily AI Agent with Celloxen Design System
-        class LilyAIAgent {
+        // Lily Health Consultant with Celloxen Design System
+        class LilyHealthConsultant {
             constructor() {
+                this.supabase = supabase.createClient(
+                    'https://defifwzgazqlrigwumqn.supabase.co',
+                    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlZmlmd3pnYXpxbHJpZ3d1bXFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcyNTM0MjYsImV4cCI6MjA3MjgyOTQyNn0.wcUBq6Pszjtqn5aBtuu3iXBE4BLmu8x9LtJbsMWlIiA'
+                );
                 this.sessionId = this.generateSessionId();
                 this.currentStep = 'practitioner_greeting';
                 this.conversationLog = [];
@@ -353,16 +356,13 @@
             
             async showGreeting() {
                 const hour = new Date().getHours();
-                let timeOfDay, greeting;
+                let greeting;
                 
                 if (hour >= 5 && hour < 12) {
-                    timeOfDay = 'morning';
                     greeting = "Good morning! I am Lily, your Celloxen Health Consultant. I trust you are having a wonderful start to your day.";
                 } else if (hour >= 12 && hour < 17) {
-                    timeOfDay = 'afternoon';
                     greeting = "Good afternoon! I am Lily, your Celloxen Health Consultant. I hope your day is progressing well.";
                 } else {
-                    timeOfDay = 'evening';
                     greeting = "Good evening! I am Lily, your Celloxen Health Consultant. I hope you have had a productive day.";
                 }
                 
@@ -421,8 +421,114 @@
                 processingMsg.remove();
             }
             
-            // Rest of the implementation continues with the same logic...
-            // (The processUserInput, handlePractitionerName, etc. methods remain the same)
+            async processUserInput(input) {
+                await this.addMessage(input, 'user');
+                this.disableInput();
+                await this.showProcessing();
+                
+                switch(this.currentStep) {
+                    case 'practitioner_greeting':
+                        await this.handlePractitionerName(input);
+                        break;
+                    case 'patient_name':
+                        await this.handlePatientName(input);
+                        break;
+                    case 'patient_age':
+                        await this.handlePatientAge(input);
+                        break;
+                    case 'confirmation':
+                        await this.handleConfirmation(input);
+                        break;
+                    default:
+                        await this.handleGeneralResponse(input);
+                }
+                
+                this.enableInput();
+            }
+            
+            async handlePractitionerName(name) {
+                this.sessionData.practitionerName = name;
+                await this.addMessage(`Thank you, ${name}. It's a pleasure to work with you today.`, 'lily');
+                await this.delay(1500);
+                await this.addMessage("Now, may I have the patient's full name please?", 'lily');
+                this.currentStep = 'patient_name';
+            }
+            
+            async handlePatientName(patientName) {
+                this.sessionData.patientName = patientName;
+                await this.addMessage(`Thank you. I shall be assessing ${patientName} today.`, 'lily');
+                await this.delay(1500);
+                await this.addMessage("May I ask the patient's age?", 'lily');
+                this.currentStep = 'patient_age';
+            }
+            
+            async handlePatientAge(age) {
+                if (isNaN(age) || age < 1 || age > 120) {
+                    await this.addMessage("I apologise, but I need a valid age between 1 and 120. Could you please provide the patient's age?", 'lily');
+                    return;
+                }
+                
+                this.sessionData.patientAge = parseInt(age);
+                
+                if (age < 12) {
+                    await this.addMessage(`I must inform you that our therapies are contraindicated for children under 12 years. I cannot proceed with an assessment for ${this.sessionData.patientName}. Please consult with a paediatrician for appropriate treatment options.`, 'lily');
+                    await this.addMessage("I wish you both a wonderful day. Goodbye!", 'lily');
+                    this.disableInput();
+                    return;
+                }
+                
+                await this.addMessage("Now I need to know the patient's gender.", 'lily', ['Male', 'Female', 'Non-binary', 'Prefer not to say']);
+                this.currentStep = 'patient_gender';
+            }
+            
+            async selectChoice(choice, index) {
+                await this.addMessage(choice, 'user');
+                this.disableInput();
+                
+                if (this.currentStep === 'patient_gender') {
+                    this.sessionData.patientGender = choice;
+                    await this.showProcessing();
+                    await this.addMessage(`Excellent. Let me confirm the details:`, 'lily');
+                    await this.delay(1000);
+                    await this.addMessage(`Practitioner: ${this.sessionData.practitionerName}
+Patient: ${this.sessionData.patientName}
+Age: ${this.sessionData.patientAge}
+Gender: ${this.sessionData.patientGender}`, 'lily');
+                    await this.delay(2000);
+                    await this.addMessage(`${this.sessionData.practitionerName}, do you wish to proceed with the health assessment for ${this.sessionData.patientName}?`, 'lily', ['Yes, proceed', 'No, not today']);
+                    this.currentStep = 'confirmation';
+                }
+                
+                this.enableInput();
+            }
+            
+            async handleConfirmation(input) {
+                if (input.toLowerCase().includes('yes') || input.toLowerCase().includes('proceed')) {
+                    await this.addMessage(`Wonderful! I shall now begin the comprehensive health assessment for ${this.sessionData.patientName}.`, 'lily');
+                    await this.delay(2000);
+                    await this.startCategorySelection();
+                } else {
+                    await this.addMessage(`I understand. I wish you and ${this.sessionData.patientName} a lovely day. Please feel free to return when you're ready for the assessment.`, 'lily');
+                    await this.addMessage("Goodbye!", 'lily');
+                    this.disableInput();
+                }
+            }
+            
+            async startCategorySelection() {
+                await this.addMessage("First, I need to understand the primary areas of concern. Please select all relevant categories:", 'lily', [
+                    'Musculoskeletal & Pain Management',
+                    'Cardiovascular & Circulation', 
+                    'Digestive & Metabolism',
+                    'Respiratory & Immune',
+                    'Neurological & Mental Health',
+                    'Other (Please specify)'
+                ]);
+                this.currentStep = 'category_selection';
+            }
+            
+            async handleGeneralResponse(input) {
+                await this.addMessage("Thank you for that information. I'm processing your response and will continue with the assessment shortly.", 'lily');
+            }
             
             delay(ms) {
                 return new Promise(resolve => setTimeout(resolve, ms));
@@ -444,7 +550,7 @@
         let lily;
         
         window.onload = function() {
-            lily = new LilyAIAgent();
+            lily = new LilyHealthConsultant();
         };
         
         function sendMessage() {
