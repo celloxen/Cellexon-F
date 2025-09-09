@@ -6,6 +6,8 @@
     <title>Lily Health Consultant - Celloxen Health Platform</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/lily-question-flow.js"></script>
+    <script src="js/lily-ai-service.js"></script>
+    <script src="js/lily-pdf-generator.js"></script>
     <style>
         * {
             margin: 0;
@@ -216,6 +218,7 @@
             line-height: 1.5;
             position: relative;
             font-size: 0.95rem;
+            white-space: pre-line;
         }
         
         .lily-message {
@@ -424,26 +427,6 @@
             }
         }
         
-        .warning-message {
-            background: linear-gradient(135deg, #fef2f2, #fee2e2);
-            border: 1px solid #fecaca;
-            color: #991b1b;
-            padding: 14px;
-            border-radius: 12px;
-            margin-top: 12px;
-            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.15);
-        }
-        
-        .success-message {
-            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
-            border: 1px solid #bbf7d0;
-            color: #166534;
-            padding: 14px;
-            border-radius: 12px;
-            margin-top: 12px;
-            box-shadow: 0 2px 8px rgba(34, 197, 94, 0.15);
-        }
-        
         @media (max-width: 768px) {
             .multiple-choice {
                 grid-template-columns: 1fr;
@@ -460,6 +443,16 @@
             
             .container {
                 padding: 15px;
+            }
+        }
+        
+        @media print {
+            .header, .session-info, .chat-card, .input-area {
+                display: none;
+            }
+            
+            body {
+                background: white;
             }
         }
     </style>
@@ -516,8 +509,11 @@
         </div>
     </div>
 
+    <!-- Hidden div for PDF report generation -->
+    <div id="reportContent" style="display: none;"></div>
+
     <script>
-        // Lily Health Consultant with Question Flow Integration
+        // Complete Lily Health Consultant with Full Integration
         class LilyHealthConsultant {
             constructor() {
                 this.supabase = supabase.createClient(
@@ -531,6 +527,8 @@
                 this.questionFlow = new LilyQuestionFlow(this.supabase);
                 this.currentQuestionIndex = 0;
                 this.selectedCategories = [];
+                this.predictiveQuestions = [];
+                this.predictiveResponses = [];
                 this.init();
             }
             
@@ -541,8 +539,26 @@
             }
             
             async init() {
+                // Create session in database
+                await this.createSessionInDatabase();
                 await this.showGreeting();
                 this.enableInput();
+            }
+            
+            async createSessionInDatabase() {
+                try {
+                    const { error } = await this.supabase
+                        .from('lily_assessment_sessions')
+                        .insert({
+                            session_id: this.sessionId,
+                            session_status: 'active',
+                            current_step: 'practitioner_greeting'
+                        });
+                    
+                    if (error) console.error('Session creation error:', error);
+                } catch (error) {
+                    console.error('Database error:', error);
+                }
             }
             
             async showGreeting() {
@@ -644,6 +660,12 @@
                     case 'answering_questions':
                         await this.handleQuestionResponse(input);
                         break;
+                    case 'answering_predictive':
+                        await this.handlePredictiveResponse(input);
+                        break;
+                    case 'email_input':
+                        await this.handleEmailInput(input);
+                        break;
                     default:
                         await this.handleGeneralResponse(input);
                 }
@@ -706,6 +728,10 @@ Gender: ${this.sessionData.patientGender}`, 'lily');
                     await this.handleCategorySelection(choice);
                 } else if (this.currentStep === 'answering_questions') {
                     await this.handleQuestionResponse(choice);
+                } else if (this.currentStep === 'answering_predictive') {
+                    await this.handlePredictiveResponse(choice);
+                } else if (this.currentStep === 'report_options') {
+                    await this.handleReportOption(choice);
                 }
                 
                 this.enableInput();
@@ -773,7 +799,6 @@ Gender: ${this.sessionData.patientGender}`, 'lily');
                     const question = questions[this.currentQuestionIndex];
                     const questionNumber = this.currentQuestionIndex + 1;
                     
-                    // Add progress indicator
                     const progressPercentage = (questionNumber / 20) * 100;
                     const progressHtml = `
                         <div class="question-progress">
@@ -841,11 +866,237 @@ Overall Score: ${this.questionFlow.totalScore}%`, 'lily');
                 
                 await this.addMessage(contraindicationsList, 'lily');
                 await this.addMessage(`${this.sessionData.practitionerName}, please ensure the patient obtains proper medical clearance before proceeding with any therapies.`, 'lily');
+                
+                // Continue to predictive questions even with contraindications
+                await this.proceedToPredictiveQuestions();
             }
             
             async proceedToPredictiveQuestions() {
                 await this.addMessage("Now I will generate personalised follow-up questions based on the initial assessment...", 'lily');
-                // Continue with predictive questions (to be implemented)
+                await this.showProcessing(3000);
+                
+                // Initialize AI service
+                const aiService = new LilyAIService();
+                const predictiveQuestions = await aiService.generatePredictiveQuestions(
+                    this.sessionData,
+                    this.questionFlow.categoryScores
+                );
+                
+                this.predictiveQuestions = predictiveQuestions;
+                this.currentQuestionIndex = 0;
+                
+                await this.addMessage(`${this.sessionData.practitionerName}, I've prepared 20 targeted questions based on ${this.sessionData.patientName}'s initial responses. These will help determine the most suitable therapy protocols.`, 'lily');
+                await this.delay(2000);
+                
+                this.currentStep = 'answering_predictive';
+                await this.askPredictiveQuestion();
+            }
+            
+            async askPredictiveQuestion() {
+                if (this.currentQuestionIndex < this.predictiveQuestions.length) {
+                    const question = this.predictiveQuestions[this.currentQuestionIndex];
+                    const questionNumber = this.currentQuestionIndex + 1;
+                    
+                    const progressPercentage = (questionNumber / 20) * 100;
+                    const progressHtml = `
+                        <div class="question-progress">
+                            <div class="question-progress-bar" style="width: ${progressPercentage}%"></div>
+                        </div>
+                        Targeted Question ${questionNumber} of 20: ${question.question}
+                    `;
+                    
+                    await this.addMessage(progressHtml, 'lily', Object.values(question.options));
+                } else {
+                    await this.completePredictiveAssessment();
+                }
+            }
+            
+            async handlePredictiveResponse(response) {
+                const question = this.predictiveQuestions[this.currentQuestionIndex];
+                const optionKey = Object.keys(question.options).find(key => 
+                    question.options[key] === response
+                );
+                
+                this.predictiveResponses.push({
+                    question: question.question,
+                    response: response,
+                    optionKey: optionKey,
+                    category: question.category,
+                    focus_area: question.focus_area
+                });
+                
+                this.currentQuestionIndex++;
+                await this.askPredictiveQuestion();
+            }
+            
+            async completePredictiveAssessment() {
+                await this.addMessage("Excellent! I've completed the comprehensive assessment. Now I'll analyse all responses and generate your personalised report...", 'lily');
+                await this.showProcessing(4500);
+                
+                // Generate therapy recommendations
+                await this.questionFlow.generateTherapyRecommendations();
+                const recommendations = this.questionFlow.recommendedTherapies;
+                
+                if (recommendations.length > 0) {
+                    await this.addMessage(`Based on my analysis, I recommend the following therapy protocols for ${this.sessionData.patientName}:`, 'lily');
+                    
+                    for (const therapy of recommendations) {
+                        const priorityEmoji = therapy.priority === 'essential' ? '🔴' : '🟡';
+                        await this.addMessage(`${priorityEmoji} ${therapy.category}
+Priority: ${therapy.priority.toUpperCase()}
+Reason: ${therapy.reason}
+Protocol Codes: ${therapy.codes.join(', ')}`, 'lily');
+                    }
+                }
+                
+                await this.generateFinalReport();
+            }
+            
+            async generateFinalReport() {
+                await this.addMessage("I'm now generating the comprehensive PDF report...", 'lily');
+                await this.showProcessing(3000);
+                
+                // Initialize PDF generator
+                const pdfGenerator = new LilyPDFGenerator();
+                
+                // Prepare report data
+                const reportData = {
+                    sessionId: this.sessionId,
+                    practitionerName: this.sessionData.practitionerName,
+                    patientName: this.sessionData.patientName,
+                    patientAge: this.sessionData.patientAge,
+                    patientGender: this.sessionData.patientGender,
+                    clinicName: this.sessionData.clinicName || 'Celloxen Health Clinic',
+                    clinicAddress: this.sessionData.clinicAddress || '123 Health Street, London, UK',
+                    clinicPhone: this.sessionData.clinicPhone || '+44 20 1234 5678',
+                    clinicEmail: this.sessionData.clinicEmail || 'health@celloxen.com'
+                };
+                
+                const assessmentResults = {
+                    categoryScores: this.questionFlow.categoryScores,
+                    totalScore: this.questionFlow.totalScore,
+                    contraindications: this.questionFlow.contraindications
+                };
+                
+                // Generate HTML report
+                const reportHTML = await pdfGenerator.generateReport(
+                    reportData,
+                    assessmentResults,
+                    this.questionFlow.recommendedTherapies
+                );
+                
+                // Store report for printing
+                this.currentReport = reportHTML;
+                
+                // Save report to database
+                await this.saveReportToDatabase(reportHTML);
+                
+                await this.addMessage(`✅ Assessment Complete!
+    
+The comprehensive health assessment for ${this.sessionData.patientName} has been completed successfully.
+
+📊 Overall Health Score: ${this.questionFlow.totalScore}%
+
+📄 The detailed PDF report has been generated and saved.
+
+${this.questionFlow.contraindications.length > 0 ? '⚠️ Important: Contraindications have been identified. Please review the report carefully and ensure medical clearance is obtained before proceeding with therapies.' : '✅ No contraindications identified.'}
+
+Would you like to:`, 'lily', [
+                    'Download PDF Report',
+                    'Email Report',
+                    'Start New Assessment',
+                    'End Session'
+                ]);
+                
+                this.currentStep = 'report_options';
+            }
+            
+            async saveReportToDatabase(reportHTML) {
+                try {
+                    const { error } = await this.supabase
+                        .from('lily_assessment_sessions')
+                        .update({
+                            practitioner_name: this.sessionData.practitionerName,
+                            patient_name: this.sessionData.patientName,
+                            patient_age: this.sessionData.patientAge,
+                            patient_gender: this.sessionData.patientGender,
+                            assessment_categories: this.selectedCategories,
+                            general_responses: Object.fromEntries(this.questionFlow.responses),
+                            predictive_responses: this.predictiveResponses,
+                            category_scores: this.questionFlow.categoryScores,
+                            total_score: this.questionFlow.totalScore,
+                            contraindications_found: this.questionFlow.contraindications,
+                            recommended_therapies: this.questionFlow.recommendedTherapies,
+                            final_report: reportHTML,
+                            session_status: 'completed',
+                            completed_at: new Date().toISOString(),
+                            assessment_completed: true
+                        })
+                        .eq('session_id', this.sessionId);
+                        
+                    if (error) throw error;
+                } catch (error) {
+                    console.error('Error saving report:', error);
+                }
+            }
+            
+            async handleReportOption(option) {
+                switch(option) {
+                    case 'Download PDF Report':
+                        await this.downloadReport();
+                        break;
+                    case 'Email Report':
+                        await this.emailReport();
+                        break;
+                    case 'Start New Assessment':
+                        await this.startNewAssessment();
+                        break;
+                    case 'End Session':
+                        await this.endSession();
+                        break;
+                }
+            }
+            
+            async downloadReport() {
+                await this.addMessage("Preparing your PDF download...", 'lily');
+                
+                // Create a new window with the report content for printing
+                const reportWindow = window.open('', '_blank');
+                reportWindow.document.write(this.currentReport);
+                reportWindow.document.close();
+                
+                // Trigger print dialog
+                setTimeout(() => {
+                    reportWindow.print();
+                }, 500);
+                
+                await this.addMessage("The report should now be available for printing or saving as PDF. Use your browser's print function to save as PDF.", 'lily');
+            }
+            
+            async emailReport() {
+                await this.addMessage("Please provide the email address where you'd like the report sent:", 'lily');
+                this.currentStep = 'email_input';
+            }
+            
+            async handleEmailInput(email) {
+                if (!email.includes('@')) {
+                    await this.addMessage("Please provide a valid email address.", 'lily');
+                    return;
+                }
+                
+                await this.addMessage(`Report will be sent to ${email}. (Note: Email integration pending implementation)`, 'lily');
+                this.currentStep = 'report_options';
+            }
+            
+            async startNewAssessment() {
+                await this.addMessage("Starting a new assessment. Please refresh the page to begin.", 'lily');
+                setTimeout(() => location.reload(), 2000);
+            }
+            
+            async endSession() {
+                await this.addMessage(`Thank you for using the Celloxen Health Assessment System, ${this.sessionData.practitionerName}. I hope this assessment proves valuable for ${this.sessionData.patientName}'s health journey. Have a wonderful day!`, 'lily');
+                await this.addMessage("Session ended. You may close this window.", 'lily');
+                this.disableInput();
             }
             
             async handleGeneralResponse(input) {
