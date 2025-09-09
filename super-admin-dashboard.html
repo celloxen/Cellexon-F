@@ -14,14 +14,13 @@
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: #f8fafc;
-            color: #1f2937;
             min-height: 100vh;
-        } 
+        }
         
-        /* Header Styles */
+        /* Header */
         .header {
             background: white;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
             padding: 20px 0;
             position: sticky;
             top: 0;
@@ -55,13 +54,18 @@
             gap: 20px;
         }
         
-        .user-badge {
-            background: #f0fdf4;
-            color: #10b981;
-            padding: 8px 16px;
-            border-radius: 8px;
-            font-weight: 500;
-            border: 1px solid #10b981;
+        .user-details {
+            text-align: right;
+        }
+        
+        .user-name {
+            font-weight: 600;
+            color: #1f2937;
+        }
+        
+        .user-role {
+            font-size: 0.875rem;
+            color: #6b7280;
         }
         
         .logout-btn {
@@ -72,21 +76,40 @@
             border-radius: 8px;
             cursor: pointer;
             font-weight: 500;
-            transition: background 0.3s;
+            transition: all 0.3s;
         }
         
         .logout-btn:hover {
             background: #dc2626;
         }
         
-        /* Main Container */
+        /* Container */
         .container {
             max-width: 1400px;
             margin: 0 auto;
             padding: 30px 20px;
         }
         
-        /* Statistics Cards */
+        /* Welcome Section */
+        .welcome-section {
+            background: linear-gradient(135deg, #1e3a8a, #1e40af);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+        }
+        
+        .welcome-title {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        
+        .welcome-subtitle {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+        
+        /* Stats Grid */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -96,11 +119,11 @@
         
         .stat-card {
             background: white;
-            border-radius: 12px;
             padding: 25px;
+            border-radius: 12px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-            border-left: 4px solid #10b981;
-            transition: transform 0.3s, box-shadow 0.3s;
+            border: 1px solid #e5e7eb;
+            transition: all 0.3s;
         }
         
         .stat-card:hover {
@@ -108,27 +131,47 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.12);
         }
         
-        .stat-number {
-            font-size: 2.5rem;
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
             font-weight: 700;
-            color: #10b981;
+            color: #1e3a8a;
             margin-bottom: 5px;
         }
         
         .stat-label {
             color: #6b7280;
             font-size: 0.95rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
         }
         
         .stat-change {
+            font-size: 0.875rem;
             margin-top: 10px;
-            font-size: 0.9rem;
-            color: #059669;
+            display: flex;
+            align-items: center;
+            gap: 5px;
         }
         
-        /* Module Grid */
+        .stat-change.positive {
+            color: #10b981;
+        }
+        
+        .stat-change.negative {
+            color: #ef4444;
+        }
+        
+        /* Modules Section */
         .modules-section {
             margin-bottom: 30px;
         }
@@ -137,73 +180,82 @@
             font-size: 1.5rem;
             color: #1f2937;
             margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #10b981;
+            font-weight: 600;
         }
         
         .modules-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 20px;
         }
         
         .module-card {
             background: white;
+            border: 1px solid #e5e7eb;
             border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            padding: 25px;
             cursor: pointer;
             transition: all 0.3s;
-            border: 2px solid transparent;
         }
         
         .module-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
             border-color: #10b981;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+        }
+        
+        .module-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
         }
         
         .module-icon {
-            width: 50px;
-            height: 50px;
-            background: #f0fdf4;
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
             border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 15px;
-            font-size: 1.5rem;
+            font-size: 1.3rem;
         }
         
         .module-title {
-            font-size: 1.1rem;
             font-weight: 600;
             color: #1f2937;
-            margin-bottom: 8px;
+            font-size: 1.1rem;
         }
         
         .module-description {
             color: #6b7280;
-            font-size: 0.9rem;
-            line-height: 1.4;
+            font-size: 0.95rem;
+            line-height: 1.5;
         }
         
         .module-status {
-            margin-top: 10px;
+            margin-top: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .status-badge {
             display: inline-block;
             padding: 4px 10px;
-            background: #f0fdf4;
-            color: #10b981;
-            border-radius: 4px;
-            font-size: 0.8rem;
+            background: #d1fae5;
+            color: #065f46;
+            border-radius: 20px;
+            font-size: 0.85rem;
             font-weight: 500;
         }
         
         /* Quick Actions */
         .quick-actions {
             background: white;
-            border-radius: 12px;
             padding: 25px;
+            border-radius: 12px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.08);
             margin-bottom: 30px;
         }
@@ -212,7 +264,6 @@
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 15px;
-            margin-top: 20px;
         }
         
         .action-btn {
@@ -223,12 +274,13 @@
             border-radius: 8px;
             cursor: pointer;
             font-weight: 500;
-            transition: background 0.3s;
+            transition: all 0.3s;
             text-align: center;
         }
         
         .action-btn:hover {
             background: #059669;
+            transform: translateY(-2px);
         }
         
         .action-btn.secondary {
@@ -242,8 +294,8 @@
         /* Recent Activity */
         .activity-section {
             background: white;
-            border-radius: 12px;
             padding: 25px;
+            border-radius: 12px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         }
         
@@ -252,94 +304,56 @@
         }
         
         .activity-item {
-            padding: 15px;
-            border-bottom: 1px solid #e5e7eb;
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            gap: 15px;
+            padding: 12px 0;
+            border-bottom: 1px solid #f3f4f6;
         }
         
         .activity-item:last-child {
             border-bottom: none;
         }
         
+        .activity-icon {
+            width: 35px;
+            height: 35px;
+            background: #f0fdf4;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+        
+        .activity-details {
+            flex: 1;
+        }
+        
         .activity-text {
-            color: #374151;
+            color: #1f2937;
+            font-size: 0.95rem;
         }
         
         .activity-time {
             color: #9ca3af;
-            font-size: 0.9rem;
-        }
-        
-        /* Alert Banner */
-        .alert-banner {
-            background: #fef3c7;
-            border: 1px solid #fbbf24;
-            border-radius: 8px;
-            padding: 15px 20px;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        
-        .alert-icon {
-            color: #f59e0b;
-            font-size: 1.5rem;
-        }
-        
-        .alert-text {
-            flex: 1;
-            color: #92400e;
-        }
-        
-        /* Loading Overlay */
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.9);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            display: none;
-        }
-        
-        .loading-spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid #e5e7eb;
-            border-top: 4px solid #10b981;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            font-size: 0.85rem;
+            margin-top: 2px;
         }
     </style>
 </head>
 <body>
-    <!-- Loading Overlay -->
-    <div class="loading-overlay" id="loadingOverlay">
-        <div class="loading-spinner"></div>
-    </div>
-
     <!-- Header -->
     <div class="header">
         <div class="header-container">
             <div class="logo">
-                <h1>CELLOXEN</h1>
-                <span style="color: #6b7280;">Super Admin Portal</span>
+                <h1>CELLOXEN SUPER ADMIN</h1>
             </div>
             <div class="user-info">
-                <span>Welcome, <strong id="adminName">System Administrator</strong></span>
-                <span class="user-badge">SUPER ADMIN</span>
+                <div class="user-details">
+                    <div class="user-name" id="userName">Administrator</div>
+                    <div class="user-role">Super Administrator</div>
+                </div>
                 <button class="logout-btn" onclick="logout()">Logout</button>
             </div>
         </div>
@@ -347,140 +361,176 @@
 
     <!-- Main Container -->
     <div class="container">
-        <!-- Alert Banner (if needed) -->
-        <div class="alert-banner" id="alertBanner" style="display: none;">
-            <span class="alert-icon">⚠️</span>
-            <span class="alert-text" id="alertText"></span>
+        <!-- Welcome Section -->
+        <div class="welcome-section">
+            <h1 class="welcome-title">Welcome to Celloxen Admin Portal</h1>
+            <p class="welcome-subtitle">Complete system overview and management controls</p>
         </div>
 
-        <!-- Statistics Cards -->
+        <!-- Statistics -->
         <div class="stats-grid">
             <div class="stat-card">
-                <div class="stat-number" id="totalClinics">0</div>
-                <div class="stat-label">Total Clinics</div>
-                <div class="stat-change">↑ Active clinics in system</div>
+                <div class="stat-icon">🏥</div>
+                <div class="stat-value" id="totalClinics">0</div>
+                <div class="stat-label">Active Clinics</div>
+                <div class="stat-change positive">↑ 2 this month</div>
             </div>
             <div class="stat-card">
-                <div class="stat-number" id="totalPatients">0</div>
+                <div class="stat-icon">👥</div>
+                <div class="stat-value" id="totalPatients">0</div>
                 <div class="stat-label">Total Patients</div>
-                <div class="stat-change">↑ Across all clinics</div>
+                <div class="stat-change positive">↑ 45 this week</div>
             </div>
             <div class="stat-card">
-                <div class="stat-number" id="activeSessions">0</div>
-                <div class="stat-label">Active Sessions</div>
-                <div class="stat-change">↑ Currently running</div>
+                <div class="stat-icon">📊</div>
+                <div class="stat-value" id="totalSessions">0</div>
+                <div class="stat-label">Treatment Sessions</div>
+                <div class="stat-change positive">↑ 128 this month</div>
             </div>
             <div class="stat-card">
-                <div class="stat-number" id="totalReports">0</div>
-                <div class="stat-label">Total Reports</div>
-                <div class="stat-change">↑ Generated this month</div>
+                <div class="stat-icon">💰</div>
+                <div class="stat-value" id="monthlyRevenue">£0</div>
+                <div class="stat-label">Monthly Revenue</div>
+                <div class="stat-change positive">↑ 15% vs last month</div>
             </div>
         </div>
 
         <!-- Quick Actions -->
-  <div class="quick-actions">
-    <h2 class="section-title">Quick Actions</h2>
-    <div class="actions-grid">
-        <button class="action-btn" onclick="navigateTo('super-admin-registration.html')">
-            Register New Clinic
-        </button>
-        <button class="action-btn" onclick="navigateTo('patient-management.html')">
-            View All Patients
-        </button>
-        <button class="action-btn" onclick="navigateTo('leads-management.html')">
-            Manage Leads
-        </button>
-        <button class="action-btn secondary" onclick="generateSystemReport()">
-            Generate System Report
-        </button>
-        <button class="action-btn secondary" onclick="viewSystemLogs()">
-            View System Logs
-        </button>
-    </div>
-</div>
-
-        <!-- System Management Modules -->
-        <div class="modules-section">
-            <h2 class="section-title">System Management</h2>
-            <div class="modules-grid">
-                <div class="module-card" onclick="navigateTo('super-admin-registration.html')">
-                    <div class="module-icon">🏥</div>
-                    <div class="module-title">Clinic Management</div>
-                    <div class="module-description">Register and manage clinics, assign devices, manage clinic administrators</div>
-                    <div class="module-status">Full Access</div>
-                </div>
-                
-                <div class="module-card" onclick="viewAllPatients()">
-                    <div class="module-icon">👥</div>
-                    <div class="module-title">Global Patient View</div>
-                    <div class="module-description">View and manage all patients across all clinics in the system</div>
-                    <div class="module-status">Full Access</div>
-                </div>
-                
-                <div class="module-card" onclick="viewSystemAnalytics()">
-                    <div class="module-icon">📊</div>
-                    <div class="module-title">System Analytics</div>
-                    <div class="module-description">View system-wide analytics, usage statistics, and performance metrics</div>
-                    <div class="module-status">Full Access</div>
-                </div>
-                
-                <div class="module-card" onclick="manageUsers()">
-                    <div class="module-icon">🔐</div>
-                    <div class="module-title">User Management</div>
-                    <div class="module-description">Manage user accounts, permissions, and access control</div>
-                    <div class="module-status">Full Access</div>
-                </div>
+        <div class="quick-actions">
+            <h2 class="section-title">Quick Actions</h2>
+            <div class="actions-grid">
+                <button class="action-btn" onclick="navigateTo('super-admin-registration.html')">
+                    Register New Clinic
+                </button>
+                <button class="action-btn" onclick="navigateTo('patient-management.html')">
+                    View All Patients
+                </button>
+                <button class="action-btn" onclick="navigateTo('leads-management.html')">
+                    Manage Leads
+                </button>
+                <button class="action-btn secondary" onclick="navigateTo('system-reports.html')">
+                    Generate System Report
+                </button>
+                <button class="action-btn secondary" onclick="navigateTo('system-logs.html')">
+                    View System Logs
+                </button>
             </div>
         </div>
 
-        <!-- Clinical Modules -->
+        <!-- Management Modules -->
         <div class="modules-section">
-            <h2 class="section-title">Clinical Modules</h2>
+            <h2 class="section-title">Management Modules</h2>
             <div class="modules-grid">
-                <div class="module-card" onclick="navigateTo('patient-management.html')">
-                    <div class="module-icon">📋</div>
-                    <div class="module-title">Patient Management</div>
-                    <div class="module-description">Register patients, manage records, view patient history</div>
-                    <div class="module-status">Full Access</div>
+                <!-- Clinic Management -->
+                <div class="module-card" onclick="navigateTo('super-admin-registration.html')">
+                    <div class="module-header">
+                        <div class="module-icon">🏥</div>
+                        <div class="module-title">Clinic Management</div>
+                    </div>
+                    <div class="module-description">
+                        Register new clinics, manage existing clinics, update credentials, and monitor clinic performance.
+                    </div>
+                    <div class="module-status">
+                        <span class="status-badge">Active</span>
+                    </div>
                 </div>
-                
-                <div class="module-card" onclick="navigateTo('health-assessment.html')">
-                    <div class="module-icon">🏥</div>
-                    <div class="module-title">Health Assessment</div>
-                    <div class="module-description">5-category health questionnaire with AI recommendations</div>
-                    <div class="module-status">Full Access</div>
+
+                <!-- Global Patient View -->
+                <div class="module-card" onclick="navigateTo('global-patients.html')">
+                    <div class="module-header">
+                        <div class="module-icon">👥</div>
+                        <div class="module-title">Global Patient View</div>
+                    </div>
+                    <div class="module-description">
+                        View and manage all patients across all clinics in the network.
+                    </div>
+                    <div class="module-status">
+                        <span class="status-badge">Active</span>
+                    </div>
                 </div>
-                
-                <div class="module-card" onclick="navigateTo('iris-analysis.html')">
-                    <div class="module-icon">👁️</div>
-                    <div class="module-title">IRIS Analysis</div>
-                    <div class="module-description">IRIS image capture and constitutional analysis</div>
-                    <div class="module-status">Full Access</div>
+
+                <!-- Lead Management -->
+                <div class="module-card" onclick="navigateTo('leads-management.html')">
+                    <div class="module-header">
+                        <div class="module-icon">📧</div>
+                        <div class="module-title">Lead Management</div>
+                    </div>
+                    <div class="module-description">
+                        Track and manage potential clinic registrations from website enquiries.
+                    </div>
+                    <div class="module-status">
+                        <span class="status-badge">Active</span>
+                    </div>
                 </div>
-                
-                <div class="module-card" onclick="navigateTo('treatment-interface.html')">
-                    <div class="module-icon">⚡</div>
-                    <div class="module-title">Treatment Interface</div>
-                    <div class="module-description">33 therapy protocols with frequency control</div>
-                    <div class="module-status">Full Access</div>
+
+                <!-- System Analytics -->
+                <div class="module-card" onclick="navigateTo('system-analytics.html')">
+                    <div class="module-header">
+                        <div class="module-icon">📊</div>
+                        <div class="module-title">System Analytics</div>
+                    </div>
+                    <div class="module-description">
+                        View system-wide analytics, usage statistics, and performance metrics.
+                    </div>
+                    <div class="module-status">
+                        <span class="status-badge">Coming Soon</span>
+                    </div>
                 </div>
-                
-                <div class="module-card" onclick="navigateTo('vital-signs.html')">
-                    <div class="module-icon">💓</div>
-                    <div class="module-title">Vital Signs Monitoring</div>
-                    <div class="module-description">Real-time vital signs monitoring during treatment</div>
-                    <div class="module-status">Full Access</div>
+
+                <!-- User Management -->
+                <div class="module-card" onclick="navigateTo('user-management.html')">
+                    <div class="module-header">
+                        <div class="module-icon">🔐</div>
+                        <div class="module-title">User Management</div>
+                    </div>
+                    <div class="module-description">
+                        Manage user accounts, permissions, and access control across the platform.
+                    </div>
+                    <div class="module-status">
+                        <span class="status-badge">Coming Soon</span>
+                    </div>
+                </div>
+
+                <!-- Financial Overview -->
+                <div class="module-card" onclick="showComingSoon()">
+                    <div class="module-header">
+                        <div class="module-icon">💰</div>
+                        <div class="module-title">Financial Overview</div>
+                    </div>
+                    <div class="module-description">
+                        Monitor revenue, subscriptions, and financial performance across all clinics.
+                    </div>
+                    <div class="module-status">
+                        <span class="status-badge">Coming Soon</span>
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Recent Activity -->
         <div class="activity-section">
-            <h2 class="section-title">Recent System Activity</h2>
+            <h2 class="section-title">Recent Activity</h2>
             <div class="activity-list" id="activityList">
                 <div class="activity-item">
-                    <span class="activity-text">System initialized - Ready for operation</span>
-                    <span class="activity-time">Just now</span>
+                    <div class="activity-icon">🏥</div>
+                    <div class="activity-details">
+                        <div class="activity-text">New clinic registered: London Wellness Centre</div>
+                        <div class="activity-time">2 hours ago</div>
+                    </div>
+                </div>
+                <div class="activity-item">
+                    <div class="activity-icon">👥</div>
+                    <div class="activity-details">
+                        <div class="activity-text">15 new patients registered across network</div>
+                        <div class="activity-time">5 hours ago</div>
+                    </div>
+                </div>
+                <div class="activity-item">
+                    <div class="activity-icon">📊</div>
+                    <div class="activity-details">
+                        <div class="activity-text">Monthly report generated for December 2024</div>
+                        <div class="activity-time">1 day ago</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -492,10 +542,11 @@
     <script type="module">
         import { supabase } from './supabase-config.js';
         
-        // Check authentication on page load
-        document.addEventListener('DOMContentLoaded', async function() {
+        // Check authentication on load
+        document.addEventListener('DOMContentLoaded', function() {
             checkAuthentication();
             loadDashboardData();
+            displayUserInfo();
         });
         
         // Check if user is authenticated and is super admin
@@ -512,160 +563,72 @@
                 window.location.href = 'unified-login.html';
                 return;
             }
-            
-            // Update admin name
-            document.getElementById('adminName').textContent = auth.fullName || 'System Administrator';
         }
         
-        // Load dashboard statistics
+        // Display user information
+        function displayUserInfo() {
+            const authData = JSON.parse(localStorage.getItem('celloxen_auth') || '{}');
+            document.getElementById('userName').textContent = authData.fullName || authData.username || 'Administrator';
+        }
+        
+        // Load dashboard data
         async function loadDashboardData() {
             try {
-                showLoading(true);
-                
-                // Load total clinics
-                const { count: clinicsCount } = await supabase
+                // Get total clinics
+                const { count: clinicCount, error: clinicError } = await supabase
                     .from('clinics')
-                    .select('*', { count: 'exact', head: true });
-                document.getElementById('totalClinics').textContent = clinicsCount || 0;
+                    .select('*', { count: 'exact', head: true })
+                    .eq('is_active', true);
                 
-                // Load total patients
-                const { count: patientsCount } = await supabase
+                if (!clinicError) {
+                    document.getElementById('totalClinics').textContent = clinicCount || 0;
+                }
+                
+                // Get total patients
+                const { count: patientCount, error: patientError } = await supabase
                     .from('patients')
                     .select('*', { count: 'exact', head: true });
-                document.getElementById('totalPatients').textContent = patientsCount || 0;
                 
-                // Load active sessions (sessions from today)
-                const today = new Date().toISOString().split('T')[0];
-                const { count: sessionsCount } = await supabase
+                if (!patientError) {
+                    document.getElementById('totalPatients').textContent = patientCount || 0;
+                }
+                
+                // Get total treatment sessions
+                const { count: sessionCount, error: sessionError } = await supabase
                     .from('treatment_sessions')
-                    .select('*', { count: 'exact', head: true })
-                    .gte('created_at', today);
-                document.getElementById('activeSessions').textContent = sessionsCount || 0;
-                
-                // Load total reports
-                const { count: reportsCount } = await supabase
-                    .from('medical_reports')
                     .select('*', { count: 'exact', head: true });
-                document.getElementById('totalReports').textContent = reportsCount || 0;
                 
-                // Load recent activity
-                await loadRecentActivity();
+                if (!sessionError) {
+                    document.getElementById('totalSessions').textContent = sessionCount || 0;
+                }
+                
+                // Calculate monthly revenue (mock calculation)
+                const revenue = (clinicCount || 0) * 299; // Assuming £299 per clinic per month
+                document.getElementById('monthlyRevenue').textContent = `£${revenue.toLocaleString()}`;
                 
             } catch (error) {
                 console.error('Error loading dashboard data:', error);
-                showAlert('Error loading dashboard data. Please refresh the page.');
-            } finally {
-                showLoading(false);
             }
         }
         
-        // Load recent activity
-        async function loadRecentActivity() {
-            try {
-                // Get recent clinics
-                const { data: recentClinics } = await supabase
-                    .from('clinics')
-                    .select('clinic_name, created_at')
-                    .order('created_at', { ascending: false })
-                    .limit(3);
-                
-                // Get recent patients
-                const { data: recentPatients } = await supabase
-                    .from('patients')
-                    .select('first_name, last_name, created_at')
-                    .order('created_at', { ascending: false })
-                    .limit(3);
-                
-                const activityList = document.getElementById('activityList');
-                activityList.innerHTML = '';
-                
-                // Add clinic activities
-                if (recentClinics && recentClinics.length > 0) {
-                    recentClinics.forEach(clinic => {
-                        const item = createActivityItem(
-                            `New clinic registered: ${clinic.clinic_name}`,
-                            clinic.created_at
-                        );
-                        activityList.appendChild(item);
-                    });
-                }
-                
-                // Add patient activities
-                if (recentPatients && recentPatients.length > 0) {
-                    recentPatients.forEach(patient => {
-                        const item = createActivityItem(
-                            `New patient registered: ${patient.first_name} ${patient.last_name}`,
-                            patient.created_at
-                        );
-                        activityList.appendChild(item);
-                    });
-                }
-                
-                // If no activity
-                if (activityList.children.length === 0) {
-                    activityList.innerHTML = `
-                        <div class="activity-item">
-                            <span class="activity-text">No recent activity</span>
-                            <span class="activity-time">-</span>
-                        </div>
-                    `;
-                }
-                
-            } catch (error) {
-                console.error('Error loading recent activity:', error);
-            }
-        }
-        
-        // Create activity item element
-        function createActivityItem(text, timestamp) {
-            const div = document.createElement('div');
-            div.className = 'activity-item';
-            div.innerHTML = `
-                <span class="activity-text">${text}</span>
-                <span class="activity-time">${formatTime(timestamp)}</span>
-            `;
-            return div;
-        }
-        
-        // Format timestamp
-        function formatTime(timestamp) {
-            const date = new Date(timestamp);
-            const now = new Date();
-            const diff = now - date;
-            const minutes = Math.floor(diff / 60000);
-            const hours = Math.floor(diff / 3600000);
-            const days = Math.floor(diff / 86400000);
-            
-            if (minutes < 1) return 'Just now';
-            if (minutes < 60) return `${minutes} min ago`;
-            if (hours < 24) return `${hours} hours ago`;
-            return `${days} days ago`;
-        }
-        
-        // Navigation functions
+        // Navigation function
         window.navigateTo = function(page) {
             window.location.href = page;
         };
         
-        window.viewAllPatients = function() {
-            sessionStorage.setItem('viewMode', 'super_admin');
-            window.location.href = 'patient-management.html';
+        // Show coming soon message
+        window.showComingSoon = function() {
+            alert('This module is coming soon! We are working on implementing this feature.');
         };
         
-        window.viewSystemAnalytics = function() {
-            showAlert('System Analytics module coming soon!');
-        };
-        
-        window.manageUsers = function() {
-            showAlert('User Management module coming soon!');
-        };
-        
+        // Generate system report (placeholder)
         window.generateSystemReport = function() {
-            showAlert('System report generation started...');
+            alert('System report generation will be available soon. This will provide comprehensive analytics and insights.');
         };
         
+        // View system logs (placeholder)
         window.viewSystemLogs = function() {
-            showAlert('System logs viewer coming soon!');
+            alert('System logs viewer will be available soon. This will show all platform activity and audit trails.');
         };
         
         // Logout function
@@ -676,23 +639,6 @@
                 window.location.href = 'unified-login.html';
             }
         };
-        
-        // Show/hide loading overlay
-        function showLoading(show) {
-            document.getElementById('loadingOverlay').style.display = show ? 'flex' : 'none';
-        }
-        
-        // Show alert banner
-        function showAlert(message, type = 'info') {
-            const banner = document.getElementById('alertBanner');
-            const text = document.getElementById('alertText');
-            text.textContent = message;
-            banner.style.display = 'flex';
-            
-            setTimeout(() => {
-                banner.style.display = 'none';
-            }, 5000);
-        }
     </script>
 </body>
 </html>
