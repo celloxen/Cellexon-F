@@ -1,0 +1,2759 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Celloxen Health Therapy - Complete Practitioner Guide</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f8f9fa;
+            color: #2c3e50;
+            line-height: 1.6;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 2rem 1rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+        
+        .header-info {
+            text-align: right;
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        .main-container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 2rem;
+            padding: 0 1rem;
+        }
+        
+        .sidebar {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            height: fit-content;
+            position: sticky;
+            top: 100px;
+            max-height: calc(100vh - 120px);
+            overflow-y: auto;
+        }
+        
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .sidebar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+        
+        .sidebar::-webkit-scrollbar-thumb {
+            background: #3498db;
+            border-radius: 3px;
+        }
+        
+        .sidebar-title {
+            font-size: 1.2rem;
+            color: #2c3e50;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid #3498db;
+        }
+        
+        .category-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .category-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #7f8c8d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+            padding-left: 0.5rem;
+        }
+        
+        .therapy-btn {
+            width: 100%;
+            text-align: left;
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.25rem;
+            border: 1px solid #ecf0f1;
+            background: white;
+            color: #34495e;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .therapy-btn:hover {
+            background: #f8f9fa;
+            border-color: #3498db;
+            transform: translateX(5px);
+        }
+        
+        .therapy-btn.active {
+            background: #3498db;
+            color: white;
+            border-color: #2980b9;
+            font-weight: 500;
+        }
+        
+        .therapy-code {
+            font-size: 0.75rem;
+            opacity: 0.7;
+            font-weight: normal;
+        }
+        
+        .content-area {
+            background: white;
+            border-radius: 12px;
+            padding: 2.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            min-height: 600px;
+        }
+        
+        .therapy-section {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .therapy-section.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .therapy-title {
+            font-size: 2rem;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 3px solid #3498db;
+        }
+        
+        .therapy-subtitle {
+            color: #7f8c8d;
+            font-size: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .info-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border-left: 4px solid #3498db;
+        }
+        
+        .info-card h3 {
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+        
+        .conditions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 0.75rem;
+        }
+        
+        .condition-item {
+            padding: 0.5rem 0;
+            color: #34495e;
+            display: flex;
+            align-items: center;
+        }
+        
+        .condition-item:before {
+            content: "✓";
+            color: #27ae60;
+            font-weight: bold;
+            margin-right: 0.75rem;
+            font-size: 1.1rem;
+        }
+        
+        .probe-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-bottom: 2rem;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 0 0 1px #ecf0f1;
+        }
+        
+        .probe-table th {
+            background: #2c3e50;
+            color: white;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+        
+        .probe-table td {
+            padding: 1rem;
+            border-bottom: 1px solid #ecf0f1;
+            background: white;
+        }
+        
+        .probe-table tr:nth-child(even) td {
+            background: #f8f9fa;
+        }
+        
+        .probe-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .probe-number {
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 1rem;
+        }
+        
+        .cable-badge {
+            display: inline-block;
+            padding: 0.35rem 0.75rem;
+            border-radius: 20px;
+            font-weight: 500;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .cable-blue { background: #e3f2fd; color: #1565c0; }
+        .cable-yellow { background: #fff9c4; color: #f57c00; }
+        .cable-green { background: #e8f5e9; color: #2e7d32; }
+        .cable-grey-black { background: #f5f5f5; color: #424242; }
+        .cable-grey-white { background: #fafafa; color: #616161; border: 1px solid #e0e0e0; }
+        
+        .parameters-section {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 10px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+        
+        .parameters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .parameter-box {
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+        }
+        
+        .parameter-label {
+            font-size: 0.8rem;
+            color: #7f8c8d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+        
+        .parameter-value {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .alert-box {
+            border-radius: 8px;
+            padding: 1rem 1.5rem;
+            margin: 1.5rem 0;
+            display: flex;
+            align-items: flex-start;
+        }
+        
+        .alert-warning {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            color: #856404;
+        }
+        
+        .alert-info {
+            background: #d1ecf1;
+            border-left: 4px solid #17a2b8;
+            color: #0c5460;
+        }
+        
+        .alert-box strong {
+            margin-right: 0.5rem;
+        }
+        
+        .quick-reference {
+            background: #e8f4f8;
+            border: 2px dashed #3498db;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        .quick-reference h4 {
+            color: #2c3e50;
+            margin-bottom: 0.75rem;
+            font-size: 1rem;
+        }
+        
+        .print-button {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: #2c3e50;
+            color: white;
+            padding: 1rem 1.5rem;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .print-button:hover {
+            background: #34495e;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+        
+        @media (max-width: 768px) {
+            .main-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                position: static;
+                max-height: none;
+            }
+            
+            .conditions-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media print {
+            .sidebar, .print-button, .header {
+                display: none;
+            }
+            
+            .main-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .content-area {
+                box-shadow: none;
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">CELLOXEN HEALTH THERAPY</div>
+            <div class="header-info">
+                Practitioner Guide v3.0<br>
+                Numbered Probe System
+            </div>
+        </div>
+    </div>
+    
+    <div class="main-container">
+        <nav class="sidebar">
+            <h2 class="sidebar-title">Select Therapy Protocol</h2>
+            
+            <div class="category-group">
+                <div class="category-label">Sleep & Stress Management</div>
+                <button class="therapy-btn active" data-therapy="deep-sleep">
+                    Deep Sleep Renewal <span class="therapy-code">101</span>
+                </button>
+                <button class="therapy-btn" data-therapy="stress-relief">
+                    Stress Relief <span class="therapy-code">102</span>
+                </button>
+                <button class="therapy-btn" data-therapy="relaxation-calm">
+                    Relaxation & Calm <span class="therapy-code">103</span>
+                </button>
+                <button class="therapy-btn" data-therapy="sleep-quality">
+                    Sleep Quality <span class="therapy-code">104</span>
+                </button>
+            </div>
+            
+            <div class="category-group">
+                <div class="category-label">Metabolic Health</div>
+                <button class="therapy-btn" data-therapy="blood-sugar">
+                    Blood Sugar Balance <span class="therapy-code">100</span>
+                </button>
+            </div>
+            
+            <div class="category-group">
+                <div class="category-label">Cardiovascular</div>
+                <button class="therapy-btn" data-therapy="heart-health">
+                    Heart Health <span class="therapy-code">301</span>
+                </button>
+                <button class="therapy-btn" data-therapy="blood-pressure">
+                    Blood Pressure Balance <span class="therapy-code">302</span>
+                </button>
+                <button class="therapy-btn" data-therapy="circulation-boost">
+                    Circulation Boost <span class="therapy-code">303</span>
+                </button>
+                <button class="therapy-btn" data-therapy="cardiovascular-vitality">
+                    Cardiovascular Vitality <span class="therapy-code">304</span>
+                </button>
+            </div>
+            
+            <div class="category-group">
+                <div class="category-label">Joint & Mobility</div>
+                <button class="therapy-btn" data-therapy="gout-relief">
+                    Gout Relief <span class="therapy-code">401</span>
+                </button>
+                <button class="therapy-btn" data-therapy="arthricomfort">
+                    ArthriComfort <span class="therapy-code">402</span>
+                </button>
+                <button class="therapy-btn" data-therapy="joint-mobility">
+                    Joint Mobility <span class="therapy-code">403</span>
+                </button>
+            </div>
+            
+            <div class="category-group">
+                <div class="category-label">Kidney & Urinary</div>
+                <button class="therapy-btn" data-therapy="kidney-vitality">
+                    Kidney Vitality <span class="therapy-code">201</span>
+                </button>
+                <button class="therapy-btn" data-therapy="kidney-support">
+                    Kidney Support <span class="therapy-code">202</span>
+                </button>
+                <button class="therapy-btn" data-therapy="bladder-comfort">
+                    Bladder Comfort <span class="therapy-code">203</span>
+                </button>
+                <button class="therapy-btn" data-therapy="urinary-flow">
+                    Urinary Flow <span class="therapy-code">204</span>
+                </button>
+            </div>
+            
+            <div class="category-group">
+                <div class="category-label">Wellness & Energy</div>
+                <button class="therapy-btn" data-therapy="digestive-balance">
+                    Digestive Balance <span class="therapy-code">601</span>
+                </button>
+                <button class="therapy-btn" data-therapy="energy-boost">
+                    Energy Boost <span class="therapy-code">602</span>
+                </button>
+                <button class="therapy-btn" data-therapy="skin-health">
+                    Skin Health <span class="therapy-code">703</span>
+                </button>
+            </div>
+            
+            <div class="category-group">
+                <div class="category-label">Healing Support</div>
+                <button class="therapy-btn" data-therapy="wound-healing">
+                    Wound Healing <span class="therapy-code">501</span>
+                </button>
+                <button class="therapy-btn" data-therapy="vascular-health">
+                    Vascular Health <span class="therapy-code">502</span>
+                </button>
+            </div>
+            
+            <div class="category-group">
+                <div class="category-label">Comprehensive Packages</div>
+                <button class="therapy-btn" data-therapy="total-wellness">
+                    Total Wellness <span class="therapy-code">801</span>
+                </button>
+                <button class="therapy-btn" data-therapy="stress-package">
+                    Stress & Relaxation <span class="therapy-code">802</span>
+                </button>
+            </div>
+        </nav>
+        
+        <main class="content-area">
+            <!-- Deep Sleep Renewal Therapy -->
+            <div class="therapy-section active" id="deep-sleep">
+                <h1 class="therapy-title">Deep Sleep Renewal Therapy</h1>
+                <p class="therapy-subtitle">Protocol Code: 101 | Sleep Enhancement Programme</p>
+                
+                <div class="info-card">
+                    <h3>Clinical Indications</h3>
+                    <div class="conditions-grid">
+                        <div class="condition-item">Chronic insomnia</div>
+                        <div class="condition-item">Difficulty falling asleep</div>
+                        <div class="condition-item">Frequent night waking</div>
+                        <div class="condition-item">Poor sleep quality</div>
+                        <div class="condition-item">Shift work sleep disorders</div>
+                        <div class="condition-item">Jet lag recovery</div>
+                    </div>
+                </div>
+                
+                <h3 style="color: #2c3e50; margin: 2rem 0 1rem;">Probe Configuration</h3>
+                <table class="probe-table">
+                    <thead>
+                        <tr>
+                            <th>Probe</th>
+                            <th>Cable Colour</th>
+                            <th>Placement Location</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="probe-number">Probe 1</span></td>
+                            <td><span class="cable-badge cable-blue">Blue</span></td>
+                            <td>Lower back - kidney area</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 2</span></td>
+                            <td><span class="cable-badge cable-yellow">Yellow</span></td>
+                            <td>Affected joint (1cm from pain site)</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 3</span></td>
+                            <td><span class="cable-badge cable-green">Green</span></td>
+                            <td>Opposite side of affected joint</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 4</span></td>
+                            <td><span class="cable-badge cable-grey-black">Grey/Black</span></td>
+                            <td>Big toe - left foot</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 5</span></td>
+                            <td><span class="cable-badge cable-grey-white">Grey/White</span></td>
+                            <td>Big toe - right foot</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div class="parameters-section">
+                    <h3 style="color: #2c3e50; margin-bottom: 1.5rem;">Treatment Parameters</h3>
+                    <div class="parameters-grid">
+                        <div class="parameter-box">
+                            <div class="parameter-label">Duration</div>
+                            <div class="parameter-value">30 min</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Frequency</div>
+                            <div class="parameter-value">3x weekly</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Best Time</div>
+                            <div class="parameter-value">Morning</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Course</div>
+                            <div class="parameter-value">4 weeks</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Intensity</div>
+                            <div class="parameter-value">2-4</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Temperature</div>
+                            <div class="parameter-value">Low</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="alert-box alert-warning">
+                    <strong>Caution:</strong> During acute attacks, use lower intensity. Increase fluid intake during treatment course.
+                </div>
+                
+                <div class="quick-reference">
+                    <h4>Quick Setup Guide</h4>
+                    <p>Blue (1) on kidneys | Yellow (2) near affected joint | Green (3) opposite side | Grey cables (4&5) on big toes<br>
+                    Settings: Intensity 2-4, Temperature Low, Duration 30 minutes</p>
+                </div>
+            </div>
+            
+            <!-- ArthriComfort Therapy -->
+            <div class="therapy-section" id="arthricomfort">
+                <h1 class="therapy-title">ArthriComfort Therapy</h1>
+                <p class="therapy-subtitle">Protocol Code: 402 | Arthritis Management Programme</p>
+                
+                <div class="info-card">
+                    <h3>Clinical Indications</h3>
+                    <div class="conditions-grid">
+                        <div class="condition-item">Osteoarthritis</div>
+                        <div class="condition-item">Rheumatoid arthritis</div>
+                        <div class="condition-item">Joint stiffness</div>
+                        <div class="condition-item">Morning joint pain</div>
+                        <div class="condition-item">Chronic joint inflammation</div>
+                        <div class="condition-item">Reduced mobility</div>
+                    </div>
+                </div>
+                
+                <h3 style="color: #2c3e50; margin: 2rem 0 1rem;">Probe Configuration</h3>
+                <table class="probe-table">
+                    <thead>
+                        <tr>
+                            <th>Probe</th>
+                            <th>Cable Colour</th>
+                            <th>Placement Location</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="probe-number">Probe 1</span></td>
+                            <td><span class="cable-badge cable-blue">Blue</span></td>
+                            <td>Lower back - lumbar region</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 2</span></td>
+                            <td><span class="cable-badge cable-yellow">Yellow</span></td>
+                            <td>Primary affected joint</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 3</span></td>
+                            <td><span class="cable-badge cable-green">Green</span></td>
+                            <td>Secondary affected joint</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 4</span></td>
+                            <td><span class="cable-badge cable-grey-black">Grey/Black</span></td>
+                            <td>Above primary joint</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 5</span></td>
+                            <td><span class="cable-badge cable-grey-white">Grey/White</span></td>
+                            <td>Below primary joint</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div class="parameters-section">
+                    <h3 style="color: #2c3e50; margin-bottom: 1.5rem;">Treatment Parameters</h3>
+                    <div class="parameters-grid">
+                        <div class="parameter-box">
+                            <div class="parameter-label">Duration</div>
+                            <div class="parameter-value">35-45 min</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Frequency</div>
+                            <div class="parameter-value">Daily</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Best Time</div>
+                            <div class="parameter-value">Morning</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Course</div>
+                            <div class="parameter-value">6 weeks</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Intensity</div>
+                            <div class="parameter-value">3-5</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Temperature</div>
+                            <div class="parameter-value">Medium</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="alert-box alert-info">
+                    <strong>Tip:</strong> Gentle movement exercises after treatment enhance effectiveness. Apply warm compress before treatment.
+                </div>
+                
+                <div class="quick-reference">
+                    <h4>Quick Setup Guide</h4>
+                    <p>Blue (1) on lumbar | Yellow (2) on main joint | Green (3) on secondary joint | Grey cables (4&5) above/below main joint<br>
+                    Settings: Intensity 3-5, Temperature Medium, Duration 35-45 minutes</p>
+                </div>
+            </div>
+            
+            <!-- Joint Mobility Therapy -->
+            <div class="therapy-section" id="joint-mobility">
+                <h1 class="therapy-title">Joint Mobility Therapy</h1>
+                <p class="therapy-subtitle">Protocol Code: 403 | Flexibility & Range Enhancement</p>
+                
+                <div class="info-card">
+                    <h3>Clinical Indications</h3>
+                    <div class="conditions-grid">
+                        <div class="condition-item">Restricted range of motion</div>
+                        <div class="condition-item">Post-injury stiffness</div>
+                        <div class="condition-item">Frozen shoulder</div>
+                        <div class="condition-item">Tennis/Golfer's elbow</div>
+                        <div class="condition-item">Hip mobility issues</div>
+                        <div class="condition-item">Sports recovery</div>
+                    </div>
+                </div>
+                
+                <h3 style="color: #2c3e50; margin: 2rem 0 1rem;">Probe Configuration</h3>
+                <table class="probe-table">
+                    <thead>
+                        <tr>
+                            <th>Probe</th>
+                            <th>Cable Colour</th>
+                            <th>Placement Location</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="probe-number">Probe 1</span></td>
+                            <td><span class="cable-badge cable-blue">Blue</span></td>
+                            <td>Spine - at level of affected joint</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 2</span></td>
+                            <td><span class="cable-badge cable-yellow">Yellow</span></td>
+                            <td>Muscle above joint</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 3</span></td>
+                            <td><span class="cable-badge cable-green">Green</span></td>
+                            <td>Muscle below joint</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 4</span></td>
+                            <td><span class="cable-badge cable-grey-black">Grey/Black</span></td>
+                            <td>Tendon attachment point</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 5</span></td>
+                            <td><span class="cable-badge cable-grey-white">Grey/White</span></td>
+                            <td>Opposite tendon point</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div class="parameters-section">
+                    <h3 style="color: #2c3e50; margin-bottom: 1.5rem;">Treatment Parameters</h3>
+                    <div class="parameters-grid">
+                        <div class="parameter-box">
+                            <div class="parameter-label">Duration</div>
+                            <div class="parameter-value">30-40 min</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Frequency</div>
+                            <div class="parameter-value">3x weekly</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Best Time</div>
+                            <div class="parameter-value">Before activity</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Course</div>
+                            <div class="parameter-value">4 weeks</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Intensity</div>
+                            <div class="parameter-value">4-6</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Temperature</div>
+                            <div class="parameter-value">Medium</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="alert-box alert-info">
+                    <strong>Athletic Note:</strong> Excellent pre-training treatment. Combine with stretching for optimal results.
+                </div>
+                
+                <div class="quick-reference">
+                    <h4>Quick Setup Guide</h4>
+                    <p>Blue (1) on spine | Yellow (2) above joint | Green (3) below joint | Grey cables (4&5) on tendon points<br>
+                    Settings: Intensity 4-6, Temperature Medium, Duration 30-40 minutes</p>
+                </div>
+            </div>
+            
+            <!-- Kidney Vitality Therapy -->
+            <div class="therapy-section" id="kidney-vitality">
+                <h1 class="therapy-title">Kidney Vitality Therapy</h1>
+                <p class="therapy-subtitle">Protocol Code: 201 | Renal Function Enhancement</p>
+                
+                <div class="info-card">
+                    <h3>Clinical Indications</h3>
+                    <div class="conditions-grid">
+                        <div class="condition-item">Chronic kidney disease (early stage)</div>
+                        <div class="condition-item">Kidney fatigue</div>
+                        <div class="condition-item">Water retention</div>
+                        <div class="condition-item">Lower back pain (kidney-related)</div>
+                        <div class="condition-item">Frequent urination</div>
+                        <div class="condition-item">Kidney stone prevention</div>
+                    </div>
+                </div>
+                
+                <h3 style="color: #2c3e50; margin: 2rem 0 1rem;">Probe Configuration</h3>
+                <table class="probe-table">
+                    <thead>
+                        <tr>
+                            <th>Probe</th>
+                            <th>Cable Colour</th>
+                            <th>Placement Location</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="probe-number">Probe 1</span></td>
+                            <td><span class="cable-badge cable-blue">Blue</span></td>
+                            <td>Lower back - left kidney</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 2</span></td>
+                            <td><span class="cable-badge cable-yellow">Yellow</span></td>
+                            <td>Lower back - right kidney</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 3</span></td>
+                            <td><span class="cable-badge cable-green">Green</span></td>
+                            <td>Lower abdomen - bladder area</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 4</span></td>
+                            <td><span class="cable-badge cable-grey-black">Grey/Black</span></td>
+                            <td>Inner ankle - left</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 5</span></td>
+                            <td><span class="cable-badge cable-grey-white">Grey/White</span></td>
+                            <td>Inner ankle - right</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div class="parameters-section">
+                    <h3 style="color: #2c3e50; margin-bottom: 1.5rem;">Treatment Parameters</h3>
+                    <div class="parameters-grid">
+                        <div class="parameter-box">
+                            <div class="parameter-label">Duration</div>
+                            <div class="parameter-value">30-40 min</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Frequency</div>
+                            <div class="parameter-value">3x weekly</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Best Time</div>
+                            <div class="parameter-value">Morning</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Course</div>
+                            <div class="parameter-value">6 weeks</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Intensity</div>
+                            <div class="parameter-value">3-5</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Temperature</div>
+                            <div class="parameter-value">Low-Medium</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="alert-box alert-warning">
+                    <strong>Important:</strong> Increase water intake to 2-3 litres daily during treatment. Monitor kidney function with GP.
+                </div>
+                
+                <div class="quick-reference">
+                    <h4>Quick Setup Guide</h4>
+                    <p>Blue (1) left kidney | Yellow (2) right kidney | Green (3) bladder area | Grey cables (4&5) on inner ankles<br>
+                    Settings: Intensity 3-5, Temperature Low-Medium, Duration 30-40 minutes</p>
+                </div>
+            </div>
+            
+            <!-- Kidney Support Therapy -->
+            <div class="therapy-section" id="kidney-support">
+                <h1 class="therapy-title">Kidney Support Therapy</h1>
+                <p class="therapy-subtitle">Protocol Code: 202 | Comprehensive Renal Care</p>
+                
+                <div class="info-card">
+                    <h3>Clinical Indications</h3>
+                    <div class="conditions-grid">
+                        <div class="condition-item">Kidney function support</div>
+                        <div class="condition-item">Proteinuria</div>
+                        <div class="condition-item">Oedema management</div>
+                        <div class="condition-item">Diabetic kidney concerns</div>
+                        <div class="condition-item">Post-infection recovery</div>
+                        <div class="condition-item">Medication-related kidney stress</div>
+                    </div>
+                </div>
+                
+                <h3 style="color: #2c3e50; margin: 2rem 0 1rem;">Probe Configuration</h3>
+                <table class="probe-table">
+                    <thead>
+                        <tr>
+                            <th>Probe</th>
+                            <th>Cable Colour</th>
+                            <th>Placement Location</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="probe-number">Probe 1</span></td>
+                            <td><span class="cable-badge cable-blue">Blue</span></td>
+                            <td>Mid-back - kidney level</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 2</span></td>
+                            <td><span class="cable-badge cable-yellow">Yellow</span></td>
+                            <td>Left flank - kidney area</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 3</span></td>
+                            <td><span class="cable-badge cable-green">Green</span></td>
+                            <td>Right flank - kidney area</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 4</span></td>
+                            <td><span class="cable-badge cable-grey-black">Grey/Black</span></td>
+                            <td>Lower leg - left shin</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 5</span></td>
+                            <td><span class="cable-badge cable-grey-white">Grey/White</span></td>
+                            <td>Lower leg - right shin</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div class="parameters-section">
+                    <h3 style="color: #2c3e50; margin-bottom: 1.5rem;">Treatment Parameters</h3>
+                    <div class="parameters-grid">
+                        <div class="parameter-box">
+                            <div class="parameter-label">Duration</div>
+                            <div class="parameter-value">35-45 min</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Frequency</div>
+                            <div class="parameter-value">2x weekly</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Best Time</div>
+                            <div class="parameter-value">Morning</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Course</div>
+                            <div class="parameter-value">8 weeks</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Intensity</div>
+                            <div class="parameter-value">2-4</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Temperature</div>
+                            <div class="parameter-value">Low</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="alert-box alert-info">
+                    <strong>Dietary Note:</strong> Reduce sodium intake during treatment course. Monitor fluid balance daily.
+                </div>
+                
+                <div class="quick-reference">
+                    <h4>Quick Setup Guide</h4>
+                    <p>Blue (1) mid-back | Yellow (2) left flank | Green (3) right flank | Grey cables (4&5) on shins<br>
+                    Settings: Intensity 2-4, Temperature Low, Duration 35-45 minutes</p>
+                </div>
+            </div>
+            
+            <!-- Bladder Comfort Therapy -->
+            <div class="therapy-section" id="bladder-comfort">
+                <h1 class="therapy-title">Bladder Comfort Therapy</h1>
+                <p class="therapy-subtitle">Protocol Code: 203 | Urinary Comfort & Control</p>
+                
+                <div class="info-card">
+                    <h3>Clinical Indications</h3>
+                    <div class="conditions-grid">
+                        <div class="condition-item">Overactive bladder</div>
+                        <div class="condition-item">Urinary urgency</div>
+                        <div class="condition-item">Stress incontinence</div>
+                        <div class="condition-item">Interstitial cystitis</div>
+                        <div class="condition-item">Post-pregnancy bladder issues</div>
+                        <div class="condition-item">Nocturia</div>
+                    </div>
+                </div>
+                
+                <h3 style="color: #2c3e50; margin: 2rem 0 1rem;">Probe Configuration</h3>
+                <table class="probe-table">
+                    <thead>
+                        <tr>
+                            <th>Probe</th>
+                            <th>Cable Colour</th>
+                            <th>Placement Location</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="probe-number">Probe 1</span></td>
+                            <td><span class="cable-badge cable-blue">Blue</span></td>
+                            <td>Lower back - sacrum</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 2</span></td>
+                            <td><span class="cable-badge cable-yellow">Yellow</span></td>
+                            <td>Lower abdomen - above pubic bone</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 3</span></td>
+                            <td><span class="cable-badge cable-green">Green</span></td>
+                            <td>Pelvic area - left side</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 4</span></td>
+                            <td><span class="cable-badge cable-grey-black">Grey/Black</span></td>
+                            <td>Inner thigh - left</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 5</span></td>
+                            <td><span class="cable-badge cable-grey-white">Grey/White</span></td>
+                            <td>Inner thigh - right</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div class="parameters-section">
+                    <h3 style="color: #2c3e50; margin-bottom: 1.5rem;">Treatment Parameters</h3>
+                    <div class="parameters-grid">
+                        <div class="parameter-box">
+                            <div class="parameter-label">Duration</div>
+                            <div class="parameter-value">25-35 min</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Frequency</div>
+                            <div class="parameter-value">3x weekly</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Best Time</div>
+                            <div class="parameter-value">Afternoon</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Course</div>
+                            <div class="parameter-value">4 weeks</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Intensity</div>
+                            <div class="parameter-value">2-3</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Temperature</div>
+                            <div class="parameter-value">Low</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="alert-box alert-info">
+                    <strong>Lifestyle Tip:</strong> Combine with pelvic floor exercises. Avoid caffeine 2 hours before treatment.
+                </div>
+                
+                <div class="quick-reference">
+                    <h4>Quick Setup Guide</h4>
+                    <p>Blue (1) on sacrum | Yellow (2) above pubic bone | Green (3) pelvic left | Grey cables (4&5) on inner thighs<br>
+                    Settings: Intensity 2-3, Temperature Low, Duration 25-35 minutes</p>
+                </div>
+            </div>
+            
+            <!-- Urinary Flow Therapy -->
+            <div class="therapy-section" id="urinary-flow">
+                <h1 class="therapy-title">Urinary Flow Therapy</h1>
+                <p class="therapy-subtitle">Protocol Code: 204 | Prostate & Urinary Health</p>
+                
+                <div class="info-card">
+                    <h3>Clinical Indications</h3>
+                    <div class="conditions-grid">
+                        <div class="condition-item">Benign prostatic hyperplasia</div>
+                        <div class="condition-item">Weak urinary stream</div>
+                        <div class="condition-item">Incomplete bladder emptying</div>
+                        <div class="condition-item">Urinary hesitancy</div>
+                        <div class="condition-item">Post-void dribbling</div>
+                        <div class="condition-item">Prostate health maintenance</div>
+                    </div>
+                </div>
+                
+                <h3 style="color: #2c3e50; margin: 2rem 0 1rem;">Probe Configuration</h3>
+                <table class="probe-table">
+                    <thead>
+                        <tr>
+                            <th>Probe</th>
+                            <th>Cable Colour</th>
+                            <th>Placement Location</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="probe-number">Probe 1</span></td>
+                            <td><span class="cable-badge cable-blue">Blue</span></td>
+                            <td>Lower back - coccyx area</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 2</span></td>
+                            <td><span class="cable-badge cable-yellow">Yellow</span></td>
+                            <td>Perineum area (external)</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 3</span></td>
+                            <td><span class="cable-badge cable-green">Green</span></td>
+                            <td>Lower abdomen</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 4</span></td>
+                            <td><span class="cable-badge cable-grey-black">Grey/Black</span></td>
+                            <td>Inner knee - left</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 5</span></td>
+                            <td><span class="cable-badge cable-grey-white">Grey/White</span></td>
+                            <td>Inner knee - right</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div class="parameters-section">
+                    <h3 style="color: #2c3e50; margin-bottom: 1.5rem;">Treatment Parameters</h3>
+                    <div class="parameters-grid">
+                        <div class="parameter-box">
+                            <div class="parameter-label">Duration</div>
+                            <div class="parameter-value">30-40 min</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Frequency</div>
+                            <div class="parameter-value">Daily</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Best Time</div>
+                            <div class="parameter-value">Evening</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Course</div>
+                            <div class="parameter-value">6 weeks</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Intensity</div>
+                            <div class="parameter-value">3-5</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Temperature</div>
+                            <div class="parameter-value">Low-Medium</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="alert-box alert-warning">
+                    <strong>Men's Health Note:</strong> Regular PSA monitoring recommended. Consult GP for persistent symptoms.
+                </div>
+                
+                <div class="quick-reference">
+                    <h4>Quick Setup Guide</h4>
+                    <p>Blue (1) on coccyx | Yellow (2) perineal area | Green (3) lower abdomen | Grey cables (4&5) on inner knees<br>
+                    Settings: Intensity 3-5, Temperature Low-Medium, Duration 30-40 minutes</p>
+                </div>
+            </div>
+            
+            <!-- Digestive Balance Therapy -->
+            <div class="therapy-section" id="digestive-balance">
+                <h1 class="therapy-title">Digestive Balance Therapy</h1>
+                <p class="therapy-subtitle">Protocol Code: 601 | Gastrointestinal Harmony</p>
+                
+                <div class="info-card">
+                    <h3>Clinical Indications</h3>
+                    <div class="conditions-grid">
+                        <div class="condition-item">IBS (Irritable Bowel Syndrome)</div>
+                        <div class="condition-item">Bloating and wind</div>
+                        <div class="condition-item">Constipation</div>
+                        <div class="condition-item">Acid reflux (GORD)</div>
+                        <div class="condition-item">Digestive cramping</div>
+                        <div class="condition-item">Food sensitivity reactions</div>
+                    </div>
+                </div>
+                
+                <h3 style="color: #2c3e50; margin: 2rem 0 1rem;">Probe Configuration</h3>
+                <table class="probe-table">
+                    <thead>
+                        <tr>
+                            <th>Probe</th>
+                            <th>Cable Colour</th>
+                            <th>Placement Location</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="probe-number">Probe 1</span></td>
+                            <td><span class="cable-badge cable-blue">Blue</span></td>
+                            <td>Mid-back - stomach level</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 2</span></td>
+                            <td><span class="cable-badge cable-yellow">Yellow</span></td>
+                            <td>Upper abdomen - stomach area</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 3</span></td>
+                            <td><span class="cable-badge cable-green">Green</span></td>
+                            <td>Around navel</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 4</span></td>
+                            <td><span class="cable-badge cable-grey-black">Grey/Black</span></td>
+                            <td>Left side - colon area</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 5</span></td>
+                            <td><span class="cable-badge cable-grey-white">Grey/White</span></td>
+                            <td>Right side - colon area</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div class="parameters-section">
+                    <h3 style="color: #2c3e50; margin-bottom: 1.5rem;">Treatment Parameters</h3>
+                    <div class="parameters-grid">
+                        <div class="parameter-box">
+                            <div class="parameter-label">Duration</div>
+                            <div class="parameter-value">25-35 min</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Frequency</div>
+                            <div class="parameter-value">Daily</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Best Time</div>
+                            <div class="parameter-value">Before meals</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Course</div>
+                            <div class="parameter-value">3 weeks</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Intensity</div>
+                            <div class="parameter-value">2-4</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Temperature</div>
+                            <div class="parameter-value">Low</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="alert-box alert-info">
+                    <strong>Dietary Advice:</strong> Avoid large meals 2 hours before treatment. Stay hydrated throughout the day.
+                </div>
+                
+                <div class="quick-reference">
+                    <h4>Quick Setup Guide</h4>
+                    <p>Blue (1) mid-back | Yellow (2) stomach area | Green (3) navel | Grey cables (4&5) on colon sides<br>
+                    Settings: Intensity 2-4, Temperature Low, Duration 25-35 minutes before meals</p>
+                </div>
+            </div>
+            
+            <!-- Energy Boost Therapy -->
+            <div class="therapy-section" id="energy-boost">
+                <h1 class="therapy-title">Energy Boost Therapy</h1>
+                <p class="therapy-subtitle">Protocol Code: 602 | Vitality Enhancement Programme</p>
+                
+                <div class="info-card">
+                    <h3>Clinical Indications</h3>
+                    <div class="conditions-grid">
+                        <div class="condition-item">Chronic fatigue</div>
+                        <div class="condition-item">Post-viral fatigue</div>
+                        <div class="condition-item">Low energy levels</div>
+                        <div class="condition-item">Mental exhaustion</div>
+                        <div class="condition-item">Adrenal fatigue</div>
+                        <div class="condition-item">ME/CFS support</div>
+                    </div>
+                </div>
+                
+                <h3 style="color: #2c3e50; margin: 2rem 0 1rem;">Probe Configuration</h3>
+                <table class="probe-table">
+                    <thead>
+                        <tr>
+                            <th>Probe</th>
+                            <th>Cable Colour</th>
+                            <th>Placement Location</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="probe-number">Probe 1</span></td>
+                            <td><span class="cable-badge cable-blue">Blue</span></td>
+                            <td>Lower back - adrenal area</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 2</span></td>
+                            <td><span class="cable-badge cable-yellow">Yellow</span></td>
+                            <td>Upper back - between shoulders</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 3</span></td>
+                            <td><span class="cable-badge cable-green">Green</span></td>
+                            <td>Solar plexus</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 4</span></td>
+                            <td><span class="cable-badge cable-grey-black">Grey/Black</span></td>
+                            <td>Below left knee</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 5</span></td>
+                            <td><span class="cable-badge cable-grey-white">Grey/White</span></td>
+                            <td>Below right knee</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div class="parameters-section">
+                    <h3 style="color: #2c3e50; margin-bottom: 1.5rem;">Treatment Parameters</h3>
+                    <div class="parameters-grid">
+                        <div class="parameter-box">
+                            <div class="parameter-label">Duration</div>
+                            <div class="parameter-value">20-30 min</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Frequency</div>
+                            <div class="parameter-value">2x daily</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Best Time</div>
+                            <div class="parameter-value">AM & 2PM</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Course</div>
+                            <div class="parameter-value">4 weeks</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Intensity</div>
+                            <div class="parameter-value">3-6</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Temperature</div>
+                            <div class="parameter-value">Medium</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="alert-box alert-warning">
+                    <strong>Caution:</strong> Avoid late afternoon sessions to prevent sleep disruption. Start with lower intensity.
+                </div>
+                
+                <div class="quick-reference">
+                    <h4>Quick Setup Guide</h4>
+                    <p>Blue (1) adrenal area | Yellow (2) upper back | Green (3) solar plexus | Grey cables (4&5) below knees<br>
+                    Settings: Intensity 3-6, Temperature Medium, Duration 20-30 minutes twice daily</p>
+                </div>
+            </div>
+            
+            <!-- Skin Health Therapy -->
+            <div class="therapy-section" id="skin-health">
+                <h1 class="therapy-title">Skin Health Therapy</h1>
+                <p class="therapy-subtitle">Protocol Code: 703 | Dermatological Wellness</p>
+                
+                <div class="info-card">
+                    <h3>Clinical Indications</h3>
+                    <div class="conditions-grid">
+                        <div class="condition-item">Eczema</div>
+                        <div class="condition-item">Psoriasis</div>
+                        <div class="condition-item">Acne</div>
+                        <div class="condition-item">Dry skin conditions</div>
+                        <div class="condition-item">Premature ageing</div>
+                        <div class="condition-item">Poor wound healing</div>
+                    </div>
+                </div>
+                
+                <h3 style="color: #2c3e50; margin: 2rem 0 1rem;">Probe Configuration</h3>
+                <table class="probe-table">
+                    <thead>
+                        <tr>
+                            <th>Probe</th>
+                            <th>Cable Colour</th>
+                            <th>Placement Location</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="probe-number">Probe 1</span></td>
+                            <td><span class="cable-badge cable-blue">Blue</span></td>
+                            <td>Upper back - lymphatic area</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 2</span></td>
+                            <td><span class="cable-badge cable-yellow">Yellow</span></td>
+                            <td>Near affected skin (2cm away)</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 3</span></td>
+                            <td><span class="cable-badge cable-green">Green</span></td>
+                            <td>Liver area - right side</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 4</span></td>
+                            <td><span class="cable-badge cable-grey-black">Grey/Black</span></td>
+                            <td>Left forearm</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 5</span></td>
+                            <td><span class="cable-badge cable-grey-white">Grey/White</span></td>
+                            <td>Right forearm</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div class="parameters-section">
+                    <h3 style="color: #2c3e50; margin-bottom: 1.5rem;">Treatment Parameters</h3>
+                    <div class="parameters-grid">
+                        <div class="parameter-box">
+                            <div class="parameter-label">Duration</div>
+                            <div class="parameter-value">30-40 min</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Frequency</div>
+                            <div class="parameter-value">3x weekly</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Best Time</div>
+                            <div class="parameter-value">Evening</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Course</div>
+                            <div class="parameter-value">8 weeks</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Intensity</div>
+                            <div class="parameter-value">2-4</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Temperature</div>
+                            <div class="parameter-value">Low</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="alert-box alert-info">
+                    <strong>Skin Care:</strong> Stay hydrated (2L water daily). Avoid harsh soaps during treatment course.
+                </div>
+                
+                <div class="quick-reference">
+                    <h4>Quick Setup Guide</h4>
+                    <p>Blue (1) upper back | Yellow (2) near affected area | Green (3) liver area | Grey cables (4&5) on forearms<br>
+                    Settings: Intensity 2-4, Temperature Low, Duration 30-40 minutes</p>
+                </div>
+            </div>
+            
+            <!-- Wound Healing Therapy -->
+            <div class="therapy-section" id="wound-healing">
+                <h1 class="therapy-title">Wound Healing Therapy</h1>
+                <p class="therapy-subtitle">Protocol Code: 501 | Tissue Repair Acceleration</p>
+                
+                <div class="info-card">
+                    <h3>Clinical Indications</h3>
+                    <div class="conditions-grid">
+                        <div class="condition-item">Diabetic ulcers</div>
+                        <div class="condition-item">Post-surgical wounds</div>
+                        <div class="condition-item">Slow-healing injuries</div>
+                        <div class="condition-item">Pressure sores</div>
+                        <div class="condition-item">Burns (minor)</div>
+                        <div class="condition-item">Traumatic wounds</div>
+                    </div>
+                </div>
+                
+                <h3 style="color: #2c3e50; margin: 2rem 0 1rem;">Probe Configuration</h3>
+                <table class="probe-table">
+                    <thead>
+                        <tr>
+                            <th>Probe</th>
+                            <th>Cable Colour</th>
+                            <th>Placement Location</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="probe-number">Probe 1</span></td>
+                            <td><span class="cable-badge cable-blue">Blue</span></td>
+                            <td>Spine - level with wound</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 2</span></td>
+                            <td><span class="cable-badge cable-yellow">Yellow</span></td>
+                            <td>1-2cm above wound</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 3</span></td>
+                            <td><span class="cable-badge cable-green">Green</span></td>
+                            <td>1-2cm below wound</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 4</span></td>
+                            <td><span class="cable-badge cable-grey-black">Grey/Black</span></td>
+                            <td>1-2cm left of wound</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 5</span></td>
+                            <td><span class="cable-badge cable-grey-white">Grey/White</span></td>
+                            <td>1-2cm right of wound</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div class="parameters-section">
+                    <h3 style="color: #2c3e50; margin-bottom: 1.5rem;">Treatment Parameters</h3>
+                    <div class="parameters-grid">
+                        <div class="parameter-box">
+                            <div class="parameter-label">Duration</div>
+                            <div class="parameter-value">30-45 min</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Frequency</div>
+                            <div class="parameter-value">Daily</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Best Time</div>
+                            <div class="parameter-value">Morning</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Course</div>
+                            <div class="parameter-value">Until healed</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Intensity</div>
+                            <div class="parameter-value">1-3</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Temperature</div>
+                            <div class="parameter-value">Low</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="alert-box alert-warning">
+                    <strong>Important:</strong> Never place probes directly on open wounds. Maintain sterile dressing protocols.
+                </div>
+                
+                <div class="quick-reference">
+                    <h4>Quick Setup Guide</h4>
+                    <p>Blue (1) spine level | Yellow/Green (2&3) above/below wound | Grey cables (4&5) sides of wound<br>
+                    All probes 1-2cm from wound edge. Intensity 1-3, Temperature Low, Duration 30-45 minutes</p>
+                </div>
+            </div>
+            
+            <!-- Vascular Health Therapy -->
+            <div class="therapy-section" id="vascular-health">
+                <h1 class="therapy-title">Vascular Health Therapy</h1>
+                <p class="therapy-subtitle">Protocol Code: 502 | Vascular System Support</p>
+                
+                <div class="info-card">
+                    <h3>Clinical Indications</h3>
+                    <div class="conditions-grid">
+                        <div class="condition-item">Peripheral artery disease</div>
+                        <div class="condition-item">Venous insufficiency</div>
+                        <div class="condition-item">Lymphoedema</div>
+                        <div class="condition-item">Spider veins</div>
+                        <div class="condition-item">Heavy leg syndrome</div>
+                        <div class="condition-item">Post-thrombotic syndrome</div>
+                    </div>
+                </div>
+                
+                <h3 style="color: #2c3e50; margin: 2rem 0 1rem;">Probe Configuration</h3>
+                <table class="probe-table">
+                    <thead>
+                        <tr>
+                            <th>Probe</th>
+                            <th>Cable Colour</th>
+                            <th>Placement Location</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="probe-number">Probe 1</span></td>
+                            <td><span class="cable-badge cable-blue">Blue</span></td>
+                            <td>Lower back - lumbar</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 2</span></td>
+                            <td><span class="cable-badge cable-yellow">Yellow</span></td>
+                            <td>Upper thigh - left</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 3</span></td>
+                            <td><span class="cable-badge cable-green">Green</span></td>
+                            <td>Upper thigh - right</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 4</span></td>
+                            <td><span class="cable-badge cable-grey-black">Grey/Black</span></td>
+                            <td>Left ankle</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 5</span></td>
+                            <td><span class="cable-badge cable-grey-white">Grey/White</span></td>
+                            <td>Right ankle</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div class="parameters-section">
+                    <h3 style="color: #2c3e50; margin-bottom: 1.5rem;">Treatment Parameters</h3>
+                    <div class="parameters-grid">
+                        <div class="parameter-box">
+                            <div class="parameter-label">Duration</div>
+                            <div class="parameter-value">35-45 min</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Frequency</div>
+                            <div class="parameter-value">3x weekly</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Best Time</div>
+                            <div class="parameter-value">Evening</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Course</div>
+                            <div class="parameter-value">8 weeks</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Intensity</div>
+                            <div class="parameter-value">3-5</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Temperature</div>
+                            <div class="parameter-value">Medium</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="alert-box alert-info">
+                    <strong>Lifestyle:</strong> Elevate legs for 15 minutes post-treatment. Wear compression stockings if prescribed.
+                </div>
+                
+                <div class="quick-reference">
+                    <h4>Quick Setup Guide</h4>
+                    <p>Blue (1) on lumbar | Yellow/Green (2&3) on thighs | Grey cables (4&5) on ankles<br>
+                    Settings: Intensity 3-5, Temperature Medium, Duration 35-45 minutes</p>
+                </div>
+            </div>
+            
+            <!-- Total Wellness Package -->
+            <div class="therapy-section" id="total-wellness">
+                <h1 class="therapy-title">Total Wellness Package</h1>
+                <p class="therapy-subtitle">Protocol Code: 801 | Comprehensive Health Optimisation</p>
+                
+                <div class="info-card">
+                    <h3>Clinical Indications</h3>
+                    <div class="conditions-grid">
+                        <div class="condition-item">General health maintenance</div>
+                        <div class="condition-item">Preventive wellness</div>
+                        <div class="condition-item">Anti-ageing support</div>
+                        <div class="condition-item">Immune system boost</div>
+                        <div class="condition-item">Energy optimisation</div>
+                        <div class="condition-item">Stress management</div>
+                    </div>
+                </div>
+                
+                <h3 style="color: #2c3e50; margin: 2rem 0 1rem;">Probe Configuration - Rotating Protocol</h3>
+                <table class="probe-table">
+                    <thead>
+                        <tr>
+                            <th>Day</th>
+                            <th>Focus Area</th>
+                            <th>Probe Configuration</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Monday</strong></td>
+                            <td>Energy & Vitality</td>
+                            <td>Use Energy Boost configuration</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Tuesday</strong></td>
+                            <td>Circulation</td>
+                            <td>Use Circulation Boost configuration</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Wednesday</strong></td>
+                            <td>Stress Relief</td>
+                            <td>Use Relaxation & Calm configuration</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Thursday</strong></td>
+                            <td>Digestive Health</td>
+                            <td>Use Digestive Balance configuration</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Friday</strong></td>
+                            <td>Sleep Quality</td>
+                            <td>Use Sleep Quality configuration</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div class="parameters-section">
+                    <h3 style="color: #2c3e50; margin-bottom: 1.5rem;">Treatment Parameters</h3>
+                    <div class="parameters-grid">
+                        <div class="parameter-box">
+                            <div class="parameter-label">Duration</div>
+                            <div class="parameter-value">30 min</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Frequency</div>
+                            <div class="parameter-value">5x weekly</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Best Time</div>
+                            <div class="parameter-value">Varies</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Course</div>
+                            <div class="parameter-value">12 weeks</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Intensity</div>
+                            <div class="parameter-value">2-4</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Temperature</div>
+                            <div class="parameter-value">Low</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="alert-box alert-info">
+                    <strong>Programme Note:</strong> This rotating protocol addresses all body systems. Maintain consistency for best results.
+                </div>
+                
+                <div class="quick-reference">
+                    <h4>Quick Setup Guide</h4>
+                    <p>Follow daily protocol as outlined. Each day targets different body system.<br>
+                    Universal settings: Intensity 2-4, Temperature Low, Duration 30 minutes</p>
+                </div>
+            </div>
+            
+            <!-- Stress & Relaxation Package -->
+            <div class="therapy-section" id="stress-package">
+                <h1 class="therapy-title">Stress & Relaxation Package</h1>
+                <p class="therapy-subtitle">Protocol Code: 802 | Complete Stress Management Programme</p>
+                
+                <div class="info-card">
+                    <h3>Clinical Indications</h3>
+                    <div class="conditions-grid">
+                        <div class="condition-item">Chronic stress syndrome</div>
+                        <div class="condition-item">Anxiety with insomnia</div>
+                        <div class="condition-item">Burnout recovery</div>
+                        <div class="condition-item">PTSD support</div>
+                        <div class="condition-item">Executive stress</div>
+                        <div class="condition-item">Caregiver fatigue</div>
+                    </div>
+                </div>
+                
+                <h3 style="color: #2c3e50; margin: 2rem 0 1rem;">Alternating Protocol Schedule</h3>
+                <table class="probe-table">
+                    <thead>
+                        <tr>
+                            <th>Session</th>
+                            <th>Therapy Used</th>
+                            <th>Time of Day</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Morning (Mon/Wed/Fri)</strong></td>
+                            <td>Stress Relief Therapy (102)</td>
+                            <td>8-10 AM</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Afternoon (Tue/Thu)</strong></td>
+                            <td>Relaxation & Calm (103)</td>
+                            <td>2-4 PM</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Evening (Daily)</strong></td>
+                            <td>Deep Sleep Renewal (101)</td>
+                            <td>8-10 PM</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div class="parameters-section">
+                    <h3 style="color: #2c3e50; margin-bottom: 1.5rem;">Treatment Parameters</h3>
+                    <div class="parameters-grid">
+                        <div class="parameter-box">
+                            <div class="parameter-label">Duration</div>
+                            <div class="parameter-value">30-40 min</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Frequency</div>
+                            <div class="parameter-value">Daily</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Best Time</div>
+                            <div class="parameter-value">As scheduled</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Course</div>
+                            <div class="parameter-value">8 weeks</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Intensity</div>
+                            <div class="parameter-value">2-4</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Temperature</div>
+                            <div class="parameter-value">Low</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="alert-box alert-warning">
+                    <strong>Important:</strong> This intensive programme requires commitment. Combine with counselling for optimal results.
+                </div>
+                
+                <div class="quick-reference">
+                    <h4>Quick Setup Guide</h4>
+                    <p>Alternating between three protocols as scheduled. Follow specific probe placements for each therapy.<br>
+                    Universal settings: Intensity 2-4, Temperature Low, Duration 30-40 minutes</p>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <button class="print-button" onclick="window.print()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M6 9V2h12v7"></path>
+            <path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"></path>
+            <rect x="6" y="14" width="12" height="8"></rect>
+        </svg>
+        Print Guide
+    </button>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const therapyButtons = document.querySelectorAll('.therapy-btn');
+            const therapySections = document.querySelectorAll('.therapy-section');
+            
+            therapyButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const targetTherapy = this.getAttribute('data-therapy');
+                    
+                    // Remove active class from all buttons
+                    therapyButtons.forEach(btn => btn.classList.remove('active'));
+                    
+                    // Add active class to clicked button
+                    this.classList.add('active');
+                    
+                    // Hide all therapy sections
+                    therapySections.forEach(section => section.classList.remove('active'));
+                    
+                    // Show selected therapy section
+                    const targetSection = document.getElementById(targetTherapy);
+                    if (targetSection) {
+                        targetSection.classList.add('active');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
+                            <th>Cable Colour</th>
+                            <th>Placement Location</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="probe-number">Probe 1</span></td>
+                            <td><span class="cable-badge cable-blue">Blue</span></td>
+                            <td>Lower back - centre of spine at waist level</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 2</span></td>
+                            <td><span class="cable-badge cable-yellow">Yellow</span></td>
+                            <td>Upper back - between shoulder blades</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 3</span></td>
+                            <td><span class="cable-badge cable-green">Green</span></td>
+                            <td>Back of neck - base of skull</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 4</span></td>
+                            <td><span class="cable-badge cable-grey-black">Grey/Black</span></td>
+                            <td>Left temple</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 5</span></td>
+                            <td><span class="cable-badge cable-grey-white">Grey/White</span></td>
+                            <td>Right temple</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div class="parameters-section">
+                    <h3 style="color: #2c3e50; margin-bottom: 1.5rem;">Treatment Parameters</h3>
+                    <div class="parameters-grid">
+                        <div class="parameter-box">
+                            <div class="parameter-label">Duration</div>
+                            <div class="parameter-value">30-40 min</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Frequency</div>
+                            <div class="parameter-value">Daily</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Best Time</div>
+                            <div class="parameter-value">Evening</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Course</div>
+                            <div class="parameter-value">10 days</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Intensity</div>
+                            <div class="parameter-value">2-4</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Temperature</div>
+                            <div class="parameter-value">Low</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="alert-box alert-info">
+                    <strong>Clinical Note:</strong> Best performed 1-2 hours before bedtime. Ensure patient is in a quiet, comfortable environment. Advise avoiding caffeine 4 hours before treatment.
+                </div>
+                
+                <div class="quick-reference">
+                    <h4>Quick Setup Guide</h4>
+                    <p>Blue (1) on lower back | Yellow (2) between shoulders | Green (3) at neck base | Grey/Black (4) left temple | Grey/White (5) right temple<br>
+                    Settings: Intensity 2-4, Temperature Low, Duration 30-40 minutes</p>
+                </div>
+            </div>
+            
+            <!-- Stress Relief Therapy -->
+            <div class="therapy-section" id="stress-relief">
+                <h1 class="therapy-title">Stress Relief Therapy</h1>
+                <p class="therapy-subtitle">Protocol Code: 102 | Anxiety & Stress Management</p>
+                
+                <div class="info-card">
+                    <h3>Clinical Indications</h3>
+                    <div class="conditions-grid">
+                        <div class="condition-item">Chronic stress</div>
+                        <div class="condition-item">Anxiety disorders</div>
+                        <div class="condition-item">Work-related stress</div>
+                        <div class="condition-item">Emotional tension</div>
+                        <div class="condition-item">Panic attacks</div>
+                        <div class="condition-item">Nervous exhaustion</div>
+                    </div>
+                </div>
+                
+                <h3 style="color: #2c3e50; margin: 2rem 0 1rem;">Probe Configuration</h3>
+                <table class="probe-table">
+                    <thead>
+                        <tr>
+                            <th>Probe</th>
+                            <th>Cable Colour</th>
+                            <th>Placement Location</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="probe-number">Probe 1</span></td>
+                            <td><span class="cable-badge cable-blue">Blue</span></td>
+                            <td>Lower back - kidney area (both sides)</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 2</span></td>
+                            <td><span class="cable-badge cable-yellow">Yellow</span></td>
+                            <td>Solar plexus - upper abdomen</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 3</span></td>
+                            <td><span class="cable-badge cable-green">Green</span></td>
+                            <td>Centre chest - heart area</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 4</span></td>
+                            <td><span class="cable-badge cable-grey-black">Grey/Black</span></td>
+                            <td>Inner wrist - left arm</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 5</span></td>
+                            <td><span class="cable-badge cable-grey-white">Grey/White</span></td>
+                            <td>Inner wrist - right arm</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div class="parameters-section">
+                    <h3 style="color: #2c3e50; margin-bottom: 1.5rem;">Treatment Parameters</h3>
+                    <div class="parameters-grid">
+                        <div class="parameter-box">
+                            <div class="parameter-label">Duration</div>
+                            <div class="parameter-value">25-35 min</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Frequency</div>
+                            <div class="parameter-value">2x daily</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Best Time</div>
+                            <div class="parameter-value">Morning/Evening</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Course</div>
+                            <div class="parameter-value">14 days</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Intensity</div>
+                            <div class="parameter-value">3-5</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Temperature</div>
+                            <div class="parameter-value">Low-Medium</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="alert-box alert-warning">
+                    <strong>Caution:</strong> Monitor patient for dizziness during first session. Reduce intensity if discomfort occurs.
+                </div>
+                
+                <div class="quick-reference">
+                    <h4>Quick Setup Guide</h4>
+                    <p>Blue (1) on kidney area | Yellow (2) on solar plexus | Green (3) on chest | Grey/Black (4) left wrist | Grey/White (5) right wrist<br>
+                    Settings: Intensity 3-5, Temperature Low-Medium, Duration 25-35 minutes</p>
+                </div>
+            </div>
+            
+            <!-- Relaxation & Calm Therapy -->
+            <div class="therapy-section" id="relaxation-calm">
+                <h1 class="therapy-title">Relaxation & Calm Therapy</h1>
+                <p class="therapy-subtitle">Protocol Code: 103 | Deep Relaxation Programme</p>
+                
+                <div class="info-card">
+                    <h3>Clinical Indications</h3>
+                    <div class="conditions-grid">
+                        <div class="condition-item">General anxiety</div>
+                        <div class="condition-item">Muscle tension</div>
+                        <div class="condition-item">Restlessness</div>
+                        <div class="condition-item">Mild depression</div>
+                        <div class="condition-item">Emotional imbalance</div>
+                        <div class="condition-item">Mental fatigue</div>
+                    </div>
+                </div>
+                
+                <h3 style="color: #2c3e50; margin: 2rem 0 1rem;">Probe Configuration</h3>
+                <table class="probe-table">
+                    <thead>
+                        <tr>
+                            <th>Probe</th>
+                            <th>Cable Colour</th>
+                            <th>Placement Location</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="probe-number">Probe 1</span></td>
+                            <td><span class="cable-badge cable-blue">Blue</span></td>
+                            <td>Lower back - sacrum area</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 2</span></td>
+                            <td><span class="cable-badge cable-yellow">Yellow</span></td>
+                            <td>Upper back - trapezius muscles</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 3</span></td>
+                            <td><span class="cable-badge cable-green">Green</span></td>
+                            <td>Forehead - centre</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 4</span></td>
+                            <td><span class="cable-badge cable-grey-black">Grey/Black</span></td>
+                            <td>Palm - left hand</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 5</span></td>
+                            <td><span class="cable-badge cable-grey-white">Grey/White</span></td>
+                            <td>Palm - right hand</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div class="parameters-section">
+                    <h3 style="color: #2c3e50; margin-bottom: 1.5rem;">Treatment Parameters</h3>
+                    <div class="parameters-grid">
+                        <div class="parameter-box">
+                            <div class="parameter-label">Duration</div>
+                            <div class="parameter-value">20-30 min</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Frequency</div>
+                            <div class="parameter-value">Daily</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Best Time</div>
+                            <div class="parameter-value">Afternoon</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Course</div>
+                            <div class="parameter-value">10 days</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Intensity</div>
+                            <div class="parameter-value">2-3</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Temperature</div>
+                            <div class="parameter-value">Low</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="alert-box alert-info">
+                    <strong>Clinical Note:</strong> Encourage deep breathing exercises during treatment. Dim lighting enhances relaxation response.
+                </div>
+                
+                <div class="quick-reference">
+                    <h4>Quick Setup Guide</h4>
+                    <p>Blue (1) on sacrum | Yellow (2) on upper back | Green (3) on forehead | Grey/Black (4) left palm | Grey/White (5) right palm<br>
+                    Settings: Intensity 2-3, Temperature Low, Duration 20-30 minutes</p>
+                </div>
+            </div>
+            
+            <!-- Sleep Quality Therapy -->
+            <div class="therapy-section" id="sleep-quality">
+                <h1 class="therapy-title">Sleep Quality Therapy</h1>
+                <p class="therapy-subtitle">Protocol Code: 104 | Restorative Sleep Enhancement</p>
+                
+                <div class="info-card">
+                    <h3>Clinical Indications</h3>
+                    <div class="conditions-grid">
+                        <div class="condition-item">Light sleep patterns</div>
+                        <div class="condition-item">Early morning waking</div>
+                        <div class="condition-item">Non-restorative sleep</div>
+                        <div class="condition-item">Sleep maintenance issues</div>
+                        <div class="condition-item">Circadian rhythm disorders</div>
+                        <div class="condition-item">Menopausal sleep disturbance</div>
+                    </div>
+                </div>
+                
+                <h3 style="color: #2c3e50; margin: 2rem 0 1rem;">Probe Configuration</h3>
+                <table class="probe-table">
+                    <thead>
+                        <tr>
+                            <th>Probe</th>
+                            <th>Cable Colour</th>
+                            <th>Placement Location</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="probe-number">Probe 1</span></td>
+                            <td><span class="cable-badge cable-blue">Blue</span></td>
+                            <td>Lower back - lumbar region</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 2</span></td>
+                            <td><span class="cable-badge cable-yellow">Yellow</span></td>
+                            <td>Mid-back - thoracic spine</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 3</span></td>
+                            <td><span class="cable-badge cable-green">Green</span></td>
+                            <td>Crown of head</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 4</span></td>
+                            <td><span class="cable-badge cable-grey-black">Grey/Black</span></td>
+                            <td>Behind left ear</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 5</span></td>
+                            <td><span class="cable-badge cable-grey-white">Grey/White</span></td>
+                            <td>Behind right ear</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div class="parameters-section">
+                    <h3 style="color: #2c3e50; margin-bottom: 1.5rem;">Treatment Parameters</h3>
+                    <div class="parameters-grid">
+                        <div class="parameter-box">
+                            <div class="parameter-label">Duration</div>
+                            <div class="parameter-value">35-45 min</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Frequency</div>
+                            <div class="parameter-value">Nightly</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Best Time</div>
+                            <div class="parameter-value">9-10 PM</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Course</div>
+                            <div class="parameter-value">21 days</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Intensity</div>
+                            <div class="parameter-value">1-3</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Temperature</div>
+                            <div class="parameter-value">Low</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="alert-box alert-info">
+                    <strong>Clinical Note:</strong> Maintain consistent treatment timing to regulate circadian rhythm. Room temperature should be cool (18-20°C).
+                </div>
+                
+                <div class="quick-reference">
+                    <h4>Quick Setup Guide</h4>
+                    <p>Blue (1) on lumbar | Yellow (2) on mid-back | Green (3) on crown | Grey/Black (4) behind left ear | Grey/White (5) behind right ear<br>
+                    Settings: Intensity 1-3, Temperature Low, Duration 35-45 minutes</p>
+                </div>
+            </div>
+            
+            <!-- Blood Sugar Balance Therapy -->
+            <div class="therapy-section" id="blood-sugar">
+                <h1 class="therapy-title">Blood Sugar Balance Therapy</h1>
+                <p class="therapy-subtitle">Protocol Code: 100 | Metabolic Regulation Programme</p>
+                
+                <div class="info-card">
+                    <h3>Clinical Indications</h3>
+                    <div class="conditions-grid">
+                        <div class="condition-item">Type 2 diabetes</div>
+                        <div class="condition-item">Pre-diabetes</div>
+                        <div class="condition-item">Insulin resistance</div>
+                        <div class="condition-item">Metabolic syndrome</div>
+                        <div class="condition-item">Blood sugar fluctuations</div>
+                        <div class="condition-item">Diabetic neuropathy</div>
+                    </div>
+                </div>
+                
+                <h3 style="color: #2c3e50; margin: 2rem 0 1rem;">Probe Configuration</h3>
+                <table class="probe-table">
+                    <thead>
+                        <tr>
+                            <th>Probe</th>
+                            <th>Cable Colour</th>
+                            <th>Placement Location</th>
+                            <th>Time Variation</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="probe-number">Probe 1</span></td>
+                            <td><span class="cable-badge cable-blue">Blue</span></td>
+                            <td>Lower back - kidney points (both sides)</td>
+                            <td>All day</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 2</span></td>
+                            <td><span class="cable-badge cable-yellow">Yellow</span></td>
+                            <td>Left side abdomen - liver area</td>
+                            <td>All day</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 3</span></td>
+                            <td><span class="cable-badge cable-green">Green</span></td>
+                            <td>Centre abdomen - navel area</td>
+                            <td>All day</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 4</span></td>
+                            <td><span class="cable-badge cable-grey-black">Grey/Black</span></td>
+                            <td>Below knee - left leg (morning) / Left foot arch (afternoon)</td>
+                            <td>Varies</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 5</span></td>
+                            <td><span class="cable-badge cable-grey-white">Grey/White</span></td>
+                            <td>Below knee - right leg (morning) / Right foot arch (afternoon)</td>
+                            <td>Varies</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div class="parameters-section">
+                    <h3 style="color: #2c3e50; margin-bottom: 1.5rem;">Treatment Parameters</h3>
+                    <div class="parameters-grid">
+                        <div class="parameter-box">
+                            <div class="parameter-label">Duration</div>
+                            <div class="parameter-value">30-40 min</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Frequency</div>
+                            <div class="parameter-value">2x daily</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Best Time</div>
+                            <div class="parameter-value">Before meals</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Course</div>
+                            <div class="parameter-value">30 days</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Intensity</div>
+                            <div class="parameter-value">3-6</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Temperature</div>
+                            <div class="parameter-value">Low-Medium</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="alert-box alert-warning">
+                    <strong>Important:</strong> Monitor blood glucose levels before and after treatment. Do not replace prescribed diabetes medications without medical consultation.
+                </div>
+                
+                <div class="quick-reference">
+                    <h4>Quick Setup Guide</h4>
+                    <p>Blue (1) on kidney points | Yellow (2) on liver area | Green (3) on navel | Grey cables (4&5) on legs (AM) or feet (PM)<br>
+                    Settings: Intensity 3-6, Temperature Low-Medium, Duration 30-40 minutes, twice daily before meals</p>
+                </div>
+            </div>
+            
+            <!-- Heart Health Therapy -->
+            <div class="therapy-section" id="heart-health">
+                <h1 class="therapy-title">Heart Health Therapy</h1>
+                <p class="therapy-subtitle">Protocol Code: 301 | Cardiovascular Support Programme</p>
+                
+                <div class="info-card">
+                    <h3>Clinical Indications</h3>
+                    <div class="conditions-grid">
+                        <div class="condition-item">Mild hypertension</div>
+                        <div class="condition-item">Arrhythmia</div>
+                        <div class="condition-item">Chest tightness</div>
+                        <div class="condition-item">Palpitations</div>
+                        <div class="condition-item">Post-cardiac event recovery</div>
+                        <div class="condition-item">Cardiovascular prevention</div>
+                    </div>
+                </div>
+                
+                <h3 style="color: #2c3e50; margin: 2rem 0 1rem;">Probe Configuration</h3>
+                <table class="probe-table">
+                    <thead>
+                        <tr>
+                            <th>Probe</th>
+                            <th>Cable Colour</th>
+                            <th>Placement Location</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="probe-number">Probe 1</span></td>
+                            <td><span class="cable-badge cable-blue">Blue</span></td>
+                            <td>Mid-back - between shoulder blades</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 2</span></td>
+                            <td><span class="cable-badge cable-yellow">Yellow</span></td>
+                            <td>Left chest - heart area (avoid direct placement)</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 3</span></td>
+                            <td><span class="cable-badge cable-green">Green</span></td>
+                            <td>Upper abdomen - solar plexus</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 4</span></td>
+                            <td><span class="cable-badge cable-grey-black">Grey/Black</span></td>
+                            <td>Inner left wrist</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 5</span></td>
+                            <td><span class="cable-badge cable-grey-white">Grey/White</span></td>
+                            <td>Inner right wrist</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div class="parameters-section">
+                    <h3 style="color: #2c3e50; margin-bottom: 1.5rem;">Treatment Parameters</h3>
+                    <div class="parameters-grid">
+                        <div class="parameter-box">
+                            <div class="parameter-label">Duration</div>
+                            <div class="parameter-value">25-35 min</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Frequency</div>
+                            <div class="parameter-value">Daily</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Best Time</div>
+                            <div class="parameter-value">Morning</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Course</div>
+                            <div class="parameter-value">28 days</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Intensity</div>
+                            <div class="parameter-value">2-4</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Temperature</div>
+                            <div class="parameter-value">Low</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="alert-box alert-warning">
+                    <strong>Contraindication:</strong> Not suitable for patients with pacemakers or severe cardiac conditions. Medical clearance required.
+                </div>
+                
+                <div class="quick-reference">
+                    <h4>Quick Setup Guide</h4>
+                    <p>Blue (1) between shoulders | Yellow (2) near heart (indirect) | Green (3) on solar plexus | Grey cables (4&5) on wrists<br>
+                    Settings: Intensity 2-4, Temperature Low, Duration 25-35 minutes</p>
+                </div>
+            </div>
+            
+            <!-- Blood Pressure Balance Therapy -->
+            <div class="therapy-section" id="blood-pressure">
+                <h1 class="therapy-title">Blood Pressure Balance Therapy</h1>
+                <p class="therapy-subtitle">Protocol Code: 302 | Hypertension Management</p>
+                
+                <div class="info-card">
+                    <h3>Clinical Indications</h3>
+                    <div class="conditions-grid">
+                        <div class="condition-item">Essential hypertension</div>
+                        <div class="condition-item">Blood pressure fluctuations</div>
+                        <div class="condition-item">Stress-related hypertension</div>
+                        <div class="condition-item">White coat syndrome</div>
+                        <div class="condition-item">Morning blood pressure surge</div>
+                        <div class="condition-item">Resistant hypertension support</div>
+                    </div>
+                </div>
+                
+                <h3 style="color: #2c3e50; margin: 2rem 0 1rem;">Probe Configuration</h3>
+                <table class="probe-table">
+                    <thead>
+                        <tr>
+                            <th>Probe</th>
+                            <th>Cable Colour</th>
+                            <th>Placement Location</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="probe-number">Probe 1</span></td>
+                            <td><span class="cable-badge cable-blue">Blue</span></td>
+                            <td>Base of neck - cervical spine</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 2</span></td>
+                            <td><span class="cable-badge cable-yellow">Yellow</span></td>
+                            <td>Upper back - thoracic region</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 3</span></td>
+                            <td><span class="cable-badge cable-green">Green</span></td>
+                            <td>Lower back - kidney area</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 4</span></td>
+                            <td><span class="cable-badge cable-grey-black">Grey/Black</span></td>
+                            <td>Inner ankle - left foot</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 5</span></td>
+                            <td><span class="cable-badge cable-grey-white">Grey/White</span></td>
+                            <td>Inner ankle - right foot</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div class="parameters-section">
+                    <h3 style="color: #2c3e50; margin-bottom: 1.5rem;">Treatment Parameters</h3>
+                    <div class="parameters-grid">
+                        <div class="parameter-box">
+                            <div class="parameter-label">Duration</div>
+                            <div class="parameter-value">30-40 min</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Frequency</div>
+                            <div class="parameter-value">2x daily</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Best Time</div>
+                            <div class="parameter-value">AM/PM</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Course</div>
+                            <div class="parameter-value">30 days</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Intensity</div>
+                            <div class="parameter-value">2-5</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Temperature</div>
+                            <div class="parameter-value">Low-Medium</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="alert-box alert-warning">
+                    <strong>Monitoring Required:</strong> Check blood pressure before and after treatment. Continue prescribed medications unless advised by GP.
+                </div>
+                
+                <div class="quick-reference">
+                    <h4>Quick Setup Guide</h4>
+                    <p>Blue (1) on neck base | Yellow (2) on upper back | Green (3) on kidney area | Grey cables (4&5) on inner ankles<br>
+                    Settings: Intensity 2-5, Temperature Low-Medium, Duration 30-40 minutes, twice daily</p>
+                </div>
+            </div>
+            
+            <!-- Circulation Boost Therapy -->
+            <div class="therapy-section" id="circulation-boost">
+                <h1 class="therapy-title">Circulation Boost Therapy</h1>
+                <p class="therapy-subtitle">Protocol Code: 303 | Peripheral Circulation Enhancement</p>
+                
+                <div class="info-card">
+                    <h3>Clinical Indications</h3>
+                    <div class="conditions-grid">
+                        <div class="condition-item">Poor peripheral circulation</div>
+                        <div class="condition-item">Cold hands and feet</div>
+                        <div class="condition-item">Raynaud's syndrome</div>
+                        <div class="condition-item">Varicose veins</div>
+                        <div class="condition-item">Leg cramps</div>
+                        <div class="condition-item">Diabetic circulation issues</div>
+                    </div>
+                </div>
+                
+                <h3 style="color: #2c3e50; margin: 2rem 0 1rem;">Probe Configuration</h3>
+                <table class="probe-table">
+                    <thead>
+                        <tr>
+                            <th>Probe</th>
+                            <th>Cable Colour</th>
+                            <th>Placement Location</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="probe-number">Probe 1</span></td>
+                            <td><span class="cable-badge cable-blue">Blue</span></td>
+                            <td>Lower back - sacral area</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 2</span></td>
+                            <td><span class="cable-badge cable-yellow">Yellow</span></td>
+                            <td>Behind left knee</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 3</span></td>
+                            <td><span class="cable-badge cable-green">Green</span></td>
+                            <td>Behind right knee</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 4</span></td>
+                            <td><span class="cable-badge cable-grey-black">Grey/Black</span></td>
+                            <td>Left foot - arch area</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 5</span></td>
+                            <td><span class="cable-badge cable-grey-white">Grey/White</span></td>
+                            <td>Right foot - arch area</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div class="parameters-section">
+                    <h3 style="color: #2c3e50; margin-bottom: 1.5rem;">Treatment Parameters</h3>
+                    <div class="parameters-grid">
+                        <div class="parameter-box">
+                            <div class="parameter-label">Duration</div>
+                            <div class="parameter-value">35 min</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Frequency</div>
+                            <div class="parameter-value">2-3x weekly</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Best Time</div>
+                            <div class="parameter-value">Evening</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Course</div>
+                            <div class="parameter-value">6 weeks</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Intensity</div>
+                            <div class="parameter-value">3-6</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Temperature</div>
+                            <div class="parameter-value">Medium</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="alert-box alert-info">
+                    <strong>Tip:</strong> Elevate legs slightly during treatment for enhanced effect. Encourage ankle exercises post-treatment.
+                </div>
+                
+                <div class="quick-reference">
+                    <h4>Quick Setup Guide</h4>
+                    <p>Blue (1) on sacrum | Yellow (2) behind left knee | Green (3) behind right knee | Grey cables (4&5) on foot arches<br>
+                    Settings: Intensity 3-6, Temperature Medium, Duration 35 minutes</p>
+                </div>
+            </div>
+            
+            <!-- Cardiovascular Vitality Therapy -->
+            <div class="therapy-section" id="cardiovascular-vitality">
+                <h1 class="therapy-title">Cardiovascular Vitality Therapy</h1>
+                <p class="therapy-subtitle">Protocol Code: 304 | Complete Heart & Circulation Support</p>
+                
+                <div class="info-card">
+                    <h3>Clinical Indications</h3>
+                    <div class="conditions-grid">
+                        <div class="condition-item">General cardiovascular health</div>
+                        <div class="condition-item">Athletic performance</div>
+                        <div class="condition-item">Recovery from cardiac events</div>
+                        <div class="condition-item">Preventive cardiovascular care</div>
+                        <div class="condition-item">Exercise tolerance improvement</div>
+                        <div class="condition-item">Cardiovascular endurance</div>
+                    </div>
+                </div>
+                
+                <h3 style="color: #2c3e50; margin: 2rem 0 1rem;">Probe Configuration</h3>
+                <table class="probe-table">
+                    <thead>
+                        <tr>
+                            <th>Probe</th>
+                            <th>Cable Colour</th>
+                            <th>Placement Location</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="probe-number">Probe 1</span></td>
+                            <td><span class="cable-badge cable-blue">Blue</span></td>
+                            <td>Mid-spine - thoracic area</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 2</span></td>
+                            <td><span class="cable-badge cable-yellow">Yellow</span></td>
+                            <td>Left shoulder blade area</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 3</span></td>
+                            <td><span class="cable-badge cable-green">Green</span></td>
+                            <td>Right shoulder blade area</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 4</span></td>
+                            <td><span class="cable-badge cable-grey-black">Grey/Black</span></td>
+                            <td>Left calf muscle</td>
+                        </tr>
+                        <tr>
+                            <td><span class="probe-number">Probe 5</span></td>
+                            <td><span class="cable-badge cable-grey-white">Grey/White</span></td>
+                            <td>Right calf muscle</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div class="parameters-section">
+                    <h3 style="color: #2c3e50; margin-bottom: 1.5rem;">Treatment Parameters</h3>
+                    <div class="parameters-grid">
+                        <div class="parameter-box">
+                            <div class="parameter-label">Duration</div>
+                            <div class="parameter-value">40 min</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Frequency</div>
+                            <div class="parameter-value">2x weekly</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Best Time</div>
+                            <div class="parameter-value">Morning</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Course</div>
+                            <div class="parameter-value">8 weeks</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Intensity</div>
+                            <div class="parameter-value">2-5</div>
+                        </div>
+                        <div class="parameter-box">
+                            <div class="parameter-label">Temperature</div>
+                            <div class="parameter-value">Low-Medium</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="alert-box alert-info">
+                    <strong>Athletic Note:</strong> Excellent for pre-competition preparation. Allow 24 hours between treatment and competition.
+                </div>
+                
+                <div class="quick-reference">
+                    <h4>Quick Setup Guide</h4>
+                    <p>Blue (1) on mid-spine | Yellow (2) left shoulder | Green (3) right shoulder | Grey cables (4&5) on calves<br>
+                    Settings: Intensity 2-5, Temperature Low-Medium, Duration 40 minutes</p>
+                </div>
+            </div>
+            
+            <!-- Gout Relief Therapy -->
+            <div class="therapy-section" id="gout-relief">
+                <h1 class="therapy-title">Gout Relief Therapy</h1>
+                <p class="therapy-subtitle">Protocol Code: 401 | Uric Acid Management</p>
+                
+                <div class="info-card">
+                    <h3>Clinical Indications</h3>
+                    <div class="conditions-grid">
+                        <div class="condition-item">Acute gout attacks</div>
+                        <div class="condition-item">Chronic gout</div>
+                        <div class="condition-item">Hyperuricaemia</div>
+                        <div class="condition-item">Joint inflammation</div>
+                        <div class="condition-item">Tophi deposits</div>
+                        <div class="condition-item">Gout prevention</div>
+                    </div>
+                </div>
+                
+                <h3 style="color: #2c3e50; margin: 2rem 0 1rem;">Probe Configuration</h3>
+                <table class="probe-table">
+                    <thead>
+                        <tr>
+                            <th>Probe</th>
