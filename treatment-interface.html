@@ -955,6 +955,32 @@
         let selectedProtocol = null;
         let allProbesChecked = false;
         
+        // Define toggleView function globally
+        function toggleView(view) {
+            if (view === 'front') {
+                document.getElementById('frontView').style.display = 'block';
+                document.getElementById('backView').style.display = 'none';
+                document.getElementById('frontViewBtn').style.background = '#3b82f6';
+                document.getElementById('frontViewBtn').style.color = 'white';
+                document.getElementById('backViewBtn').style.background = '#e5e7eb';
+                document.getElementById('backViewBtn').style.color = '#333';
+            } else {
+                document.getElementById('frontView').style.display = 'none';
+                document.getElementById('backView').style.display = 'block';
+                document.getElementById('backViewBtn').style.background = '#3b82f6';
+                document.getElementById('backViewBtn').style.color = 'white';
+                document.getElementById('frontViewBtn').style.background = '#e5e7eb';
+                document.getElementById('frontViewBtn').style.color = '#333';
+            }
+        }
+        
+        // Make other functions globally accessible
+        window.toggleView = toggleView;
+        window.checkAllProbes = checkAllProbes;
+        window.confirmSetup = confirmSetup;
+        window.viewPatientHistory = viewPatientHistory;
+        window.printSetupSheet = printSetupSheet;
+        
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
             loadPatients();
@@ -1382,27 +1408,3 @@
                 });
                 
                 // Update UI to show completion
-                document.getElementById('readyStatus').className = 'ready-status ready';
-                document.getElementById('readyStatus').innerHTML = `
-                    <div class="status-icon">✅</div>
-                    <div class="status-message">Setup Complete!</div>
-                    <div class="status-detail">Please START treatment on the device</div>
-                `;
-                
-                document.getElementById('confirmBtn').textContent = 'Setup Confirmed ✓';
-                document.getElementById('confirmBtn').style.background = '#059669';
-                
-                alert('Setup complete! Please press START on the device to begin treatment.');
-                
-            } catch (error) {
-                console.error('Error saving session:', error);
-                alert('Error saving session. Please try again.');
-            }
-        }
-        
-        // Utility Functions
-        function calculateAge(birthDate) {
-            const today = new Date();
-            const birth = new Date(birthDate);
-            let age = today.getFullYear() - birth.getFullYear();
-            const monthDiff = today.get
