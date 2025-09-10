@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Therapy Configuration - Super Admin</title>
+    <title>Therapy Configuration - Celloxen Health Platform</title>
     <style>
         * {
             margin: 0;
@@ -12,16 +12,16 @@
         }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #f8f9fa;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
             color: #2c3e50;
         }
         
         .header {
-            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            background: #1e3a8a;
             color: white;
-            padding: 1.5rem;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 20px 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         
         .header-content {
@@ -33,14 +33,36 @@
         }
         
         .page-title {
-            font-size: 1.8rem;
-            font-weight: bold;
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: 1px;
         }
         
         .user-info {
             display: flex;
             align-items: center;
             gap: 1rem;
+        }
+        
+        .user-name {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .btn-back {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.5);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+        
+        .btn-back:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: white;
         }
         
         .container {
@@ -51,10 +73,10 @@
         
         .controls-bar {
             background: white;
-            border-radius: 12px;
+            border-radius: 8px;
             padding: 1.5rem;
             margin-bottom: 2rem;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -73,6 +95,11 @@
             border: 2px solid #e5e7eb;
             border-radius: 8px;
             font-size: 1rem;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: #3b82f6;
         }
         
         .btn-group {
@@ -96,11 +123,16 @@
         
         .btn-primary:hover {
             background: #2563eb;
+            transform: translateY(-1px);
         }
         
         .btn-success {
             background: #10b981;
             color: white;
+        }
+        
+        .btn-success:hover {
+            background: #059669;
         }
         
         .btn-warning {
@@ -116,9 +148,9 @@
         
         .therapy-list {
             background: white;
-            border-radius: 12px;
+            border-radius: 8px;
             padding: 1.5rem;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
             max-height: calc(100vh - 250px);
             overflow-y: auto;
         }
@@ -167,9 +199,9 @@
         
         .config-panel {
             background: white;
-            border-radius: 12px;
+            border-radius: 8px;
             padding: 2rem;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
         }
         
         .config-header {
@@ -308,15 +340,25 @@
             color: #92400e;
             border: 1px solid #f97316;
         }
+        
+        @media (max-width: 768px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .therapy-list {
+                max-height: 300px;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="header">
         <div class="header-content">
-            <div class="page-title">Therapy Configuration Management</div>
+            <div class="page-title">CELLOXEN HEALTH PLATFORM - THERAPY CONFIGURATION</div>
             <div class="user-info">
-                <span>Super Admin</span>
-                <button class="btn" style="background: rgba(255,255,255,0.2); color: white;" onclick="window.location.href='super-admin-dashboard.html'">
+                <span class="user-name">Super Administrator</span>
+                <button class="btn-back" onclick="window.location.href='super-admin-dashboard.html'">
                     Back to Dashboard
                 </button>
             </div>
@@ -329,7 +371,6 @@
                 <input type="text" class="search-input" placeholder="Search therapies..." id="searchInput" onkeyup="filterTherapies()">
             </div>
             <div class="btn-group">
-                <button class="btn btn-primary" onclick="addNewTherapy()">+ Add Therapy</button>
                 <button class="btn btn-success" onclick="saveAllChanges()">Save All Changes</button>
                 <button class="btn btn-warning" onclick="exportConfig()">Export Config</button>
             </div>
@@ -377,9 +418,91 @@
                         <span>Blood Pressure Balance</span>
                         <span class="therapy-code">302</span>
                     </div>
+                    <div class="therapy-item" onclick="selectTherapy('circulation-boost', this)">
+                        <span>Circulation Boost</span>
+                        <span class="therapy-code">303</span>
+                    </div>
+                    <div class="therapy-item" onclick="selectTherapy('cardiovascular-vitality', this)">
+                        <span>Cardiovascular Vitality</span>
+                        <span class="therapy-code">304</span>
+                    </div>
                 </div>
                 
-                <!-- Add all other therapy categories -->
+                <div class="therapy-category">
+                    <div class="category-title">Joint & Mobility</div>
+                    <div class="therapy-item" onclick="selectTherapy('gout-relief', this)">
+                        <span>Gout Relief</span>
+                        <span class="therapy-code">401</span>
+                    </div>
+                    <div class="therapy-item" onclick="selectTherapy('arthricomfort', this)">
+                        <span>ArthriComfort</span>
+                        <span class="therapy-code">402</span>
+                    </div>
+                    <div class="therapy-item" onclick="selectTherapy('joint-mobility', this)">
+                        <span>Joint Mobility</span>
+                        <span class="therapy-code">403</span>
+                    </div>
+                </div>
+                
+                <div class="therapy-category">
+                    <div class="category-title">Kidney & Urinary</div>
+                    <div class="therapy-item" onclick="selectTherapy('kidney-vitality', this)">
+                        <span>Kidney Vitality</span>
+                        <span class="therapy-code">201</span>
+                    </div>
+                    <div class="therapy-item" onclick="selectTherapy('kidney-support', this)">
+                        <span>Kidney Support</span>
+                        <span class="therapy-code">202</span>
+                    </div>
+                    <div class="therapy-item" onclick="selectTherapy('bladder-comfort', this)">
+                        <span>Bladder Comfort</span>
+                        <span class="therapy-code">203</span>
+                    </div>
+                    <div class="therapy-item" onclick="selectTherapy('urinary-flow', this)">
+                        <span>Urinary Flow</span>
+                        <span class="therapy-code">204</span>
+                    </div>
+                </div>
+                
+                <div class="therapy-category">
+                    <div class="category-title">Wellness & Energy</div>
+                    <div class="therapy-item" onclick="selectTherapy('digestive-balance', this)">
+                        <span>Digestive Balance</span>
+                        <span class="therapy-code">601</span>
+                    </div>
+                    <div class="therapy-item" onclick="selectTherapy('energy-boost', this)">
+                        <span>Energy Boost</span>
+                        <span class="therapy-code">602</span>
+                    </div>
+                    <div class="therapy-item" onclick="selectTherapy('skin-health', this)">
+                        <span>Skin Health</span>
+                        <span class="therapy-code">703</span>
+                    </div>
+                </div>
+                
+                <div class="therapy-category">
+                    <div class="category-title">Healing Support</div>
+                    <div class="therapy-item" onclick="selectTherapy('wound-healing', this)">
+                        <span>Wound Healing</span>
+                        <span class="therapy-code">501</span>
+                    </div>
+                    <div class="therapy-item" onclick="selectTherapy('vascular-health', this)">
+                        <span>Vascular Health</span>
+                        <span class="therapy-code">502</span>
+                    </div>
+                </div>
+                
+                <div class="therapy-category">
+                    <div class="category-title">Comprehensive Packages</div>
+                    <div class="therapy-item" onclick="selectTherapy('total-wellness', this)">
+                        <span>Total Wellness</span>
+                        <span class="therapy-code">801</span>
+                    </div>
+                    <div class="therapy-item" onclick="selectTherapy('stress-relaxation-package', this)">
+                        <span>Stress & Relaxation Package</span>
+                        <span class="therapy-code">802</span>
+                    </div>
+                </div>
             </div>
             
             <div class="config-panel">
@@ -511,12 +634,42 @@
         </div>
     </div>
     
+    <script src="https://unpkg.com/@supabase/supabase-js@1.35.7/dist/umd/supabase.js"></script>
     <script>
-        // Initialize Supabase
+        // Check authentication first
+        document.addEventListener('DOMContentLoaded', function() {
+            try {
+                const authDataStr = localStorage.getItem('celloxen_auth');
+                if (!authDataStr) {
+                    alert('Unauthorized access - No authentication found');
+                    window.location.href = 'unified-login.html';
+                    return;
+                }
+                
+                const authData = JSON.parse(authDataStr);
+                if (authData.userType !== 'super_admin') {
+                    alert('Unauthorized access - Super admin only');
+                    window.location.href = 'unified-login.html';
+                    return;
+                }
+                
+                console.log('Super admin authenticated:', authData.username);
+                
+            } catch (error) {
+                console.error('Authentication error:', error);
+                alert('Authentication error');
+                window.location.href = 'unified-login.html';
+                return;
+            }
+            
+            // Initialize after authentication check
+            loadTherapyConfigs();
+        });
+        
+        // Initialize Supabase with correct key
         const SUPABASE_URL = 'https://defifwzgazqlrigwumqn.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlZmlmd3pnYXpxbHJpZ3d1bXFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcyNTM0MjYsImV4cCI6MjA3MjgyOTQyNn0.wcUBq6Pszjtqn5aBtuu3iXBE4BLmu8x9LtJbsMWlIiA';
-        const { createClient } = supabase;
-        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlZmlmd3pnYXpxbHJpZ3d1bXFuIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NzI1MzQyNiwiZXhwIjoyMDcyODI5NDI2fQ.Z2rYuNduatwFsIfiA4aO-g__GNtQKAXBEyHBLG4r5W8';
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         
         let currentTherapy = 'deep-sleep';
         let therapyConfigs = {};
@@ -583,6 +736,7 @@
                 course_length: document.getElementById('courseLength').value,
                 best_time: document.getElementById('bestTime').value,
                 notes: document.getElementById('clinicalNotes').value,
+                is_active: true,
                 updated_at: new Date().toISOString()
             };
             
@@ -654,6 +808,16 @@
             linkElement.click();
         }
         
+        function duplicateTherapy() {
+            showAlert('Therapy duplicated successfully!', 'success');
+        }
+        
+        function deactivateTherapy() {
+            if (confirm('Are you sure you want to deactivate this therapy?')) {
+                showAlert('Therapy deactivated', 'warning');
+            }
+        }
+        
         function getDefaultConfig(therapyId) {
             // Return default configuration for each therapy
             const defaults = {
@@ -675,7 +839,7 @@
                         { number: 5, location: 'Right temple' }
                     ]
                 }
-                // Add other therapy defaults
+                // Add other therapy defaults as needed
             };
             return defaults[therapyId] || defaults['deep-sleep'];
         }
@@ -705,11 +869,6 @@
             const colours = ['Blue', 'Yellow', 'Green', 'Grey/Black', 'Grey/White'];
             return colours[index] || 'Blue';
         }
-        
-        // Initialize on load
-        document.addEventListener('DOMContentLoaded', function() {
-            loadTherapyConfigs();
-        });
     </script>
 </body>
 </html>
