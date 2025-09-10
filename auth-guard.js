@@ -20,6 +20,7 @@ class CelloxenAuthGuard {
             'user-management.html': ['super_admin'],
             'system-reports.html': ['super_admin'],
             'system-logs.html': ['super_admin'],
+            'therapy-configuration.html': ['super_admin'],  // NEW - Therapy configuration
             
             // Clinic Admin Pages (Super Admin also has access)
             'clinic-dashboard.html': ['super_admin', 'clinic_admin'],
@@ -28,6 +29,8 @@ class CelloxenAuthGuard {
             'iris-analysis.html': ['super_admin', 'clinic_admin'],
             'treatment-interface.html': ['super_admin', 'clinic_admin'],
             'vital-signs.html': ['super_admin', 'clinic_admin'],
+            'therapy-reference.html': ['super_admin', 'clinic_admin'],  // NEW - Therapy reference
+            'celloxen-complete-guide.html': ['super_admin', 'clinic_admin'],  // NEW - Complete guide
             
             // Public Pages (no authentication required)
             'unified-login.html': ['public'],
