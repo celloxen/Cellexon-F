@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Therapy Reference Guide - Clinic Dashboard</title>
+    <title>Therapy Reference Guide - Celloxen Health Platform</title>
     <style>
         * {
             margin: 0;
@@ -12,16 +12,16 @@
         }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #f8f9fa;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
             color: #2c3e50;
         }
         
         .header {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            background: #1e3a8a;
             color: white;
-            padding: 1.5rem;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 20px 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         
         .header-content {
@@ -33,15 +33,38 @@
         }
         
         .page-title {
-            font-size: 1.8rem;
-            font-weight: bold;
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
         }
         
         .patient-info {
-            background: rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.1);
             padding: 0.5rem 1rem;
-            border-radius: 8px;
-            font-size: 0.9rem;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        
+        .btn-back {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.5);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+        
+        .btn-back:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: white;
         }
         
         .container {
@@ -52,10 +75,17 @@
         
         .quick-access-bar {
             background: white;
-            border-radius: 12px;
+            border-radius: 8px;
             padding: 1.5rem;
             margin-bottom: 2rem;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+        }
+        
+        .quick-access-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 1rem;
         }
         
         .quick-access-grid {
@@ -66,8 +96,8 @@
         
         .quick-btn {
             padding: 1rem;
-            background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
-            border: 2px solid transparent;
+            background: white;
+            border: 1px solid #e5e7eb;
             border-radius: 8px;
             cursor: pointer;
             text-align: center;
@@ -75,9 +105,10 @@
         }
         
         .quick-btn:hover {
-            background: linear-gradient(135deg, #10b981, #059669);
+            background: #3b82f6;
             color: white;
             transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
         }
         
         .quick-btn-title {
@@ -98,13 +129,13 @@
         
         .therapy-display {
             background: white;
-            border-radius: 12px;
+            border-radius: 8px;
             padding: 2rem;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
         }
         
         .therapy-header {
-            border-bottom: 3px solid #10b981;
+            border-bottom: 3px solid #3b82f6;
             padding-bottom: 1rem;
             margin-bottom: 2rem;
         }
@@ -180,7 +211,7 @@
         }
         
         .probe-table th {
-            background: #10b981;
+            background: #3b82f6;
             color: white;
             padding: 1rem;
             text-align: left;
@@ -212,7 +243,7 @@
         .cable-grey-white { background: #fafafa; color: #6b7280; border: 1px solid #e5e7eb; }
         
         .parameters-card {
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
             border-radius: 10px;
             padding: 1.5rem;
             margin-bottom: 2rem;
@@ -253,16 +284,16 @@
         
         .timer-card {
             background: white;
-            border-radius: 12px;
+            border-radius: 8px;
             padding: 1.5rem;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
             text-align: center;
         }
         
         .timer-display {
             font-size: 3rem;
             font-weight: bold;
-            color: #10b981;
+            color: #3b82f6;
             margin: 1rem 0;
         }
         
@@ -296,11 +327,16 @@
             color: white;
         }
         
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
         .notes-card {
             background: white;
-            border-radius: 12px;
+            border-radius: 8px;
             padding: 1.5rem;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
         }
         
         .notes-title {
@@ -335,11 +371,23 @@
             cursor: pointer;
             box-shadow: 0 4px 15px rgba(0,0,0,0.2);
             transition: all 0.3s;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
         }
         
         .print-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #6b7280;
         }
         
         @media print {
@@ -351,21 +399,36 @@
                 grid-template-columns: 1fr;
             }
         }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .quick-access-grid {
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            }
+        }
     </style>
 </head>
 <body>
     <div class="header">
         <div class="header-content">
-            <div class="page-title">Therapy Probe Configuration Guide</div>
-            <div class="patient-info">
-                Current Patient: <span id="currentPatient">John Smith (JS2001)</span>
+            <div class="page-title">CELLOXEN HEALTH PLATFORM - THERAPY REFERENCE</div>
+            <div class="user-info">
+                <div class="patient-info">
+                    Current Patient: <span id="currentPatient">Loading...</span>
+                </div>
+                <button class="btn-back" onclick="window.location.href='clinic-dashboard.html'">
+                    Back to Dashboard
+                </button>
             </div>
         </div>
     </div>
     
     <div class="container">
         <div class="quick-access-bar">
-            <h3 style="margin-bottom: 1rem; color: #2c3e50;">Quick Access - Frequently Used Therapies</h3>
+            <h3 class="quick-access-title">Quick Access - Frequently Used Therapies</h3>
             <div class="quick-access-grid">
                 <button class="quick-btn" onclick="loadTherapy('deep-sleep')">
                     <div class="quick-btn-title">Deep Sleep</div>
@@ -396,98 +459,73 @@
         
         <div class="main-content">
             <div class="therapy-display">
-                <div class="therapy-header">
-                    <h2 class="therapy-title" id="therapyTitle">Deep Sleep Renewal Therapy</h2>
-                    <div class="therapy-meta">
-                        <span>Protocol Code: <strong id="therapyCode">101</strong></span>
-                        <span>Category: <strong id="therapyCategory">Sleep & Stress</strong></span>
-                        <span>Duration: <strong id="therapyDuration">30-40 min</strong></span>
-                    </div>
-                </div>
+                <div class="loading" id="loadingMessage">Loading therapy configurations...</div>
                 
-                <div class="probe-visual">
-                    <h3 style="margin-bottom: 1rem; color: #2c3e50;">Visual Probe Placement</h3>
-                    <div class="body-diagram">
-                        <div class="body-view">
-                            <div style="margin-bottom: 0.5rem; font-weight: 600;">Front View</div>
-                            <div class="body-outline">
-                                <div class="probe-marker probe-4" style="top: 30px; left: 20px;">4</div>
-                                <div class="probe-marker probe-5" style="top: 30px; right: 20px;">5</div>
-                            </div>
-                        </div>
-                        <div class="body-view">
-                            <div style="margin-bottom: 0.5rem; font-weight: 600;">Back View</div>
-                            <div class="body-outline">
-                                <div class="probe-marker probe-1" style="bottom: 100px; left: 60px;">1</div>
-                                <div class="probe-marker probe-2" style="top: 120px; left: 60px;">2</div>
-                                <div class="probe-marker probe-3" style="top: 40px; left: 60px;">3</div>
-                            </div>
+                <div id="therapyContent" style="display: none;">
+                    <div class="therapy-header">
+                        <h2 class="therapy-title" id="therapyTitle">Select a Therapy</h2>
+                        <div class="therapy-meta">
+                            <span>Protocol Code: <strong id="therapyCode">---</strong></span>
+                            <span>Category: <strong id="therapyCategory">---</strong></span>
+                            <span>Duration: <strong id="therapyDuration">---</strong></span>
                         </div>
                     </div>
-                </div>
-                
-                <h3 style="margin-bottom: 1rem; color: #2c3e50;">Probe Configuration Details</h3>
-                <table class="probe-table">
-                    <thead>
-                        <tr>
-                            <th>Probe #</th>
-                            <th>Cable Colour</th>
-                            <th>Placement Location</th>
-                            <th>Check</th>
-                        </tr>
-                    </thead>
-                    <tbody id="probeTableBody">
-                        <tr>
-                            <td><strong>Probe 1</strong></td>
-                            <td><span class="cable-indicator cable-blue">Blue Cable</span></td>
-                            <td>Lower back - centre of spine at waist level</td>
-                            <td><input type="checkbox" onchange="checkProbe(1)"></td>
-                        </tr>
-                        <tr>
-                            <td><strong>Probe 2</strong></td>
-                            <td><span class="cable-indicator cable-yellow">Yellow Cable</span></td>
-                            <td>Upper back - between shoulder blades</td>
-                            <td><input type="checkbox" onchange="checkProbe(2)"></td>
-                        </tr>
-                        <tr>
-                            <td><strong>Probe 3</strong></td>
-                            <td><span class="cable-indicator cable-green">Green Cable</span></td>
-                            <td>Back of neck - base of skull</td>
-                            <td><input type="checkbox" onchange="checkProbe(3)"></td>
-                        </tr>
-                        <tr>
-                            <td><strong>Probe 4</strong></td>
-                            <td><span class="cable-indicator cable-grey-black">Grey/Black Cable</span></td>
-                            <td>Left temple</td>
-                            <td><input type="checkbox" onchange="checkProbe(4)"></td>
-                        </tr>
-                        <tr>
-                            <td><strong>Probe 5</strong></td>
-                            <td><span class="cable-indicator cable-grey-white">Grey/White Cable</span></td>
-                            <td>Right temple</td>
-                            <td><input type="checkbox" onchange="checkProbe(5)"></td>
-                        </tr>
-                    </tbody>
-                </table>
-                
-                <div class="parameters-card">
-                    <h3 style="margin-bottom: 1rem; color: #2c3e50;">Treatment Parameters</h3>
-                    <div class="parameter-grid">
-                        <div class="parameter-item">
-                            <div class="parameter-label">Duration</div>
-                            <div class="parameter-value" id="paramDuration">30-40 min</div>
+                    
+                    <div class="probe-visual">
+                        <h3 style="margin-bottom: 1rem; color: #2c3e50;">Visual Probe Placement</h3>
+                        <div class="body-diagram">
+                            <div class="body-view">
+                                <div style="margin-bottom: 0.5rem; font-weight: 600;">Front View</div>
+                                <div class="body-outline">
+                                    <div class="probe-marker probe-4" style="top: 30px; left: 20px;">4</div>
+                                    <div class="probe-marker probe-5" style="top: 30px; right: 20px;">5</div>
+                                </div>
+                            </div>
+                            <div class="body-view">
+                                <div style="margin-bottom: 0.5rem; font-weight: 600;">Back View</div>
+                                <div class="body-outline">
+                                    <div class="probe-marker probe-1" style="bottom: 100px; left: 60px;">1</div>
+                                    <div class="probe-marker probe-2" style="top: 120px; left: 60px;">2</div>
+                                    <div class="probe-marker probe-3" style="top: 40px; left: 60px;">3</div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="parameter-item">
-                            <div class="parameter-label">Frequency</div>
-                            <div class="parameter-value" id="paramFrequency">Daily</div>
-                        </div>
-                        <div class="parameter-item">
-                            <div class="parameter-label">Intensity</div>
-                            <div class="parameter-value" id="paramIntensity">2-4</div>
-                        </div>
-                        <div class="parameter-item">
-                            <div class="parameter-label">Temperature</div>
-                            <div class="parameter-value" id="paramTemperature">Low</div>
+                    </div>
+                    
+                    <h3 style="margin-bottom: 1rem; color: #2c3e50;">Probe Configuration Details</h3>
+                    <table class="probe-table">
+                        <thead>
+                            <tr>
+                                <th>Probe #</th>
+                                <th>Cable Colour</th>
+                                <th>Placement Location</th>
+                                <th>Check</th>
+                            </tr>
+                        </thead>
+                        <tbody id="probeTableBody">
+                            <!-- Populated by JavaScript -->
+                        </tbody>
+                    </table>
+                    
+                    <div class="parameters-card">
+                        <h3 style="margin-bottom: 1rem; color: #2c3e50;">Treatment Parameters</h3>
+                        <div class="parameter-grid">
+                            <div class="parameter-item">
+                                <div class="parameter-label">Duration</div>
+                                <div class="parameter-value" id="paramDuration">---</div>
+                            </div>
+                            <div class="parameter-item">
+                                <div class="parameter-label">Frequency</div>
+                                <div class="parameter-value" id="paramFrequency">---</div>
+                            </div>
+                            <div class="parameter-item">
+                                <div class="parameter-label">Intensity</div>
+                                <div class="parameter-value" id="paramIntensity">---</div>
+                            </div>
+                            <div class="parameter-item">
+                                <div class="parameter-label">Temperature</div>
+                                <div class="parameter-value" id="paramTemperature">---</div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -507,10 +545,10 @@
                 <div class="notes-card">
                     <h3 class="notes-title">Clinical Notes</h3>
                     <div class="clinical-note" id="clinicalNote">
-                        Best performed 1-2 hours before bedtime. Patient should be in a quiet, comfortable environment.
+                        Select a therapy to view clinical notes
                     </div>
                     <div class="warning-note" id="warningNote" style="display: none;">
-                        Caution: Monitor patient for any discomfort during first session.
+                        <!-- Warnings displayed here -->
                     </div>
                 </div>
                 
@@ -539,7 +577,37 @@
         🖨️
     </button>
     
+    <script src="https://unpkg.com/@supabase/supabase-js@1.35.7/dist/umd/supabase.js"></script>
     <script>
+        // Check authentication first
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if user is authenticated
+            const authDataStr = localStorage.getItem('celloxen_auth');
+            if (!authDataStr) {
+                alert('Please login to access this page');
+                window.location.href = 'unified-login.html';
+                return;
+            }
+            
+            const authData = JSON.parse(authDataStr);
+            if (authData.userType !== 'clinic' && authData.userType !== 'super_admin') {
+                alert('Unauthorized access');
+                window.location.href = 'unified-login.html';
+                return;
+            }
+            
+            // Initialize application
+            initializeApp();
+        });
+        
+        // Initialize Supabase
+        const SUPABASE_URL = 'https://defifwzgazqlrigwumqn.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlZmlmd3pnYXpxbHJpZ3d1bXFuIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NzI1MzQyNiwiZXhwIjoyMDcyODI5NDI2fQ.Z2rYuNduatwFsIfiA4aO-g__GNtQKAXBEyHBLG4r5W8';
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        
+        // Store therapy configurations
+        let therapyConfigs = {};
+        
         // Timer functionality
         let timerInterval;
         let seconds = 0;
@@ -575,81 +643,196 @@
             }
         }
         
-        // Therapy loading
-        const therapyData = {
-            'deep-sleep': {
-                title: 'Deep Sleep Renewal Therapy',
-                code: '101',
-                category: 'Sleep & Stress',
-                duration: '30-40 min',
-                frequency: 'Daily',
-                intensity: '2-4',
-                temperature: 'Low',
-                probes: [
-                    { cable: 'Blue', location: 'Lower back - centre of spine at waist level' },
-                    { cable: 'Yellow', location: 'Upper back - between shoulder blades' },
-                    { cable: 'Green', location: 'Back of neck - base of skull' },
-                    { cable: 'Grey/Black', location: 'Left temple' },
-                    { cable: 'Grey/White', location: 'Right temple' }
-                ],
-                note: 'Best performed 1-2 hours before bedtime. Patient should be in a quiet, comfortable environment.'
-            },
-            'blood-sugar': {
-                title: 'Blood Sugar Balance Therapy',
-                code: '100',
-                category: 'Metabolic Health',
-                duration: '30-40 min',
-                frequency: 'Twice daily',
-                intensity: '3-6',
-                temperature: 'Low-Medium',
-                probes: [
-                    { cable: 'Blue', location: 'Lower back - kidney points (both sides)' },
-                    { cable: 'Yellow', location: 'Left side abdomen - liver area' },
-                    { cable: 'Green', location: 'Centre abdomen - navel area' },
-                    { cable: 'Grey/Black', location: 'Below knee - left leg (AM) / Left foot arch (PM)' },
-                    { cable: 'Grey/White', location: 'Below knee - right leg (AM) / Right foot arch (PM)' }
-                ],
-                note: 'Monitor blood glucose levels before and after treatment. Best before meals.',
-                warning: 'Do not replace prescribed diabetes medications without medical consultation.'
+        // Initialize application
+        async function initializeApp() {
+            // Load patient info
+            loadPatientInfo();
+            
+            // Load therapy configurations from database
+            await loadTherapyConfigurations();
+            
+            // Hide loading message
+            document.getElementById('loadingMessage').style.display = 'none';
+            document.getElementById('therapyContent').style.display = 'block';
+            
+            // Check for therapy parameter in URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const therapyId = urlParams.get('therapy');
+            if (therapyId) {
+                loadTherapy(therapyId);
             }
-            // Add more therapy data as needed
-        };
+        }
         
+        // Load patient information
+        function loadPatientInfo() {
+            const patientInfo = sessionStorage.getItem('currentPatient');
+            if (patientInfo) {
+                const patient = JSON.parse(patientInfo);
+                document.getElementById('currentPatient').textContent = 
+                    `${patient.first_name} ${patient.last_name} (${patient.patient_id})`;
+            } else {
+                document.getElementById('currentPatient').textContent = 'No patient selected';
+            }
+        }
+        
+        // Load therapy configurations from database
+        async function loadTherapyConfigurations() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('therapy_configurations')
+                    .select('*')
+                    .eq('is_active', true);
+                
+                if (data && data.length > 0) {
+                    data.forEach(config => {
+                        therapyConfigs[config.therapy_id] = config;
+                    });
+                } else {
+                    // Use default configurations if database is empty
+                    loadDefaultConfigurations();
+                }
+            } catch (error) {
+                console.error('Error loading therapy configurations:', error);
+                loadDefaultConfigurations();
+            }
+        }
+        
+        // Load default configurations
+        function loadDefaultConfigurations() {
+            therapyConfigs = {
+                'deep-sleep': {
+                    name: 'Deep Sleep Renewal Therapy',
+                    code: '101',
+                    category: 'Sleep & Stress',
+                    duration: '30-40 min',
+                    frequency: 'Daily',
+                    intensity: '2-4',
+                    temperature: 'Low',
+                    probes: [
+                        { number: 1, location: 'Lower back - centre of spine at waist level' },
+                        { number: 2, location: 'Upper back - between shoulder blades' },
+                        { number: 3, location: 'Back of neck - base of skull' },
+                        { number: 4, location: 'Left temple' },
+                        { number: 5, location: 'Right temple' }
+                    ],
+                    notes: 'Best performed 1-2 hours before bedtime. Patient should be in a quiet, comfortable environment.'
+                },
+                'blood-sugar': {
+                    name: 'Blood Sugar Balance Therapy',
+                    code: '100',
+                    category: 'Metabolic Health',
+                    duration: '30-40 min',
+                    frequency: 'Twice daily',
+                    intensity: '3-6',
+                    temperature: 'Low-Medium',
+                    probes: [
+                        { number: 1, location: 'Lower back - kidney points (both sides)' },
+                        { number: 2, location: 'Left side abdomen - liver area' },
+                        { number: 3, location: 'Centre abdomen - navel area' },
+                        { number: 4, location: 'Below knee - left leg (AM) / Left foot arch (PM)' },
+                        { number: 5, location: 'Below knee - right leg (AM) / Right foot arch (PM)' }
+                    ],
+                    notes: 'Monitor blood glucose levels before and after treatment. Best before meals.',
+                    warnings: 'Do not replace prescribed diabetes medications without medical consultation.'
+                },
+                'heart-health': {
+                    name: 'Heart Health Therapy',
+                    code: '301',
+                    category: 'Cardiovascular',
+                    duration: '35-45 min',
+                    frequency: '3x weekly',
+                    intensity: '3-5',
+                    temperature: 'Low',
+                    probes: [
+                        { number: 1, location: 'Lower back - kidney region' },
+                        { number: 2, location: 'Upper back - heart reflex area' },
+                        { number: 3, location: 'Back of neck - circulation point' },
+                        { number: 4, location: 'Inner left wrist' },
+                        { number: 5, location: 'Inner right wrist' }
+                    ],
+                    notes: 'Monitor blood pressure before and after treatment.'
+                },
+                'joint-mobility': {
+                    name: 'Joint Mobility Therapy',
+                    code: '403',
+                    category: 'Joint & Mobility',
+                    duration: '35 min',
+                    frequency: '2x weekly',
+                    intensity: '2-6',
+                    temperature: 'Low-Medium',
+                    probes: [
+                        { number: 1, location: 'Lower back - lumbar region' },
+                        { number: 2, location: 'Upper back - thoracic spine' },
+                        { number: 3, location: 'Affected joint area (primary)' },
+                        { number: 4, location: 'Below knee - left leg' },
+                        { number: 5, location: 'Below knee - right leg' }
+                    ],
+                    notes: 'Focus on affected joints. Start with lower intensity.'
+                },
+                'digestive-balance': {
+                    name: 'Digestive Balance Therapy',
+                    code: '601',
+                    category: 'Wellness & Energy',
+                    duration: '35 min',
+                    frequency: '2x weekly',
+                    intensity: '3-5',
+                    temperature: 'Low',
+                    probes: [
+                        { number: 1, location: 'Lower back - digestive reflex' },
+                        { number: 2, location: 'Upper abdomen - stomach area' },
+                        { number: 3, location: 'Centre abdomen - intestinal area' },
+                        { number: 4, location: 'Left side - colon area' },
+                        { number: 5, location: 'Right side - liver area' }
+                    ],
+                    notes: 'Best performed 1-2 hours after meals.'
+                }
+            };
+        }
+        
+        // Load specific therapy
         function loadTherapy(therapyId) {
-            const therapy = therapyData[therapyId];
-            if (!therapy) return;
+            const therapy = therapyConfigs[therapyId];
+            if (!therapy) {
+                alert('Therapy configuration not found');
+                return;
+            }
             
             // Update header
-            document.getElementById('therapyTitle').textContent = therapy.title;
-            document.getElementById('therapyCode').textContent = therapy.code;
-            document.getElementById('therapyCategory').textContent = therapy.category;
-            document.getElementById('therapyDuration').textContent = therapy.duration;
+            document.getElementById('therapyTitle').textContent = therapy.name || therapy.therapy_id;
+            document.getElementById('therapyCode').textContent = therapy.code || '---';
+            document.getElementById('therapyCategory').textContent = therapy.category || '---';
+            document.getElementById('therapyDuration').textContent = therapy.duration || '---';
             
             // Update parameters
-            document.getElementById('paramDuration').textContent = therapy.duration;
-            document.getElementById('paramFrequency').textContent = therapy.frequency;
-            document.getElementById('paramIntensity').textContent = therapy.intensity;
-            document.getElementById('paramTemperature').textContent = therapy.temperature;
+            document.getElementById('paramDuration').textContent = therapy.duration || '---';
+            document.getElementById('paramFrequency').textContent = therapy.frequency || '---';
+            document.getElementById('paramIntensity').textContent = therapy.intensity || '---';
+            document.getElementById('paramTemperature').textContent = therapy.temperature || '---';
             
             // Update probe table
             const tbody = document.getElementById('probeTableBody');
             tbody.innerHTML = '';
-            therapy.probes.forEach((probe, index) => {
+            
+            const probes = therapy.probes || [];
+            const cableColors = ['Blue', 'Yellow', 'Green', 'Grey/Black', 'Grey/White'];
+            
+            for (let i = 0; i < 5; i++) {
+                const probe = probes[i] || { number: i + 1, location: 'Not configured' };
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td><strong>Probe ${index + 1}</strong></td>
-                    <td><span class="cable-indicator cable-${getCableClass(probe.cable)}">${probe.cable} Cable</span></td>
+                    <td><strong>Probe ${i + 1}</strong></td>
+                    <td><span class="cable-indicator cable-${getCableClass(cableColors[i])}">${cableColors[i]} Cable</span></td>
                     <td>${probe.location}</td>
-                    <td><input type="checkbox" onchange="checkProbe(${index + 1})"></td>
+                    <td><input type="checkbox" onchange="checkProbe(${i + 1})"></td>
                 `;
                 tbody.appendChild(row);
-            });
+            }
             
             // Update notes
-            document.getElementById('clinicalNote').textContent = therapy.note;
+            document.getElementById('clinicalNote').textContent = therapy.notes || 'No clinical notes available';
             const warningNote = document.getElementById('warningNote');
-            if (therapy.warning) {
-                warningNote.textContent = therapy.warning;
+            if (therapy.warnings) {
+                warningNote.textContent = therapy.warnings;
                 warningNote.style.display = 'block';
             } else {
                 warningNote.style.display = 'none';
@@ -672,24 +855,11 @@
         
         function checkProbe(probeNumber) {
             console.log(`Probe ${probeNumber} checked`);
-            // Could add validation logic here
         }
         
         function openFullGuide() {
-            // Open the complete therapy guide in a new window
             window.open('celloxen-complete-guide.html', '_blank');
         }
-        
-        // Initialize with current patient data (would come from session/database)
-        document.addEventListener('DOMContentLoaded', function() {
-            // Load patient info from session
-            const patientInfo = sessionStorage.getItem('currentPatient');
-            if (patientInfo) {
-                const patient = JSON.parse(patientInfo);
-                document.getElementById('currentPatient').textContent = 
-                    `${patient.first_name} ${patient.last_name} (${patient.patient_id})`;
-            }
-        });
     </script>
 </body>
 </html>
