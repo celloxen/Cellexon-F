@@ -988,7 +988,72 @@
             });
         }
         
-        // Select Protocol
+        // Select Protocol from Database
+        function selectProtocolFromDB(protocol) {
+            selectedProtocol = {
+                code: protocol.therapy_code,
+                name: protocol.therapy_name,
+                category: protocol.category,
+                duration: protocol.duration || 30,
+                conditions: protocol.conditions_treated || 'Various conditions',
+                probes: {
+                    A: { 
+                        location: protocol.probe_a_location || 'See guide', 
+                        settings: protocol.probe_a_settings || 'Standard' 
+                    },
+                    B: { 
+                        location: protocol.probe_b_location || 'See guide', 
+                        settings: protocol.probe_b_settings || 'Standard' 
+                    },
+                    C: { 
+                        location: protocol.probe_c_location || 'See guide', 
+                        settings: protocol.probe_c_settings || 'Standard' 
+                    },
+                    D: { 
+                        location: protocol.probe_d_location || 'See guide', 
+                        settings: protocol.probe_d_settings || 'Standard' 
+                    }
+                }
+            };
+            
+            // Update UI
+            document.querySelectorAll('.protocol-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            event.target.closest('.protocol-card').classList.add('selected');
+            
+            // Show therapy info
+            document.getElementById('protocolName').textContent = selectedProtocol.name;
+            document.getElementById('protocolCode').textContent = selectedProtocol.code;
+            document.getElementById('protocolDuration').textContent = selectedProtocol.duration;
+            document.getElementById('protocolConditions').textContent = selectedProtocol.conditions;
+            
+            // Update probe locations
+            document.getElementById('probeALocation').textContent = selectedProtocol.probes.A.location;
+            document.getElementById('probeASettings').textContent = selectedProtocol.probes.A.settings;
+            
+            document.getElementById('probeBLocation').textContent = selectedProtocol.probes.B.location;
+            document.getElementById('probeBSettings').textContent = selectedProtocol.probes.B.settings;
+            
+            document.getElementById('probeCLocation').textContent = selectedProtocol.probes.C.location;
+            document.getElementById('probeCSettings').textContent = selectedProtocol.probes.C.settings;
+            
+            document.getElementById('probeDLocation').textContent = selectedProtocol.probes.D.location;
+            document.getElementById('probeDSettings').textContent = selectedProtocol.probes.D.settings;
+            
+            // Show sections
+            document.getElementById('therapyInfo').style.display = 'block';
+            document.getElementById('noTherapySelected').style.display = 'none';
+            document.getElementById('probeChecklist').style.display = 'block';
+            
+            // Reset checkboxes
+            document.querySelectorAll('.probe-checkbox').forEach(cb => cb.checked = false);
+            
+            updateReadyStatus();
+            updateDeviceStatus();
+        }
+        
+        // Select Protocol (fallback for hardcoded)
         function selectProtocol(protocolCode) {
             selectedProtocol = therapyProtocols[protocolCode];
             selectedProtocol.code = protocolCode;
@@ -1132,6 +1197,113 @@
             const now = new Date();
             document.getElementById('sessionDate').textContent = now.toLocaleDateString();
             document.getElementById('sessionTime').textContent = now.toLocaleTimeString();
+        }
+        
+        // View Toggle Function
+        function toggleView(view) {
+            if (view === 'front') {
+                document.getElementById('frontView').style.display = 'block';
+                document.getElementById('backView').style.display = 'none';
+                document.getElementById('frontViewBtn').style.background = '#3b82f6';
+                document.getElementById('frontViewBtn').style.color = 'white';
+                document.getElementById('backViewBtn').style.background = '#e5e7eb';
+                document.getElementById('backViewBtn').style.color = '#333';
+            } else {
+                document.getElementById('frontView').style.display = 'none';
+                document.getElementById('backView').style.display = 'block';
+                document.getElementById('backViewBtn').style.background = '#3b82f6';
+                document.getElementById('backViewBtn').style.color = 'white';
+                document.getElementById('frontViewBtn').style.background = '#e5e7eb';
+                document.getElementById('frontViewBtn').style.color = '#333';
+            }
+        }
+        
+        // Update Visual Probe Markers
+        function updateVisualProbeMarkers() {
+            if (!selectedProtocol) return;
+            
+            // Define probe colors
+            const probeColors = {
+                A: '#ef4444', // Red
+                B: '#3b82f6', // Blue
+                C: '#10b981', // Green
+                D: '#f59e0b'  // Yellow
+            };
+            
+            // Example positions for common points (simplified)
+            const pointPositions = {
+                'front': {
+                    'CV4': { x: 150, y: 220 },
+                    'CV6': { x: 150, y: 200 },
+                    'CV8': { x: 150, y: 180 },
+                    'CV17': { x: 150, y: 120 },
+                    'ST36': { x: 130, y: 250 },
+                    'SP6': { x: 125, y: 280 },
+                    'LI4': { x: 95, y: 155 },
+                    'PC6': { x: 105, y: 140 },
+                    'HT7': { x: 100, y: 150 }
+                },
+                'back': {
+                    'BL23': { x: 130, y: 160 },
+                    'DU4': { x: 150, y: 180 },
+                    'DU14': { x: 150, y: 100 },
+                    'DU20': { x: 150, y: 40 },
+                    'GB20': { x: 135, y: 70 },
+                    'BL15': { x: 130, y: 120 }
+                }
+            };
+            
+            // Clear existing markers
+            document.getElementById('frontProbeMarkers').innerHTML = '';
+            document.getElementById('backProbeMarkers').innerHTML = '';
+            
+            // Add markers for each probe
+            ['A', 'B', 'C', 'D'].forEach(probe => {
+                const location = selectedProtocol.probes[probe].location;
+                
+                // Try to find position (simplified - you can expand this)
+                let position = null;
+                let view = 'front';
+                
+                // Check if location contains back points
+                if (location.includes('BL') || location.includes('DU') || location.includes('GB')) {
+                    view = 'back';
+                }
+                
+                // Get first mentioned point (simplified parsing)
+                const points = Object.keys(view === 'front' ? pointPositions.front : pointPositions.back);
+                for (let point of points) {
+                    if (location.includes(point)) {
+                        position = pointPositions[view][point];
+                        break;
+                    }
+                }
+                
+                // If no specific position found, use default positions
+                if (!position) {
+                    const defaults = {
+                        A: { front: { x: 150, y: 180 }, back: { x: 150, y: 160 } },
+                        B: { front: { x: 130, y: 140 }, back: { x: 170, y: 140 } },
+                        C: { front: { x: 170, y: 140 }, back: { x: 130, y: 180 } },
+                        D: { front: { x: 120, y: 250 }, back: { x: 180, y: 250 } }
+                    };
+                    position = defaults[probe][view];
+                }
+                
+                // Create marker
+                const marker = `
+                    <circle cx="${position.x}" cy="${position.y}" r="12" 
+                            fill="${probeColors[probe]}" stroke="white" stroke-width="2"/>
+                    <text x="${position.x}" y="${position.y + 5}" text-anchor="middle" 
+                          fill="white" font-weight="bold" font-size="14">${probe}</text>
+                `;
+                
+                if (view === 'front') {
+                    document.getElementById('frontProbeMarkers').innerHTML += marker;
+                } else {
+                    document.getElementById('backProbeMarkers').innerHTML += marker;
+                }
+            });
         }
         
         // Action Functions
