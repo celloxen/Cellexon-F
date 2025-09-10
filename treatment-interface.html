@@ -62,15 +62,6 @@
             background: #f0f0f0;
         }
         
-        .btn-probe {
-            background: #10b981;
-            color: white;
-        }
-        
-        .btn-probe:hover {
-            background: #059669;
-        }
-        
         /* Container */
         .container {
             max-width: 1400px;
@@ -346,9 +337,6 @@
         <div class="header-content">
             <h1>CELLOXEN HEALTH PLATFORM - Treatment Setup</h1>
             <div class="header-buttons">
-                <button class="btn btn-probe" onclick="openProbeGuide()">
-                    📋 View Probe Placement Guide
-                </button>
                 <button class="btn btn-secondary" onclick="window.location.href='clinic-dashboard.html'">
                     Back to Dashboard
                 </button>
@@ -398,7 +386,7 @@
                 </div>
             </div>
             
-            <!-- Center Column: Therapy Info & Probe Verification -->
+            <!-- Center Column: Visual Guide, Therapy Info & Probe Verification -->
             <div>
                 <!-- Instructions -->
                 <div class="instructions">
@@ -406,13 +394,82 @@
                     <ol>
                         <li>Select the patient from the list</li>
                         <li>Choose the appropriate therapy protocol</li>
-                        <li>Review probe placement locations</li>
-                        <li>Click "View Probe Placement Guide" for visual reference</li>
+                        <li>Review probe placement locations in the visual guide below</li>
                         <li>Place all 5 probes on the patient as indicated</li>
                         <li>Check each probe box to confirm placement</li>
                         <li>Once all probes are confirmed, press "Setup Complete"</li>
                         <li>Start the treatment on the device</li>
                     </ol>
+                </div>
+                
+                <!-- Visual Probe Placement Guide - Always Visible -->
+                <div class="card">
+                    <h2>Visual Probe Placement Guide</h2>
+                    <div id="visualGuide">
+                        <!-- View Toggle Buttons -->
+                        <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                            <button class="btn btn-secondary" onclick="toggleView('front')" id="frontViewBtn" style="flex: 1; background: #3b82f6; color: white;">
+                                Front View
+                            </button>
+                            <button class="btn btn-secondary" onclick="toggleView('back')" id="backViewBtn" style="flex: 1;">
+                                Back View
+                            </button>
+                        </div>
+                        
+                        <!-- Body Diagram -->
+                        <div style="position: relative; background: #f9fafb; border-radius: 8px; padding: 20px; margin-bottom: 20px; min-height: 450px;">
+                            <div id="noProtocolMessage" style="text-align: center; padding: 150px 20px; color: #6b7280;">
+                                <div style="font-size: 48px; margin-bottom: 20px;">👆</div>
+                                <p style="font-size: 16px;">Select a patient and therapy protocol above to see probe placement locations</p>
+                            </div>
+                            
+                            <!-- Front View -->
+                            <div id="frontView" style="text-align: center; display: none;">
+                                <svg width="300" height="400" style="margin: 0 auto;">
+                                    <!-- Simple body outline -->
+                                    <ellipse cx="150" cy="50" rx="30" ry="35" fill="none" stroke="#333" stroke-width="2"/> <!-- Head -->
+                                    <line x1="150" y1="85" x2="150" y2="200" stroke="#333" stroke-width="2"/> <!-- Body -->
+                                    <line x1="150" y1="100" x2="100" y2="150" stroke="#333" stroke-width="2"/> <!-- Left arm -->
+                                    <line x1="150" y1="100" x2="200" y2="150" stroke="#333" stroke-width="2"/> <!-- Right arm -->
+                                    <line x1="150" y1="200" x2="120" y2="300" stroke="#333" stroke-width="2"/> <!-- Left leg -->
+                                    <line x1="150" y1="200" x2="180" y2="300" stroke="#333" stroke-width="2"/> <!-- Right leg -->
+                                    
+                                    <!-- Probe positions will be added dynamically -->
+                                    <g id="frontProbeMarkers"></g>
+                                </svg>
+                            </div>
+                            
+                            <!-- Back View -->
+                            <div id="backView" style="display: none; text-align: center;">
+                                <svg width="300" height="400" style="margin: 0 auto;">
+                                    <!-- Simple body outline (back) -->
+                                    <ellipse cx="150" cy="50" rx="30" ry="35" fill="none" stroke="#333" stroke-width="2"/> <!-- Head -->
+                                    <line x1="150" y1="85" x2="150" y2="200" stroke="#333" stroke-width="2"/> <!-- Body -->
+                                    <line x1="150" y1="100" x2="100" y2="150" stroke="#333" stroke-width="2"/> <!-- Left arm -->
+                                    <line x1="150" y1="100" x2="200" y2="150" stroke="#333" stroke-width="2"/> <!-- Right arm -->
+                                    <line x1="150" y1="200" x2="120" y2="300" stroke="#333" stroke-width="2"/> <!-- Left leg -->
+                                    <line x1="150" y1="200" x2="180" y2="300" stroke="#333" stroke-width="2"/> <!-- Right leg -->
+                                    
+                                    <!-- Back specific markers -->
+                                    <text x="150" y="120" text-anchor="middle" font-size="12" fill="#666">BACK VIEW</text>
+                                    
+                                    <!-- Probe positions will be added dynamically -->
+                                    <g id="backProbeMarkers"></g>
+                                </svg>
+                            </div>
+                        </div>
+                        
+                        <!-- Treatment Parameters -->
+                        <div id="treatmentParams" style="margin-top: 20px; padding: 15px; background: #eff6ff; border-radius: 8px; display: none;">
+                            <h4 style="color: #1e3a8a; margin-bottom: 10px;">Treatment Parameters</h4>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                                <div><strong>Duration:</strong> <span id="treatmentDuration">-</span></div>
+                                <div><strong>Frequency:</strong> <span id="treatmentFrequency">-</span></div>
+                                <div><strong>Course:</strong> <span id="treatmentCourse">-</span></div>
+                                <div><strong>Sessions/Week:</strong> <span id="treatmentSessionsWeek">-</span></div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 
                 <!-- Therapy Information -->
@@ -442,60 +499,75 @@
                     </div>
                 </div>
                 
-                <!-- Probe Checklist -->
+                <!-- Probe Verification Checklist -->
                 <div class="card">
                     <h2>3. Probe Placement Verification</h2>
                     <div id="probeChecklist" style="display: none;">
                         <div class="probe-checklist">
                             <p style="margin-bottom: 10px; font-weight: 600;">
-                                Confirm all 5 probes are correctly placed:
+                                Confirm all 5 probes are correctly placed according to the visual guide above:
                             </p>
                             
                             <!-- Probe A -->
-                            <div class="probe-item">
+                            <div class="probe-item" style="border-left: 4px solid #ef4444;">
                                 <input type="checkbox" class="probe-checkbox" id="probeA" onchange="checkAllProbes()">
                                 <div class="probe-label">
-                                    <div class="probe-position">Probe A (Red Cable)</div>
+                                    <div class="probe-position">
+                                        <span style="display: inline-block; width: 20px; height: 20px; background: #ef4444; border-radius: 50%; vertical-align: middle; margin-right: 5px;"></span>
+                                        Probe A (Red Cable)
+                                    </div>
                                     <div class="probe-location" id="probeALocation">-</div>
                                 </div>
                                 <div class="probe-settings" id="probeASettings">-</div>
                             </div>
                             
                             <!-- Probe B -->
-                            <div class="probe-item">
+                            <div class="probe-item" style="border-left: 4px solid #3b82f6;">
                                 <input type="checkbox" class="probe-checkbox" id="probeB" onchange="checkAllProbes()">
                                 <div class="probe-label">
-                                    <div class="probe-position">Probe B (Blue Cable)</div>
+                                    <div class="probe-position">
+                                        <span style="display: inline-block; width: 20px; height: 20px; background: #3b82f6; border-radius: 50%; vertical-align: middle; margin-right: 5px;"></span>
+                                        Probe B (Blue Cable)
+                                    </div>
                                     <div class="probe-location" id="probeBLocation">-</div>
                                 </div>
                                 <div class="probe-settings" id="probeBSettings">-</div>
                             </div>
                             
                             <!-- Probe C -->
-                            <div class="probe-item">
+                            <div class="probe-item" style="border-left: 4px solid #10b981;">
                                 <input type="checkbox" class="probe-checkbox" id="probeC" onchange="checkAllProbes()">
                                 <div class="probe-label">
-                                    <div class="probe-position">Probe C (Green Cable)</div>
+                                    <div class="probe-position">
+                                        <span style="display: inline-block; width: 20px; height: 20px; background: #10b981; border-radius: 50%; vertical-align: middle; margin-right: 5px;"></span>
+                                        Probe C (Green Cable)
+                                    </div>
                                     <div class="probe-location" id="probeCLocation">-</div>
                                 </div>
                                 <div class="probe-settings" id="probeCSettings">-</div>
                             </div>
                             
                             <!-- Probe D -->
-                            <div class="probe-item">
+                            <div class="probe-item" style="border-left: 4px solid #f59e0b;">
                                 <input type="checkbox" class="probe-checkbox" id="probeD" onchange="checkAllProbes()">
                                 <div class="probe-label">
-                                    <div class="probe-position">Probe D (Yellow Cable)</div>
+                                    <div class="probe-position">
+                                        <span style="display: inline-block; width: 20px; height: 20px; background: #f59e0b; border-radius: 50%; vertical-align: middle; margin-right: 5px;"></span>
+                                        Probe D (Yellow Cable)
+                                    </div>
                                     <div class="probe-location" id="probeDLocation">-</div>
                                 </div>
                                 <div class="probe-settings" id="probeDSettings">-</div>
                             </div>
                             
                             <!-- Ground Probe -->
-                            <div class="probe-item">
+                            <div class="probe-item" style="border-left: 4px solid #000;">
                                 <input type="checkbox" class="probe-checkbox" id="probeGround" onchange="checkAllProbes()">
                                 <div class="probe-label">
-                                    <div class="probe-position">Ground Probe (Black Cable)</div>
+                                    <div class="probe-position">
+                                        <span style="display: inline-block; width: 20px; height: 20px; background: #000; border-radius: 50%; vertical-align: middle; margin-right: 5px;"></span>
+                                        Ground Probe (Black Cable)
+                                    </div>
                                     <div class="probe-location">Wrist or ankle (patient preference)</div>
                                 </div>
                                 <div class="probe-settings">Ground</div>
@@ -542,12 +614,35 @@
                 <!-- Device Status -->
                 <div class="card">
                     <h2>Device Status</h2>
-                    <div style="text-align: center; padding: 20px;">
-                        <div style="font-size: 48px; margin-bottom: 10px;">🔌</div>
-                        <p style="font-weight: 600; color: #10b981;">Device Connected</p>
-                        <p style="color: #6b7280; margin-top: 10px;">
-                            Once setup is complete, press START on the device
+                    <div id="deviceStatus" style="text-align: center; padding: 20px;">
+                        <div id="deviceIcon" style="font-size: 48px; margin-bottom: 10px;">❌</div>
+                        <p id="deviceStatusText" style="font-weight: 600; color: #ef4444;">Not Ready</p>
+                        <p id="deviceInstruction" style="color: #6b7280; margin-top: 10px;">
+                            Complete patient and probe setup first
                         </p>
+                    </div>
+                </div>
+                
+                <!-- Session Tracking -->
+                <div class="card">
+                    <h2>Treatment Progress</h2>
+                    <div id="sessionTracking" style="padding: 10px;">
+                        <div style="margin-bottom: 10px; padding: 10px; background: #f9fafb; border-radius: 5px;">
+                            <strong>Current Session:</strong> 
+                            <span id="currentSessionNumber" style="color: #1e3a8a;">-</span>
+                        </div>
+                        <div style="margin-bottom: 10px; padding: 10px; background: #f9fafb; border-radius: 5px;">
+                            <strong>Total Sessions Completed:</strong> 
+                            <span id="completedSessions" style="color: #10b981;">-</span>
+                        </div>
+                        <div style="margin-bottom: 10px; padding: 10px; background: #f9fafb; border-radius: 5px;">
+                            <strong>Recommended Course:</strong> 
+                            <span id="recommendedSessions" style="color: #6b7280;">-</span>
+                        </div>
+                        <div style="padding: 10px; background: #fef3c7; border-radius: 5px;">
+                            <strong>Sessions Remaining:</strong> 
+                            <span id="remainingSessions" style="color: #f59e0b; font-weight: 600;">-</span>
+                        </div>
                     </div>
                 </div>
                 
@@ -894,6 +989,7 @@
                         selectedPatient = null;
                         document.getElementById('patientInfo').style.display = 'none';
                         updateReadyStatus();
+                        updateDeviceStatus();
                     }
                 });
                 
@@ -912,15 +1008,58 @@
             document.getElementById('patientAge').textContent = calculateAge(patient.date_of_birth);
             document.getElementById('patientGender').textContent = patient.gender;
             
-            // Load last visit
+            // Load treatment history and session tracking
             try {
-                const { data: sessions } = await supabase
+                // Get all sessions for this patient
+                const { data: sessions, error: sessionsError } = await supabase
                     .from('treatment_sessions')
-                    .select('start_time')
+                    .select('*')
                     .eq('patient_id', patient.patient_id)
-                    .order('start_time', { ascending: false })
-                    .limit(1);
+                    .order('start_time', { ascending: false });
                 
+                if (sessionsError) throw sessionsError;
+                
+                // Calculate session numbers
+                const completedSessionsCount = sessions ? sessions.filter(s => s.status === 'completed').length : 0;
+                const currentSessionNumber = completedSessionsCount + 1;
+                
+                // Update session tracking display
+                document.getElementById('currentSessionNumber').textContent = `Session #${currentSessionNumber}`;
+                document.getElementById('completedSessions').textContent = completedSessionsCount;
+                
+                // Get recommended sessions from last health assessment
+                const { data: assessment } = await supabase
+                    .from('health_assessments')
+                    .select('recommended_sessions, therapies_recommended, total_score')
+                    .eq('patient_id', patient.patient_id)
+                    .order('assessment_date', { ascending: false })
+                    .limit(1)
+                    .single();
+                
+                let recommendedTotal = 10; // Default recommendation
+                if (assessment && assessment.recommended_sessions) {
+                    recommendedTotal = assessment.recommended_sessions;
+                }
+                
+                document.getElementById('recommendedSessions').textContent = `${recommendedTotal} sessions`;
+                
+                // Calculate remaining sessions
+                const remaining = Math.max(0, recommendedTotal - completedSessionsCount);
+                document.getElementById('remainingSessions').textContent = remaining;
+                
+                // Add color coding for session status
+                if (currentSessionNumber === 1) {
+                    document.getElementById('currentSessionNumber').innerHTML = 
+                        `<span style="background: #10b981; color: white; padding: 2px 8px; border-radius: 3px;">First Session</span>`;
+                } else if (remaining === 1) {
+                    document.getElementById('currentSessionNumber').innerHTML = 
+                        `<span style="background: #f59e0b; color: white; padding: 2px 8px; border-radius: 3px;">Final Session</span>`;
+                } else if (remaining === 0) {
+                    document.getElementById('currentSessionNumber').innerHTML = 
+                        `<span style="background: #ef4444; color: white; padding: 2px 8px; border-radius: 3px;">Course Complete</span>`;
+                }
+                
+                // Update last visit
                 if (sessions && sessions.length > 0) {
                     const lastVisit = new Date(sessions[0].start_time);
                     document.getElementById('lastVisit').textContent = lastVisit.toLocaleDateString();
@@ -928,31 +1067,90 @@
                     document.getElementById('lastVisit').textContent = 'First visit';
                 }
                 
-                // Load health score
-                const { data: assessment } = await supabase
-                    .from('health_assessments')
-                    .select('total_score')
-                    .eq('patient_id', patient.patient_id)
-                    .order('assessment_date', { ascending: false })
-                    .limit(1)
-                    .single();
-                
+                // Update health score
                 if (assessment) {
-                    document.getElementById('healthScore').textContent = `${assessment.total_score}/100`;
+                    document.getElementById('healthScore').textContent = `${assessment.total_score || '-'}/100`;
                 } else {
                     document.getElementById('healthScore').textContent = 'No assessment';
                 }
                 
             } catch (error) {
                 console.error('Error loading patient history:', error);
+                // Set defaults if error
+                document.getElementById('currentSessionNumber').textContent = 'Session #1';
+                document.getElementById('completedSessions').textContent = '0';
+                document.getElementById('recommendedSessions').textContent = '10 sessions';
+                document.getElementById('remainingSessions').textContent = '10';
             }
             
             document.getElementById('patientInfo').style.display = 'block';
             updateReadyStatus();
+            updateDeviceStatus();
         }
         
         // Load Protocols
-        function loadProtocols() {
+        async function loadProtocols() {
+            const protocolsList = document.getElementById('protocolsList');
+            
+            try {
+                // First try to load from database
+                const { data: dbProtocols, error } = await supabase
+                    .from('therapy_configurations')
+                    .select('*')
+                    .order('therapy_code');
+                
+                if (error) throw error;
+                
+                // If database has protocols, use them
+                if (dbProtocols && dbProtocols.length > 0) {
+                    const categories = {};
+                    
+                    // Group protocols by category
+                    dbProtocols.forEach(protocol => {
+                        const category = protocol.category || 'Uncategorized';
+                        if (!categories[category]) {
+                            categories[category] = [];
+                        }
+                        categories[category].push(protocol);
+                    });
+                    
+                    // Create UI for each category
+                    Object.entries(categories).forEach(([category, protocols]) => {
+                        const categoryDiv = document.createElement('div');
+                        categoryDiv.className = 'protocol-category';
+                        
+                        const categoryTitle = document.createElement('h3');
+                        categoryTitle.textContent = category;
+                        categoryDiv.appendChild(categoryTitle);
+                        
+                        protocols.forEach(protocol => {
+                            const protocolCard = document.createElement('div');
+                            protocolCard.className = 'protocol-card';
+                            protocolCard.innerHTML = `
+                                <strong>${protocol.therapy_code}: ${protocol.therapy_name}</strong><br>
+                                <small>${protocol.duration || 30} minutes</small>
+                            `;
+                            protocolCard.onclick = function() { selectProtocolFromDB(protocol); };
+                            categoryDiv.appendChild(protocolCard);
+                        });
+                        
+                        protocolsList.appendChild(categoryDiv);
+                    });
+                } else {
+                    // Fall back to hardcoded protocols if database is empty
+                    console.log('No protocols in database, using defaults');
+                    loadDefaultProtocols();
+                }
+                
+            } catch (error) {
+                console.error('Error loading protocols from database:', error);
+                // Fall back to hardcoded protocols
+                loadDefaultProtocols();
+            }
+        }
+        
+        // Load default hardcoded protocols (fallback)
+        function loadDefaultProtocols() {
             const protocolsList = document.getElementById('protocolsList');
             const categories = {};
             
@@ -1022,6 +1220,25 @@
             });
             event.target.closest('.protocol-card').classList.add('selected');
             
+            updateProtocolDisplay();
+        }
+        
+        // Select Protocol (fallback for hardcoded)
+        function selectProtocol(protocolCode) {
+            selectedProtocol = therapyProtocols[protocolCode];
+            selectedProtocol.code = protocolCode;
+            
+            // Update UI
+            document.querySelectorAll('.protocol-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            event.target.closest('.protocol-card').classList.add('selected');
+            
+            updateProtocolDisplay();
+        }
+        
+        // Update Protocol Display
+        function updateProtocolDisplay() {
             // Show therapy info
             document.getElementById('protocolName').textContent = selectedProtocol.name;
             document.getElementById('protocolCode').textContent = selectedProtocol.code;
@@ -1041,10 +1258,22 @@
             document.getElementById('probeDLocation').textContent = selectedProtocol.probes.D.location;
             document.getElementById('probeDSettings').textContent = selectedProtocol.probes.D.settings;
             
-            // Show sections
+            // Update treatment parameters
+            document.getElementById('treatmentDuration').textContent = `${selectedProtocol.duration} minutes`;
+            document.getElementById('treatmentFrequency').textContent = `2-3 times per week`;
+            document.getElementById('treatmentCourse').textContent = `8-10 weeks`;
+            document.getElementById('treatmentSessionsWeek').textContent = `2-3 sessions`;
+            
+            // Update visual probe markers
+            updateVisualProbeMarkers();
+            
+            // Show/hide appropriate sections
             document.getElementById('therapyInfo').style.display = 'block';
             document.getElementById('noTherapySelected').style.display = 'none';
             document.getElementById('probeChecklist').style.display = 'block';
+            document.getElementById('noProtocolMessage').style.display = 'none';
+            document.getElementById('frontView').style.display = 'block';
+            document.getElementById('treatmentParams').style.display = 'block';
             
             // Reset checkboxes
             document.querySelectorAll('.probe-checkbox').forEach(cb => cb.checked = false);
@@ -1053,52 +1282,42 @@
             updateDeviceStatus();
         }
         
-        // Select Protocol (fallback for hardcoded)
-        function selectProtocol(protocolCode) {
-            selectedProtocol = therapyProtocols[protocolCode];
-            selectedProtocol.code = protocolCode;
-            
-            // Update UI
-            document.querySelectorAll('.protocol-card').forEach(card => {
-                card.classList.remove('selected');
-            });
-            event.target.closest('.protocol-card').classList.add('selected');
-            
-            // Show therapy info
-            document.getElementById('protocolName').textContent = selectedProtocol.name;
-            document.getElementById('protocolCode').textContent = protocolCode;
-            document.getElementById('protocolDuration').textContent = selectedProtocol.duration;
-            document.getElementById('protocolConditions').textContent = selectedProtocol.conditions;
-            
-            // Update probe locations
-            document.getElementById('probeALocation').textContent = selectedProtocol.probes.A.location;
-            document.getElementById('probeASettings').textContent = selectedProtocol.probes.A.settings;
-            
-            document.getElementById('probeBLocation').textContent = selectedProtocol.probes.B.location;
-            document.getElementById('probeBSettings').textContent = selectedProtocol.probes.B.settings;
-            
-            document.getElementById('probeCLocation').textContent = selectedProtocol.probes.C.location;
-            document.getElementById('probeCSettings').textContent = selectedProtocol.probes.C.settings;
-            
-            document.getElementById('probeDLocation').textContent = selectedProtocol.probes.D.location;
-            document.getElementById('probeDSettings').textContent = selectedProtocol.probes.D.settings;
-            
-            // Show sections
-            document.getElementById('therapyInfo').style.display = 'block';
-            document.getElementById('noTherapySelected').style.display = 'none';
-            document.getElementById('probeChecklist').style.display = 'block';
-            
-            // Reset checkboxes
-            document.querySelectorAll('.probe-checkbox').forEach(cb => cb.checked = false);
-            
-            updateReadyStatus();
-        }
-        
         // Check All Probes
         function checkAllProbes() {
             const checkboxes = document.querySelectorAll('.probe-checkbox');
             allProbesChecked = Array.from(checkboxes).every(cb => cb.checked);
             updateReadyStatus();
+            updateDeviceStatus();
+        }
+        
+        // Update Device Status
+        function updateDeviceStatus() {
+            const deviceIcon = document.getElementById('deviceIcon');
+            const deviceStatusText = document.getElementById('deviceStatusText');
+            const deviceInstruction = document.getElementById('deviceInstruction');
+            
+            if (selectedPatient && selectedProtocol && allProbesChecked) {
+                // All ready - device connected and ready
+                deviceIcon.innerHTML = '✅';
+                deviceStatusText.textContent = 'Ready to Start';
+                deviceStatusText.style.color = '#10b981';
+                deviceInstruction.innerHTML = '<strong>Press START on the device to begin treatment</strong>';
+                deviceInstruction.style.color = '#059669';
+            } else if (selectedPatient && selectedProtocol) {
+                // Patient and protocol selected but probes not confirmed
+                deviceIcon.innerHTML = '⚠️';
+                deviceStatusText.textContent = 'Waiting for Probe Confirmation';
+                deviceStatusText.style.color = '#f59e0b';
+                deviceInstruction.textContent = 'Please confirm all probe placements';
+                deviceInstruction.style.color = '#6b7280';
+            } else {
+                // Not ready
+                deviceIcon.innerHTML = '❌';
+                deviceStatusText.textContent = 'Not Ready';
+                deviceStatusText.style.color = '#ef4444';
+                deviceInstruction.textContent = 'Complete patient and probe setup first';
+                deviceInstruction.style.color = '#6b7280';
+            }
         }
         
         // Update Ready Status
@@ -1186,148 +1405,4 @@
             const today = new Date();
             const birth = new Date(birthDate);
             let age = today.getFullYear() - birth.getFullYear();
-            const monthDiff = today.getMonth() - birth.getMonth();
-            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
-                age--;
-            }
-            return age;
-        }
-        
-        function updateDateTime() {
-            const now = new Date();
-            document.getElementById('sessionDate').textContent = now.toLocaleDateString();
-            document.getElementById('sessionTime').textContent = now.toLocaleTimeString();
-        }
-        
-        // View Toggle Function
-        function toggleView(view) {
-            if (view === 'front') {
-                document.getElementById('frontView').style.display = 'block';
-                document.getElementById('backView').style.display = 'none';
-                document.getElementById('frontViewBtn').style.background = '#3b82f6';
-                document.getElementById('frontViewBtn').style.color = 'white';
-                document.getElementById('backViewBtn').style.background = '#e5e7eb';
-                document.getElementById('backViewBtn').style.color = '#333';
-            } else {
-                document.getElementById('frontView').style.display = 'none';
-                document.getElementById('backView').style.display = 'block';
-                document.getElementById('backViewBtn').style.background = '#3b82f6';
-                document.getElementById('backViewBtn').style.color = 'white';
-                document.getElementById('frontViewBtn').style.background = '#e5e7eb';
-                document.getElementById('frontViewBtn').style.color = '#333';
-            }
-        }
-        
-        // Update Visual Probe Markers
-        function updateVisualProbeMarkers() {
-            if (!selectedProtocol) return;
-            
-            // Define probe colors
-            const probeColors = {
-                A: '#ef4444', // Red
-                B: '#3b82f6', // Blue
-                C: '#10b981', // Green
-                D: '#f59e0b'  // Yellow
-            };
-            
-            // Example positions for common points (simplified)
-            const pointPositions = {
-                'front': {
-                    'CV4': { x: 150, y: 220 },
-                    'CV6': { x: 150, y: 200 },
-                    'CV8': { x: 150, y: 180 },
-                    'CV17': { x: 150, y: 120 },
-                    'ST36': { x: 130, y: 250 },
-                    'SP6': { x: 125, y: 280 },
-                    'LI4': { x: 95, y: 155 },
-                    'PC6': { x: 105, y: 140 },
-                    'HT7': { x: 100, y: 150 }
-                },
-                'back': {
-                    'BL23': { x: 130, y: 160 },
-                    'DU4': { x: 150, y: 180 },
-                    'DU14': { x: 150, y: 100 },
-                    'DU20': { x: 150, y: 40 },
-                    'GB20': { x: 135, y: 70 },
-                    'BL15': { x: 130, y: 120 }
-                }
-            };
-            
-            // Clear existing markers
-            document.getElementById('frontProbeMarkers').innerHTML = '';
-            document.getElementById('backProbeMarkers').innerHTML = '';
-            
-            // Add markers for each probe
-            ['A', 'B', 'C', 'D'].forEach(probe => {
-                const location = selectedProtocol.probes[probe].location;
-                
-                // Try to find position (simplified - you can expand this)
-                let position = null;
-                let view = 'front';
-                
-                // Check if location contains back points
-                if (location.includes('BL') || location.includes('DU') || location.includes('GB')) {
-                    view = 'back';
-                }
-                
-                // Get first mentioned point (simplified parsing)
-                const points = Object.keys(view === 'front' ? pointPositions.front : pointPositions.back);
-                for (let point of points) {
-                    if (location.includes(point)) {
-                        position = pointPositions[view][point];
-                        break;
-                    }
-                }
-                
-                // If no specific position found, use default positions
-                if (!position) {
-                    const defaults = {
-                        A: { front: { x: 150, y: 180 }, back: { x: 150, y: 160 } },
-                        B: { front: { x: 130, y: 140 }, back: { x: 170, y: 140 } },
-                        C: { front: { x: 170, y: 140 }, back: { x: 130, y: 180 } },
-                        D: { front: { x: 120, y: 250 }, back: { x: 180, y: 250 } }
-                    };
-                    position = defaults[probe][view];
-                }
-                
-                // Create marker
-                const marker = `
-                    <circle cx="${position.x}" cy="${position.y}" r="12" 
-                            fill="${probeColors[probe]}" stroke="white" stroke-width="2"/>
-                    <text x="${position.x}" y="${position.y + 5}" text-anchor="middle" 
-                          fill="white" font-weight="bold" font-size="14">${probe}</text>
-                `;
-                
-                if (view === 'front') {
-                    document.getElementById('frontProbeMarkers').innerHTML += marker;
-                } else {
-                    document.getElementById('backProbeMarkers').innerHTML += marker;
-                }
-            });
-        }
-        
-        // Action Functions
-        function openProbeGuide() {
-            const protocolParam = selectedProtocol ? '?therapy=' + selectedProtocol.code : '';
-            window.open('therapy-reference.html' + protocolParam, 'ProbeGuide', 'width=1200,height=800');
-        }
-        
-        function viewPatientHistory() {
-            if (selectedPatient) {
-                alert(`Opening treatment history for ${selectedPatient.first_name} ${selectedPatient.last_name}...`);
-                // Implementation would open history modal
-            } else {
-                alert('Please select a patient first');
-            }
-        }
-        
-        function printSetupSheet() {
-            if (selectedPatient && selectedProtocol) {
-                window.print();
-            } else {
-                alert('Please select patient and protocol first');
-            }
-        }
-    </script>
-</body>
-</html>
+            const monthDiff = today.get
