@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Therapy Reference Guide - Clinic Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8f9fa;
+            color: #2c3e50;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .page-title {
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+        
+        .patient-info {
+            background: rgba(255,255,255,0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        
+        .quick-access-bar {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+        
+        .quick-access-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+        
+        .quick-btn {
+            padding: 1rem;
+            background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
+            border: 2px solid transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        
+        .quick-btn:hover {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        .quick-btn-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+        
+        .quick-btn-code {
+            font-size: 0.85rem;
+            opacity: 0.7;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+        }
+        
+        .therapy-display {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+        
+        .therapy-header {
+            border-bottom: 3px solid #10b981;
+            padding-bottom: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .therapy-title {
+            font-size: 1.8rem;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+        
+        .therapy-meta {
+            display: flex;
+            gap: 2rem;
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+        
+        .probe-visual {
+            background: #f9fafb;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .body-diagram {
+            display: flex;
+            justify-content: space-around;
+            margin: 2rem 0;
+        }
+        
+        .body-view {
+            text-align: center;
+            position: relative;
+        }
+        
+        .body-outline {
+            width: 150px;
+            height: 300px;
+            border: 2px solid #d1d5db;
+            border-radius: 20px 20px 10px 10px;
+            position: relative;
+            background: white;
+        }
+        
+        .probe-marker {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 0.9rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        .probe-1 { background: #3b82f6; }
+        .probe-2 { background: #fbbf24; }
+        .probe-3 { background: #10b981; }
+        .probe-4 { background: #6b7280; }
+        .probe-5 { background: #9ca3af; }
+        
+        .probe-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 0 0 1px #e5e7eb;
+            margin-bottom: 2rem;
+        }
+        
+        .probe-table th {
+            background: #10b981;
+            color: white;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 500;
+        }
+        
+        .probe-table td {
+            padding: 1rem;
+            border-top: 1px solid #e5e7eb;
+            background: white;
+        }
+        
+        .probe-table tr:nth-child(even) td {
+            background: #f9fafb;
+        }
+        
+        .cable-indicator {
+            display: inline-block;
+            padding: 0.35rem 0.75rem;
+            border-radius: 20px;
+            font-weight: 500;
+            font-size: 0.85rem;
+        }
+        
+        .cable-blue { background: #dbeafe; color: #1e40af; }
+        .cable-yellow { background: #fef3c7; color: #f59e0b; }
+        .cable-green { background: #d1fae5; color: #065f46; }
+        .cable-grey-black { background: #f3f4f6; color: #374151; }
+        .cable-grey-white { background: #fafafa; color: #6b7280; border: 1px solid #e5e7eb; }
+        
+        .parameters-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .parameter-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+        
+        .parameter-item {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .parameter-label {
+            font-size: 0.8rem;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .parameter-value {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-top: 0.25rem;
+        }
+        
+        .side-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        
+        .timer-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            text-align: center;
+        }
+        
+        .timer-display {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #10b981;
+            margin: 1rem 0;
+        }
+        
+        .timer-controls {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+        
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .btn-start {
+            background: #10b981;
+            color: white;
+        }
+        
+        .btn-pause {
+            background: #f59e0b;
+            color: white;
+        }
+        
+        .btn-stop {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .notes-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+        
+        .notes-title {
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #2c3e50;
+        }
+        
+        .clinical-note {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+        }
+        
+        .warning-note {
+            background: #fee2e2;
+            border-left: 4px solid #ef4444;
+            padding: 1rem;
+            border-radius: 4px;
+        }
+        
+        .print-btn {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: #2c3e50;
+            color: white;
+            padding: 1rem;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+        }
+        
+        .print-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+        
+        @media print {
+            .header, .quick-access-bar, .side-panel, .print-btn {
+                display: none;
+            }
+            
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="page-title">Therapy Probe Configuration Guide</div>
+            <div class="patient-info">
+                Current Patient: <span id="currentPatient">John Smith (JS2001)</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="quick-access-bar">
+            <h3 style="margin-bottom: 1rem; color: #2c3e50;">Quick Access - Frequently Used Therapies</h3>
+            <div class="quick-access-grid">
+                <button class="quick-btn" onclick="loadTherapy('deep-sleep')">
+                    <div class="quick-btn-title">Deep Sleep</div>
+                    <div class="quick-btn-code">Code: 101</div>
+                </button>
+                <button class="quick-btn" onclick="loadTherapy('blood-sugar')">
+                    <div class="quick-btn-title">Blood Sugar</div>
+                    <div class="quick-btn-code">Code: 100</div>
+                </button>
+                <button class="quick-btn" onclick="loadTherapy('heart-health')">
+                    <div class="quick-btn-title">Heart Health</div>
+                    <div class="quick-btn-code">Code: 301</div>
+                </button>
+                <button class="quick-btn" onclick="loadTherapy('joint-mobility')">
+                    <div class="quick-btn-title">Joint Mobility</div>
+                    <div class="quick-btn-code">Code: 403</div>
+                </button>
+                <button class="quick-btn" onclick="loadTherapy('digestive-balance')">
+                    <div class="quick-btn-title">Digestive</div>
+                    <div class="quick-btn-code">Code: 601</div>
+                </button>
+                <button class="quick-btn" onclick="openFullGuide()">
+                    <div class="quick-btn-title">All Therapies</div>
+                    <div class="quick-btn-code">Full Guide</div>
+                </button>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div class="therapy-display">
+                <div class="therapy-header">
+                    <h2 class="therapy-title" id="therapyTitle">Deep Sleep Renewal Therapy</h2>
+                    <div class="therapy-meta">
+                        <span>Protocol Code: <strong id="therapyCode">101</strong></span>
+                        <span>Category: <strong id="therapyCategory">Sleep & Stress</strong></span>
+                        <span>Duration: <strong id="therapyDuration">30-40 min</strong></span>
+                    </div>
+                </div>
+                
+                <div class="probe-visual">
+                    <h3 style="margin-bottom: 1rem; color: #2c3e50;">Visual Probe Placement</h3>
+                    <div class="body-diagram">
+                        <div class="body-view">
+                            <div style="margin-bottom: 0.5rem; font-weight: 600;">Front View</div>
+                            <div class="body-outline">
+                                <div class="probe-marker probe-4" style="top: 30px; left: 20px;">4</div>
+                                <div class="probe-marker probe-5" style="top: 30px; right: 20px;">5</div>
+                            </div>
+                        </div>
+                        <div class="body-view">
+                            <div style="margin-bottom: 0.5rem; font-weight: 600;">Back View</div>
+                            <div class="body-outline">
+                                <div class="probe-marker probe-1" style="bottom: 100px; left: 60px;">1</div>
+                                <div class="probe-marker probe-2" style="top: 120px; left: 60px;">2</div>
+                                <div class="probe-marker probe-3" style="top: 40px; left: 60px;">3</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <h3 style="margin-bottom: 1rem; color: #2c3e50;">Probe Configuration Details</h3>
+                <table class="probe-table">
+                    <thead>
+                        <tr>
+                            <th>Probe #</th>
+                            <th>Cable Colour</th>
+                            <th>Placement Location</th>
+                            <th>Check</th>
+                        </tr>
+                    </thead>
+                    <tbody id="probeTableBody">
+                        <tr>
+                            <td><strong>Probe 1</strong></td>
+                            <td><span class="cable-indicator cable-blue">Blue Cable</span></td>
+                            <td>Lower back - centre of spine at waist level</td>
+                            <td><input type="checkbox" onchange="checkProbe(1)"></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Probe 2</strong></td>
+                            <td><span class="cable-indicator cable-yellow">Yellow Cable</span></td>
+                            <td>Upper back - between shoulder blades</td>
+                            <td><input type="checkbox" onchange="checkProbe(2)"></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Probe 3</strong></td>
+                            <td><span class="cable-indicator cable-green">Green Cable</span></td>
+                            <td>Back of neck - base of skull</td>
+                            <td><input type="checkbox" onchange="checkProbe(3)"></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Probe 4</strong></td>
+                            <td><span class="cable-indicator cable-grey-black">Grey/Black Cable</span></td>
+                            <td>Left temple</td>
+                            <td><input type="checkbox" onchange="checkProbe(4)"></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Probe 5</strong></td>
+                            <td><span class="cable-indicator cable-grey-white">Grey/White Cable</span></td>
+                            <td>Right temple</td>
+                            <td><input type="checkbox" onchange="checkProbe(5)"></td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div class="parameters-card">
+                    <h3 style="margin-bottom: 1rem; color: #2c3e50;">Treatment Parameters</h3>
+                    <div class="parameter-grid">
+                        <div class="parameter-item">
+                            <div class="parameter-label">Duration</div>
+                            <div class="parameter-value" id="paramDuration">30-40 min</div>
+                        </div>
+                        <div class="parameter-item">
+                            <div class="parameter-label">Frequency</div>
+                            <div class="parameter-value" id="paramFrequency">Daily</div>
+                        </div>
+                        <div class="parameter-item">
+                            <div class="parameter-label">Intensity</div>
+                            <div class="parameter-value" id="paramIntensity">2-4</div>
+                        </div>
+                        <div class="parameter-item">
+                            <div class="parameter-label">Temperature</div>
+                            <div class="parameter-value" id="paramTemperature">Low</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="side-panel">
+                <div class="timer-card">
+                    <h3 style="margin-bottom: 1rem;">Session Timer</h3>
+                    <div class="timer-display" id="timerDisplay">00:00</div>
+                    <div class="timer-controls">
+                        <button class="btn btn-start" onclick="startTimer()">Start</button>
+                        <button class="btn btn-pause" onclick="pauseTimer()">Pause</button>
+                        <button class="btn btn-stop" onclick="stopTimer()">Stop</button>
+                    </div>
+                </div>
+                
+                <div class="notes-card">
+                    <h3 class="notes-title">Clinical Notes</h3>
+                    <div class="clinical-note" id="clinicalNote">
+                        Best performed 1-2 hours before bedtime. Patient should be in a quiet, comfortable environment.
+                    </div>
+                    <div class="warning-note" id="warningNote" style="display: none;">
+                        Caution: Monitor patient for any discomfort during first session.
+                    </div>
+                </div>
+                
+                <div class="notes-card">
+                    <h3 class="notes-title">Probe Checklist</h3>
+                    <div id="probeChecklist">
+                        <label style="display: block; margin: 0.5rem 0;">
+                            <input type="checkbox"> All cables connected
+                        </label>
+                        <label style="display: block; margin: 0.5rem 0;">
+                            <input type="checkbox"> Probes secured properly
+                        </label>
+                        <label style="display: block; margin: 0.5rem 0;">
+                            <input type="checkbox"> Patient comfortable
+                        </label>
+                        <label style="display: block; margin: 0.5rem 0;">
+                            <input type="checkbox"> Parameters set correctly
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <button class="print-btn" onclick="window.print()" title="Print Configuration">
+        🖨️
+    </button>
+    
+    <script>
+        // Timer functionality
+        let timerInterval;
+        let seconds = 0;
+        let isPaused = false;
+        
+        function startTimer() {
+            if (!timerInterval) {
+                timerInterval = setInterval(updateTimer, 1000);
+            }
+            isPaused = false;
+        }
+        
+        function pauseTimer() {
+            isPaused = true;
+            clearInterval(timerInterval);
+            timerInterval = null;
+        }
+        
+        function stopTimer() {
+            clearInterval(timerInterval);
+            timerInterval = null;
+            seconds = 0;
+            document.getElementById('timerDisplay').textContent = '00:00';
+        }
+        
+        function updateTimer() {
+            if (!isPaused) {
+                seconds++;
+                const minutes = Math.floor(seconds / 60);
+                const secs = seconds % 60;
+                document.getElementById('timerDisplay').textContent = 
+                    `${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+            }
+        }
+        
+        // Therapy loading
+        const therapyData = {
+            'deep-sleep': {
+                title: 'Deep Sleep Renewal Therapy',
+                code: '101',
+                category: 'Sleep & Stress',
+                duration: '30-40 min',
+                frequency: 'Daily',
+                intensity: '2-4',
+                temperature: 'Low',
+                probes: [
+                    { cable: 'Blue', location: 'Lower back - centre of spine at waist level' },
+                    { cable: 'Yellow', location: 'Upper back - between shoulder blades' },
+                    { cable: 'Green', location: 'Back of neck - base of skull' },
+                    { cable: 'Grey/Black', location: 'Left temple' },
+                    { cable: 'Grey/White', location: 'Right temple' }
+                ],
+                note: 'Best performed 1-2 hours before bedtime. Patient should be in a quiet, comfortable environment.'
+            },
+            'blood-sugar': {
+                title: 'Blood Sugar Balance Therapy',
+                code: '100',
+                category: 'Metabolic Health',
+                duration: '30-40 min',
+                frequency: 'Twice daily',
+                intensity: '3-6',
+                temperature: 'Low-Medium',
+                probes: [
+                    { cable: 'Blue', location: 'Lower back - kidney points (both sides)' },
+                    { cable: 'Yellow', location: 'Left side abdomen - liver area' },
+                    { cable: 'Green', location: 'Centre abdomen - navel area' },
+                    { cable: 'Grey/Black', location: 'Below knee - left leg (AM) / Left foot arch (PM)' },
+                    { cable: 'Grey/White', location: 'Below knee - right leg (AM) / Right foot arch (PM)' }
+                ],
+                note: 'Monitor blood glucose levels before and after treatment. Best before meals.',
+                warning: 'Do not replace prescribed diabetes medications without medical consultation.'
+            }
+            // Add more therapy data as needed
+        };
+        
+        function loadTherapy(therapyId) {
+            const therapy = therapyData[therapyId];
+            if (!therapy) return;
+            
+            // Update header
+            document.getElementById('therapyTitle').textContent = therapy.title;
+            document.getElementById('therapyCode').textContent = therapy.code;
+            document.getElementById('therapyCategory').textContent = therapy.category;
+            document.getElementById('therapyDuration').textContent = therapy.duration;
+            
+            // Update parameters
+            document.getElementById('paramDuration').textContent = therapy.duration;
+            document.getElementById('paramFrequency').textContent = therapy.frequency;
+            document.getElementById('paramIntensity').textContent = therapy.intensity;
+            document.getElementById('paramTemperature').textContent = therapy.temperature;
+            
+            // Update probe table
+            const tbody = document.getElementById('probeTableBody');
+            tbody.innerHTML = '';
+            therapy.probes.forEach((probe, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>Probe ${index + 1}</strong></td>
+                    <td><span class="cable-indicator cable-${getCableClass(probe.cable)}">${probe.cable} Cable</span></td>
+                    <td>${probe.location}</td>
+                    <td><input type="checkbox" onchange="checkProbe(${index + 1})"></td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            // Update notes
+            document.getElementById('clinicalNote').textContent = therapy.note;
+            const warningNote = document.getElementById('warningNote');
+            if (therapy.warning) {
+                warningNote.textContent = therapy.warning;
+                warningNote.style.display = 'block';
+            } else {
+                warningNote.style.display = 'none';
+            }
+            
+            // Reset checkboxes
+            document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+        }
+        
+        function getCableClass(cable) {
+            const mapping = {
+                'Blue': 'blue',
+                'Yellow': 'yellow',
+                'Green': 'green',
+                'Grey/Black': 'grey-black',
+                'Grey/White': 'grey-white'
+            };
+            return mapping[cable] || 'blue';
+        }
+        
+        function checkProbe(probeNumber) {
+            console.log(`Probe ${probeNumber} checked`);
+            // Could add validation logic here
+        }
+        
+        function openFullGuide() {
+            // Open the complete therapy guide in a new window
+            window.open('celloxen-complete-guide.html', '_blank');
+        }
+        
+        // Initialize with current patient data (would come from session/database)
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load patient info from session
+            const patientInfo = sessionStorage.getItem('currentPatient');
+            if (patientInfo) {
+                const patient = JSON.parse(patientInfo);
+                document.getElementById('currentPatient').textContent = 
+                    `${patient.first_name} ${patient.last_name} (${patient.patient_id})`;
+            }
+        });
+    </script>
+</body>
+</html>
