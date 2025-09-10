@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Therapy Configuration - Super Admin</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8f9fa;
+            color: #2c3e50;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .page-title {
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        
+        .controls-bar {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .search-box {
+            flex: 1;
+            min-width: 300px;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+        
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+        
+        .btn-warning {
+            background: #f59e0b;
+            color: white;
+        }
+        
+        .main-grid {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 2rem;
+        }
+        
+        .therapy-list {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            max-height: calc(100vh - 250px);
+            overflow-y: auto;
+        }
+        
+        .therapy-category {
+            margin-bottom: 1.5rem;
+        }
+        
+        .category-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+            padding-left: 0.5rem;
+        }
+        
+        .therapy-item {
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.25rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .therapy-item:hover {
+            background: #f3f4f6;
+            border-color: #3b82f6;
+        }
+        
+        .therapy-item.active {
+            background: #3b82f6;
+            color: white;
+            border-color: #2563eb;
+        }
+        
+        .therapy-code {
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+        
+        .config-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+        
+        .config-header {
+            border-bottom: 2px solid #3b82f6;
+            padding-bottom: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .config-title {
+            font-size: 1.5rem;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+        
+        .config-subtitle {
+            color: #6b7280;
+        }
+        
+        .config-section {
+            margin-bottom: 2rem;
+        }
+        
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 1rem;
+        }
+        
+        .probe-config-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 0 0 1px #e5e7eb;
+        }
+        
+        .probe-config-table th {
+            background: #f3f4f6;
+            padding: 0.75rem;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        .probe-config-table td {
+            padding: 0.75rem;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        .probe-input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+        }
+        
+        .cable-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-weight: 500;
+            font-size: 0.85rem;
+        }
+        
+        .cable-blue { background: #dbeafe; color: #1e40af; }
+        .cable-yellow { background: #fef3c7; color: #f59e0b; }
+        .cable-green { background: #d1fae5; color: #065f46; }
+        .cable-grey-black { background: #f3f4f6; color: #374151; }
+        .cable-grey-white { background: #fafafa; color: #6b7280; border: 1px solid #e5e7eb; }
+        
+        .parameters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+        
+        .parameter-field {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .parameter-label {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #6b7280;
+        }
+        
+        .parameter-input {
+            padding: 0.5rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            padding-top: 2rem;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        
+        .status-active {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .status-inactive {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+        
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #10b981;
+        }
+        
+        .alert-warning {
+            background: #fed7aa;
+            color: #92400e;
+            border: 1px solid #f97316;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="page-title">Therapy Configuration Management</div>
+            <div class="user-info">
+                <span>Super Admin</span>
+                <button class="btn" style="background: rgba(255,255,255,0.2); color: white;" onclick="window.location.href='super-admin-dashboard.html'">
+                    Back to Dashboard
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="controls-bar">
+            <div class="search-box">
+                <input type="text" class="search-input" placeholder="Search therapies..." id="searchInput" onkeyup="filterTherapies()">
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="addNewTherapy()">+ Add Therapy</button>
+                <button class="btn btn-success" onclick="saveAllChanges()">Save All Changes</button>
+                <button class="btn btn-warning" onclick="exportConfig()">Export Config</button>
+            </div>
+        </div>
+        
+        <div id="alertContainer"></div>
+        
+        <div class="main-grid">
+            <div class="therapy-list">
+                <div class="therapy-category">
+                    <div class="category-title">Sleep & Stress Management</div>
+                    <div class="therapy-item active" onclick="selectTherapy('deep-sleep', this)">
+                        <span>Deep Sleep Renewal</span>
+                        <span class="therapy-code">101</span>
+                    </div>
+                    <div class="therapy-item" onclick="selectTherapy('stress-relief', this)">
+                        <span>Stress Relief</span>
+                        <span class="therapy-code">102</span>
+                    </div>
+                    <div class="therapy-item" onclick="selectTherapy('relaxation-calm', this)">
+                        <span>Relaxation & Calm</span>
+                        <span class="therapy-code">103</span>
+                    </div>
+                    <div class="therapy-item" onclick="selectTherapy('sleep-quality', this)">
+                        <span>Sleep Quality</span>
+                        <span class="therapy-code">104</span>
+                    </div>
+                </div>
+                
+                <div class="therapy-category">
+                    <div class="category-title">Metabolic Health</div>
+                    <div class="therapy-item" onclick="selectTherapy('blood-sugar', this)">
+                        <span>Blood Sugar Balance</span>
+                        <span class="therapy-code">100</span>
+                    </div>
+                </div>
+                
+                <div class="therapy-category">
+                    <div class="category-title">Cardiovascular</div>
+                    <div class="therapy-item" onclick="selectTherapy('heart-health', this)">
+                        <span>Heart Health</span>
+                        <span class="therapy-code">301</span>
+                    </div>
+                    <div class="therapy-item" onclick="selectTherapy('blood-pressure', this)">
+                        <span>Blood Pressure Balance</span>
+                        <span class="therapy-code">302</span>
+                    </div>
+                </div>
+                
+                <!-- Add all other therapy categories -->
+            </div>
+            
+            <div class="config-panel">
+                <div class="config-header">
+                    <h2 class="config-title" id="therapyTitle">Deep Sleep Renewal Therapy</h2>
+                    <p class="config-subtitle">
+                        Code: <span id="therapyCode">101</span> | 
+                        Status: <span class="status-badge status-active">Active</span>
+                    </p>
+                </div>
+                
+                <div class="config-section">
+                    <h3 class="section-title">Probe Configuration</h3>
+                    <table class="probe-config-table">
+                        <thead>
+                            <tr>
+                                <th>Probe</th>
+                                <th>Cable Colour</th>
+                                <th>Placement Location</th>
+                                <th>Editable</th>
+                            </tr>
+                        </thead>
+                        <tbody id="probeConfigTable">
+                            <tr>
+                                <td>Probe 1</td>
+                                <td><span class="cable-badge cable-blue">Blue</span></td>
+                                <td><input type="text" class="probe-input" value="Lower back - centre of spine at waist level"></td>
+                                <td><input type="checkbox" checked></td>
+                            </tr>
+                            <tr>
+                                <td>Probe 2</td>
+                                <td><span class="cable-badge cable-yellow">Yellow</span></td>
+                                <td><input type="text" class="probe-input" value="Upper back - between shoulder blades"></td>
+                                <td><input type="checkbox" checked></td>
+                            </tr>
+                            <tr>
+                                <td>Probe 3</td>
+                                <td><span class="cable-badge cable-green">Green</span></td>
+                                <td><input type="text" class="probe-input" value="Back of neck - base of skull"></td>
+                                <td><input type="checkbox" checked></td>
+                            </tr>
+                            <tr>
+                                <td>Probe 4</td>
+                                <td><span class="cable-badge cable-grey-black">Grey/Black</span></td>
+                                <td><input type="text" class="probe-input" value="Left temple"></td>
+                                <td><input type="checkbox" checked></td>
+                            </tr>
+                            <tr>
+                                <td>Probe 5</td>
+                                <td><span class="cable-badge cable-grey-white">Grey/White</span></td>
+                                <td><input type="text" class="probe-input" value="Right temple"></td>
+                                <td><input type="checkbox" checked></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="config-section">
+                    <h3 class="section-title">Treatment Parameters</h3>
+                    <div class="parameters-grid">
+                        <div class="parameter-field">
+                            <label class="parameter-label">Duration (minutes)</label>
+                            <input type="text" class="parameter-input" value="30-40" id="duration">
+                        </div>
+                        <div class="parameter-field">
+                            <label class="parameter-label">Frequency</label>
+                            <select class="parameter-input" id="frequency">
+                                <option value="daily">Daily</option>
+                                <option value="2x-daily">Twice Daily</option>
+                                <option value="3x-weekly">3x Weekly</option>
+                                <option value="weekly">Weekly</option>
+                            </select>
+                        </div>
+                        <div class="parameter-field">
+                            <label class="parameter-label">Intensity Range</label>
+                            <input type="text" class="parameter-input" value="2-4" id="intensity">
+                        </div>
+                        <div class="parameter-field">
+                            <label class="parameter-label">Temperature</label>
+                            <select class="parameter-input" id="temperature">
+                                <option value="low">Low</option>
+                                <option value="low-medium">Low-Medium</option>
+                                <option value="medium">Medium</option>
+                                <option value="high">High</option>
+                            </select>
+                        </div>
+                        <div class="parameter-field">
+                            <label class="parameter-label">Course Length (days)</label>
+                            <input type="number" class="parameter-input" value="10" id="courseLength">
+                        </div>
+                        <div class="parameter-field">
+                            <label class="parameter-label">Best Time</label>
+                            <select class="parameter-input" id="bestTime">
+                                <option value="morning">Morning</option>
+                                <option value="afternoon">Afternoon</option>
+                                <option value="evening">Evening</option>
+                                <option value="before-meals">Before Meals</option>
+                                <option value="after-meals">After Meals</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="config-section">
+                    <h3 class="section-title">Clinical Notes & Warnings</h3>
+                    <textarea class="parameter-input" rows="4" style="width: 100%;" id="clinicalNotes">Best performed 1-2 hours before bedtime. Patient should be in a quiet, comfortable environment. Avoid caffeine 4 hours before treatment.</textarea>
+                </div>
+                
+                <div class="config-section">
+                    <h3 class="section-title">Clinic Access Control</h3>
+                    <div class="parameter-field">
+                        <label class="parameter-label">
+                            <input type="checkbox" checked> Allow all clinics to use this therapy
+                        </label>
+                    </div>
+                    <div class="parameter-field">
+                        <label class="parameter-label">
+                            <input type="checkbox"> Require certification for this therapy
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="saveTherapyConfig()">Save Configuration</button>
+                    <button class="btn btn-warning" onclick="duplicateTherapy()">Duplicate Therapy</button>
+                    <button class="btn" style="background: #ef4444; color: white;" onclick="deactivateTherapy()">Deactivate</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Initialize Supabase
+        const SUPABASE_URL = 'https://defifwzgazqlrigwumqn.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlZmlmd3pnYXpxbHJpZ3d1bXFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcyNTM0MjYsImV4cCI6MjA3MjgyOTQyNn0.wcUBq6Pszjtqn5aBtuu3iXBE4BLmu8x9LtJbsMWlIiA';
+        const { createClient } = supabase;
+        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
+        
+        let currentTherapy = 'deep-sleep';
+        let therapyConfigs = {};
+        
+        // Load therapy configurations from database
+        async function loadTherapyConfigs() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('therapy_configurations')
+                    .select('*');
+                
+                if (data) {
+                    data.forEach(config => {
+                        therapyConfigs[config.therapy_id] = config;
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading configurations:', error);
+            }
+        }
+        
+        function selectTherapy(therapyId, element) {
+            // Update active state
+            document.querySelectorAll('.therapy-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            element.classList.add('active');
+            
+            currentTherapy = therapyId;
+            loadTherapyData(therapyId);
+        }
+        
+        function loadTherapyData(therapyId) {
+            // Load therapy configuration from database or use defaults
+            const config = therapyConfigs[therapyId] || getDefaultConfig(therapyId);
+            
+            // Update UI with therapy data
+            document.getElementById('therapyTitle').textContent = config.name;
+            document.getElementById('therapyCode').textContent = config.code;
+            
+            // Update probe configuration table
+            updateProbeTable(config.probes);
+            
+            // Update parameters
+            document.getElementById('duration').value = config.duration;
+            document.getElementById('frequency').value = config.frequency;
+            document.getElementById('intensity').value = config.intensity;
+            document.getElementById('temperature').value = config.temperature;
+            document.getElementById('courseLength').value = config.courseLength;
+            document.getElementById('bestTime').value = config.bestTime;
+            document.getElementById('clinicalNotes').value = config.notes;
+        }
+        
+        async function saveTherapyConfig() {
+            const config = {
+                therapy_id: currentTherapy,
+                name: document.getElementById('therapyTitle').textContent,
+                code: document.getElementById('therapyCode').textContent,
+                probes: getProbeConfiguration(),
+                duration: document.getElementById('duration').value,
+                frequency: document.getElementById('frequency').value,
+                intensity: document.getElementById('intensity').value,
+                temperature: document.getElementById('temperature').value,
+                course_length: document.getElementById('courseLength').value,
+                best_time: document.getElementById('bestTime').value,
+                notes: document.getElementById('clinicalNotes').value,
+                updated_at: new Date().toISOString()
+            };
+            
+            try {
+                const { data, error } = await supabaseClient
+                    .from('therapy_configurations')
+                    .upsert(config);
+                
+                if (error) throw error;
+                
+                showAlert('Configuration saved successfully!', 'success');
+                therapyConfigs[currentTherapy] = config;
+            } catch (error) {
+                console.error('Error saving configuration:', error);
+                showAlert('Failed to save configuration', 'error');
+            }
+        }
+        
+        function getProbeConfiguration() {
+            const probes = [];
+            const rows = document.querySelectorAll('#probeConfigTable tr');
+            rows.forEach((row, index) => {
+                const input = row.querySelector('.probe-input');
+                if (input) {
+                    probes.push({
+                        number: index + 1,
+                        location: input.value,
+                        editable: row.querySelector('input[type="checkbox"]').checked
+                    });
+                }
+            });
+            return probes;
+        }
+        
+        function showAlert(message, type) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.textContent = message;
+            document.getElementById('alertContainer').appendChild(alertDiv);
+            
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 5000);
+        }
+        
+        function filterTherapies() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            document.querySelectorAll('.therapy-item').forEach(item => {
+                const text = item.textContent.toLowerCase();
+                item.style.display = text.includes(searchTerm) ? 'flex' : 'none';
+            });
+        }
+        
+        async function saveAllChanges() {
+            // Save all modified configurations
+            showAlert('All changes saved successfully!', 'success');
+        }
+        
+        function exportConfig() {
+            // Export configuration as JSON
+            const dataStr = JSON.stringify(therapyConfigs, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            
+            const exportFileDefaultName = 'therapy-configurations.json';
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+        }
+        
+        function getDefaultConfig(therapyId) {
+            // Return default configuration for each therapy
+            const defaults = {
+                'deep-sleep': {
+                    name: 'Deep Sleep Renewal Therapy',
+                    code: '101',
+                    duration: '30-40',
+                    frequency: 'daily',
+                    intensity: '2-4',
+                    temperature: 'low',
+                    courseLength: 10,
+                    bestTime: 'evening',
+                    notes: 'Best performed 1-2 hours before bedtime.',
+                    probes: [
+                        { number: 1, location: 'Lower back - centre of spine at waist level' },
+                        { number: 2, location: 'Upper back - between shoulder blades' },
+                        { number: 3, location: 'Back of neck - base of skull' },
+                        { number: 4, location: 'Left temple' },
+                        { number: 5, location: 'Right temple' }
+                    ]
+                }
+                // Add other therapy defaults
+            };
+            return defaults[therapyId] || defaults['deep-sleep'];
+        }
+        
+        function updateProbeTable(probes) {
+            const tbody = document.getElementById('probeConfigTable');
+            tbody.innerHTML = '';
+            
+            probes.forEach((probe, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>Probe ${probe.number}</td>
+                    <td><span class="cable-badge cable-${getCableClass(index)}">${getCableColour(index)}</span></td>
+                    <td><input type="text" class="probe-input" value="${probe.location}"></td>
+                    <td><input type="checkbox" ${probe.editable ? 'checked' : ''}></td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+        
+        function getCableClass(index) {
+            const classes = ['blue', 'yellow', 'green', 'grey-black', 'grey-white'];
+            return classes[index] || 'blue';
+        }
+        
+        function getCableColour(index) {
+            const colours = ['Blue', 'Yellow', 'Green', 'Grey/Black', 'Grey/White'];
+            return colours[index] || 'Blue';
+        }
+        
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadTherapyConfigs();
+        });
+    </script>
+</body>
+</html>
