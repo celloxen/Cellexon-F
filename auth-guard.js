@@ -9,7 +9,7 @@ class CelloxenAuthGuard {
         this.sessionTimeout = 2 * 60 * 60 * 1000; // 2 hours in milliseconds
         this.warningTime = 10 * 60 * 1000; // 10 minutes before logout warning
         
-        // Define page access rules
+        // Define page access rules - FIXED TO ACCEPT 'clinic' as userType
         this.pageAccessRules = {
             // Super Admin Only Pages
             'super-admin-dashboard.html': ['super_admin'],
@@ -20,25 +20,26 @@ class CelloxenAuthGuard {
             'user-management.html': ['super_admin'],
             'system-reports.html': ['super_admin'],
             'system-logs.html': ['super_admin'],
-            'therapy-configuration.html': ['super_admin'],  // NEW - Therapy configuration
+            'therapy-configuration.html': ['super_admin'],
             
-            // Clinic Admin Pages (Super Admin also has access)
-            'clinic-dashboard.html': ['super_admin', 'clinic_admin'],
-            'patient-management.html': ['super_admin', 'clinic_admin'],
-            'health-assessment.html': ['super_admin', 'clinic_admin'],
-            'iris-analysis.html': ['super_admin', 'clinic_admin'],
-            'treatment-interface.html': ['super_admin', 'clinic_admin'],
-            'vital-signs.html': ['super_admin', 'clinic_admin'],
-            'therapy-reference.html': ['super_admin', 'clinic_admin'],  // NEW - Therapy reference
-            'celloxen-complete-guide.html': ['super_admin', 'clinic_admin'],  // NEW - Complete guide
+            // Clinic Admin Pages - NOW ACCEPTS 'clinic' userType
+            'clinic-dashboard.html': ['super_admin', 'clinic_admin', 'clinic'],
+            'patient-management.html': ['super_admin', 'clinic_admin', 'clinic'],
+            'health-assessment.html': ['super_admin', 'clinic_admin', 'clinic'],
+            'iris-analysis.html': ['super_admin', 'clinic_admin', 'clinic'],
+            'treatment-interface.html': ['super_admin', 'clinic_admin', 'clinic'],
+            'vital-signs.html': ['super_admin', 'clinic_admin', 'clinic'],
+            'therapy-reference.html': ['super_admin', 'clinic_admin', 'clinic'],
+            'celloxen-complete-guide.html': ['super_admin', 'clinic_admin', 'clinic'],
             
             // Public Pages (no authentication required)
             'unified-login.html': ['public'],
-            'index.html': ['public']
+            'index.html': ['public'],
+            'test-login.html': ['public']
         };
         
         // Don't run auth guard on login page
-        if (this.currentPath === 'unified-login.html' || this.currentPath === '') {
+        if (this.currentPath === 'unified-login.html' || this.currentPath === 'test-login.html' || this.currentPath === '') {
             return;
         }
         
@@ -151,6 +152,7 @@ class CelloxenAuthGuard {
             // Check user permissions for current page
             if (!this.hasPageAccess(authData)) {
                 console.log('Celloxen Auth: Insufficient permissions for this page');
+                console.log('User type:', authData.userType, 'Page:', this.currentPath);
                 this.showAccessDenied();
                 return false;
             }
@@ -177,13 +179,15 @@ class CelloxenAuthGuard {
     // Get authentication data from localStorage
     getAuthData() {
         try {
-            const authDataStr = localStorage.getItem('celloxen_auth');
+            // Check both localStorage and sessionStorage
+            const authDataStr = localStorage.getItem('celloxen_auth') || sessionStorage.getItem('celloxen_auth');
             if (!authDataStr) return null;
             
             return JSON.parse(authDataStr);
         } catch (error) {
             console.error('Celloxen Auth: Error parsing auth data:', error);
             localStorage.removeItem('celloxen_auth');
+            sessionStorage.removeItem('celloxen_auth');
             return null;
         }
     }
@@ -217,7 +221,7 @@ class CelloxenAuthGuard {
             return true;
         }
         
-        // Check if user's role has access
+        // Check if user's role has access - FIXED TO HANDLE 'clinic' userType
         return allowedRoles.includes(userType);
     }
     
@@ -234,7 +238,8 @@ class CelloxenAuthGuard {
         };
         
         // Store in session storage for page-to-page context
-        if (authData.userType === 'clinic_admin') {
+        // Handle both 'clinic' and 'clinic_admin' userTypes
+        if (authData.userType === 'clinic_admin' || authData.userType === 'clinic') {
             sessionStorage.setItem('currentClinicId', authData.clinicId);
             sessionStorage.setItem('viewMode', 'clinic_admin');
         } else if (authData.userType === 'super_admin') {
@@ -248,6 +253,7 @@ class CelloxenAuthGuard {
         if (authData) {
             authData.lastActivity = new Date().toISOString();
             localStorage.setItem('celloxen_auth', JSON.stringify(authData));
+            sessionStorage.setItem('celloxen_auth', JSON.stringify(authData));
         }
     }
     
@@ -410,7 +416,7 @@ class CelloxenAuthGuard {
     // Static method to get current user info
     static getCurrentUser() {
         try {
-            const authDataStr = localStorage.getItem('celloxen_auth');
+            const authDataStr = localStorage.getItem('celloxen_auth') || sessionStorage.getItem('celloxen_auth');
             return authDataStr ? JSON.parse(authDataStr) : null;
         } catch {
             return null;
@@ -438,7 +444,8 @@ class CelloxenAuthGuard {
     // Static method to check if user is clinic admin
     static isClinicAdmin() {
         const authData = CelloxenAuthGuard.getCurrentUser();
-        return authData && authData.userType === 'clinic_admin';
+        // Check for both 'clinic_admin' and 'clinic' userTypes
+        return authData && (authData.userType === 'clinic_admin' || authData.userType === 'clinic');
     }
     
     // Static method to get current clinic ID (for clinic admins)
@@ -452,7 +459,7 @@ class CelloxenAuthGuard {
 document.addEventListener('DOMContentLoaded', function() {
     // Only initialize on protected pages (not login or index page)
     const currentPath = window.location.pathname.split('/').pop();
-    if (currentPath !== 'unified-login.html' && currentPath !== 'index.html' && currentPath !== '') {
+    if (currentPath !== 'unified-login.html' && currentPath !== 'index.html' && currentPath !== 'test-login.html' && currentPath !== '') {
         window.celloxenAuth = new CelloxenAuthGuard();
     }
 });
