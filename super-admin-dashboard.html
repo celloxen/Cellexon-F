@@ -297,7 +297,7 @@
                 <div class="stat-subtitle">Currently Running</div>
             </div>
             <div class="stat-card">
-                <div class="stat-number" id="monthlyRevenue">0</div>
+                <div class="stat-number" id="monthlyRevenue">£0</div>
                 <div class="stat-label">Monthly Revenue</div>
                 <div class="stat-subtitle">This Month</div>
             </div>
@@ -313,18 +313,18 @@
                 <div class="module-description">Register new clinics and manage existing clinic accounts</div>
             </div>
             
-            <div class="module-card" onclick="navigateTo('leads-management.html')">
+            <div class="module-card" onclick="navigateTo('clinics-overview.html')">
                 <span class="module-status">ACTIVE</span>
                 <div class="module-icon">📊</div>
-                <div class="module-title">Leads Management</div>
-                <div class="module-description">View and manage marketing leads and conversions</div>
+                <div class="module-title">Clinics Overview</div>
+                <div class="module-description">View all registered clinics and their details</div>
             </div>
             
-            <div class="module-card" onclick="navigateTo('clinics-overview.html">
+            <div class="module-card" onclick="navigateTo('leads-management.html')">
                 <span class="module-status">ACTIVE</span>
                 <div class="module-icon">📈</div>
-                <div class="module-title">Clinic Overview</div>
-                <div class="module-description">View all registered clinics and their statistics</div>
+                <div class="module-title">Leads Management</div>
+                <div class="module-description">View and manage marketing leads and conversions</div>
             </div>
         </div>
 
@@ -357,6 +357,13 @@
                 <div class="module-icon">🔍</div>
                 <div class="module-title">System Logs</div>
                 <div class="module-description">View authentication and activity logs</div>
+            </div>
+            
+            <div class="module-card" onclick="navigateTo('financial-overview.html')">
+                <span class="module-status">ACTIVE</span>
+                <div class="module-icon">💰</div>
+                <div class="module-title">Financial Overview</div>
+                <div class="module-description">Manage invoices, payments and subscriptions</div>
             </div>
             
             <div class="module-card" onclick="navigateTo('therapy-configuration.html')">
@@ -471,7 +478,8 @@
                 document.getElementById('activeSessions').textContent = sessionsCount || 0;
                 
                 // Calculate monthly revenue (placeholder - implement based on your revenue model)
-                document.getElementById('monthlyRevenue').textContent = '£0';
+                const monthlyRevenue = (clinicsCount || 0) * 299; // Example: £299 per clinic
+                document.getElementById('monthlyRevenue').textContent = `£${monthlyRevenue}`;
                 
             } catch (error) {
                 console.error('Error loading dashboard data:', error);
@@ -486,37 +494,6 @@
             // Store super admin context
             sessionStorage.setItem('viewMode', 'super_admin');
             window.location.href = page;
-        };
-        
-        // Show clinic overview (inline function since it doesn't have a separate page)
-        window.showClinicOverview = async function() {
-            try {
-                showLoading(true);
-                
-                // Fetch all clinics data
-                const { data: clinics, error } = await supabase
-                    .from('clinics')
-                    .select('*')
-                    .order('created_at', { ascending: false });
-                
-                if (error) throw error;
-                
-                // For now, show in alert - you can create a modal later
-                let overview = 'CLINIC OVERVIEW\n\n';
-                clinics.forEach(clinic => {
-                    overview += `${clinic.clinic_name} (${clinic.clinic_code})\n`;
-                    overview += `Owner: ${clinic.owner_name}\n`;
-                    overview += `Status: ${clinic.is_active ? 'Active' : 'Inactive'}\n\n`;
-                });
-                
-                alert(overview);
-                
-            } catch (error) {
-                console.error('Error loading clinic overview:', error);
-                showAlert('Error loading clinic overview');
-            } finally {
-                showLoading(false);
-            }
         };
         
         // Logout function
