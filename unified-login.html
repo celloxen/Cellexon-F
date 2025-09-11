@@ -313,9 +313,61 @@
             loginBtnText.innerHTML = '<span class="loading"></span>Signing In...';
             
             try {
-                // Determine user type and authenticate
-                const userType = await determineUserType(username);
-                const authResult = await authenticateUser(username, password, userType);
+                // First, check super_admin_users table
+                let userType = null;
+                let authResult = null;
+                
+                // Check super admin table first
+                const { data: superAdminData, error: superAdminError } = await supabase
+                    .from('super_admin_users')
+                    .select('*')
+                    .eq('username', username)
+                    .eq('password_hash', password)
+                    .single();
+                
+                if (superAdminData && !superAdminError) {
+                    // Found in super admin table
+                    userType = 'super_admin';
+                    authResult = {
+                        success: true,
+                        user: superAdminData,
+                        permissions: ['all'],
+                        message: 'Super admin login successful'
+                    };
+                    
+                    // Update last login
+                    await supabase
+                        .from('super_admin_users')
+                        .update({ last_login: new Date().toISOString() })
+                        .eq('username', username);
+                } else {
+                    // Not a super admin, check clinics table
+                    const { data: clinicData, error: clinicError } = await supabase
+                        .from('clinics')
+                        .select('*')
+                        .eq('username', username)
+                        .eq('password_hash', password)
+                        .single();
+                    
+                    if (clinicData && !clinicError) {
+                        // Found in clinics table
+                        userType = 'clinic';
+                        authResult = {
+                            success: true,
+                            user: clinicData,
+                            clinicId: clinicData.id,
+                            clinicCode: clinicData.clinic_code,
+                            permissions: ['clinic'],
+                            message: 'Clinic login successful'
+                        };
+                    } else {
+                        // Not found in either table
+                        authResult = {
+                            success: false,
+                            message: 'Invalid username or password'
+                        };
+                    }
+                }
                 
                 if (authResult.success) {
                     // Store authentication data
@@ -327,14 +379,20 @@
                         permissions: authResult.permissions || [],
                         loginTime: new Date().toISOString(),
                         lastActivity: new Date().toISOString(),
-                        sessionId: generateSessionId()
+                        sessionId: generateSessionId(),
+                        user: authResult.user
                     };
                     
                     // Store in both localStorage AND sessionStorage for redundancy
                     localStorage.setItem('celloxen_auth', JSON.stringify(authData));
                     sessionStorage.setItem('celloxen_auth', JSON.stringify(authData));
-                    sessionStorage.setItem('userRole', userType === 'super_admin' ? 'superadmin' : 'clinic');
+                    sessionStorage.setItem('userRole', userType);
                     sessionStorage.setItem('username', username);
+                    
+                    if (userType === 'clinic') {
+                        sessionStorage.setItem('clinicId', authResult.clinicId);
+                        sessionStorage.setItem('clinicCode', authResult.clinicCode);
+                    }
                     
                     showAlert('Login successful! Redirecting...', 'success');
                     
@@ -358,104 +416,6 @@
                 // Reset button state
                 loginBtn.disabled = false;
                 loginBtnText.textContent = 'Sign In';
-            }
-        }
-        
-        async function determineUserType(username) {
-            // Check if it's a super admin username
-            if (username.toLowerCase() === 'superadmin') {
-                return 'super_admin';
-            }
-            
-            // Check if username exists in clinics table
-            try {
-                if (supabase) {
-                    const { data, error } = await supabase
-                        .from('clinics')
-                        .select('username, clinic_code')
-                        .eq('username', username)
-                        .single();
-                    
-                    if (data && !error) {
-                        return 'clinic';
-                    }
-                }
-            } catch (e) {
-                console.log('Username not found in clinics table');
-            }
-            
-            // Default to clinic
-            return 'clinic';
-        }
-        
-        async function authenticateUser(username, password, userType) {
-            try {
-                // Check if supabase is available
-                if (!supabase) {
-                    console.error('Supabase client not initialized');
-                    return { success: false, message: 'Database connection error' };
-                }
-                
-                if (userType === 'super_admin') {
-                    // Super admin authentication
-                    const { data, error } = await supabase
-                        .from('super_admin_users')
-                        .select('*')
-                        .eq('username', username)
-                        .single();
-                    
-                    if (error || !data) {
-                        console.log('Super admin not found:', error);
-                        return { success: false, message: 'Invalid super admin credentials' };
-                    }
-                    
-                    // Check password against database value
-                    if (data.password_hash === password) {
-                        // Update last login
-                        await supabase
-                            .from('super_admin_users')
-                            .update({ last_login: new Date().toISOString() })
-                            .eq('username', username);
-                        
-                        return {
-                            success: true,
-                            permissions: ['all'],
-                            message: 'Super admin login successful'
-                        };
-                    } else {
-                        return { success: false, message: 'Invalid password' };
-                    }
-                    
-                } else {
-                    // Clinic user authentication
-                    const { data, error } = await supabase
-                        .from('clinics')
-                        .select('*')
-                        .eq('username', username)
-                        .single();
-                    
-                    if (error || !data) {
-                        console.log('Clinic user not found:', error);
-                        return { success: false, message: 'Invalid clinic credentials' };
-                    }
-                    
-                    // Check password against database value
-                    if (data.password_hash === password) {
-                        return {
-                            success: true,
-                            clinicId: data.id,
-                            clinicCode: data.clinic_code,
-                            permissions: ['clinic'],
-                            message: 'Clinic login successful'
-                        };
-                    } else {
-                        return { success: false, message: 'Invalid password' };
-                    }
-                }
-                
-            } catch (error) {
-                console.error('Authentication error:', error);
-                return { success: false, message: 'Authentication failed' };
             }
         }
         
