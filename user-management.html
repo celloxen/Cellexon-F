@@ -292,6 +292,14 @@
             color: #991b1b;
             border: 1px solid #fecaca;
         }
+        
+        .password-display {
+            background: #f3f4f6;
+            padding: 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
@@ -514,7 +522,7 @@
                 if (!superError && supers) {
                     superAdmins = supers.map(admin => ({
                         ...admin,
-                        role: 'super_admin'
+                        role: admin.role || 'super_admin'
                     }));
                     displaySuperAdmins();
                 }
@@ -773,40 +781,58 @@
             
             try {
                 if (userType === 'super_admin') {
+                    // For super admin, use password_hash column
                     const { data, error } = await supabase
                         .from('super_admin_users')
                         .insert([{
                             username: username,
-                            password: password,
+                            password_hash: password, // Using password_hash
                             full_name: fullName,
                             email: email,
-                            is_active: true
-                        }]);
+                            role: 'super_admin',
+                            is_active: true,
+                            created_at: new Date().toISOString()
+                        }])
+                        .select();
                     
-                    if (error) throw error;
+                    if (error) {
+                        console.error('Insert error:', error);
+                        throw error;
+                    }
                     
-                    showAlert(`Super Admin created successfully! Password: ${password}`, 'success');
+                    // Show success with password
+                    const alertMsg = `Super Admin created successfully!\n\nUsername: ${username}\nPassword: ${password}\n\nPlease save these credentials securely.`;
+                    alert(alertMsg);
+                    showAlert('Super Admin created successfully!', 'success');
                     
                 } else {
+                    // For clinic admin, update existing clinic
                     const clinicId = document.getElementById('clinicSelect').value;
                     if (!clinicId) {
                         showAlert('Please select a clinic', 'error');
                         return;
                     }
                     
+                    // Update clinic with password_hash
                     const { data, error } = await supabase
                         .from('clinics')
                         .update({
                             username: username,
-                            password: password,
+                            password_hash: password, // Using password_hash for clinics too
                             contact_email: email,
                             owner_name: fullName
                         })
                         .eq('id', clinicId);
                     
-                    if (error) throw error;
+                    if (error) {
+                        console.error('Update error:', error);
+                        throw error;
+                    }
                     
-                    showAlert(`Clinic Admin updated successfully! Password: ${password}`, 'success');
+                    // Show success with password
+                    const alertMsg = `Clinic Admin updated successfully!\n\nUsername: ${username}\nPassword: ${password}\n\nPlease save these credentials securely.`;
+                    alert(alertMsg);
+                    showAlert('Clinic Admin updated successfully!', 'success');
                 }
                 
                 closeModal();
@@ -814,31 +840,36 @@
                 
             } catch (error) {
                 console.error('Error adding user:', error);
-                showAlert('Error adding user: ' + error.message, 'error');
+                showAlert(`Error: ${error.message || 'Failed to add user'}`, 'error');
             }
         };
         
         window.resetPassword = async function(role, userId) {
             const newPassword = generatePassword();
-            const confirmReset = confirm(`Reset password to: ${newPassword}\n\nMake sure to save this password!`);
+            const confirmReset = confirm(`Reset password for this user?\n\nNew password will be: ${newPassword}\n\nMake sure to save this password!`);
             
             if (!confirmReset) return;
             
             try {
                 const table = role === 'super_admin' ? 'super_admin_users' : 'clinics';
                 
+                // Both tables now use password_hash
                 const { data, error } = await supabase
                     .from(table)
-                    .update({ password: newPassword })
+                    .update({ 
+                        password_hash: newPassword,
+                        updated_at: new Date().toISOString()
+                    })
                     .eq('id', userId);
                 
                 if (error) throw error;
                 
-                showAlert(`Password reset successfully! New password: ${newPassword}`, 'success');
+                alert(`Password reset successfully!\n\nNew password: ${newPassword}\n\nPlease save this password securely.`);
+                showAlert('Password reset successfully!', 'success');
                 
             } catch (error) {
                 console.error('Error resetting password:', error);
-                showAlert('Error resetting password', 'error');
+                showAlert(`Error resetting password: ${error.message}`, 'error');
             }
         };
         
@@ -852,7 +883,10 @@
                 
                 const { data, error } = await supabase
                     .from(table)
-                    .update({ is_active: newStatus })
+                    .update({ 
+                        is_active: newStatus,
+                        updated_at: new Date().toISOString()
+                    })
                     .eq('id', userId);
                 
                 if (error) throw error;
@@ -862,7 +896,7 @@
                 
             } catch (error) {
                 console.error('Error updating user status:', error);
-                showAlert('Error updating user status', 'error');
+                showAlert(`Error updating user status: ${error.message}`, 'error');
             }
         };
         
