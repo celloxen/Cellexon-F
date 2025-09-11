@@ -595,7 +595,10 @@
             }
             
             const auth = JSON.parse(authData);
-            if (auth.userType !== 'clinic_admin' && auth.userType !== 'super_admin') {
+            
+            // FIXED: Accept 'clinic', 'clinic_admin', or 'super_admin' as valid user types
+            const validUserTypes = ['clinic', 'clinic_admin', 'super_admin'];
+            if (!validUserTypes.includes(auth.userType)) {
                 alert('Access denied. Clinic administrator privileges required.');
                 window.location.href = 'unified-login.html';
                 return;
@@ -603,7 +606,8 @@
             
             // If super admin, they can view any clinic (would need a clinic selector)
             // For now, clinic admins see their own clinic
-            if (auth.userType === 'clinic_admin') {
+            // FIXED: Handle both 'clinic' and 'clinic_admin' user types
+            if (auth.userType === 'clinic' || auth.userType === 'clinic_admin') {
                 currentClinicId = auth.clinicId;
                 
                 // Load clinic data
@@ -611,6 +615,10 @@
                 
                 // Update UI with user info
                 document.getElementById('userName').textContent = auth.username || 'Clinic Administrator';
+            } else if (auth.userType === 'super_admin') {
+                // Super admin logic - for now, show a message
+                document.getElementById('userName').textContent = auth.username || 'Super Administrator';
+                showAlert('Super Admin view - Select a clinic to manage');
             }
         }
         
