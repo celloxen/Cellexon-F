@@ -149,6 +149,13 @@
             color: #9ca3af;
             background: #f9fafb;
             border-radius: 8px;
+            flex-direction: column;
+        }
+        
+        .chart-info {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #6b7280;
         }
         
         /* Data Tables */
@@ -245,6 +252,17 @@
             color: #6b7280;
             text-transform: uppercase;
         }
+        
+        .data-status {
+            background: #fef3c7;
+            border: 1px solid #fde68a;
+            color: #92400e;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            text-align: center;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
@@ -271,7 +289,7 @@
             </div>
             <div class="stat-card blue">
                 <div class="stat-value" id="activeUsers">0</div>
-                <div class="stat-label">Active Users</div>
+                <div class="stat-label">Active Clinics</div>
             </div>
             <div class="stat-card orange">
                 <div class="stat-value" id="totalSessions">0</div>
@@ -287,11 +305,17 @@
         <div class="charts-section">
             <div class="chart-container">
                 <h3 class="chart-title">Revenue Trend</h3>
-                <div class="chart-placeholder" id="revenueChart">Revenue chart will be displayed here</div>
+                <div class="chart-placeholder" id="revenueChart">
+                    <span>Revenue chart visualization</span>
+                    <span class="chart-info">Monthly revenue tracking coming soon</span>
+                </div>
             </div>
             <div class="chart-container">
                 <h3 class="chart-title">Patient Growth</h3>
-                <div class="chart-placeholder" id="patientChart">Patient growth chart will be displayed here</div>
+                <div class="chart-placeholder" id="patientChart">
+                    <span>Patient growth visualization</span>
+                    <span class="chart-info" id="patientGrowthInfo">Loading patient data...</span>
+                </div>
             </div>
         </div>
         
@@ -304,28 +328,10 @@
                 </ul>
             </div>
             <div class="data-card">
-                <h3 class="data-title">Popular Treatments</h3>
+                <h3 class="data-title">Treatment Sessions</h3>
+                <div class="data-status">System showing real data from database</div>
                 <ul class="data-list" id="treatmentsList">
-                    <li class="data-item">
-                        <span class="treatment-name">Stress Relief Protocol</span>
-                        <span class="treatment-count">156 sessions</span>
-                    </li>
-                    <li class="data-item">
-                        <span class="treatment-name">Pain Management</span>
-                        <span class="treatment-count">134 sessions</span>
-                    </li>
-                    <li class="data-item">
-                        <span class="treatment-name">Detox Support</span>
-                        <span class="treatment-count">98 sessions</span>
-                    </li>
-                    <li class="data-item">
-                        <span class="treatment-name">Energy Boost</span>
-                        <span class="treatment-count">87 sessions</span>
-                    </li>
-                    <li class="data-item">
-                        <span class="treatment-name">Sleep Enhancement</span>
-                        <span class="treatment-count">76 sessions</span>
-                    </li>
+                    <li class="data-item">Loading treatment data...</li>
                 </ul>
             </div>
         </div>
@@ -335,16 +341,16 @@
             <h3 class="data-title">System Usage</h3>
             <div class="usage-grid">
                 <div class="usage-item">
-                    <div class="usage-value" id="dailyActiveUsers">0</div>
-                    <div class="usage-label">Daily Active Users</div>
+                    <div class="usage-value" id="totalPatients">0</div>
+                    <div class="usage-label">Total Patients</div>
                 </div>
                 <div class="usage-item">
-                    <div class="usage-value" id="weeklyActiveUsers">0</div>
-                    <div class="usage-label">Weekly Active Users</div>
+                    <div class="usage-value" id="totalTherapies">0</div>
+                    <div class="usage-label">Therapy Protocols</div>
                 </div>
                 <div class="usage-item">
-                    <div class="usage-value" id="monthlyActiveUsers">0</div>
-                    <div class="usage-label">Monthly Active Users</div>
+                    <div class="usage-value" id="completedSessions">0</div>
+                    <div class="usage-label">Completed Sessions</div>
                 </div>
                 <div class="usage-item">
                     <div class="usage-value" id="systemUptime">99.9%</div>
@@ -367,6 +373,7 @@
         // Load analytics data on page load
         document.addEventListener('DOMContentLoaded', async function() {
             await loadAnalyticsData();
+            await loadTreatmentData();
         });
         
         async function loadAnalyticsData() {
@@ -384,30 +391,114 @@
                     .from('patients')
                     .select('*');
                 
-                if (patientsError) console.log('Patients error:', patientsError);
+                // Load therapy configurations
+                const { data: therapies, error: therapiesError } = await supabase
+                    .from('therapy_configurations')
+                    .select('*')
+                    .eq('is_active', true);
+                
+                // Load treatment sessions
+                const { data: sessions, error: sessionsError } = await supabase
+                    .from('treatment_sessions')
+                    .select('*');
                 
                 // Calculate statistics
                 const totalClinics = clinics?.length || 0;
                 const totalPatients = patients?.length || 0;
+                const totalTherapies = therapies?.length || 0;
+                const totalSessions = sessions?.length || 0;
+                const completedSessions = sessions?.filter(s => s.status === 'completed').length || 0;
                 const monthlyRevenue = totalClinics * 299;
-                const totalSessions = totalPatients * 12; // Estimate sessions
+                
+                // Calculate average session time
+                let avgTime = 0;
+                if (sessions && sessions.length > 0) {
+                    const totalMinutes = sessions.reduce((sum, session) => {
+                        return sum + (session.duration_minutes || 0);
+                    }, 0);
+                    avgTime = Math.round(totalMinutes / sessions.length);
+                }
                 
                 // Update main stats
                 document.getElementById('totalRevenue').textContent = `£${monthlyRevenue.toLocaleString()}`;
                 document.getElementById('activeUsers').textContent = totalClinics;
                 document.getElementById('totalSessions').textContent = totalSessions;
-                document.getElementById('avgSessionTime').textContent = '45m';
+                document.getElementById('avgSessionTime').textContent = avgTime ? `${avgTime}m` : '0m';
                 
                 // Update usage stats
-                document.getElementById('dailyActiveUsers').textContent = totalPatients;
-                document.getElementById('weeklyActiveUsers').textContent = totalClinics;
-                document.getElementById('monthlyActiveUsers').textContent = totalClinics;
+                document.getElementById('totalPatients').textContent = totalPatients;
+                document.getElementById('totalTherapies').textContent = totalTherapies;
+                document.getElementById('completedSessions').textContent = completedSessions;
+                
+                // Update patient growth info
+                document.getElementById('patientGrowthInfo').textContent = 
+                    `${totalPatients} patients across ${totalClinics} clinics`;
                 
                 // Update clinics list
                 updateClinicsList(clinics);
                 
             } catch (error) {
                 console.error('Error loading analytics:', error);
+            }
+        }
+        
+        async function loadTreatmentData() {
+            try {
+                // Get all therapy configurations
+                const { data: therapyConfigs, error: configError } = await supabase
+                    .from('therapy_configurations')
+                    .select('*')
+                    .eq('is_active', true)
+                    .order('code');
+                
+                if (configError) throw configError;
+                
+                // Get treatment session counts
+                const { data: sessions, error: sessionsError } = await supabase
+                    .from('treatment_sessions')
+                    .select('protocol_used');
+                
+                if (sessionsError) throw sessionsError;
+                
+                // Count sessions by protocol
+                const sessionCounts = {};
+                sessions?.forEach(session => {
+                    if (session.protocol_used) {
+                        sessionCounts[session.protocol_used] = (sessionCounts[session.protocol_used] || 0) + 1;
+                    }
+                });
+                
+                // Update treatments list with ALL therapies
+                const treatmentsList = document.getElementById('treatmentsList');
+                
+                if (!therapyConfigs || therapyConfigs.length === 0) {
+                    treatmentsList.innerHTML = `
+                        <li class="data-item">
+                            <span class="treatment-name">No therapy configurations found</span>
+                            <span class="treatment-count">Configure therapies first</span>
+                        </li>
+                    `;
+                } else {
+                    // Show all therapy configurations with their session counts
+                    treatmentsList.innerHTML = therapyConfigs.map(therapy => {
+                        const count = sessionCounts[therapy.name] || 0;
+                        return `
+                            <li class="data-item">
+                                <span class="treatment-name">${therapy.name} (${therapy.code})</span>
+                                <span class="treatment-count">${count} sessions</span>
+                            </li>
+                        `;
+                    }).join('');
+                }
+                
+            } catch (error) {
+                console.error('Error loading treatment data:', error);
+                document.getElementById('treatmentsList').innerHTML = `
+                    <li class="data-item">
+                        <span class="treatment-name">Error loading treatment data</span>
+                        <span class="treatment-count">Check console for details</span>
+                    </li>
+                `;
             }
         }
         
