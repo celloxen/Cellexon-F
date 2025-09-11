@@ -97,6 +97,7 @@
             grid-template-columns: 1fr auto auto;
             gap: 15px;
             align-items: end;
+            margin-bottom: 20px;
         }
         
         .search-input {
@@ -170,14 +171,26 @@
             color: white;
         }
         
+        .btn-primary:hover {
+            background: #059669;
+        }
+        
         .btn-secondary {
             background: #6b7280;
             color: white;
         }
         
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+        
         .btn-danger {
             background: #ef4444;
             color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #dc2626;
         }
         
         .btn-small {
@@ -222,12 +235,18 @@
             align-items: center;
         }
         
+        .modal.show {
+            display: flex;
+        }
+        
         .modal-content {
             background: white;
             border-radius: 12px;
             padding: 30px;
             max-width: 500px;
             width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
         }
         
         .modal-header {
@@ -250,6 +269,29 @@
             cursor: pointer;
             color: #6b7280;
         }
+        
+        .alert {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .alert.show {
+            display: block;
+        }
+        
+        .alert-success {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+        
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
     </style>
 </head>
 <body>
@@ -268,6 +310,9 @@
     </div>
 
     <div class="container">
+        <!-- Alert Messages -->
+        <div id="alertMessage" class="alert"></div>
+        
         <!-- Tabs -->
         <div class="tabs-container">
             <div class="tabs">
@@ -281,7 +326,7 @@
         <div id="allTab" class="tab-content active">
             <div class="card">
                 <div class="search-section">
-                    <input type="text" class="search-input" placeholder="Search users..." onkeyup="searchUsers()">
+                    <input type="text" class="search-input" id="searchInput" placeholder="Search users..." onkeyup="searchUsers()">
                     <button class="btn btn-primary" onclick="showAddUserModal()">Add New User</button>
                     <button class="btn btn-secondary" onclick="refreshUsers()">Refresh</button>
                 </div>
@@ -295,7 +340,7 @@
                             <th>Role</th>
                             <th>Clinic</th>
                             <th>Status</th>
-                            <th>Last Login</th>
+                            <th>Created</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -334,7 +379,7 @@
         <!-- Super Admins Tab -->
         <div id="superTab" class="tab-content">
             <div class="card">
-                <button class="btn btn-primary" onclick="showAddSuperAdminModal()" style="margin-bottom: 20px;">
+                <button class="btn btn-primary" onclick="showAddUserModal('super_admin')" style="margin-bottom: 20px;">
                     Add Super Admin
                 </button>
                 <table class="user-table">
@@ -344,7 +389,7 @@
                             <th>Full Name</th>
                             <th>Email</th>
                             <th>Status</th>
-                            <th>Last Login</th>
+                            <th>Created</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -365,7 +410,7 @@
                 <h2 class="modal-title">Add New User</h2>
                 <button class="close-btn" onclick="closeModal()">&times;</button>
             </div>
-            <form id="addUserForm">
+            <form id="addUserForm" onsubmit="handleAddUser(event)">
                 <div class="form-group">
                     <label class="form-label">User Type</label>
                     <select class="form-select" id="userType" onchange="toggleUserFields()">
@@ -398,7 +443,8 @@
                 
                 <div class="form-group">
                     <label class="form-label">Password</label>
-                    <input type="text" class="form-input" id="newPassword" required>
+                    <input type="text" class="form-input" id="newPassword" value="" placeholder="Auto-generated">
+                    <small style="color: #6b7280;">Leave blank to auto-generate</small>
                 </div>
                 
                 <div style="display: flex; gap: 10px; justify-content: flex-end;">
@@ -409,17 +455,23 @@
         </div>
     </div>
 
+    <!-- Include auth guard -->
     <script src="auth-guard.js"></script>
+    
+    <!-- Main script using ES6 modules -->
     <script type="module">
         import { supabase } from './supabase-config.js';
         
         let allUsers = [];
         let clinicAdmins = [];
         let superAdmins = [];
+        let clinicsList = [];
         
+        // Load users on page load
         document.addEventListener('DOMContentLoaded', function() {
             checkAuthentication();
             loadUsers();
+            loadClinicsForDropdown();
         });
         
         function checkAuthentication() {
@@ -438,14 +490,18 @@
         
         async function loadUsers() {
             try {
-                // Load clinic admins
+                // Load clinic admins from clinics table
                 const { data: clinics, error: clinicError } = await supabase
                     .from('clinics')
                     .select('*')
                     .order('created_at', { ascending: false });
                 
-                if (!clinicError) {
-                    clinicAdmins = clinics || [];
+                if (!clinicError && clinics) {
+                    clinicAdmins = clinics.map(clinic => ({
+                        ...clinic,
+                        full_name: clinic.owner_name || clinic.authorised_person || '-',
+                        role: 'clinic_admin'
+                    }));
                     displayClinicAdmins();
                 }
                 
@@ -455,36 +511,57 @@
                     .select('*')
                     .order('created_at', { ascending: false });
                 
-                if (!superError) {
-                    superAdmins = supers || [];
+                if (!superError && supers) {
+                    superAdmins = supers.map(admin => ({
+                        ...admin,
+                        role: 'super_admin'
+                    }));
                     displaySuperAdmins();
                 }
                 
-                // Combine all users
+                // Combine and display all users
+                allUsers = [...clinicAdmins, ...superAdmins];
                 displayAllUsers();
                 
             } catch (error) {
                 console.error('Error loading users:', error);
+                showAlert('Error loading users', 'error');
+            }
+        }
+        
+        async function loadClinicsForDropdown() {
+            try {
+                const { data: clinics, error } = await supabase
+                    .from('clinics')
+                    .select('id, clinic_name, clinic_code')
+                    .order('clinic_name');
+                
+                if (!error && clinics) {
+                    clinicsList = clinics;
+                    const select = document.getElementById('clinicSelect');
+                    select.innerHTML = '<option value="">Select a clinic...</option>';
+                    clinics.forEach(clinic => {
+                        select.innerHTML += `<option value="${clinic.id}">${clinic.clinic_name} (${clinic.clinic_code})</option>`;
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading clinics:', error);
             }
         }
         
         function displayAllUsers() {
             const tbody = document.getElementById('userTableBody');
-            const allUsersList = [
-                ...clinicAdmins.map(u => ({...u, role: 'clinic_admin'})),
-                ...superAdmins.map(u => ({...u, role: 'super_admin'}))
-            ];
             
-            if (allUsersList.length === 0) {
+            if (allUsers.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">No users found</td></tr>';
                 return;
             }
             
-            tbody.innerHTML = allUsersList.map(user => `
+            tbody.innerHTML = allUsers.map(user => `
                 <tr>
-                    <td><strong>${user.username}</strong></td>
-                    <td>${user.full_name || user.authorised_person || user.owner_name || '-'}</td>
-                    <td>${user.email}</td>
+                    <td><strong>${user.username || '-'}</strong></td>
+                    <td>${user.full_name || '-'}</td>
+                    <td>${user.email || user.contact_email || '-'}</td>
                     <td>
                         <span class="role-badge ${user.role === 'super_admin' ? 'role-super-admin' : 'role-clinic-admin'}">
                             ${user.role === 'super_admin' ? 'Super Admin' : 'Clinic Admin'}
@@ -493,16 +570,17 @@
                     <td>${user.clinic_name || '-'}</td>
                     <td>
                         <span class="${user.is_active !== false ? 'status-active' : 'status-inactive'}">
-                            ${user.is_active !== false ? '● Active' : '● Inactive'}
+                            ● ${user.is_active !== false ? 'Active' : 'Inactive'}
                         </span>
                     </td>
-                    <td>${user.last_login ? new Date(user.last_login).toLocaleDateString() : 'Never'}</td>
+                    <td>${new Date(user.created_at).toLocaleDateString('en-GB')}</td>
                     <td>
                         <div class="action-buttons">
-                            <button class="btn btn-primary btn-small" onclick="resetPassword(${user.id})">
-                                Reset Password
+                            <button class="btn btn-primary btn-small" onclick="resetPassword('${user.role}', ${user.id})">
+                                Reset Pass
                             </button>
-                            <button class="btn btn-danger btn-small" onclick="toggleUserStatus(${user.id})">
+                            <button class="btn ${user.is_active !== false ? 'btn-danger' : 'btn-primary'} btn-small" 
+                                    onclick="toggleUserStatus('${user.role}', ${user.id}, ${user.is_active !== false})">
                                 ${user.is_active !== false ? 'Deactivate' : 'Activate'}
                             </button>
                         </div>
@@ -521,19 +599,23 @@
             
             tbody.innerHTML = clinicAdmins.map(admin => `
                 <tr>
-                    <td><strong>${admin.username}</strong></td>
-                    <td>${admin.clinic_name || admin.business_name}</td>
-                    <td>${admin.email}</td>
-                    <td>${admin.phone || admin.telephone || '-'}</td>
+                    <td><strong>${admin.username || '-'}</strong></td>
+                    <td>${admin.clinic_name}</td>
+                    <td>${admin.email || admin.contact_email || '-'}</td>
+                    <td>${admin.contact_phone || admin.phone || '-'}</td>
                     <td>
-                        <span class="${admin.is_active ? 'status-active' : 'status-inactive'}">
-                            ${admin.is_active ? '● Active' : '● Inactive'}
+                        <span class="${admin.is_active !== false ? 'status-active' : 'status-inactive'}">
+                            ● ${admin.is_active !== false ? 'Active' : 'Inactive'}
                         </span>
                     </td>
                     <td>
                         <div class="action-buttons">
-                            <button class="btn btn-primary btn-small" onclick="editClinicAdmin(${admin.id})">
-                                Edit
+                            <button class="btn btn-primary btn-small" onclick="resetPassword('clinic_admin', ${admin.id})">
+                                Reset Password
+                            </button>
+                            <button class="btn ${admin.is_active !== false ? 'btn-danger' : 'btn-primary'} btn-small" 
+                                    onclick="toggleUserStatus('clinic_admin', ${admin.id}, ${admin.is_active !== false})">
+                                ${admin.is_active !== false ? 'Deactivate' : 'Activate'}
                             </button>
                         </div>
                     </td>
@@ -555,15 +637,19 @@
                     <td>${admin.full_name}</td>
                     <td>${admin.email}</td>
                     <td>
-                        <span class="${admin.is_active ? 'status-active' : 'status-inactive'}">
-                            ${admin.is_active ? '● Active' : '● Inactive'}
+                        <span class="${admin.is_active !== false ? 'status-active' : 'status-inactive'}">
+                            ● ${admin.is_active !== false ? 'Active' : 'Inactive'}
                         </span>
                     </td>
-                    <td>${admin.last_login ? new Date(admin.last_login).toLocaleDateString() : 'Never'}</td>
+                    <td>${new Date(admin.created_at).toLocaleDateString('en-GB')}</td>
                     <td>
                         <div class="action-buttons">
-                            <button class="btn btn-primary btn-small" onclick="editSuperAdmin(${admin.id})">
-                                Edit
+                            <button class="btn btn-primary btn-small" onclick="resetPassword('super_admin', ${admin.id})">
+                                Reset Password
+                            </button>
+                            <button class="btn ${admin.is_active !== false ? 'btn-danger' : 'btn-primary'} btn-small" 
+                                    onclick="toggleUserStatus('super_admin', ${admin.id}, ${admin.is_active !== false})">
+                                ${admin.is_active !== false ? 'Deactivate' : 'Activate'}
                             </button>
                         </div>
                     </td>
@@ -571,6 +657,73 @@
             `).join('');
         }
         
+        function searchUsers() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const filteredUsers = allUsers.filter(user => 
+                (user.username && user.username.toLowerCase().includes(searchTerm)) ||
+                (user.full_name && user.full_name.toLowerCase().includes(searchTerm)) ||
+                (user.email && user.email.toLowerCase().includes(searchTerm)) ||
+                (user.clinic_name && user.clinic_name.toLowerCase().includes(searchTerm))
+            );
+            
+            const tbody = document.getElementById('userTableBody');
+            if (filteredUsers.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">No matching users found</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = filteredUsers.map(user => `
+                <tr>
+                    <td><strong>${user.username || '-'}</strong></td>
+                    <td>${user.full_name || '-'}</td>
+                    <td>${user.email || user.contact_email || '-'}</td>
+                    <td>
+                        <span class="role-badge ${user.role === 'super_admin' ? 'role-super-admin' : 'role-clinic-admin'}">
+                            ${user.role === 'super_admin' ? 'Super Admin' : 'Clinic Admin'}
+                        </span>
+                    </td>
+                    <td>${user.clinic_name || '-'}</td>
+                    <td>
+                        <span class="${user.is_active !== false ? 'status-active' : 'status-inactive'}">
+                            ● ${user.is_active !== false ? 'Active' : 'Inactive'}
+                        </span>
+                    </td>
+                    <td>${new Date(user.created_at).toLocaleDateString('en-GB')}</td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn btn-primary btn-small" onclick="resetPassword('${user.role}', ${user.id})">
+                                Reset Pass
+                            </button>
+                            <button class="btn ${user.is_active !== false ? 'btn-danger' : 'btn-primary'} btn-small" 
+                                    onclick="toggleUserStatus('${user.role}', ${user.id}, ${user.is_active !== false})">
+                                ${user.is_active !== false ? 'Deactivate' : 'Activate'}
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+        
+        function generatePassword() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%';
+            let password = '';
+            for (let i = 0; i < 12; i++) {
+                password += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return password;
+        }
+        
+        function showAlert(message, type) {
+            const alertDiv = document.getElementById('alertMessage');
+            alertDiv.textContent = message;
+            alertDiv.className = `alert alert-${type} show`;
+            
+            setTimeout(() => {
+                alertDiv.classList.remove('show');
+            }, 5000);
+        }
+        
+        // Export functions to window for onclick handlers
         window.switchTab = function(tab) {
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
@@ -579,24 +732,146 @@
             document.getElementById(tab + 'Tab').classList.add('active');
         };
         
-        window.showAddUserModal = function() {
-            document.getElementById('addUserModal').style.display = 'flex';
+        window.showAddUserModal = function(type = 'clinic_admin') {
+            document.getElementById('userType').value = type;
+            toggleUserFields();
+            
+            const password = generatePassword();
+            document.getElementById('newPassword').value = password;
+            
+            document.getElementById('addUserModal').classList.add('show');
         };
         
         window.closeModal = function() {
-            document.getElementById('addUserModal').style.display = 'none';
+            document.getElementById('addUserModal').classList.remove('show');
+            document.getElementById('addUserForm').reset();
         };
         
-        window.resetPassword = function(userId) {
-            const newPassword = prompt('Enter new password:');
-            if (newPassword) {
-                alert(`Password reset for user ID ${userId} to: ${newPassword}`);
+        window.toggleUserFields = function() {
+            const userType = document.getElementById('userType').value;
+            const clinicField = document.getElementById('clinicField');
+            
+            if (userType === 'super_admin') {
+                clinicField.style.display = 'none';
+            } else {
+                clinicField.style.display = 'block';
+            }
+        };
+        
+        window.handleAddUser = async function(event) {
+            event.preventDefault();
+            
+            const userType = document.getElementById('userType').value;
+            const username = document.getElementById('newUsername').value;
+            const fullName = document.getElementById('newFullName').value;
+            const email = document.getElementById('newEmail').value;
+            let password = document.getElementById('newPassword').value;
+            
+            if (!password) {
+                password = generatePassword();
+            }
+            
+            try {
+                if (userType === 'super_admin') {
+                    const { data, error } = await supabase
+                        .from('super_admin_users')
+                        .insert([{
+                            username: username,
+                            password: password,
+                            full_name: fullName,
+                            email: email,
+                            is_active: true
+                        }]);
+                    
+                    if (error) throw error;
+                    
+                    showAlert(`Super Admin created successfully! Password: ${password}`, 'success');
+                    
+                } else {
+                    const clinicId = document.getElementById('clinicSelect').value;
+                    if (!clinicId) {
+                        showAlert('Please select a clinic', 'error');
+                        return;
+                    }
+                    
+                    const { data, error } = await supabase
+                        .from('clinics')
+                        .update({
+                            username: username,
+                            password: password,
+                            contact_email: email,
+                            owner_name: fullName
+                        })
+                        .eq('id', clinicId);
+                    
+                    if (error) throw error;
+                    
+                    showAlert(`Clinic Admin updated successfully! Password: ${password}`, 'success');
+                }
+                
+                closeModal();
+                await loadUsers();
+                
+            } catch (error) {
+                console.error('Error adding user:', error);
+                showAlert('Error adding user: ' + error.message, 'error');
+            }
+        };
+        
+        window.resetPassword = async function(role, userId) {
+            const newPassword = generatePassword();
+            const confirmReset = confirm(`Reset password to: ${newPassword}\n\nMake sure to save this password!`);
+            
+            if (!confirmReset) return;
+            
+            try {
+                const table = role === 'super_admin' ? 'super_admin_users' : 'clinics';
+                
+                const { data, error } = await supabase
+                    .from(table)
+                    .update({ password: newPassword })
+                    .eq('id', userId);
+                
+                if (error) throw error;
+                
+                showAlert(`Password reset successfully! New password: ${newPassword}`, 'success');
+                
+            } catch (error) {
+                console.error('Error resetting password:', error);
+                showAlert('Error resetting password', 'error');
+            }
+        };
+        
+        window.toggleUserStatus = async function(role, userId, currentStatus) {
+            const action = currentStatus ? 'deactivate' : 'activate';
+            if (!confirm(`Are you sure you want to ${action} this user?`)) return;
+            
+            try {
+                const table = role === 'super_admin' ? 'super_admin_users' : 'clinics';
+                const newStatus = !currentStatus;
+                
+                const { data, error } = await supabase
+                    .from(table)
+                    .update({ is_active: newStatus })
+                    .eq('id', userId);
+                
+                if (error) throw error;
+                
+                showAlert(`User ${action}d successfully!`, 'success');
+                await loadUsers();
+                
+            } catch (error) {
+                console.error('Error updating user status:', error);
+                showAlert('Error updating user status', 'error');
             }
         };
         
         window.refreshUsers = function() {
             loadUsers();
+            showAlert('Users refreshed', 'success');
         };
+        
+        window.searchUsers = searchUsers;
         
         window.logout = function() {
             if (confirm('Are you sure you want to logout?')) {
