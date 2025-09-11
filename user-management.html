@@ -193,6 +193,15 @@
             background: #dc2626;
         }
         
+        .btn-warning {
+            background: #f59e0b;
+            color: white;
+        }
+        
+        .btn-warning:hover {
+            background: #d97706;
+        }
+        
         .btn-small {
             padding: 6px 12px;
             font-size: 0.85rem;
@@ -201,6 +210,7 @@
         .action-buttons {
             display: flex;
             gap: 8px;
+            flex-wrap: wrap;
         }
         
         .form-group {
@@ -293,12 +303,22 @@
             border: 1px solid #fecaca;
         }
         
-        .password-display {
-            background: #f3f4f6;
-            padding: 8px;
-            border-radius: 4px;
-            font-family: monospace;
-            margin-top: 10px;
+        .delete-warning {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        
+        .delete-warning h3 {
+            color: #991b1b;
+            margin-bottom: 10px;
+        }
+        
+        .delete-warning p {
+            color: #7f1d1d;
+            margin-bottom: 5px;
         }
     </style>
 </head>
@@ -587,9 +607,12 @@
                             <button class="btn btn-primary btn-small" onclick="resetPassword('${user.role}', ${user.id})">
                                 Reset Pass
                             </button>
-                            <button class="btn ${user.is_active !== false ? 'btn-danger' : 'btn-primary'} btn-small" 
+                            <button class="btn ${user.is_active !== false ? 'btn-warning' : 'btn-primary'} btn-small" 
                                     onclick="toggleUserStatus('${user.role}', ${user.id}, ${user.is_active !== false})">
                                 ${user.is_active !== false ? 'Deactivate' : 'Activate'}
+                            </button>
+                            <button class="btn btn-danger btn-small" onclick="deleteUser('${user.role}', ${user.id}, '${user.username || user.clinic_name}')">
+                                Remove
                             </button>
                         </div>
                     </td>
@@ -621,7 +644,7 @@
                             <button class="btn btn-primary btn-small" onclick="resetPassword('clinic_admin', ${admin.id})">
                                 Reset Password
                             </button>
-                            <button class="btn ${admin.is_active !== false ? 'btn-danger' : 'btn-primary'} btn-small" 
+                            <button class="btn ${admin.is_active !== false ? 'btn-warning' : 'btn-primary'} btn-small" 
                                     onclick="toggleUserStatus('clinic_admin', ${admin.id}, ${admin.is_active !== false})">
                                 ${admin.is_active !== false ? 'Deactivate' : 'Activate'}
                             </button>
@@ -653,11 +676,14 @@
                     <td>
                         <div class="action-buttons">
                             <button class="btn btn-primary btn-small" onclick="resetPassword('super_admin', ${admin.id})">
-                                Reset Password
+                                Reset Pass
                             </button>
-                            <button class="btn ${admin.is_active !== false ? 'btn-danger' : 'btn-primary'} btn-small" 
+                            <button class="btn ${admin.is_active !== false ? 'btn-warning' : 'btn-primary'} btn-small" 
                                     onclick="toggleUserStatus('super_admin', ${admin.id}, ${admin.is_active !== false})">
                                 ${admin.is_active !== false ? 'Deactivate' : 'Activate'}
+                            </button>
+                            <button class="btn btn-danger btn-small" onclick="deleteUser('super_admin', ${admin.id}, '${admin.username}')">
+                                Remove
                             </button>
                         </div>
                     </td>
@@ -702,9 +728,12 @@
                             <button class="btn btn-primary btn-small" onclick="resetPassword('${user.role}', ${user.id})">
                                 Reset Pass
                             </button>
-                            <button class="btn ${user.is_active !== false ? 'btn-danger' : 'btn-primary'} btn-small" 
+                            <button class="btn ${user.is_active !== false ? 'btn-warning' : 'btn-primary'} btn-small" 
                                     onclick="toggleUserStatus('${user.role}', ${user.id}, ${user.is_active !== false})">
                                 ${user.is_active !== false ? 'Deactivate' : 'Activate'}
+                            </button>
+                            <button class="btn btn-danger btn-small" onclick="deleteUser('${user.role}', ${user.id}, '${user.username || user.clinic_name}')">
+                                Remove
                             </button>
                         </div>
                     </td>
@@ -781,12 +810,11 @@
             
             try {
                 if (userType === 'super_admin') {
-                    // For super admin, use password_hash column
                     const { data, error } = await supabase
                         .from('super_admin_users')
                         .insert([{
                             username: username,
-                            password_hash: password, // Using password_hash
+                            password_hash: password,
                             full_name: fullName,
                             email: email,
                             role: 'super_admin',
@@ -800,25 +828,22 @@
                         throw error;
                     }
                     
-                    // Show success with password
                     const alertMsg = `Super Admin created successfully!\n\nUsername: ${username}\nPassword: ${password}\n\nPlease save these credentials securely.`;
                     alert(alertMsg);
                     showAlert('Super Admin created successfully!', 'success');
                     
                 } else {
-                    // For clinic admin, update existing clinic
                     const clinicId = document.getElementById('clinicSelect').value;
                     if (!clinicId) {
                         showAlert('Please select a clinic', 'error');
                         return;
                     }
                     
-                    // Update clinic with password_hash
                     const { data, error } = await supabase
                         .from('clinics')
                         .update({
                             username: username,
-                            password_hash: password, // Using password_hash for clinics too
+                            password_hash: password,
                             contact_email: email,
                             owner_name: fullName
                         })
@@ -829,7 +854,6 @@
                         throw error;
                     }
                     
-                    // Show success with password
                     const alertMsg = `Clinic Admin updated successfully!\n\nUsername: ${username}\nPassword: ${password}\n\nPlease save these credentials securely.`;
                     alert(alertMsg);
                     showAlert('Clinic Admin updated successfully!', 'success');
@@ -853,7 +877,6 @@
             try {
                 const table = role === 'super_admin' ? 'super_admin_users' : 'clinics';
                 
-                // Both tables now use password_hash
                 const { data, error } = await supabase
                     .from(table)
                     .update({ 
@@ -897,6 +920,77 @@
             } catch (error) {
                 console.error('Error updating user status:', error);
                 showAlert(`Error updating user status: ${error.message}`, 'error');
+            }
+        };
+        
+        window.deleteUser = async function(role, userId, userName) {
+            // Special warning for super admins
+            const isSuperAdmin = role === 'super_admin';
+            const userType = isSuperAdmin ? 'Super Admin' : 'Clinic Admin';
+            
+            // Check if it's the last super admin
+            if (isSuperAdmin && superAdmins.length === 1) {
+                alert('Cannot delete the last Super Admin!\n\nYou must have at least one Super Admin in the system.');
+                return;
+            }
+            
+            // For clinic admins, warn about data implications
+            let warningMessage = `⚠️ WARNING: Delete ${userType} User\n\n`;
+            warningMessage += `User: ${userName}\n`;
+            warningMessage += `Type: ${userType}\n\n`;
+            
+            if (!isSuperAdmin) {
+                warningMessage += `Note: Deleting a clinic admin will remove their access but preserve the clinic data.\n\n`;
+            } else {
+                warningMessage += `This action is permanent and cannot be undone!\n\n`;
+            }
+            
+            warningMessage += `Are you sure you want to permanently delete this user?`;
+            
+            if (!confirm(warningMessage)) return;
+            
+            // Double confirmation for super admins
+            if (isSuperAdmin) {
+                const secondConfirm = prompt(`Type "DELETE" to confirm deletion of Super Admin: ${userName}`);
+                if (secondConfirm !== 'DELETE') {
+                    showAlert('Deletion cancelled', 'error');
+                    return;
+                }
+            }
+            
+            try {
+                if (isSuperAdmin) {
+                    // Delete from super_admin_users table
+                    const { error } = await supabase
+                        .from('super_admin_users')
+                        .delete()
+                        .eq('id', userId);
+                    
+                    if (error) throw error;
+                    
+                    showAlert(`Super Admin "${userName}" has been permanently deleted.`, 'success');
+                } else {
+                    // For clinic admins, just clear their credentials
+                    const { error } = await supabase
+                        .from('clinics')
+                        .update({
+                            username: null,
+                            password_hash: null,
+                            is_active: false,
+                            updated_at: new Date().toISOString()
+                        })
+                        .eq('id', userId);
+                    
+                    if (error) throw error;
+                    
+                    showAlert(`Clinic Admin access for "${userName}" has been removed.`, 'success');
+                }
+                
+                await loadUsers();
+                
+            } catch (error) {
+                console.error('Error deleting user:', error);
+                showAlert(`Error deleting user: ${error.message}`, 'error');
             }
         };
         
