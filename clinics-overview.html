@@ -68,7 +68,7 @@
             padding: 30px 20px;
         }
         
-        /* Page Title */
+        /* Page Header */
         .page-header {
             margin-bottom: 30px;
         }
@@ -84,38 +84,39 @@
             color: #64748b;
         }
         
-        /* Search and Filter Bar */
-        .controls-bar {
+        /* Search and Actions Bar */
+        .actions-bar {
             background: white;
             border-radius: 12px;
             padding: 20px;
             margin-bottom: 30px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.08);
             display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
+            gap: 20px;
             align-items: center;
-            justify-content: space-between;
+            flex-wrap: wrap;
         }
         
-        .search-group {
-            display: flex;
-            gap: 10px;
+        .search-box {
             flex: 1;
             min-width: 300px;
+            position: relative;
         }
         
         .search-input {
-            flex: 1;
-            padding: 10px 15px;
+            width: 100%;
+            padding: 10px 15px 10px 40px;
             border: 2px solid #e5e7eb;
             border-radius: 8px;
             font-size: 14px;
         }
         
-        .search-input:focus {
-            outline: none;
-            border-color: #3b82f6;
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
         }
         
         .filter-select {
@@ -127,9 +128,11 @@
             cursor: pointer;
         }
         
-        .btn {
-            padding: 10px 20px;
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
             border: none;
+            padding: 10px 20px;
             border-radius: 8px;
             cursor: pointer;
             font-weight: 500;
@@ -137,49 +140,12 @@
             font-size: 14px;
         }
         
-        .btn-primary {
-            background: #3b82f6;
-            color: white;
-        }
-        
         .btn-primary:hover {
             background: #2563eb;
         }
         
-        .btn-secondary {
-            background: #6b7280;
-            color: white;
-        }
-        
-        .btn-secondary:hover {
-            background: #4b5563;
-        }
-        
-        .btn-success {
-            background: #10b981;
-            color: white;
-        }
-        
-        .btn-success:hover {
-            background: #059669;
-        }
-        
-        .btn-danger {
-            background: #ef4444;
-            color: white;
-        }
-        
-        .btn-danger:hover {
-            background: #dc2626;
-        }
-        
-        .btn-small {
-            padding: 6px 12px;
-            font-size: 12px;
-        }
-        
-        /* Statistics Cards */
-        .stats-grid {
+        /* Stats Summary */
+        .stats-summary {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 20px;
@@ -274,25 +240,20 @@
         
         .status-badge {
             display: inline-block;
-            padding: 4px 12px;
-            border-radius: 20px;
+            padding: 4px 10px;
+            border-radius: 12px;
             font-size: 12px;
             font-weight: 600;
         }
         
-        .status-active {
-            background: #d1fae5;
-            color: #065f46;
+        .status-badge.active {
+            background: #dcfce7;
+            color: #166534;
         }
         
-        .status-inactive {
+        .status-badge.inactive {
             background: #fee2e2;
             color: #991b1b;
-        }
-        
-        .status-suspended {
-            background: #fef3c7;
-            color: #92400e;
         }
         
         .action-buttons {
@@ -300,7 +261,43 @@
             gap: 8px;
         }
         
-        /* Modal */
+        .btn-action {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+        
+        .btn-edit {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .btn-edit:hover {
+            background: #2563eb;
+        }
+        
+        .btn-view {
+            background: #10b981;
+            color: white;
+        }
+        
+        .btn-view:hover {
+            background: #059669;
+        }
+        
+        .btn-suspend {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .btn-suspend:hover {
+            background: #dc2626;
+        }
+        
+        /* Modal Styles */
         .modal {
             display: none;
             position: fixed;
@@ -308,54 +305,34 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.6);
+            background: rgba(0,0,0,0.5);
             z-index: 1000;
             align-items: center;
             justify-content: center;
         }
         
-        .modal.active {
+        .modal.show {
             display: flex;
         }
         
         .modal-content {
             background: white;
             border-radius: 12px;
+            padding: 30px;
+            max-width: 500px;
             width: 90%;
-            max-width: 600px;
             max-height: 90vh;
-            overflow: auto;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow-y: auto;
         }
         
         .modal-header {
-            padding: 25px;
-            border-bottom: 2px solid #e5e7eb;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            margin-bottom: 20px;
         }
         
         .modal-title {
-            font-size: 20px;
+            font-size: 24px;
             font-weight: 600;
             color: #1e293b;
-        }
-        
-        .close-btn {
-            background: none;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            color: #6b7280;
-        }
-        
-        .close-btn:hover {
-            color: #374151;
-        }
-        
-        .modal-body {
-            padding: 25px;
         }
         
         .form-group {
@@ -365,14 +342,13 @@
         .form-label {
             display: block;
             margin-bottom: 8px;
-            font-size: 14px;
             font-weight: 500;
             color: #374151;
         }
         
         .form-input, .form-select {
             width: 100%;
-            padding: 10px 14px;
+            padding: 10px;
             border: 2px solid #e5e7eb;
             border-radius: 8px;
             font-size: 14px;
@@ -384,41 +360,24 @@
         }
         
         .modal-footer {
-            padding: 20px 25px;
-            background: #f9fafb;
-            border-top: 2px solid #e5e7eb;
             display: flex;
-            justify-content: flex-end;
             gap: 10px;
+            justify-content: flex-end;
+            margin-top: 30px;
         }
         
-        /* Activity Log */
-        .activity-log {
-            background: #f9fafb;
+        .btn-cancel {
+            background: #6b7280;
+            color: white;
+            border: none;
+            padding: 10px 20px;
             border-radius: 8px;
-            padding: 15px;
-            margin-top: 20px;
-            max-height: 300px;
-            overflow-y: auto;
+            cursor: pointer;
+            font-weight: 500;
         }
         
-        .activity-item {
-            padding: 10px;
-            background: white;
-            border-radius: 6px;
-            margin-bottom: 10px;
-            border-left: 3px solid #3b82f6;
-        }
-        
-        .activity-time {
-            font-size: 12px;
-            color: #6b7280;
-        }
-        
-        .activity-action {
-            font-size: 14px;
-            color: #1e293b;
-            margin-top: 5px;
+        .btn-cancel:hover {
+            background: #4b5563;
         }
         
         /* Alert Messages */
@@ -437,12 +396,6 @@
             background: #dcfce7;
             color: #166534;
             border: 1px solid #bbf7d0;
-        }
-        
-        .alert-info {
-            background: #dbeafe;
-            color: #1e40af;
-            border: 1px solid #bfdbfe;
         }
     </style>
 </head>
@@ -463,14 +416,28 @@
         <!-- Page Header -->
         <div class="page-header">
             <h1 class="page-title">Clinics Overview</h1>
-            <p class="page-subtitle">Manage and monitor all registered clinics on the platform</p>
+            <p class="page-subtitle">Manage and monitor all registered clinics</p>
         </div>
 
         <!-- Alert Messages -->
         <div id="alertMessage" class="alert"></div>
 
-        <!-- Statistics Cards -->
-        <div class="stats-grid">
+        <!-- Search and Actions Bar -->
+        <div class="actions-bar">
+            <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <input type="text" class="search-input" id="searchInput" placeholder="Search clinics by name or code...">
+            </div>
+            <select class="filter-select" id="statusFilter">
+                <option value="">All Status</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+            </select>
+            <button class="btn-primary" onclick="exportClinics()">Export CSV</button>
+        </div>
+
+        <!-- Stats Summary -->
+        <div class="stats-summary">
             <div class="stat-card">
                 <div class="stat-number" id="totalClinics">0</div>
                 <div class="stat-label">Total Clinics</div>
@@ -480,29 +447,12 @@
                 <div class="stat-label">Active Clinics</div>
             </div>
             <div class="stat-card">
-                <div class="stat-number" id="suspendedClinics">0</div>
-                <div class="stat-label">Suspended</div>
-            </div>
-            <div class="stat-card">
                 <div class="stat-number" id="totalPatients">0</div>
                 <div class="stat-label">Total Patients</div>
             </div>
-        </div>
-
-        <!-- Search and Filter Bar -->
-        <div class="controls-bar">
-            <div class="search-group">
-                <input type="text" class="search-input" id="searchInput" placeholder="Search by clinic name, code, owner, or email...">
-                <select class="filter-select" id="statusFilter">
-                    <option value="">All Status</option>
-                    <option value="active">Active</option>
-                    <option value="inactive">Inactive</option>
-                    <option value="suspended">Suspended</option>
-                </select>
-            </div>
-            <div>
-                <button class="btn btn-secondary" onclick="exportClinics()">Export CSV</button>
-                <button class="btn btn-primary" onclick="window.location.href='super-admin-registration.html'">Add New Clinic</button>
+            <div class="stat-card">
+                <div class="stat-number" id="avgPatients">0</div>
+                <div class="stat-label">Avg Patients/Clinic</div>
             </div>
         </div>
 
@@ -510,15 +460,14 @@
         <div class="table-container">
             <div class="table-header">
                 <h2 class="table-title">All Clinics</h2>
-                <span id="clinicCount">0 clinics</span>
+                <span id="recordCount" style="color: #6b7280; font-size: 14px;">Loading...</span>
             </div>
             <table class="clinics-table">
                 <thead>
                     <tr>
-                        <th>Clinic Details</th>
-                        <th>Owner</th>
-                        <th>Contact</th>
-                        <th>Credentials</th>
+                        <th>Clinic Code</th>
+                        <th>Clinic Name</th>
+                        <th>Location</th>
                         <th>Patients</th>
                         <th>Status</th>
                         <th>Actions</th>
@@ -526,7 +475,7 @@
                 </thead>
                 <tbody id="clinicsTableBody">
                     <tr>
-                        <td colspan="7" style="text-align: center; padding: 40px;">Loading clinics...</td>
+                        <td colspan="6" style="text-align: center; padding: 40px;">Loading clinics...</td>
                     </tr>
                 </tbody>
             </table>
@@ -537,76 +486,38 @@
     <div id="editModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 class="modal-title">Edit Clinic Details</h2>
-                <button class="close-btn" onclick="closeEditModal()">&times;</button>
+                <h2 class="modal-title">Edit Clinic</h2>
             </div>
-            <div class="modal-body">
-                <form id="editForm">
-                    <input type="hidden" id="editClinicId">
-                    
-                    <div class="form-group">
-                        <label class="form-label">Clinic Name</label>
-                        <input type="text" class="form-input" id="editClinicName" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">Owner Name</label>
-                        <input type="text" class="form-input" id="editOwnerName">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">Email</label>
-                        <input type="email" class="form-input" id="editEmail">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">Phone</label>
-                        <input type="tel" class="form-input" id="editPhone">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">Mobile</label>
-                        <input type="tel" class="form-input" id="editMobile">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">Address</label>
-                        <textarea class="form-input" id="editAddress" rows="3"></textarea>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">Status</label>
-                        <select class="form-select" id="editStatus">
-                            <option value="active">Active</option>
-                            <option value="inactive">Inactive</option>
-                            <option value="suspended">Suspended</option>
-                        </select>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="closeEditModal()">Cancel</button>
-                <button class="btn btn-primary" onclick="saveClinicChanges()">Save Changes</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Activity Modal -->
-    <div id="activityModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="modal-title">Clinic Activity Log</h2>
-                <button class="close-btn" onclick="closeActivityModal()">&times;</button>
-            </div>
-            <div class="modal-body">
-                <h3 id="activityClinicName" style="margin-bottom: 20px; color: #1e3a8a;"></h3>
-                <div class="activity-log" id="activityLog">
-                    <!-- Activity items will be loaded here -->
+            <form id="editForm">
+                <input type="hidden" id="editClinicId">
+                <div class="form-group">
+                    <label class="form-label">Clinic Name</label>
+                    <input type="text" class="form-input" id="editClinicName" required>
                 </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="closeActivityModal()">Close</button>
-            </div>
+                <div class="form-group">
+                    <label class="form-label">Location</label>
+                    <input type="text" class="form-input" id="editLocation">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Contact Email</label>
+                    <input type="email" class="form-input" id="editEmail">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Contact Phone</label>
+                    <input type="tel" class="form-input" id="editPhone">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Status</label>
+                    <select class="form-select" id="editStatus">
+                        <option value="true">Active</option>
+                        <option value="false">Inactive</option>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-cancel" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn-primary">Save Changes</button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -621,31 +532,41 @@
         const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
         
         let allClinics = [];
-        let filteredClinics = [];
+        let patientCounts = {};
         
+        // Load clinics on page load
         document.addEventListener('DOMContentLoaded', async function() {
             await loadClinics();
             setupEventListeners();
         });
         
-        function setupEventListeners() {
-            document.getElementById('searchInput').addEventListener('input', filterClinics);
-            document.getElementById('statusFilter').addEventListener('change', filterClinics);
-        }
-        
         async function loadClinics() {
             try {
-                const { data: clinics, error } = await supabase
+                // Load clinics
+                const { data: clinics, error: clinicsError } = await supabase
                     .from('clinics')
                     .select('*')
-                    .order('created_at', { ascending: false });
+                    .order('clinic_code');
                 
-                if (error) throw error;
+                if (clinicsError) throw clinicsError;
+                
+                // Load patient counts per clinic
+                const { data: patientData, error: patientError } = await supabase
+                    .from('patients')
+                    .select('clinic_id');
+                
+                if (!patientError && patientData) {
+                    // Count patients per clinic
+                    patientData.forEach(patient => {
+                        if (patient.clinic_id) {
+                            patientCounts[patient.clinic_id] = (patientCounts[patient.clinic_id] || 0) + 1;
+                        }
+                    });
+                }
                 
                 allClinics = clinics || [];
-                filteredClinics = allClinics;
-                displayClinics();
-                updateStatistics();
+                updateStats();
+                displayClinics(allClinics);
                 
             } catch (error) {
                 console.error('Error loading clinics:', error);
@@ -653,297 +574,201 @@
             }
         }
         
-        async function loadPatientCount(clinicId) {
-            try {
-                const { count } = await supabase
-                    .from('patients')
-                    .select('*', { count: 'exact', head: true })
-                    .eq('clinic_id', clinicId);
-                return count || 0;
-            } catch (error) {
-                return 0;
-            }
+        function updateStats() {
+            const totalClinics = allClinics.length;
+            const activeClinics = allClinics.filter(c => c.is_active !== false).length;
+            const totalPatients = Object.values(patientCounts).reduce((sum, count) => sum + count, 0);
+            const avgPatients = totalClinics > 0 ? Math.round(totalPatients / totalClinics) : 0;
+            
+            document.getElementById('totalClinics').textContent = totalClinics;
+            document.getElementById('activeClinics').textContent = activeClinics;
+            document.getElementById('totalPatients').textContent = totalPatients;
+            document.getElementById('avgPatients').textContent = avgPatients;
         }
         
-        async function displayClinics() {
+        function displayClinics(clinics) {
             const tbody = document.getElementById('clinicsTableBody');
+            document.getElementById('recordCount').textContent = `${clinics.length} clinics found`;
             
-            if (filteredClinics.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 40px;">No clinics found</td></tr>';
-                document.getElementById('clinicCount').textContent = '0 clinics';
+            if (clinics.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 40px;">No clinics found</td></tr>';
                 return;
             }
             
-            // Get patient counts for all clinics
-            const patientCounts = {};
-            for (const clinic of filteredClinics) {
-                patientCounts[clinic.id] = await loadPatientCount(clinic.id);
-            }
-            
-            tbody.innerHTML = filteredClinics.map(clinic => {
-                const status = clinic.is_active ? 'active' : 'inactive';
-                const statusClass = status === 'active' ? 'status-active' : 'status-inactive';
+            tbody.innerHTML = clinics.map(clinic => {
                 const patientCount = patientCounts[clinic.id] || 0;
+                const isActive = clinic.is_active !== false;
                 
                 return `
                     <tr>
+                        <td><span class="clinic-code">${clinic.clinic_code}</span></td>
+                        <td><span class="clinic-name">${clinic.clinic_name}</span></td>
+                        <td>${clinic.location || 'Not specified'}</td>
+                        <td><strong>${patientCount}</strong></td>
                         <td>
-                            <div class="clinic-name">${clinic.clinic_name || 'Unnamed Clinic'}</div>
-                            <span class="clinic-code">${clinic.clinic_code}</span>
-                        </td>
-                        <td>${clinic.owner_name || '-'}</td>
-                        <td>
-                            <div>${clinic.email || '-'}</div>
-                            <div style="font-size: 12px; color: #6b7280;">
-                                ${clinic.phone || ''} ${clinic.mobile ? '| ' + clinic.mobile : ''}
-                            </div>
-                        </td>
-                        <td>
-                            <div style="font-family: monospace; font-size: 12px;">
-                                <div>User: ${clinic.username}</div>
-                                <div style="color: #6b7280;">Pass: ••••••••</div>
-                            </div>
-                        </td>
-                        <td style="text-align: center;">
-                            <span style="font-weight: 600;">${patientCount}</span>
-                        </td>
-                        <td>
-                            <span class="status-badge ${statusClass}">
-                                ${status.toUpperCase()}
+                            <span class="status-badge ${isActive ? 'active' : 'inactive'}">
+                                ${isActive ? 'Active' : 'Inactive'}
                             </span>
                         </td>
                         <td>
                             <div class="action-buttons">
-                                <button class="btn btn-primary btn-small" onclick="editClinic(${clinic.id})">Edit</button>
-                                <button class="btn btn-secondary btn-small" onclick="resetPassword(${clinic.id})">Reset Pass</button>
-                                <button class="btn btn-success btn-small" onclick="viewActivity(${clinic.id})">Activity</button>
-                                <button class="btn ${clinic.is_active ? 'btn-danger' : 'btn-success'} btn-small" 
-                                        onclick="toggleStatus(${clinic.id}, ${clinic.is_active})">
-                                    ${clinic.is_active ? 'Suspend' : 'Activate'}
+                                <button class="btn-action btn-edit" onclick="editClinic(${clinic.id})">Edit</button>
+                                <button class="btn-action btn-view" onclick="viewClinic(${clinic.id})">View</button>
+                                <button class="btn-action btn-suspend" onclick="toggleStatus(${clinic.id}, ${isActive})">
+                                    ${isActive ? 'Suspend' : 'Activate'}
                                 </button>
                             </div>
                         </td>
                     </tr>
                 `;
             }).join('');
-            
-            document.getElementById('clinicCount').textContent = `${filteredClinics.length} clinic${filteredClinics.length !== 1 ? 's' : ''}`;
         }
         
-        async function updateStatistics() {
-            const total = allClinics.length;
-            const active = allClinics.filter(c => c.is_active).length;
-            const suspended = allClinics.filter(c => !c.is_active).length;
+        function setupEventListeners() {
+            // Search functionality
+            document.getElementById('searchInput').addEventListener('input', filterClinics);
+            document.getElementById('statusFilter').addEventListener('change', filterClinics);
             
-            // Get total patient count
-            const { count: totalPatientsCount } = await supabase
-                .from('patients')
-                .select('*', { count: 'exact', head: true });
-            
-            document.getElementById('totalClinics').textContent = total;
-            document.getElementById('activeClinics').textContent = active;
-            document.getElementById('suspendedClinics').textContent = suspended;
-            document.getElementById('totalPatients').textContent = totalPatientsCount || 0;
+            // Edit form submission
+            document.getElementById('editForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await saveClinicChanges();
+            });
         }
         
         function filterClinics() {
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
             const statusFilter = document.getElementById('statusFilter').value;
             
-            filteredClinics = allClinics.filter(clinic => {
-                const matchesSearch = !searchTerm || 
-                    (clinic.clinic_name && clinic.clinic_name.toLowerCase().includes(searchTerm)) ||
-                    (clinic.clinic_code && clinic.clinic_code.toLowerCase().includes(searchTerm)) ||
-                    (clinic.owner_name && clinic.owner_name.toLowerCase().includes(searchTerm)) ||
-                    (clinic.email && clinic.email.toLowerCase().includes(searchTerm)) ||
-                    (clinic.username && clinic.username.toLowerCase().includes(searchTerm));
-                
-                const matchesStatus = !statusFilter || 
-                    (statusFilter === 'active' && clinic.is_active) ||
-                    (statusFilter === 'inactive' && !clinic.is_active);
-                
-                return matchesSearch && matchesStatus;
-            });
+            let filtered = allClinics;
             
-            displayClinics();
+            if (searchTerm) {
+                filtered = filtered.filter(clinic => 
+                    clinic.clinic_name.toLowerCase().includes(searchTerm) ||
+                    clinic.clinic_code.toLowerCase().includes(searchTerm) ||
+                    (clinic.location && clinic.location.toLowerCase().includes(searchTerm))
+                );
+            }
+            
+            if (statusFilter) {
+                filtered = filtered.filter(clinic => 
+                    statusFilter === 'active' ? clinic.is_active !== false : clinic.is_active === false
+                );
+            }
+            
+            displayClinics(filtered);
         }
         
-        window.editClinic = function(clinicId) {
+        async function editClinic(clinicId) {
             const clinic = allClinics.find(c => c.id === clinicId);
             if (!clinic) return;
             
             document.getElementById('editClinicId').value = clinic.id;
-            document.getElementById('editClinicName').value = clinic.clinic_name || '';
-            document.getElementById('editOwnerName').value = clinic.owner_name || '';
-            document.getElementById('editEmail').value = clinic.email || '';
-            document.getElementById('editPhone').value = clinic.phone || '';
-            document.getElementById('editMobile').value = clinic.mobile || '';
-            document.getElementById('editAddress').value = clinic.address || '';
-            document.getElementById('editStatus').value = clinic.is_active ? 'active' : 'inactive';
+            document.getElementById('editClinicName').value = clinic.clinic_name;
+            document.getElementById('editLocation').value = clinic.location || '';
+            document.getElementById('editEmail').value = clinic.contact_email || '';
+            document.getElementById('editPhone').value = clinic.contact_phone || '';
+            document.getElementById('editStatus').value = clinic.is_active !== false ? 'true' : 'false';
             
-            document.getElementById('editModal').classList.add('active');
-        };
+            document.getElementById('editModal').classList.add('show');
+        }
         
-        window.saveClinicChanges = async function() {
+        async function saveClinicChanges() {
             const clinicId = document.getElementById('editClinicId').value;
-            const status = document.getElementById('editStatus').value;
             
-            const updateData = {
+            const updates = {
                 clinic_name: document.getElementById('editClinicName').value,
-                owner_name: document.getElementById('editOwnerName').value,
-                email: document.getElementById('editEmail').value,
-                phone: document.getElementById('editPhone').value,
-                mobile: document.getElementById('editMobile').value,
-                address: document.getElementById('editAddress').value,
-                is_active: status === 'active'
+                location: document.getElementById('editLocation').value,
+                contact_email: document.getElementById('editEmail').value,
+                contact_phone: document.getElementById('editPhone').value,
+                is_active: document.getElementById('editStatus').value === 'true'
             };
             
             try {
                 const { error } = await supabase
                     .from('clinics')
-                    .update(updateData)
+                    .update(updates)
                     .eq('id', clinicId);
                 
                 if (error) throw error;
                 
-                showAlert('Clinic details updated successfully', 'success');
-                closeEditModal();
+                showAlert('Clinic updated successfully', 'success');
+                closeModal();
                 await loadClinics();
                 
             } catch (error) {
                 console.error('Error updating clinic:', error);
-                showAlert('Error updating clinic details', 'error');
+                showAlert('Error updating clinic', 'error');
             }
-        };
+        }
         
-        window.resetPassword = async function(clinicId) {
-            const clinic = allClinics.find(c => c.id === clinicId);
-            if (!clinic) return;
-            
-            if (confirm(`Reset password for ${clinic.clinic_name}?`)) {
-                // Generate new password
-                const newPassword = generateSecurePassword();
-                
-                try {
-                    const { error } = await supabase
-                        .from('clinics')
-                        .update({ password_hash: newPassword })
-                        .eq('id', clinicId);
-                    
-                    if (error) throw error;
-                    
-                    // Show new password to admin
-                    alert(`New password for ${clinic.clinic_name}:\n\n${newPassword}\n\nPlease copy and send to the clinic.`);
-                    
-                } catch (error) {
-                    console.error('Error resetting password:', error);
-                    showAlert('Error resetting password', 'error');
-                }
-            }
-        };
-        
-        window.viewActivity = function(clinicId) {
-            const clinic = allClinics.find(c => c.id === clinicId);
-            if (!clinic) return;
-            
-            document.getElementById('activityClinicName').textContent = clinic.clinic_name;
-            
-            // Sample activity data - in production, this would come from an activity log table
-            const activities = [
-                { time: '2025-01-09 14:30', action: 'User logged in' },
-                { time: '2025-01-09 14:25', action: 'New patient registered' },
-                { time: '2025-01-09 10:15', action: 'Health assessment completed' },
-                { time: '2025-01-08 16:45', action: 'Treatment session started' },
-                { time: '2025-01-08 15:30', action: 'Patient data updated' }
-            ];
-            
-            const activityLog = document.getElementById('activityLog');
-            activityLog.innerHTML = activities.map(activity => `
-                <div class="activity-item">
-                    <div class="activity-time">${activity.time}</div>
-                    <div class="activity-action">${activity.action}</div>
-                </div>
-            `).join('');
-            
-            document.getElementById('activityModal').classList.add('active');
-        };
-        
-        window.toggleStatus = async function(clinicId, currentStatus) {
-            const clinic = allClinics.find(c => c.id === clinicId);
-            if (!clinic) return;
-            
+        async function toggleStatus(clinicId, currentStatus) {
             const action = currentStatus ? 'suspend' : 'activate';
-            if (confirm(`Are you sure you want to ${action} ${clinic.clinic_name}?`)) {
-                try {
-                    const { error } = await supabase
-                        .from('clinics')
-                        .update({ is_active: !currentStatus })
-                        .eq('id', clinicId);
-                    
-                    if (error) throw error;
-                    
-                    showAlert(`Clinic ${action}d successfully`, 'success');
-                    await loadClinics();
-                    
-                } catch (error) {
-                    console.error('Error updating clinic status:', error);
-                    showAlert('Error updating clinic status', 'error');
-                }
+            if (!confirm(`Are you sure you want to ${action} this clinic?`)) return;
+            
+            try {
+                const { error } = await supabase
+                    .from('clinics')
+                    .update({ is_active: !currentStatus })
+                    .eq('id', clinicId);
+                
+                if (error) throw error;
+                
+                showAlert(`Clinic ${action}d successfully`, 'success');
+                await loadClinics();
+                
+            } catch (error) {
+                console.error('Error updating clinic status:', error);
+                showAlert('Error updating clinic status', 'error');
             }
-        };
+        }
         
-        window.exportClinics = function() {
-            // Convert clinics data to CSV
-            const headers = ['Clinic Code', 'Clinic Name', 'Owner', 'Email', 'Phone', 'Status'];
-            const rows = filteredClinics.map(clinic => [
-                clinic.clinic_code,
-                clinic.clinic_name || '',
-                clinic.owner_name || '',
-                clinic.email || '',
-                clinic.phone || '',
-                clinic.is_active ? 'Active' : 'Inactive'
-            ]);
+        function viewClinic(clinicId) {
+            const clinic = allClinics.find(c => c.id === clinicId);
+            if (!clinic) return;
             
-            let csv = headers.join(',') + '\n';
-            rows.forEach(row => {
-                csv += row.map(cell => `"${cell}"`).join(',') + '\n';
-            });
+            const patientCount = patientCounts[clinic.id] || 0;
             
-            // Download CSV
-            const blob = new Blob([csv], { type: 'text/csv' });
+            alert(`
+                Clinic Details:
+                
+                Code: ${clinic.clinic_code}
+                Name: ${clinic.clinic_name}
+                Location: ${clinic.location || 'Not specified'}
+                Email: ${clinic.contact_email || 'Not specified'}
+                Phone: ${clinic.contact_phone || 'Not specified'}
+                Patients: ${patientCount}
+                Status: ${clinic.is_active !== false ? 'Active' : 'Inactive'}
+                Created: ${new Date(clinic.created_at).toLocaleDateString()}
+            `);
+        }
+        
+        function exportClinics() {
+            const csvContent = [
+                ['Clinic Code', 'Clinic Name', 'Location', 'Patients', 'Status', 'Email', 'Phone'],
+                ...allClinics.map(clinic => [
+                    clinic.clinic_code,
+                    clinic.clinic_name,
+                    clinic.location || '',
+                    patientCounts[clinic.id] || 0,
+                    clinic.is_active !== false ? 'Active' : 'Inactive',
+                    clinic.contact_email || '',
+                    clinic.contact_phone || ''
+                ])
+            ].map(row => row.join(',')).join('\n');
+            
+            const blob = new Blob([csvContent], { type: 'text/csv' });
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
             a.download = `clinics_export_${new Date().toISOString().split('T')[0]}.csv`;
             a.click();
-        };
-        
-        window.closeEditModal = function() {
-            document.getElementById('editModal').classList.remove('active');
-        };
-        
-        window.closeActivityModal = function() {
-            document.getElementById('activityModal').classList.remove('active');
-        };
-        
-        function generateSecurePassword() {
-            const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-            const lowercase = 'abcdefghijklmnopqrstuvwxyz';
-            const numbers = '0123456789';
-            const special = '!@#$%&';
-            const all = uppercase + lowercase + numbers + special;
             
-            let password = '';
-            password += uppercase[Math.floor(Math.random() * uppercase.length)];
-            password += lowercase[Math.floor(Math.random() * lowercase.length)];
-            password += numbers[Math.floor(Math.random() * numbers.length)];
-            password += special[Math.floor(Math.random() * special.length)];
-            
-            for (let i = 4; i < 12; i++) {
-                password += all[Math.floor(Math.random() * all.length)];
-            }
-            
-            return password.split('').sort(() => Math.random() - 0.5).join('');
+            showAlert('Clinics exported successfully', 'success');
+        }
+        
+        function closeModal() {
+            document.getElementById('editModal').classList.remove('show');
         }
         
         function showAlert(message, type) {
