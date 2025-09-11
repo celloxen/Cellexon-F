@@ -568,13 +568,11 @@
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlZmlmd3pnYXpxbHJpZ3d1bXFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcyNTM0MjYsImV4cCI6MjA3MjgyOTQyNn0.wcUBq6Pszjtqn5aBtuu3iXBE4BLmu8x9LtJbsMWlIiA';
         
         let supabase;
-        let usingLocalStorage = false;
         
         try {
             supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
         } catch (error) {
             console.error('Failed to initialize Supabase:', error);
-            usingLocalStorage = true;
         }
         
         // Initialize on page load
@@ -610,10 +608,7 @@
         
         async function loadClinics() {
             try {
-                if (!supabase) {
-                    console.log('Using local data');
-                    return;
-                }
+                if (!supabase) return;
                 
                 const { data: clinics, error } = await supabase
                     .from('clinics')
@@ -638,6 +633,7 @@
             try {
                 let clinicsCount = 0;
                 let patientsCount = 0;
+                let dbReportsCount = 0;
                 
                 if (supabase) {
                     const { count: clinics } = await supabase
@@ -649,13 +645,16 @@
                         .from('patients')
                         .select('*', { count: 'exact', head: true });
                     patientsCount = patients || 0;
+                    
+                    const { count: reports } = await supabase
+                        .from('system_reports')
+                        .select('*', { count: 'exact', head: true });
+                    dbReportsCount = reports || 0;
                 }
                 
-                // Load reports count from localStorage
                 const localReports = JSON.parse(localStorage.getItem('celloxen_reports') || '[]');
-                const totalReportsCount = localReports.length;
+                const totalReportsCount = dbReportsCount + localReports.length;
                 
-                // Count this month's reports
                 const startOfMonth = new Date();
                 startOfMonth.setDate(1);
                 startOfMonth.setHours(0, 0, 0, 0);
@@ -666,7 +665,6 @@
                 
                 const monthlyRevenue = clinicsCount * 299;
                 
-                // Update display
                 document.getElementById('totalReports').textContent = totalReportsCount;
                 document.getElementById('totalClinics').textContent = clinicsCount;
                 document.getElementById('totalPatients').textContent = patientsCount;
@@ -681,9 +679,11 @@
         async function loadSavedReports() {
             try {
                 let reports = [];
-                let storageType = 'Database';
+                let storageType = 'Local Storage';
                 
-                // Try to load from database first
+                const localReports = JSON.parse(localStorage.getItem('celloxen_reports') || '[]');
+                reports = localReports;
+                
                 if (supabase) {
                     try {
                         const { data: dbReports, error } = await supabase
@@ -692,20 +692,13 @@
                             .order('created_at', { ascending: false })
                             .limit(50);
                         
-                        if (!error && dbReports) {
-                            reports = dbReports;
-                        } else {
-                            throw new Error('Database unavailable');
+                        if (!error && dbReports && dbReports.length > 0) {
+                            reports = [...dbReports, ...localReports];
+                            storageType = 'Database + Local';
                         }
                     } catch (dbError) {
-                        // Fall back to localStorage
-                        reports = JSON.parse(localStorage.getItem('celloxen_reports') || '[]');
-                        storageType = 'Local Storage';
+                        console.log('Using local storage only');
                     }
-                } else {
-                    // Use localStorage
-                    reports = JSON.parse(localStorage.getItem('celloxen_reports') || '[]');
-                    storageType = 'Local Storage';
                 }
                 
                 document.getElementById('storageStatus').textContent = `Storage: ${storageType}`;
@@ -713,9 +706,6 @@
                 
             } catch (error) {
                 console.error('Error loading reports:', error);
-                const localReports = JSON.parse(localStorage.getItem('celloxen_reports') || '[]');
-                document.getElementById('storageStatus').textContent = 'Storage: Local Storage';
-                updateReportsTable(localReports);
             }
         }
         
@@ -782,31 +772,39 @@
         }
         
         async function saveReport(report) {
-            // Try to save to database first
+            // Always save to localStorage for now
+            saveToLocalStorage(report);
+            
+            // Try to save to database as well (optional)
             if (supabase) {
                 try {
+                    const dbReport = {
+                        report_name: report.report_name,
+                        report_type: report.report_type,
+                        period: report.period,
+                        generated_by: report.generated_by,
+                        report_data: report.report_data,
+                        status: report.status,
+                        clinic_filter: report.clinic_filter
+                    };
+                    
                     const { data, error } = await supabase
                         .from('system_reports')
-                        .insert([report])
-                        .select();
+                        .insert([dbReport]);
                     
-                    if (!error) {
-                        return; // Successfully saved to database
+                    if (error) {
+                        console.log('Database save failed:', error);
                     }
                 } catch (dbError) {
-                    console.log('Database save failed, using localStorage');
+                    console.log('Database save error:', dbError);
                 }
             }
-            
-            // Fall back to localStorage
-            saveToLocalStorage(report);
         }
         
         function saveToLocalStorage(report) {
             const existingReports = JSON.parse(localStorage.getItem('celloxen_reports') || '[]');
             existingReports.unshift(report);
             
-            // Keep only last 100 reports in localStorage
             if (existingReports.length > 100) {
                 existingReports.length = 100;
             }
@@ -818,6 +816,7 @@
             try {
                 let clinics = [];
                 let patients = [];
+                let treatments = [];
                 
                 if (supabase) {
                     let patientsQuery = supabase.from('patients').select('*');
@@ -830,9 +829,13 @@
                     
                     const { data: patientsData } = await patientsQuery;
                     const { data: clinicsData } = await clinicsQuery;
+                    const { data: treatmentsData } = await supabase
+                        .from('treatment_sessions')
+                        .select('*');
                     
                     patients = patientsData || [];
                     clinics = clinicsData || [];
+                    treatments = treatmentsData || [];
                 }
                 
                 return {
@@ -840,18 +843,21 @@
                     statistics: {
                         totalClinics: clinics.length,
                         totalPatients: patients.length,
+                        totalTreatments: treatments.length,
                         clinicFilter: clinicFilter
                     },
                     clinics: clinics,
-                    patients: patients
+                    patients: patients,
+                    treatments: treatments
                 };
             } catch (error) {
                 console.error('Error gathering report data:', error);
                 return {
                     dateRange: { start: startDate, end: endDate },
-                    statistics: { totalClinics: 0, totalPatients: 0 },
+                    statistics: { totalClinics: 0, totalPatients: 0, totalTreatments: 0 },
                     clinics: [],
-                    patients: []
+                    patients: [],
+                    treatments: []
                 };
             }
         }
@@ -860,12 +866,19 @@
             try {
                 let clinics = [];
                 let patients = [];
+                let treatments = [];
+                let therapies = [];
                 
                 if (supabase) {
                     const { data: clinicsData } = await supabase.from('clinics').select('*');
                     const { data: patientsData } = await supabase.from('patients').select('*');
+                    const { data: treatmentsData } = await supabase.from('treatment_sessions').select('*');
+                    const { data: therapiesData } = await supabase.from('therapy_configurations').select('*');
+                    
                     clinics = clinicsData || [];
                     patients = patientsData || [];
+                    treatments = treatmentsData || [];
+                    therapies = therapiesData || [];
                 }
                 
                 const reportData = {
@@ -874,17 +887,19 @@
                     statistics: {
                         clinicsCount: clinics.length,
                         patientsCount: patients.length,
+                        treatmentsCount: treatments.length,
+                        therapiesCount: therapies.length,
                         activeClinics: clinics.filter(c => c.is_active).length
                     }
                 };
                 
-                // Add type-specific data
                 switch(type) {
                     case 'clinical':
                         reportData.clinicalData = {
                             totalAssessments: patients.length * 2,
+                            totalSessions: treatments.length,
                             averageSessionTime: 45,
-                            treatmentTypes: ['Electromagnetic', 'IRIS Analysis', 'Health Assessment']
+                            treatmentTypes: therapies.map(t => t.name)
                         };
                         break;
                     case 'financial':
@@ -894,11 +909,11 @@
                             monthlyRecurring: clinics.length * 299
                         };
                         break;
-                    case 'patient':
-                        reportData.patientData = {
-                            newPatientsThisMonth: Math.floor(patients.length * 0.2),
-                            retentionRate: 85,
-                            averageAge: 45
+                    case 'therapy':
+                        reportData.therapyData = {
+                            totalProtocols: therapies.length,
+                            completedSessions: treatments.filter(t => t.status === 'completed').length,
+                            protocols: therapies
                         };
                         break;
                 }
@@ -926,6 +941,7 @@
             
             tbody.innerHTML = reports.map(report => {
                 const date = new Date(report.created_at);
+                const reportId = report.id;
                 return `
                     <tr>
                         <td><div class="report-name">${report.report_name}</div></td>
@@ -934,8 +950,8 @@
                         <td>${date.toLocaleDateString('en-GB')} ${date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}</td>
                         <td style="color: #10b981; font-weight: 500;">${report.status || 'Ready'}</td>
                         <td>
-                            <button class="download-btn" onclick="downloadReport('${report.id}')">Download</button>
-                            <button class="delete-btn" onclick="deleteReport('${report.id}')">Delete</button>
+                            <button class="download-btn" onclick="downloadReport(${reportId})">Download</button>
+                            <button class="delete-btn" onclick="deleteReport(${reportId})">Delete</button>
                         </td>
                     </tr>
                 `;
@@ -944,10 +960,15 @@
         
         window.downloadReport = async function(reportId) {
             try {
+                console.log('Downloading report:', reportId);
                 let report = null;
                 
-                // Try to get from database first
-                if (supabase) {
+                // Check localStorage first
+                const localReports = JSON.parse(localStorage.getItem('celloxen_reports') || '[]');
+                report = localReports.find(r => r.id == reportId);
+                
+                // If not found locally, check database
+                if (!report && supabase) {
                     try {
                         const { data, error } = await supabase
                             .from('system_reports')
@@ -955,18 +976,10 @@
                             .eq('id', reportId)
                             .single();
                         
-                        if (!error && data) {
-                            report = data;
-                        }
+                        if (data) report = data;
                     } catch (dbError) {
-                        // Fall back to localStorage
+                        console.log('Not found in database');
                     }
-                }
-                
-                // If not found in database, try localStorage
-                if (!report) {
-                    const localReports = JSON.parse(localStorage.getItem('celloxen_reports') || '[]');
-                    report = localReports.find(r => r.id == reportId);
                 }
                 
                 if (!report) {
@@ -974,17 +987,15 @@
                     return;
                 }
                 
-                showAlert('Preparing download...', 'info');
-                
                 // Create CSV content
                 const csvRows = [];
                 csvRows.push(['CELLOXEN SYSTEM REPORT']);
                 csvRows.push(['']);
-                csvRows.push(['Report Name:', report.report_name]);
-                csvRows.push(['Generated:', new Date(report.created_at).toLocaleString()]);
-                csvRows.push(['Generated By:', report.generated_by]);
-                csvRows.push(['Period:', report.period]);
-                csvRows.push(['Type:', report.report_type]);
+                csvRows.push(['Report Name', report.report_name]);
+                csvRows.push(['Generated', new Date(report.created_at || new Date()).toLocaleString()]);
+                csvRows.push(['Generated By', report.generated_by || 'System']);
+                csvRows.push(['Period', report.period]);
+                csvRows.push(['Type', report.report_type]);
                 csvRows.push(['']);
                 
                 if (report.report_data) {
@@ -992,32 +1003,46 @@
                     csvRows.push(['']);
                     
                     if (report.report_data.statistics) {
-                        csvRows.push(['Statistics:']);
+                        csvRows.push(['Statistics']);
                         Object.entries(report.report_data.statistics).forEach(([key, value]) => {
-                            csvRows.push([key, value]);
+                            csvRows.push([key.replace(/_/g, ' '), value]);
+                        });
+                    }
+                    
+                    if (report.report_data.clinics && report.report_data.clinics.length > 0) {
+                        csvRows.push(['']);
+                        csvRows.push(['Clinics']);
+                        report.report_data.clinics.forEach(clinic => {
+                            csvRows.push([clinic.clinic_code, clinic.clinic_name]);
                         });
                     }
                 }
                 
-                const csvContent = csvRows.map(row => row.join(',')).join('\n');
+                // Convert to CSV
+                const csvContent = csvRows.map(row => {
+                    return row.map(cell => {
+                        const str = String(cell || '');
+                        return str.includes(',') ? `"${str}"` : str;
+                    }).join(',');
+                }).join('\n');
                 
-                // Create and trigger download
+                // Download
                 const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-                const link = document.createElement('a');
                 const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
                 
-                link.setAttribute('href', url);
-                link.setAttribute('download', `${report.report_name.replace(/\s+/g, '_')}_${reportId}.csv`);
-                link.style.visibility = 'hidden';
-                
+                link.href = url;
+                link.download = `${report.report_name.replace(/[^a-z0-9]/gi, '_')}_${new Date().toISOString().split('T')[0]}.csv`;
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
                 
+                setTimeout(() => URL.revokeObjectURL(url), 100);
+                
                 showAlert('Report downloaded successfully!', 'success');
                 
             } catch (error) {
-                console.error('Error downloading report:', error);
+                console.error('Download error:', error);
                 showAlert('Error downloading report', 'error');
             }
         };
@@ -1026,29 +1051,18 @@
             if (!confirm('Are you sure you want to delete this report?')) return;
             
             try {
-                // Try to delete from database first
-                if (supabase) {
-                    try {
-                        const { error } = await supabase
-                            .from('system_reports')
-                            .delete()
-                            .eq('id', reportId);
-                        
-                        if (!error) {
-                            showAlert('Report deleted successfully', 'success');
-                            await loadStatistics();
-                            await loadSavedReports();
-                            return;
-                        }
-                    } catch (dbError) {
-                        // Fall back to localStorage
-                    }
-                }
-                
                 // Delete from localStorage
                 const localReports = JSON.parse(localStorage.getItem('celloxen_reports') || '[]');
                 const filteredReports = localReports.filter(r => r.id != reportId);
                 localStorage.setItem('celloxen_reports', JSON.stringify(filteredReports));
+                
+                // Try to delete from database too
+                if (supabase) {
+                    await supabase
+                        .from('system_reports')
+                        .delete()
+                        .eq('id', reportId);
+                }
                 
                 showAlert('Report deleted successfully', 'success');
                 await loadStatistics();
