@@ -589,7 +589,7 @@
             <h2 class="section-title">Today's Schedule</h2>
             <div class="schedule-list" id="scheduleList">
                 <div class="schedule-item">
-                    <span style="color: #9ca3af;">No appointments scheduled for today</span>
+                    <span style="color: #9ca3af;">Loading appointments...</span>
                 </div>
             </div>
         </div>
@@ -690,7 +690,12 @@
                     .select('*', { count: 'exact', head: true })
                     .eq('clinic_id', currentClinicId);
                 document.getElementById('totalPatients').textContent = patientsCount || 0;
-                document.getElementById('activePatients').textContent = patientsCount || 0;
+                
+                // Load appointment statistics
+                await loadAppointmentStatistics();
+                
+                // Load today's schedule
+                await loadTodaysSchedule();
                 
                 // Load recent patients
                 await loadRecentPatients();
@@ -700,6 +705,140 @@
             } finally {
                 showLoading(false);
             }
+        }
+        
+        // Load appointment statistics
+        async function loadAppointmentStatistics() {
+            try {
+                const today = new Date().toISOString().split('T')[0];
+                const startOfWeek = getStartOfWeek();
+                const endOfWeek = getEndOfWeek();
+                
+                // Get all appointments for this clinic
+                const { data: appointments, error } = await supabase
+                    .from('appointments')
+                    .select('*')
+                    .eq('clinic_id', currentClinicId);
+                
+                if (error) throw error;
+                
+                // Calculate today's appointments
+                const todayAppointments = appointments.filter(a => 
+                    a.appointment_date === today && 
+                    a.status === 'scheduled'
+                ).length;
+                
+                // Calculate this week's completed sessions
+                const completedThisWeek = appointments.filter(a => 
+                    a.appointment_date >= startOfWeek && 
+                    a.appointment_date <= endOfWeek && 
+                    a.status === 'completed'
+                ).length;
+                
+                // Get active patients (those with scheduled appointments)
+                const activePatientIds = [...new Set(
+                    appointments
+                        .filter(a => a.status === 'scheduled')
+                        .map(a => a.patient_id)
+                )];
+                
+                // Update the statistics cards
+                document.getElementById('todayAppointments').textContent = todayAppointments;
+                document.getElementById('completedSessions').textContent = completedThisWeek;
+                document.getElementById('activePatients').textContent = activePatientIds.length;
+                
+                // For active sessions - count ongoing therapy programs
+                document.getElementById('activeSessions').textContent = activePatientIds.length;
+                
+            } catch (error) {
+                console.error('Error loading appointment statistics:', error);
+                // Keep default values if error occurs
+            }
+        }
+        
+        // Load today's schedule with real data
+        async function loadTodaysSchedule() {
+            try {
+                const today = new Date().toISOString().split('T')[0];
+                
+                const { data: todaysAppointments, error } = await supabase
+                    .from('appointments')
+                    .select(`
+                        *,
+                        patients!appointments_patient_id_fkey (
+                            first_name,
+                            last_name,
+                            patient_id
+                        )
+                    `)
+                    .eq('clinic_id', currentClinicId)
+                    .eq('appointment_date', today)
+                    .eq('status', 'scheduled')
+                    .order('appointment_time');
+                
+                if (error) throw error;
+                
+                const scheduleList = document.getElementById('scheduleList');
+                
+                if (todaysAppointments && todaysAppointments.length > 0) {
+                    scheduleList.innerHTML = todaysAppointments.map(appointment => {
+                        const patient = appointment.patients;
+                        const time = appointment.appointment_time.substring(0, 5); // Format time HH:MM
+                        
+                        // Determine appointment type label
+                        let typeLabel = appointment.appointment_type;
+                        if (appointment.appointment_type === 'therapy' && appointment.therapy_code) {
+                            typeLabel = `Therapy - ${appointment.therapy_code}`;
+                        }
+                        
+                        return `
+                            <div class="schedule-item">
+                                <div style="display: flex; align-items: center; gap: 15px;">
+                                    <span style="background: #eff6ff; color: #3b82f6; padding: 4px 8px; border-radius: 4px; font-weight: 600; font-size: 13px;">
+                                        ${time}
+                                    </span>
+                                    <div style="flex: 1;">
+                                        <strong>${patient ? `${patient.first_name} ${patient.last_name}` : 'Unknown Patient'}</strong>
+                                        <br>
+                                        <span style="font-size: 12px; color: #6b7280;">
+                                            ${typeLabel} • ${appointment.practitioner || 'No practitioner assigned'}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                } else {
+                    scheduleList.innerHTML = `
+                        <div class="schedule-item">
+                            <span style="color: #9ca3af;">No appointments scheduled for today</span>
+                        </div>
+                    `;
+                }
+                
+            } catch (error) {
+                console.error('Error loading today\'s schedule:', error);
+                scheduleList.innerHTML = `
+                    <div class="schedule-item">
+                        <span style="color: #9ca3af;">No appointments scheduled for today</span>
+                    </div>
+                `;
+            }
+        }
+        
+        // Helper functions for date calculations
+        function getStartOfWeek() {
+            const date = new Date();
+            const day = date.getDay();
+            const diff = date.getDate() - day + (day === 0 ? -6 : 1);
+            return new Date(date.setDate(diff)).toISOString().split('T')[0];
+        }
+        
+        function getEndOfWeek() {
+            const date = new Date();
+            const day = date.getDay();
+            const diff = date.getDate() - day + 7;
+            return new Date(date.setDate(diff)).toISOString().split('T')[0];
         }
         
         // Load recent patients
@@ -797,6 +936,12 @@
         function showLoading(show) {
             document.getElementById('loadingOverlay').style.display = show ? 'flex' : 'none';
         }
+        
+        // Auto-refresh dashboard every 5 minutes
+        setInterval(() => {
+            loadAppointmentStatistics();
+            loadTodaysSchedule();
+        }, 300000);
     </script>
 </body>
 </html>
