@@ -1271,6 +1271,9 @@
             document.querySelectorAll('.time-slot-option').forEach(slot => {
                 slot.classList.remove('selected');
             });
+            
+            // Clear editing flag
+            window.editingAppointmentId = null;
         };
         
         // Render appointments list
