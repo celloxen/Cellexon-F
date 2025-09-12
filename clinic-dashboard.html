@@ -473,7 +473,8 @@
                     <div class="module-description">Schedule and manage patient appointments</div>
                 </div>
                 
-                <div class="module-card" onclick="navigateTo('health-assessment.html')">
+                <!-- UPDATED: Health Assessment now points directly to Lily AI Agent -->
+                <div class="module-card" onclick="navigateTo('health-assessment/lily-ai-agent.html')">
                     <div class="module-icon">🏥</div>
                     <div class="module-title">Health Assessment</div>
                     <div class="module-description">5-category health questionnaire with AI recommendations</div>
@@ -890,8 +891,9 @@
             navigateTo('patient-management.html');
         };
         
+        // UPDATED: Start Health Assessment now goes directly to Lily AI Agent
         window.startHealthAssessment = function() {
-            navigateTo('health-assessment.html');
+            navigateTo('health-assessment/lily-ai-agent.html');
         };
         
         window.scheduleAppointment = function() {
