@@ -162,6 +162,34 @@
             color: #1f2937;
         }
         
+        .view-toggle {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .view-toggle button {
+            padding: 6px 12px;
+            background: #f3f4f6;
+            border: 1px solid #d1d5db;
+            color: #6b7280;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .view-toggle button:first-child {
+            border-radius: 6px 0 0 6px;
+        }
+        
+        .view-toggle button:last-child {
+            border-radius: 0 6px 6px 0;
+        }
+        
+        .view-toggle button.active {
+            background: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+        
         /* Weekly View */
         .weekly-view {
             background: white;
@@ -213,6 +241,28 @@
         
         .time-slot:hover {
             background: #f0fdf4;
+        }
+        
+        .appointment-block {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            padding: 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            margin: 2px;
+        }
+        
+        .appointment-block:hover {
+            opacity: 0.9;
+        }
+        
+        .appointment-block.therapy {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+        
+        .appointment-block.assessment {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
         }
         
         /* New Appointment Form */
@@ -277,6 +327,10 @@
         }
         
         /* Patient Selection with Session Info */
+        .patient-select-wrapper {
+            position: relative;
+        }
+        
         .session-info-card {
             background: #f0fdf4;
             border: 1px solid #10b981;
@@ -371,6 +425,13 @@
             border-color: #3b82f6;
         }
         
+        .time-slot-option.unavailable {
+            background: #f3f4f6;
+            color: #9ca3af;
+            cursor: not-allowed;
+            text-decoration: line-through;
+        }
+        
         /* Form Actions */
         .form-actions {
             display: flex;
@@ -433,6 +494,19 @@
             border: 1px solid #d1d5db;
             border-radius: 6px;
             width: 250px;
+        }
+        
+        .filter-btn {
+            padding: 8px 16px;
+            background: #f3f4f6;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .filter-btn:hover {
+            background: #e5e7eb;
         }
         
         .appointment-card {
@@ -511,6 +585,11 @@
             color: #1e40af;
         }
         
+        .status-badge.in-progress {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
         .status-badge.completed {
             background: #d1fae5;
             color: #065f46;
@@ -548,6 +627,31 @@
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .time-slots {
+                grid-template-columns: 60px repeat(7, 1fr);
+            }
+            
+            .appointment-card {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .appointment-actions {
+                margin-top: 10px;
+                width: 100%;
+            }
+            
+            .action-btn {
+                flex: 1;
+            }
         }
     </style>
 </head>
@@ -590,6 +694,11 @@
                     <button onclick="nextWeek()">→</button>
                 </div>
                 <div class="current-date" id="currentDate">December 2024</div>
+                <div class="view-toggle">
+                    <button class="active" onclick="setView('week')">Week</button>
+                    <button onclick="setView('day')">Day</button>
+                    <button onclick="setView('month')">Month</button>
+                </div>
             </div>
             
             <div class="weekly-view" id="weeklyView">
@@ -605,15 +714,17 @@
                 <div class="form-grid">
                     <div class="form-group">
                         <label for="patientSelect">Select Patient *</label>
-                        <select id="patientSelect" onchange="loadPatientTherapyInfo()">
-                            <option value="">-- Select Patient --</option>
-                        </select>
-                        
-                        <!-- Patient Therapy Session Info -->
-                        <div class="session-info-card" id="sessionInfoCard">
-                            <div class="session-info-title">Current Therapy Programme</div>
-                            <div id="therapyInfoContent">
-                                <!-- Therapy info will be loaded here -->
+                        <div class="patient-select-wrapper">
+                            <select id="patientSelect" onchange="loadPatientTherapyInfo()">
+                                <option value="">-- Select Patient --</option>
+                            </select>
+                            
+                            <!-- Patient Therapy Session Info -->
+                            <div class="session-info-card" id="sessionInfoCard">
+                                <div class="session-info-title">Current Therapy Programme</div>
+                                <div id="therapyInfoContent">
+                                    <!-- Therapy info will be loaded here -->
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -638,13 +749,16 @@
                     
                     <div class="form-group">
                         <label for="appointmentDate">Date *</label>
-                        <input type="date" id="appointmentDate">
+                        <input type="date" id="appointmentDate" onchange="loadAvailableTimeSlots()">
                     </div>
                     
                     <div class="form-group">
                         <label for="practitioner">Practitioner *</label>
                         <select id="practitioner">
                             <option value="">-- Select Practitioner --</option>
+                            <option value="dr-smith">Dr. Smith</option>
+                            <option value="dr-jones">Dr. Jones</option>
+                            <option value="therapist-1">Therapist 1</option>
                         </select>
                     </div>
                     
@@ -686,6 +800,7 @@
                     <h2 style="font-size: 18px; font-weight: 600;">Upcoming Appointments</h2>
                     <div class="search-box">
                         <input type="text" placeholder="Search by patient name..." id="searchInput" onkeyup="filterAppointments()">
+                        <button class="filter-btn" onclick="openFilterModal()">Filters</button>
                     </div>
                 </div>
                 
@@ -720,7 +835,6 @@
         let appointments = [];
         let patients = [];
         let therapyProtocols = [];
-        let practitioners = [];
         
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', async function() {
@@ -763,7 +877,6 @@
                 await Promise.all([
                     loadPatients(),
                     loadTherapyProtocols(),
-                    loadPractitioners(),
                     loadAppointments(),
                     loadTherapyTracking()
                 ]);
@@ -812,13 +925,12 @@
             }
         }
         
-        // Load therapy protocols with correct column names
+        // Load therapy protocols
         async function loadTherapyProtocols() {
             try {
                 const { data, error } = await supabase
                     .from('therapy_configurations')
                     .select('*')
-                    .eq('is_active', true)
                     .order('therapy_code');
                 
                 if (error) throw error;
@@ -841,36 +953,7 @@
             }
         }
         
-        // Load practitioners
-        async function loadPractitioners() {
-            try {
-                const { data, error } = await supabase
-                    .from('practitioners')
-                    .select('*')
-                    .eq('clinic_id', currentClinicId)
-                    .eq('is_active', true)
-                    .order('name');
-                
-                if (error) throw error;
-                
-                practitioners = data || [];
-                
-                const practitionerSelect = document.getElementById('practitioner');
-                practitionerSelect.innerHTML = '<option value="">-- Select Practitioner --</option>';
-                
-                practitioners.forEach(practitioner => {
-                    const option = document.createElement('option');
-                    option.value = practitioner.id;
-                    option.textContent = `${practitioner.name} - ${practitioner.specialization || 'General'}`;
-                    practitionerSelect.appendChild(option);
-                });
-                
-            } catch (error) {
-                console.error('Error loading practitioners:', error);
-            }
-        }
-        
-        // Load patient therapy information
+        // Load patient therapy information with correct column names
         window.loadPatientTherapyInfo = async function() {
             const patientId = document.getElementById('patientSelect').value;
             const sessionInfoCard = document.getElementById('sessionInfoCard');
@@ -882,21 +965,35 @@
             }
             
             try {
-                // Get patient's health assessment
-                const { data: assessment } = await supabase
-                    .from('health_assessments')
-                    .select('*')
-                    .eq('patient_id', patientId)
-                    .order('assessment_date', { ascending: false })
-                    .limit(1)
-                    .single();
+                // Get patient's health assessment - handle table not existing
+                let assessment = null;
+                try {
+                    const { data, error } = await supabase
+                        .from('health_assessments')
+                        .select('*')
+                        .eq('patient_id', patientId)
+                        .order('assessment_date', { ascending: false })
+                        .limit(1)
+                        .single();
+                    
+                    if (!error) assessment = data;
+                } catch (e) {
+                    console.log('Health assessments table not available');
+                }
                 
-                // Get all treatment sessions for this patient
-                const { data: sessions } = await supabase
-                    .from('treatment_sessions')
-                    .select('*')
-                    .eq('patient_id', patientId)
-                    .order('start_time', { ascending: false });
+                // Get all therapy sessions for this patient - handle table not existing
+                let sessions = [];
+                try {
+                    const { data, error } = await supabase
+                        .from('treatment_sessions')
+                        .select('*')
+                        .eq('patient_id', patientId)
+                        .order('start_time', { ascending: false });
+                    
+                    if (!error) sessions = data || [];
+                } catch (e) {
+                    console.log('Treatment sessions table not available');
+                }
                 
                 if (assessment && assessment.therapies_recommended) {
                     const therapies = assessment.therapies_recommended;
@@ -906,18 +1003,21 @@
                     
                     // Display each recommended therapy with progress
                     for (const therapyCode of therapies) {
-                        const therapy = therapyProtocols.find(t => t.therapy_code === therapyCode);
+                        // Find therapy using either column name
+                        const therapy = therapyProtocols.find(t => 
+                            (t.code === therapyCode) || (t.therapy_code === therapyCode)
+                        );
                         if (therapy) {
                             // Count sessions for this specific therapy
-                            const therapySessions = sessions ? sessions.filter(s => 
+                            const therapySessions = sessions.filter(s => 
                                 s.therapy_code === therapyCode && s.status === 'completed'
-                            ).length : 0;
+                            ).length;
                             
                             const progress = (therapySessions / recommendedSessions) * 100;
                             
                             therapyHTML += `
                                 <div class="therapy-item">
-                                    <div class="therapy-name">${therapy.therapy_name}</div>
+                                    <div class="therapy-name">${therapy.name || therapy.therapy_name}</div>
                                     <div class="therapy-details">
                                         <span>Code: ${therapyCode}</span>
                                         <span>Category: ${therapy.category || 'General'}</span>
@@ -972,19 +1072,7 @@
             try {
                 const { data, error } = await supabase
                     .from('appointments')
-                    .select(`
-                        *,
-                        patients!appointments_patient_id_fkey (
-                            first_name,
-                            last_name
-                        ),
-                        practitioners!appointments_practitioner_id_fkey (
-                            name
-                        ),
-                        therapy_configurations!appointments_therapy_code_fkey (
-                            therapy_name
-                        )
-                    `)
+                    .select('*')
                     .eq('clinic_id', currentClinicId)
                     .order('appointment_date', { ascending: true });
                 
@@ -1030,7 +1118,7 @@
                         if (progress === 0) {
                             statusBadge = '<span class="status-badge scheduled">Not Started</span>';
                         } else if (progress < 100) {
-                            statusBadge = '<span class="status-badge scheduled">In Progress</span>';
+                            statusBadge = '<span class="status-badge in-progress">In Progress</span>';
                         } else {
                             statusBadge = '<span class="status-badge completed">Completed</span>';
                         }
@@ -1101,7 +1189,7 @@
             const patientId = document.getElementById('patientSelect').value;
             const appointmentType = document.getElementById('appointmentType').value;
             const appointmentDate = document.getElementById('appointmentDate').value;
-            const practitionerId = document.getElementById('practitioner').value;
+            const practitioner = document.getElementById('practitioner').value;
             const duration = document.getElementById('duration').value;
             const notes = document.getElementById('appointmentNotes').value;
             
@@ -1110,7 +1198,7 @@
             const appointmentTime = selectedTimeSlot ? selectedTimeSlot.textContent.trim() : null;
             
             // Validation
-            if (!patientId || !appointmentType || !appointmentDate || !appointmentTime || !practitionerId) {
+            if (!patientId || !appointmentType || !appointmentDate || !appointmentTime || !practitioner) {
                 alert('Please fill in all required fields and select a time slot');
                 return;
             }
@@ -1132,14 +1220,15 @@
                 const appointmentData = {
                     clinic_id: currentClinicId,
                     patient_id: patientId,
-                    practitioner_id: parseInt(practitionerId),
                     appointment_type: appointmentType,
                     appointment_date: appointmentDate,
                     appointment_time: appointmentTime,
                     duration: parseInt(duration),
+                    practitioner: practitioner,
                     therapy_code: therapyCode,
                     status: 'scheduled',
-                    notes: notes
+                    notes: notes,
+                    created_at: new Date().toISOString()
                 };
                 
                 // Save to database
@@ -1194,11 +1283,8 @@
             }
             
             const appointmentsHTML = appointments.map(appointment => {
-                const patient = appointment.patients;
-                const practitioner = appointment.practitioners;
-                const therapy = appointment.therapy_configurations;
+                const patient = patients.find(p => p.patient_id === appointment.patient_id);
                 const patientName = patient ? `${patient.first_name} ${patient.last_name}` : 'Unknown Patient';
-                const practitionerName = practitioner ? practitioner.name : 'No practitioner';
                 
                 let statusBadge = '';
                 switch (appointment.status) {
@@ -1223,8 +1309,7 @@
                                 <span>Date: ${new Date(appointment.appointment_date).toLocaleDateString()}</span>
                                 <span>Time: ${appointment.appointment_time}</span>
                                 <span>Type: ${appointment.appointment_type}</span>
-                                ${therapy ? `<span>Therapy: ${therapy.therapy_name}</span>` : ''}
-                                <span>Practitioner: ${practitionerName}</span>
+                                ${appointment.therapy_code ? `<span>Therapy: ${appointment.therapy_code}</span>` : ''}
                                 ${statusBadge}
                             </div>
                         </div>
@@ -1269,7 +1354,7 @@
                 calendarHTML += `<div class="time-label">${hour}</div>`;
                 
                 for (let day = 0; day < 7; day++) {
-                    calendarHTML += '<div class="time-slot"></div>';
+                    calendarHTML += '<div class="time-slot" onclick="quickAddAppointment(this)"></div>';
                 }
             });
             
@@ -1281,12 +1366,14 @@
             currentWeekStart.setDate(currentWeekStart.getDate() - 7);
             renderWeeklyCalendar();
             updateCurrentDateDisplay();
+            renderAppointmentsOnCalendar();
         };
         
         window.nextWeek = function() {
             currentWeekStart.setDate(currentWeekStart.getDate() + 7);
             renderWeeklyCalendar();
             updateCurrentDateDisplay();
+            renderAppointmentsOnCalendar();
         };
         
         window.goToToday = function() {
@@ -1294,6 +1381,22 @@
             currentWeekStart = getWeekStart(today);
             renderWeeklyCalendar();
             updateCurrentDateDisplay();
+            renderAppointmentsOnCalendar();
+        };
+        
+        // View appointment details
+        window.viewAppointmentDetails = function(appointmentId) {
+            const appointment = appointments.find(a => a.id === appointmentId);
+            if (appointment) {
+                alert(`Appointment Details:\n
+Patient: ${appointment.patients ? appointment.patients.first_name + ' ' + appointment.patients.last_name : 'Unknown'}
+Date: ${new Date(appointment.appointment_date).toLocaleDateString('en-GB')}
+Time: ${appointment.appointment_time.substring(0, 5)}
+Type: ${appointment.appointment_type}
+Practitioner: ${appointment.practitioners ? appointment.practitioners.name : appointment.practitioner || 'TBD'}
+Status: ${appointment.status}
+${appointment.notes ? 'Notes: ' + appointment.notes : ''}`);
+            }
         };
         
         function getWeekStart(date) {
@@ -1330,18 +1433,8 @@
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
             
-            // Add active class to selected tab - handle both click and programmatic calls
-            if (event && event.target) {
-                event.target.classList.add('active');
-            } else {
-                // Find the tab button by its onclick content
-                document.querySelectorAll('.tab-btn').forEach(btn => {
-                    if (btn.onclick && btn.onclick.toString().includes(tabName)) {
-                        btn.classList.add('active');
-                    }
-                });
-            }
-            
+            // Add active class to selected tab
+            event.target.classList.add('active');
             document.getElementById(`${tabName}-tab`).classList.add('active');
             
             // Load specific tab data if needed
@@ -1352,6 +1445,7 @@
         
         // Helper functions
         window.viewPatientSessions = function(patientId) {
+            // Navigate to detailed session view
             sessionStorage.setItem('selectedPatientId', patientId);
             window.location.href = 'session-tracking.html';
         };
@@ -1422,6 +1516,34 @@
                 }
             });
         };
+        
+        // Update dashboard statistics
+        async function updateDashboardStats() {
+            try {
+                const { data, error } = await supabase
+                    .from('appointments')
+                    .select('*')
+                    .eq('clinic_id', currentClinicId);
+                
+                if (error) throw error;
+                
+                const today = new Date().toISOString().split('T')[0];
+                const stats = {
+                    total: data.length,
+                    scheduled: data.filter(a => a.status === 'scheduled').length,
+                    completed: data.filter(a => a.status === 'completed').length,
+                    cancelled: data.filter(a => a.status === 'cancelled').length,
+                    today: data.filter(a => a.appointment_date === today).length,
+                    upcoming: data.filter(a => a.appointment_date > today && a.status === 'scheduled').length
+                };
+                
+                // You can display these stats in a dashboard section if needed
+                console.log('Appointment Statistics:', stats);
+                
+            } catch (error) {
+                console.error('Error updating dashboard stats:', error);
+            }
+        }
         
         // Navigation
         window.goBack = function() {
