@@ -513,7 +513,7 @@
     <div id="reportContent" style="display: none;"></div>
 
     <script>
-        // Complete Lily Health Consultant with All Bug Fixes
+        // Complete Lily Health Consultant with All Bug Fixes and Database Fix
         class LilyHealthConsultant {
             constructor() {
                 this.supabase = supabase.createClient(
@@ -949,12 +949,12 @@ Gender: ${this.sessionData.patientGender}`, 'lily');
                     optionKey = 'c'; // Default to middle option
                 }
                 
-                // Save response with correct key
+                // Fixed: Save response with proper structure
                 await this.questionFlow.saveResponse(
                     this.sessionId,
                     question.id,
                     optionKey,
-                    response
+                    response  // This is the response_text that was missing
                 );
                 
                 this.currentQuestionIndex++;
