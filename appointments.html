@@ -550,6 +550,11 @@
                 allAppointments = data || [];
                 displayAppointments(allAppointments);
                 
+                // Update calendar if it exists
+                if (document.getElementById('calendarGrid')) {
+                    renderCalendar();
+                }
+                
             } catch (error) {
                 console.error('Error loading appointments:', error);
                 document.getElementById('appointmentsList').innerHTML = 
