@@ -102,7 +102,8 @@
         }
         
         .form-group input,
-        .form-group select {
+        .form-group select,
+        .form-group textarea {
             padding: 8px 12px;
             border: 1px solid #d1d5db;
             border-radius: 6px;
@@ -110,9 +111,15 @@
         }
         
         .form-group input:focus,
-        .form-group select:focus {
+        .form-group select:focus,
+        .form-group textarea:focus {
             outline: none;
             border-color: #10b981;
+        }
+        
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
         }
         
         /* Buttons */
@@ -159,11 +166,17 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            background: white;
+        }
+        
+        .appointment-card:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
         
         .appointment-info h3 {
             font-size: 16px;
             margin-bottom: 5px;
+            color: #1f2937;
         }
         
         .appointment-details {
@@ -171,6 +184,7 @@
             gap: 15px;
             font-size: 13px;
             color: #6b7280;
+            flex-wrap: wrap;
         }
         
         .appointment-actions {
@@ -224,6 +238,20 @@
             padding: 20px;
             color: #6b7280;
         }
+        
+        /* Filters */
+        .filters {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .filter-select {
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
@@ -249,6 +277,18 @@
         <!-- List Tab -->
         <div class="tab-content active" id="list-tab">
             <h2 style="margin-bottom: 20px;">Appointments</h2>
+            
+            <!-- Filters -->
+            <div class="filters">
+                <select class="filter-select" id="statusFilter" onchange="filterAppointments()">
+                    <option value="">All Status</option>
+                    <option value="scheduled">Scheduled</option>
+                    <option value="completed">Completed</option>
+                    <option value="cancelled">Cancelled</option>
+                </select>
+                <input type="text" class="filter-select" id="searchFilter" placeholder="Search patient..." onkeyup="filterAppointments()">
+            </div>
+            
             <div id="appointmentsList" class="loading">Loading appointments...</div>
         </div>
 
@@ -298,6 +338,22 @@
                             <option value="">Select Practitioner</option>
                         </select>
                     </div>
+                    
+                    <div class="form-group">
+                        <label>Duration (minutes)</label>
+                        <select id="duration">
+                            <option value="30">30 minutes</option>
+                            <option value="45">45 minutes</option>
+                            <option value="60" selected>1 hour</option>
+                            <option value="90">1.5 hours</option>
+                            <option value="120">2 hours</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label>Notes</label>
+                        <textarea id="notes" placeholder="Add any notes..."></textarea>
+                    </div>
                 </div>
                 
                 <div style="display: flex; gap: 10px;">
@@ -308,16 +364,18 @@
         </div>
     </div>
 
-    <!-- Include Supabase -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Include auth guard if available -->
+    <script src="auth-guard.js"></script>
     
-    <script>
-        // Initialize Supabase
-        const supabaseUrl = 'https://defifwzgazqlrigwumqn.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlZmlmd3pnYXpxbHJpZ3d1bXFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzA3NDc2NjIsImV4cCI6MjA0NjMyMzY2Mn0.6d6FM3i0e8ZMCfQc0qRUwBj-_TbT6KfXslY-CorLKb0';
-        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+    <!-- Include Supabase config -->
+    <script type="module">
+        import { supabase } from './supabase-config.js';
+        
+        // Make supabase available globally for this page
+        window.supabase = supabase;
         
         let clinicId = 1; // Default clinic ID
+        let allAppointments = []; // Store all appointments for filtering
         
         // Initialize
         document.addEventListener('DOMContentLoaded', async function() {
@@ -341,7 +399,7 @@
         });
         
         // Switch tabs
-        function switchTab(tabName, event) {
+        window.switchTab = function(tabName, event) {
             // Update tab buttons
             document.querySelectorAll('.tab').forEach(tab => {
                 tab.classList.remove('active');
@@ -355,10 +413,10 @@
                 content.classList.remove('active');
             });
             document.getElementById(`${tabName}-tab`).classList.add('active');
-        }
+        };
         
         // Load patients
-        async function loadPatients() {
+        window.loadPatients = async function() {
             try {
                 const { data, error } = await supabase
                     .from('patients')
@@ -371,19 +429,21 @@
                 const select = document.getElementById('patientId');
                 select.innerHTML = '<option value="">Select Patient</option>';
                 
-                data.forEach(patient => {
-                    const option = document.createElement('option');
-                    option.value = patient.patient_id;
-                    option.textContent = `${patient.first_name} ${patient.last_name} (${patient.patient_id})`;
-                    select.appendChild(option);
-                });
+                if (data && data.length > 0) {
+                    data.forEach(patient => {
+                        const option = document.createElement('option');
+                        option.value = patient.patient_id;
+                        option.textContent = `${patient.first_name} ${patient.last_name} (${patient.patient_id})`;
+                        select.appendChild(option);
+                    });
+                }
             } catch (error) {
                 console.error('Error loading patients:', error);
             }
-        }
+        };
         
         // Load practitioners
-        async function loadPractitioners() {
+        window.loadPractitioners = async function() {
             try {
                 const { data, error } = await supabase
                     .from('practitioners')
@@ -397,19 +457,21 @@
                 const select = document.getElementById('practitionerId');
                 select.innerHTML = '<option value="">Select Practitioner</option>';
                 
-                data.forEach(practitioner => {
-                    const option = document.createElement('option');
-                    option.value = practitioner.id;
-                    option.textContent = `${practitioner.name} - ${practitioner.specialization || 'General'}`;
-                    select.appendChild(option);
-                });
+                if (data && data.length > 0) {
+                    data.forEach(practitioner => {
+                        const option = document.createElement('option');
+                        option.value = practitioner.id;
+                        option.textContent = `${practitioner.name}${practitioner.specialization ? ' - ' + practitioner.specialization : ''}`;
+                        select.appendChild(option);
+                    });
+                }
             } catch (error) {
                 console.error('Error loading practitioners:', error);
             }
-        }
+        };
         
         // Load therapies
-        async function loadTherapies() {
+        window.loadTherapies = async function() {
             try {
                 const { data, error } = await supabase
                     .from('therapy_configurations')
@@ -422,77 +484,136 @@
                 const select = document.getElementById('therapyCode');
                 select.innerHTML = '<option value="">Select Therapy</option>';
                 
-                data.forEach(therapy => {
-                    const option = document.createElement('option');
-                    option.value = therapy.therapy_code;
-                    option.textContent = `${therapy.therapy_code}: ${therapy.therapy_name}`;
-                    select.appendChild(option);
-                });
+                if (data && data.length > 0) {
+                    data.forEach(therapy => {
+                        const option = document.createElement('option');
+                        option.value = therapy.therapy_code;
+                        option.textContent = `${therapy.therapy_code}: ${therapy.therapy_name}`;
+                        select.appendChild(option);
+                    });
+                }
             } catch (error) {
                 console.error('Error loading therapies:', error);
             }
-        }
+        };
         
         // Toggle therapy selection
-        function toggleTherapySelection() {
+        window.toggleTherapySelection = function() {
             const type = document.getElementById('appointmentType').value;
             const therapyGroup = document.getElementById('therapyGroup');
             therapyGroup.style.display = type === 'therapy' ? 'block' : 'none';
-        }
+            if (type !== 'therapy') {
+                document.getElementById('therapyCode').value = '';
+            }
+        };
         
         // Load appointments
-        async function loadAppointments() {
+        window.loadAppointments = async function() {
             try {
-                const { data, error } = await supabase
+                // First try the view
+                let { data, error } = await supabase
                     .from('appointment_details')
                     .select('*')
-                    .eq('clinic_name', 'Demo Clinic London')
                     .order('appointment_date', { ascending: true })
                     .order('appointment_time', { ascending: true });
                 
-                if (error) throw error;
+                // If view doesn't work, try direct query
+                if (error || !data) {
+                    const result = await supabase
+                        .from('appointments')
+                        .select(`
+                            *,
+                            patients!inner(first_name, last_name),
+                            practitioners(name),
+                            therapy_configurations(therapy_name)
+                        `)
+                        .eq('clinic_id', clinicId)
+                        .order('appointment_date', { ascending: true });
+                    
+                    if (result.data) {
+                        // Transform the data
+                        data = result.data.map(apt => ({
+                            id: apt.id,
+                            appointment_date: apt.appointment_date,
+                            appointment_time: apt.appointment_time,
+                            appointment_type: apt.appointment_type,
+                            status: apt.status,
+                            notes: apt.notes,
+                            patient_name: apt.patients ? `${apt.patients.first_name} ${apt.patients.last_name}` : 'Unknown',
+                            patient_id: apt.patient_id,
+                            practitioner_name: apt.practitioners?.name || 'TBD',
+                            therapy_name: apt.therapy_configurations?.therapy_name || null
+                        }));
+                    }
+                }
                 
-                displayAppointments(data);
+                allAppointments = data || [];
+                displayAppointments(allAppointments);
+                
             } catch (error) {
                 console.error('Error loading appointments:', error);
                 document.getElementById('appointmentsList').innerHTML = 
-                    '<p style="color: #ef4444;">Error loading appointments</p>';
+                    '<p style="color: #ef4444;">Error loading appointments. Please refresh the page.</p>';
             }
-        }
+        };
         
         // Display appointments
-        function displayAppointments(appointments) {
+        window.displayAppointments = function(appointments) {
             const container = document.getElementById('appointmentsList');
             
             if (!appointments || appointments.length === 0) {
-                container.innerHTML = '<p style="color: #6b7280;">No appointments scheduled</p>';
+                container.innerHTML = '<p style="color: #6b7280; text-align: center; padding: 20px;">No appointments found</p>';
                 return;
             }
             
             container.innerHTML = appointments.map(apt => `
                 <div class="appointment-card">
                     <div class="appointment-info">
-                        <h3>${apt.patient_name}</h3>
+                        <h3>${apt.patient_name || 'Unknown Patient'}</h3>
                         <div class="appointment-details">
                             <span>ID: ${apt.patient_id}</span>
                             <span>Date: ${formatDate(apt.appointment_date)}</span>
                             <span>Time: ${apt.appointment_time.substring(0, 5)}</span>
                             <span>Type: ${apt.appointment_type}</span>
                             ${apt.therapy_name ? `<span>Therapy: ${apt.therapy_name}</span>` : ''}
-                            <span>Practitioner: ${apt.practitioner_name}</span>
+                            <span>Doctor: ${apt.practitioner_name}</span>
                             <span class="status-badge status-${apt.status}">${apt.status}</span>
                         </div>
+                        ${apt.notes ? `<div style="margin-top: 5px; font-size: 12px; color: #6b7280;">Notes: ${apt.notes}</div>` : ''}
                     </div>
                     <div class="appointment-actions">
-                        <button class="btn btn-primary btn-sm" onclick="updateStatus(${apt.id}, 'completed')">Complete</button>
-                        <button class="btn btn-danger btn-sm" onclick="updateStatus(${apt.id}, 'cancelled')">Cancel</button>
+                        ${apt.status === 'scheduled' ? `
+                            <button class="btn btn-primary btn-sm" onclick="updateStatus(${apt.id}, 'completed')">Complete</button>
+                            <button class="btn btn-danger btn-sm" onclick="updateStatus(${apt.id}, 'cancelled')">Cancel</button>
+                        ` : ''}
                     </div>
                 </div>
             `).join('');
-        }
+        };
+        
+        // Filter appointments
+        window.filterAppointments = function() {
+            const statusFilter = document.getElementById('statusFilter').value;
+            const searchFilter = document.getElementById('searchFilter').value.toLowerCase();
+            
+            let filtered = allAppointments;
+            
+            if (statusFilter) {
+                filtered = filtered.filter(apt => apt.status === statusFilter);
+            }
+            
+            if (searchFilter) {
+                filtered = filtered.filter(apt => 
+                    apt.patient_name.toLowerCase().includes(searchFilter) ||
+                    apt.patient_id.toLowerCase().includes(searchFilter)
+                );
+            }
+            
+            displayAppointments(filtered);
+        };
         
         // Save appointment
-        async function saveAppointment(event) {
+        window.saveAppointment = async function(event) {
             event.preventDefault();
             
             const appointmentData = {
@@ -502,7 +623,9 @@
                 appointment_date: document.getElementById('appointmentDate').value,
                 appointment_time: document.getElementById('appointmentTime').value,
                 appointment_type: document.getElementById('appointmentType').value,
+                duration_minutes: parseInt(document.getElementById('duration').value),
                 therapy_code: document.getElementById('therapyCode').value || null,
+                notes: document.getElementById('notes').value || null,
                 status: 'scheduled'
             };
             
@@ -519,61 +642,70 @@
                 
                 // Switch to list view
                 document.querySelector('.tab').click();
+                
             } catch (error) {
                 console.error('Error saving appointment:', error);
                 showMessage('Error saving appointment: ' + error.message, 'error');
             }
-        }
+        };
         
         // Update appointment status
-        async function updateStatus(id, newStatus) {
+        window.updateStatus = async function(id, newStatus) {
             const confirmMsg = newStatus === 'cancelled' 
                 ? 'Cancel this appointment?' 
-                : 'Mark as completed?';
+                : 'Mark this appointment as completed?';
                 
             if (!confirm(confirmMsg)) return;
             
             try {
                 const { error } = await supabase
                     .from('appointments')
-                    .update({ status: newStatus })
+                    .update({ 
+                        status: newStatus,
+                        updated_at: new Date().toISOString()
+                    })
                     .eq('id', id);
                 
                 if (error) throw error;
                 
                 showMessage(`Appointment ${newStatus}`, 'success');
                 await loadAppointments();
+                
             } catch (error) {
                 console.error('Error updating appointment:', error);
                 showMessage('Error updating appointment', 'error');
             }
-        }
+        };
         
         // Clear form
-        function clearForm() {
+        window.clearForm = function() {
             document.getElementById('appointmentForm').reset();
             document.getElementById('therapyGroup').style.display = 'none';
-        }
+        };
         
         // Format date
-        function formatDate(dateString) {
+        window.formatDate = function(dateString) {
             const date = new Date(dateString);
-            return date.toLocaleDateString('en-GB');
-        }
+            return date.toLocaleDateString('en-GB', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+        };
         
         // Show message
-        function showMessage(text, type) {
+        window.showMessage = function(text, type) {
             const messageArea = document.getElementById('messageArea');
             messageArea.innerHTML = `<div class="message ${type}">${text}</div>`;
             setTimeout(() => {
                 messageArea.innerHTML = '';
             }, 3000);
-        }
+        };
         
         // Go back
-        function goBack() {
+        window.goBack = function() {
             window.location.href = 'clinic-dashboard.html';
-        }
+        };
     </script>
 </body>
 </html>
