@@ -15,102 +15,55 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: #f8fafc;
             color: #1f2937;
-            min-height: 100vh;
         }
         
-        /* Header Styles */
+        /* Header */
         .header {
             background: linear-gradient(135deg, #10b981 0%, #059669 100%);
             color: white;
-            padding: 20px 0;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            position: sticky;
-            top: 0;
-            z-index: 100;
+            padding: 20px;
         }
         
-        .header-container {
-            max-width: 1400px;
+        .header-content {
+            max-width: 1200px;
             margin: 0 auto;
-            padding: 0 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
         
-        .logo-section {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-        
         .logo {
             font-size: 24px;
             font-weight: bold;
-            letter-spacing: 1px;
-        }
-        
-        .page-title {
-            font-size: 16px;
-            opacity: 0.95;
-            border-left: 2px solid rgba(255,255,255,0.3);
-            padding-left: 20px;
-        }
-        
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-        
-        .back-btn {
-            background: rgba(255,255,255,0.2);
-            border: 1px solid rgba(255,255,255,0.3);
-            color: white;
-            padding: 8px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-weight: 500;
-        }
-        
-        .back-btn:hover {
-            background: rgba(255,255,255,0.3);
         }
         
         /* Container */
         .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 30px 20px;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
         }
         
-        /* Tabs Navigation */
-        .tabs-nav {
+        /* Tabs */
+        .tabs {
             display: flex;
             gap: 10px;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
             border-bottom: 2px solid #e5e7eb;
-            padding-bottom: 0;
         }
         
-        .tab-btn {
-            padding: 12px 24px;
-            background: transparent;
+        .tab {
+            padding: 10px 20px;
+            background: none;
             border: none;
-            color: #6b7280;
-            font-weight: 500;
             cursor: pointer;
-            transition: all 0.3s;
+            font-size: 14px;
+            color: #6b7280;
             border-bottom: 3px solid transparent;
             margin-bottom: -2px;
         }
         
-        .tab-btn:hover {
-            color: #1f2937;
-        }
-        
-        .tab-btn.active {
+        .tab.active {
             color: #10b981;
             border-bottom-color: #10b981;
         }
@@ -118,176 +71,21 @@
         /* Tab Content */
         .tab-content {
             display: none;
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         
         .tab-content.active {
             display: block;
         }
         
-        /* Calendar View */
-        .calendar-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding: 15px;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        }
-        
-        .calendar-nav {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-        
-        .calendar-nav button {
-            background: #3b82f6;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 500;
-        }
-        
-        .calendar-nav button:hover {
-            background: #2563eb;
-        }
-        
-        .current-date {
-            font-size: 18px;
-            font-weight: 600;
-            color: #1f2937;
-        }
-        
-        .view-toggle {
-            display: flex;
-            gap: 5px;
-        }
-        
-        .view-toggle button {
-            padding: 6px 12px;
-            background: #f3f4f6;
-            border: 1px solid #d1d5db;
-            color: #6b7280;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .view-toggle button:first-child {
-            border-radius: 6px 0 0 6px;
-        }
-        
-        .view-toggle button:last-child {
-            border-radius: 0 6px 6px 0;
-        }
-        
-        .view-toggle button.active {
-            background: #3b82f6;
-            color: white;
-            border-color: #3b82f6;
-        }
-        
-        /* Weekly View */
-        .weekly-view {
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        }
-        
-        .time-slots {
-            display: grid;
-            grid-template-columns: 80px repeat(7, 1fr);
-            gap: 1px;
-            background: #e5e7eb;
-            border: 1px solid #e5e7eb;
-        }
-        
-        .time-header {
-            background: #f9fafb;
-            padding: 10px;
-            font-weight: 600;
-            text-align: center;
-            border-right: 1px solid #e5e7eb;
-        }
-        
-        .day-header {
-            background: #f9fafb;
-            padding: 10px;
-            font-weight: 600;
-            text-align: center;
-        }
-        
-        .time-label {
-            background: white;
-            padding: 10px;
-            text-align: right;
-            font-size: 12px;
-            color: #6b7280;
-            border-right: 1px solid #e5e7eb;
-        }
-        
-        .time-slot {
-            background: white;
-            min-height: 60px;
-            padding: 5px;
-            position: relative;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-        
-        .time-slot:hover {
-            background: #f0fdf4;
-        }
-        
-        .appointment-block {
-            background: linear-gradient(135deg, #3b82f6, #2563eb);
-            color: white;
-            padding: 8px;
-            border-radius: 6px;
-            font-size: 12px;
-            cursor: pointer;
-            margin: 2px;
-        }
-        
-        .appointment-block:hover {
-            opacity: 0.9;
-        }
-        
-        .appointment-block.therapy {
-            background: linear-gradient(135deg, #10b981, #059669);
-        }
-        
-        .appointment-block.assessment {
-            background: linear-gradient(135deg, #f59e0b, #d97706);
-        }
-        
-        /* New Appointment Form */
-        .new-appointment-form {
-            background: white;
-            border-radius: 10px;
-            padding: 25px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-            max-width: 800px;
-            margin: 0 auto;
-        }
-        
-        .form-title {
-            font-size: 20px;
-            font-weight: 600;
-            color: #1f2937;
-            margin-bottom: 25px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #e5e7eb;
-        }
-        
+        /* Form Styles */
         .form-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
+            gap: 15px;
             margin-bottom: 20px;
         }
         
@@ -297,167 +95,44 @@
         }
         
         .form-group label {
-            color: #374151;
+            margin-bottom: 5px;
             font-size: 14px;
             font-weight: 500;
-            margin-bottom: 8px;
+            color: #374151;
         }
         
         .form-group input,
-        .form-group select,
-        .form-group textarea {
-            padding: 10px 12px;
+        .form-group select {
+            padding: 8px 12px;
             border: 1px solid #d1d5db;
             border-radius: 6px;
             font-size: 14px;
-            transition: border-color 0.3s;
         }
         
         .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
+        .form-group select:focus {
             outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            border-color: #10b981;
         }
         
-        .form-group textarea {
-            resize: vertical;
-            min-height: 100px;
-        }
-        
-        /* Patient Selection with Session Info */
-        .patient-select-wrapper {
-            position: relative;
-        }
-        
-        .session-info-card {
-            background: #f0fdf4;
-            border: 1px solid #10b981;
-            border-radius: 8px;
-            padding: 15px;
-            margin-top: 10px;
-            display: none;
-        }
-        
-        .session-info-card.show {
-            display: block;
-        }
-        
-        .session-info-title {
-            font-weight: 600;
-            color: #059669;
-            margin-bottom: 10px;
-        }
-        
-        .therapy-item {
-            background: white;
-            border-radius: 6px;
-            padding: 12px;
-            margin-bottom: 10px;
-            border-left: 4px solid #10b981;
-        }
-        
-        .therapy-name {
-            font-weight: 600;
-            color: #1f2937;
-            margin-bottom: 5px;
-        }
-        
-        .therapy-details {
-            display: flex;
-            gap: 20px;
-            font-size: 13px;
-            color: #6b7280;
-        }
-        
-        .session-progress {
-            margin-top: 8px;
-        }
-        
-        .progress-bar {
-            background: #e5e7eb;
-            height: 8px;
-            border-radius: 4px;
-            overflow: hidden;
-        }
-        
-        .progress-fill {
-            background: linear-gradient(90deg, #10b981, #059669);
-            height: 100%;
-            transition: width 0.3s;
-        }
-        
-        .session-stats {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 5px;
-            font-size: 12px;
-            color: #6b7280;
-        }
-        
-        /* Time Slot Picker */
-        .time-slot-picker {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-            gap: 10px;
-            margin-top: 10px;
-        }
-        
-        .time-slot-option {
-            padding: 8px;
-            text-align: center;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-size: 13px;
-        }
-        
-        .time-slot-option:hover {
-            border-color: #3b82f6;
-            background: #eff6ff;
-        }
-        
-        .time-slot-option.selected {
-            background: #3b82f6;
-            color: white;
-            border-color: #3b82f6;
-        }
-        
-        .time-slot-option.unavailable {
-            background: #f3f4f6;
-            color: #9ca3af;
-            cursor: not-allowed;
-            text-decoration: line-through;
-        }
-        
-        /* Form Actions */
-        .form-actions {
-            display: flex;
-            gap: 10px;
-            justify-content: flex-end;
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid #e5e7eb;
-        }
-        
+        /* Buttons */
         .btn {
-            padding: 10px 24px;
-            border-radius: 6px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s;
+            padding: 10px 20px;
             border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s;
         }
         
         .btn-primary {
-            background: #3b82f6;
+            background: #10b981;
             color: white;
         }
         
         .btn-primary:hover {
-            background: #2563eb;
+            background: #059669;
         }
         
         .btn-secondary {
@@ -465,1097 +140,309 @@
             color: white;
         }
         
-        .btn-secondary:hover {
-            background: #4b5563;
+        .btn-danger {
+            background: #ef4444;
+            color: white;
         }
         
-        /* Appointments List */
-        .appointments-list {
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 12px;
         }
         
-        .list-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        
-        .search-box {
-            display: flex;
-            gap: 10px;
-        }
-        
-        .search-box input {
-            padding: 8px 12px;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-            width: 250px;
-        }
-        
-        .filter-btn {
-            padding: 8px 16px;
-            background: #f3f4f6;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .filter-btn:hover {
-            background: #e5e7eb;
-        }
-        
+        /* Appointment List */
         .appointment-card {
             border: 1px solid #e5e7eb;
             border-radius: 8px;
             padding: 15px;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            transition: all 0.3s;
         }
         
-        .appointment-card:hover {
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        }
-        
-        .appointment-info {
-            flex: 1;
-        }
-        
-        .appointment-patient {
-            font-weight: 600;
-            color: #1f2937;
+        .appointment-info h3 {
+            font-size: 16px;
             margin-bottom: 5px;
         }
         
         .appointment-details {
             display: flex;
-            gap: 20px;
+            gap: 15px;
             font-size: 13px;
             color: #6b7280;
         }
         
         .appointment-actions {
             display: flex;
-            gap: 10px;
+            gap: 5px;
         }
         
-        .action-btn {
-            padding: 6px 12px;
-            border-radius: 4px;
-            font-size: 12px;
-            cursor: pointer;
-            border: none;
-            transition: all 0.3s;
-        }
-        
-        .action-btn.edit {
-            background: #eff6ff;
-            color: #3b82f6;
-        }
-        
-        .action-btn.cancel {
-            background: #fef2f2;
-            color: #ef4444;
-        }
-        
-        .action-btn.complete {
-            background: #f0fdf4;
-            color: #10b981;
-        }
-        
-        /* Status Badges */
         .status-badge {
-            padding: 4px 10px;
-            border-radius: 12px;
+            padding: 3px 8px;
+            border-radius: 4px;
             font-size: 11px;
             font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
         }
         
-        .status-badge.scheduled {
+        .status-scheduled {
             background: #dbeafe;
             color: #1e40af;
         }
         
-        .status-badge.in-progress {
-            background: #fef3c7;
-            color: #92400e;
-        }
-        
-        .status-badge.completed {
+        .status-completed {
             background: #d1fae5;
             color: #065f46;
         }
         
-        .status-badge.cancelled {
+        .status-cancelled {
             background: #fee2e2;
             color: #991b1b;
         }
         
-        /* Loading Overlay */
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.9);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            display: none;
+        /* Messages */
+        .message {
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 15px;
         }
         
-        .loading-spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid #e5e7eb;
-            border-top: 4px solid #10b981;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
+        .message.success {
+            background: #d1fae5;
+            color: #065f46;
         }
         
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .form-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .time-slots {
-                grid-template-columns: 60px repeat(7, 1fr);
-            }
-            
-            .appointment-card {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            
-            .appointment-actions {
-                margin-top: 10px;
-                width: 100%;
-            }
-            
-            .action-btn {
-                flex: 1;
-            }
+        .message.error {
+            background: #fee2e2;
+            color: #991b1b;
         }
     </style>
 </head>
 <body>
-    <!-- Loading Overlay -->
-    <div class="loading-overlay" id="loadingOverlay">
-        <div class="loading-spinner"></div>
-    </div>
-
     <!-- Header -->
     <div class="header">
-        <div class="header-container">
-            <div class="logo-section">
-                <div class="logo">CELLOXEN</div>
-                <div class="page-title">Appointment Management</div>
-            </div>
-            <div class="user-info">
-                <span>Welcome, <strong id="userName">Clinic Administrator</strong></span>
-                <button class="back-btn" onclick="goBack()">Back to Dashboard</button>
-            </div>
+        <div class="header-content">
+            <div class="logo">CELLOXEN - Appointment Management</div>
+            <button class="btn btn-secondary" onclick="goBack()">Back to Dashboard</button>
         </div>
     </div>
 
-    <!-- Main Container -->
+    <!-- Container -->
     <div class="container">
-        <!-- Tabs Navigation -->
-        <div class="tabs-nav">
-            <button class="tab-btn active" onclick="switchTab('calendar', event)">Calendar View</button>
-            <button class="tab-btn" onclick="switchTab('new', event)">New Appointment</button>
-            <button class="tab-btn" onclick="switchTab('list', event)">All Appointments</button>
-            <button class="tab-btn" onclick="switchTab('therapy-tracking', event)">Therapy Sessions</button>
+        <!-- Messages -->
+        <div id="messageArea"></div>
+        
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('list')">All Appointments</button>
+            <button class="tab" onclick="switchTab('new')">New Appointment</button>
         </div>
 
-        <!-- Calendar View Tab -->
-        <div class="tab-content active" id="calendar-tab">
-            <div class="calendar-header">
-                <div class="calendar-nav">
-                    <button onclick="previousWeek()">←</button>
-                    <button onclick="goToToday()">Today</button>
-                    <button onclick="nextWeek()">→</button>
-                </div>
-                <div class="current-date" id="currentDate">December 2024</div>
-                <div class="view-toggle">
-                    <button class="active" onclick="setView('week')">Week</button>
-                    <button onclick="setView('day')">Day</button>
-                    <button onclick="setView('month')">Month</button>
-                </div>
-            </div>
-            
-            <div class="weekly-view" id="weeklyView">
-                <!-- Weekly calendar will be generated here -->
-            </div>
+        <!-- List Tab -->
+        <div class="tab-content active" id="list-tab">
+            <h2 style="margin-bottom: 20px;">Upcoming Appointments</h2>
+            <div id="appointmentsList"></div>
         </div>
 
         <!-- New Appointment Tab -->
         <div class="tab-content" id="new-tab">
-            <div class="new-appointment-form">
-                <h2 class="form-title">Schedule New Appointment</h2>
-                
+            <h2 style="margin-bottom: 20px;">Schedule New Appointment</h2>
+            <form id="appointmentForm" onsubmit="saveAppointment(event)">
                 <div class="form-grid">
                     <div class="form-group">
-                        <label for="patientSelect">Select Patient *</label>
-                        <div class="patient-select-wrapper">
-                            <select id="patientSelect" onchange="loadPatientTherapyInfo()">
-                                <option value="">-- Select Patient --</option>
-                            </select>
-                            
-                            <!-- Patient Therapy Session Info -->
-                            <div class="session-info-card" id="sessionInfoCard">
-                                <div class="session-info-title">Current Therapy Programme</div>
-                                <div id="therapyInfoContent">
-                                    <!-- Therapy info will be loaded here -->
-                                </div>
-                            </div>
-                        </div>
+                        <label>Patient Name *</label>
+                        <input type="text" id="patientName" required>
                     </div>
                     
                     <div class="form-group">
-                        <label for="appointmentType">Appointment Type *</label>
-                        <select id="appointmentType" onchange="updateTherapySelection()">
-                            <option value="">-- Select Type --</option>
-                            <option value="assessment">Health Assessment</option>
-                            <option value="therapy">Therapy Session</option>
+                        <label>Patient ID *</label>
+                        <input type="text" id="patientId" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Date *</label>
+                        <input type="date" id="appointmentDate" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Time *</label>
+                        <input type="time" id="appointmentTime" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Type *</label>
+                        <select id="appointmentType" required>
+                            <option value="">Select Type</option>
                             <option value="consultation">Consultation</option>
+                            <option value="therapy">Therapy Session</option>
+                            <option value="assessment">Health Assessment</option>
                             <option value="follow-up">Follow-up</option>
                         </select>
                     </div>
                     
-                    <div class="form-group" id="therapySelectGroup" style="display: none;">
-                        <label for="therapySelect">Select Therapy Protocol *</label>
-                        <select id="therapySelect">
-                            <option value="">-- Select Therapy --</option>
-                        </select>
-                    </div>
-                    
                     <div class="form-group">
-                        <label for="appointmentDate">Date *</label>
-                        <input type="date" id="appointmentDate" onchange="loadAvailableTimeSlots()">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="practitioner">Practitioner *</label>
-                        <select id="practitioner">
-                            <option value="">-- Select Practitioner --</option>
-                            <option value="dr-smith">Dr. Smith</option>
-                            <option value="dr-jones">Dr. Jones</option>
-                            <option value="therapist-1">Therapist 1</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="duration">Duration *</label>
-                        <select id="duration">
-                            <option value="30">30 minutes</option>
-                            <option value="45">45 minutes</option>
-                            <option value="60" selected>1 hour</option>
-                            <option value="90">1.5 hours</option>
-                            <option value="120">2 hours</option>
+                        <label>Practitioner *</label>
+                        <select id="practitioner" required>
+                            <option value="">Select Practitioner</option>
+                            <option value="Dr. Smith">Dr. Smith</option>
+                            <option value="Dr. Jones">Dr. Jones</option>
+                            <option value="Sarah Williams">Sarah Williams</option>
+                            <option value="John Brown">John Brown</option>
                         </select>
                     </div>
                 </div>
                 
-                <div class="form-group">
-                    <label>Available Time Slots</label>
-                    <div class="time-slot-picker" id="timeSlotPicker">
-                        <!-- Time slots will be generated here -->
-                    </div>
+                <div style="display: flex; gap: 10px;">
+                    <button type="submit" class="btn btn-primary">Save Appointment</button>
+                    <button type="button" class="btn btn-secondary" onclick="clearForm()">Clear</button>
                 </div>
-                
-                <div class="form-group">
-                    <label for="appointmentNotes">Notes (Optional)</label>
-                    <textarea id="appointmentNotes" placeholder="Add any special notes or requirements..."></textarea>
-                </div>
-                
-                <div class="form-actions">
-                    <button class="btn btn-secondary" onclick="clearForm()">Clear</button>
-                    <button class="btn btn-primary" onclick="saveAppointment()">Schedule Appointment</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- All Appointments Tab -->
-        <div class="tab-content" id="list-tab">
-            <div class="appointments-list">
-                <div class="list-header">
-                    <h2 style="font-size: 18px; font-weight: 600;">Upcoming Appointments</h2>
-                    <div class="search-box">
-                        <input type="text" placeholder="Search by patient name..." id="searchInput" onkeyup="filterAppointments()">
-                        <button class="filter-btn" onclick="openFilterModal()">Filters</button>
-                    </div>
-                </div>
-                
-                <div id="appointmentsList">
-                    <!-- Appointments will be loaded here -->
-                </div>
-            </div>
-        </div>
-
-        <!-- Therapy Sessions Tracking Tab -->
-        <div class="tab-content" id="therapy-tracking-tab">
-            <div class="appointments-list">
-                <div class="list-header">
-                    <h2 style="font-size: 18px; font-weight: 600;">Therapy Session Tracking</h2>
-                </div>
-                
-                <div id="therapyTrackingList">
-                    <!-- Therapy tracking will be loaded here -->
-                </div>
-            </div>
+            </form>
         </div>
     </div>
 
-    <!-- Include Supabase and Auth -->
-    <script src="auth-guard.js"></script>
-    
-    <script type="module">
-        import { supabase } from './supabase-config.js';
+    <script>
+        // Local storage key
+        const STORAGE_KEY = 'celloxen_appointments';
         
-        let currentClinicId = null;
-        let currentWeekStart = null;
-        let appointments = [];
-        let patients = [];
-        let therapyProtocols = [];
+        // Load appointments from localStorage
+        let appointments = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
         
-        // Initialize on page load
-        document.addEventListener('DOMContentLoaded', async function() {
-            await checkAuthentication();
-            if (currentClinicId) {
-                await initializeAppointments();
-            }
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadAppointments();
+            // Set minimum date to today
+            document.getElementById('appointmentDate').min = new Date().toISOString().split('T')[0];
         });
         
-        // Check authentication
-        async function checkAuthentication() {
-            const authData = localStorage.getItem('celloxen_auth');
-            if (!authData) {
-                window.location.href = 'unified-login.html';
-                return;
-            }
+        // Switch tabs
+        function switchTab(tabName) {
+            // Update tab buttons
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
             
-            const auth = JSON.parse(authData);
-            const validUserTypes = ['clinic', 'clinic_admin', 'super_admin'];
-            
-            if (!validUserTypes.includes(auth.userType)) {
-                alert('Access denied. Clinic administrator privileges required.');
-                window.location.href = 'unified-login.html';
-                return;
-            }
-            
-            currentClinicId = auth.clinicId;
-            document.getElementById('userName').textContent = auth.username || 'Clinic Administrator';
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(`${tabName}-tab`).classList.add('active');
         }
         
-        // Initialize appointments system
-        async function initializeAppointments() {
-            showLoading(true);
-            try {
-                // Set current week
-                const today = new Date();
-                currentWeekStart = getWeekStart(today);
-                
-                // Load initial data
-                await Promise.all([
-                    loadPatients(),
-                    loadTherapyProtocols(),
-                    loadAppointments(),
-                    loadTherapyTracking()
-                ]);
-                
-                // Initialize calendar
-                renderWeeklyCalendar();
-                updateCurrentDateDisplay();
-                
-                // Generate initial time slots
-                generateTimeSlots();
-                
-            } catch (error) {
-                console.error('Error initializing appointments:', error);
-                alert('Error loading appointment data. Please try again.');
-            } finally {
-                showLoading(false);
-            }
+        // Save appointment
+        function saveAppointment(event) {
+            event.preventDefault();
+            
+            const appointment = {
+                id: Date.now(),
+                patientName: document.getElementById('patientName').value,
+                patientId: document.getElementById('patientId').value,
+                date: document.getElementById('appointmentDate').value,
+                time: document.getElementById('appointmentTime').value,
+                type: document.getElementById('appointmentType').value,
+                practitioner: document.getElementById('practitioner').value,
+                status: 'scheduled',
+                createdAt: new Date().toISOString()
+            };
+            
+            appointments.push(appointment);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(appointments));
+            
+            showMessage('Appointment scheduled successfully!', 'success');
+            clearForm();
+            loadAppointments();
+            
+            // Switch to list view
+            document.querySelector('.tab').click();
         }
         
-        // Load patients for current clinic
-        async function loadPatients() {
-            try {
-                const { data, error } = await supabase
-                    .from('patients')
-                    .select('*')
-                    .eq('clinic_id', currentClinicId)
-                    .order('first_name');
-                
-                if (error) throw error;
-                
-                patients = data || [];
-                
-                // Populate patient select dropdown
-                const patientSelect = document.getElementById('patientSelect');
-                patientSelect.innerHTML = '<option value="">-- Select Patient --</option>';
-                
-                patients.forEach(patient => {
-                    const option = document.createElement('option');
-                    option.value = patient.patient_id;
-                    option.textContent = `${patient.first_name} ${patient.last_name} (${patient.patient_id})`;
-                    patientSelect.appendChild(option);
+        // Load and display appointments
+        function loadAppointments() {
+            const listContainer = document.getElementById('appointmentsList');
+            
+            // Sort appointments by date and time
+            const sortedAppointments = appointments
+                .filter(a => a.status !== 'cancelled')
+                .sort((a, b) => {
+                    const dateA = new Date(a.date + ' ' + a.time);
+                    const dateB = new Date(b.date + ' ' + b.time);
+                    return dateA - dateB;
                 });
-                
-            } catch (error) {
-                console.error('Error loading patients:', error);
-            }
-        }
-        
-        // Load therapy protocols
-        async function loadTherapyProtocols() {
-            try {
-                const { data, error } = await supabase
-                    .from('therapy_configurations')
-                    .select('*')
-                    .order('therapy_code');
-                
-                if (error) throw error;
-                
-                therapyProtocols = data || [];
-                
-                // Populate therapy select dropdown
-                const therapySelect = document.getElementById('therapySelect');
-                therapySelect.innerHTML = '<option value="">-- Select Therapy --</option>';
-                
-                therapyProtocols.forEach(therapy => {
-                    const option = document.createElement('option');
-                    option.value = therapy.therapy_code;
-                    option.textContent = `${therapy.therapy_code}: ${therapy.therapy_name}`;
-                    therapySelect.appendChild(option);
-                });
-                
-            } catch (error) {
-                console.error('Error loading therapy protocols:', error);
-            }
-        }
-        
-        // Load patient therapy information with correct column names
-        window.loadPatientTherapyInfo = async function() {
-            const patientId = document.getElementById('patientSelect').value;
-            const sessionInfoCard = document.getElementById('sessionInfoCard');
-            const therapyInfoContent = document.getElementById('therapyInfoContent');
             
-            if (!patientId) {
-                sessionInfoCard.classList.remove('show');
+            if (sortedAppointments.length === 0) {
+                listContainer.innerHTML = '<p style="color: #6b7280;">No appointments scheduled</p>';
                 return;
             }
             
-            try {
-                // Get patient's health assessment - handle table not existing
-                let assessment = null;
-                try {
-                    const { data, error } = await supabase
-                        .from('health_assessments')
-                        .select('*')
-                        .eq('patient_id', patientId)
-                        .order('assessment_date', { ascending: false })
-                        .limit(1)
-                        .single();
-                    
-                    if (!error) assessment = data;
-                } catch (e) {
-                    console.log('Health assessments table not available');
-                }
-                
-                // Get all therapy sessions for this patient - handle table not existing
-                let sessions = [];
-                try {
-                    const { data, error } = await supabase
-                        .from('treatment_sessions')
-                        .select('*')
-                        .eq('patient_id', patientId)
-                        .order('start_time', { ascending: false });
-                    
-                    if (!error) sessions = data || [];
-                } catch (e) {
-                    console.log('Treatment sessions table not available');
-                }
-                
-                if (assessment && assessment.therapies_recommended) {
-                    const therapies = assessment.therapies_recommended;
-                    const recommendedSessions = assessment.recommended_sessions || 10;
-                    
-                    let therapyHTML = '';
-                    
-                    // Display each recommended therapy with progress
-                    for (const therapyCode of therapies) {
-                        // Find therapy using either column name
-                        const therapy = therapyProtocols.find(t => 
-                            (t.code === therapyCode) || (t.therapy_code === therapyCode)
-                        );
-                        if (therapy) {
-                            // Count sessions for this specific therapy
-                            const therapySessions = sessions.filter(s => 
-                                s.therapy_code === therapyCode && s.status === 'completed'
-                            ).length;
-                            
-                            const progress = (therapySessions / recommendedSessions) * 100;
-                            
-                            therapyHTML += `
-                                <div class="therapy-item">
-                                    <div class="therapy-name">${therapy.name || therapy.therapy_name}</div>
-                                    <div class="therapy-details">
-                                        <span>Code: ${therapyCode}</span>
-                                        <span>Category: ${therapy.category || 'General'}</span>
-                                    </div>
-                                    <div class="session-progress">
-                                        <div class="progress-bar">
-                                            <div class="progress-fill" style="width: ${Math.min(progress, 100)}%"></div>
-                                        </div>
-                                        <div class="session-stats">
-                                            <span>Completed: ${therapySessions}/${recommendedSessions}</span>
-                                            <span>Remaining: ${Math.max(0, recommendedSessions - therapySessions)}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            `;
-                        }
-                    }
-                    
-                    if (therapyHTML) {
-                        therapyInfoContent.innerHTML = therapyHTML;
-                        sessionInfoCard.classList.add('show');
-                    } else {
-                        therapyInfoContent.innerHTML = '<p style="color: #6b7280;">No active therapy programme</p>';
-                        sessionInfoCard.classList.add('show');
-                    }
-                } else {
-                    therapyInfoContent.innerHTML = '<p style="color: #6b7280;">No health assessment found. Please conduct an assessment first.</p>';
-                    sessionInfoCard.classList.add('show');
-                }
-                
-            } catch (error) {
-                console.error('Error loading patient therapy info:', error);
-                therapyInfoContent.innerHTML = '<p style="color: #6b7280;">Therapy information will be available after health assessment.</p>';
-                sessionInfoCard.classList.add('show');
-            }
-        };
-        
-        // Update therapy selection based on appointment type
-        window.updateTherapySelection = function() {
-            const appointmentType = document.getElementById('appointmentType').value;
-            const therapySelectGroup = document.getElementById('therapySelectGroup');
-            
-            if (appointmentType === 'therapy') {
-                therapySelectGroup.style.display = 'block';
-            } else {
-                therapySelectGroup.style.display = 'none';
-            }
-        };
-        
-        // Load appointments
-        async function loadAppointments() {
-            try {
-                const { data, error } = await supabase
-                    .from('appointments')
-                    .select('*')
-                    .eq('clinic_id', currentClinicId)
-                    .order('appointment_date', { ascending: true });
-                
-                if (error) throw error;
-                
-                appointments = data || [];
-                renderAppointmentsList();
-                
-            } catch (error) {
-                console.error('Error loading appointments:', error);
-            }
-        }
-        
-        // Load therapy tracking data
-        async function loadTherapyTracking() {
-            try {
-                const therapyTrackingList = document.getElementById('therapyTrackingList');
-                let trackingHTML = '';
-                
-                // For each patient, get their therapy progress
-                for (const patient of patients) {
-                    // Get health assessment
-                    const { data: assessment } = await supabase
-                        .from('health_assessments')
-                        .select('*')
-                        .eq('patient_id', patient.patient_id)
-                        .order('assessment_date', { ascending: false })
-                        .limit(1)
-                        .single();
-                    
-                    if (assessment && assessment.therapies_recommended) {
-                        // Get all sessions
-                        const { data: sessions } = await supabase
-                            .from('treatment_sessions')
-                            .select('*')
-                            .eq('patient_id', patient.patient_id);
-                        
-                        const totalCompleted = sessions ? sessions.filter(s => s.status === 'completed').length : 0;
-                        const totalRecommended = assessment.recommended_sessions || 10;
-                        const progress = (totalCompleted / totalRecommended) * 100;
-                        
-                        let statusBadge = '';
-                        if (progress === 0) {
-                            statusBadge = '<span class="status-badge scheduled">Not Started</span>';
-                        } else if (progress < 100) {
-                            statusBadge = '<span class="status-badge in-progress">In Progress</span>';
-                        } else {
-                            statusBadge = '<span class="status-badge completed">Completed</span>';
-                        }
-                        
-                        trackingHTML += `
-                            <div class="appointment-card">
-                                <div class="appointment-info">
-                                    <div class="appointment-patient">${patient.first_name} ${patient.last_name}</div>
-                                    <div class="appointment-details">
-                                        <span>Patient ID: ${patient.patient_id}</span>
-                                        <span>Sessions: ${totalCompleted}/${totalRecommended}</span>
-                                        <span>Progress: ${Math.round(progress)}%</span>
-                                        ${statusBadge}
-                                    </div>
-                                    <div class="session-progress" style="margin-top: 10px;">
-                                        <div class="progress-bar">
-                                            <div class="progress-fill" style="width: ${Math.min(progress, 100)}%"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="appointment-actions">
-                                    <button class="action-btn edit" onclick="viewPatientSessions('${patient.patient_id}')">View Details</button>
-                                    <button class="action-btn complete" onclick="bookNextSession('${patient.patient_id}')">Book Next</button>
-                                </div>
-                            </div>
-                        `;
-                    }
-                }
-                
-                therapyTrackingList.innerHTML = trackingHTML || '<p style="color: #6b7280; text-align: center; padding: 20px;">No active therapy programmes</p>';
-                
-            } catch (error) {
-                console.error('Error loading therapy tracking:', error);
-            }
-        }
-        
-        // Generate time slots
-        function generateTimeSlots() {
-            const timeSlotPicker = document.getElementById('timeSlotPicker');
-            const slots = [];
-            
-            // Generate slots from 9 AM to 5 PM
-            for (let hour = 9; hour < 17; hour++) {
-                slots.push(`${hour.toString().padStart(2, '0')}:00`);
-                slots.push(`${hour.toString().padStart(2, '0')}:30`);
-            }
-            
-            timeSlotPicker.innerHTML = slots.map(slot => `
-                <div class="time-slot-option" onclick="selectTimeSlot(this, '${slot}')">
-                    ${slot}
+            listContainer.innerHTML = sortedAppointments.map(appointment => `
+                <div class="appointment-card">
+                    <div class="appointment-info">
+                        <h3>${appointment.patientName}</h3>
+                        <div class="appointment-details">
+                            <span>ID: ${appointment.patientId}</span>
+                            <span>Date: ${formatDate(appointment.date)}</span>
+                            <span>Time: ${appointment.time}</span>
+                            <span>Type: ${appointment.type}</span>
+                            <span>Practitioner: ${appointment.practitioner}</span>
+                            <span class="status-badge status-${appointment.status}">${appointment.status}</span>
+                        </div>
+                    </div>
+                    <div class="appointment-actions">
+                        <button class="btn btn-primary btn-sm" onclick="completeAppointment(${appointment.id})">Complete</button>
+                        <button class="btn btn-danger btn-sm" onclick="cancelAppointment(${appointment.id})">Cancel</button>
+                    </div>
                 </div>
             `).join('');
         }
         
-        // Select time slot
-        window.selectTimeSlot = function(element, time) {
-            // Remove previous selection
-            document.querySelectorAll('.time-slot-option').forEach(slot => {
-                slot.classList.remove('selected');
-            });
-            
-            // Add selection to clicked slot
-            element.classList.add('selected');
-        };
-        
-        // Save appointment
-        window.saveAppointment = async function() {
-            const patientId = document.getElementById('patientSelect').value;
-            const appointmentType = document.getElementById('appointmentType').value;
-            const appointmentDate = document.getElementById('appointmentDate').value;
-            const practitioner = document.getElementById('practitioner').value;
-            const duration = document.getElementById('duration').value;
-            const notes = document.getElementById('appointmentNotes').value;
-            
-            // Get selected time slot
-            const selectedTimeSlot = document.querySelector('.time-slot-option.selected');
-            const appointmentTime = selectedTimeSlot ? selectedTimeSlot.textContent.trim() : null;
-            
-            // Validation
-            if (!patientId || !appointmentType || !appointmentDate || !appointmentTime || !practitioner) {
-                alert('Please fill in all required fields and select a time slot');
-                return;
+        // Complete appointment
+        function completeAppointment(id) {
+            const appointment = appointments.find(a => a.id === id);
+            if (appointment) {
+                appointment.status = 'completed';
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(appointments));
+                showMessage('Appointment marked as completed', 'success');
+                loadAppointments();
             }
-            
-            // Additional validation for therapy appointments
-            let therapyCode = null;
-            if (appointmentType === 'therapy') {
-                therapyCode = document.getElementById('therapySelect').value;
-                if (!therapyCode) {
-                    alert('Please select a therapy protocol');
-                    return;
+        }
+        
+        // Cancel appointment
+        function cancelAppointment(id) {
+            if (confirm('Are you sure you want to cancel this appointment?')) {
+                const appointment = appointments.find(a => a.id === id);
+                if (appointment) {
+                    appointment.status = 'cancelled';
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(appointments));
+                    showMessage('Appointment cancelled', 'success');
+                    loadAppointments();
                 }
             }
-            
-            showLoading(true);
-            
-            try {
-                // Create appointment object
-                const appointmentData = {
-                    clinic_id: currentClinicId,
-                    patient_id: patientId,
-                    appointment_type: appointmentType,
-                    appointment_date: appointmentDate,
-                    appointment_time: appointmentTime,
-                    duration: parseInt(duration),
-                    practitioner: practitioner,
-                    therapy_code: therapyCode,
-                    status: 'scheduled',
-                    notes: notes,
-                    created_at: new Date().toISOString()
-                };
-                
-                // Save to database
-                const { data, error } = await supabase
-                    .from('appointments')
-                    .insert([appointmentData]);
-                
-                if (error) throw error;
-                
-                alert('Appointment scheduled successfully!');
-                
-                // Clear form and reload appointments
-                clearForm();
-                await loadAppointments();
-                
-                // Switch to list view
-                switchTab('list');
-                
-            } catch (error) {
-                console.error('Error saving appointment:', error);
-                alert('Error scheduling appointment. Please try again.');
-            } finally {
-                showLoading(false);
-            }
-        };
+        }
         
         // Clear form
-        window.clearForm = function() {
-            document.getElementById('patientSelect').value = '';
-            document.getElementById('appointmentType').value = '';
-            document.getElementById('therapySelect').value = '';
-            document.getElementById('appointmentDate').value = '';
-            document.getElementById('practitioner').value = '';
-            document.getElementById('duration').value = '60';
-            document.getElementById('appointmentNotes').value = '';
-            document.getElementById('sessionInfoCard').classList.remove('show');
-            document.getElementById('therapySelectGroup').style.display = 'none';
-            
-            // Clear time slot selection
-            document.querySelectorAll('.time-slot-option').forEach(slot => {
-                slot.classList.remove('selected');
-            });
-            
-            // Clear editing flag
-            window.editingAppointmentId = null;
-        };
-        
-        // Render appointments list
-        function renderAppointmentsList() {
-            const appointmentsList = document.getElementById('appointmentsList');
-            
-            if (appointments.length === 0) {
-                appointmentsList.innerHTML = '<p style="color: #6b7280; text-align: center; padding: 20px;">No appointments scheduled</p>';
-                return;
-            }
-            
-            const appointmentsHTML = appointments.map(appointment => {
-                const patient = patients.find(p => p.patient_id === appointment.patient_id);
-                const patientName = patient ? `${patient.first_name} ${patient.last_name}` : 'Unknown Patient';
-                
-                let statusBadge = '';
-                switch (appointment.status) {
-                    case 'scheduled':
-                        statusBadge = '<span class="status-badge scheduled">Scheduled</span>';
-                        break;
-                    case 'completed':
-                        statusBadge = '<span class="status-badge completed">Completed</span>';
-                        break;
-                    case 'cancelled':
-                        statusBadge = '<span class="status-badge cancelled">Cancelled</span>';
-                        break;
-                    default:
-                        statusBadge = '<span class="status-badge scheduled">Scheduled</span>';
-                }
-                
-                return `
-                    <div class="appointment-card">
-                        <div class="appointment-info">
-                            <div class="appointment-patient">${patientName}</div>
-                            <div class="appointment-details">
-                                <span>Date: ${new Date(appointment.appointment_date).toLocaleDateString()}</span>
-                                <span>Time: ${appointment.appointment_time}</span>
-                                <span>Type: ${appointment.appointment_type}</span>
-                                ${appointment.therapy_code ? `<span>Therapy: ${appointment.therapy_code}</span>` : ''}
-                                ${statusBadge}
-                            </div>
-                        </div>
-                        <div class="appointment-actions">
-                            <button class="action-btn edit" onclick="editAppointment('${appointment.id}')">Edit</button>
-                            <button class="action-btn complete" onclick="markComplete('${appointment.id}')">Complete</button>
-                            <button class="action-btn cancel" onclick="cancelAppointment('${appointment.id}')">Cancel</button>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-            
-            appointmentsList.innerHTML = appointmentsHTML;
+        function clearForm() {
+            document.getElementById('appointmentForm').reset();
         }
         
-        // Calendar functions
-        function renderWeeklyCalendar() {
-            const weeklyView = document.getElementById('weeklyView');
-            const days = ['Time', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-            const hours = [];
-            
-            // Generate hours from 8 AM to 6 PM
-            for (let i = 8; i <= 18; i++) {
-                hours.push(`${i.toString().padStart(2, '0')}:00`);
-            }
-            
-            let calendarHTML = '';
-            
-            // Day headers
-            days.forEach((day, index) => {
-                if (index === 0) {
-                    calendarHTML += '<div class="time-header"></div>';
-                } else {
-                    const date = new Date(currentWeekStart);
-                    date.setDate(date.getDate() + index - 1);
-                    calendarHTML += `<div class="day-header">${day}<br><span style="font-size: 12px; font-weight: normal;">${date.getDate()}</span></div>`;
-                }
-            });
-            
-            // Time slots
-            hours.forEach(hour => {
-                calendarHTML += `<div class="time-label">${hour}</div>`;
-                
-                for (let day = 0; day < 7; day++) {
-                    calendarHTML += '<div class="time-slot" ondblclick="quickAddAppointment(this)"></div>';
-                }
-            });
-            
-            weeklyView.innerHTML = `<div class="time-slots">${calendarHTML}</div>`;
+        // Format date for display
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-GB');
         }
         
-        // Week navigation functions
-        window.previousWeek = function() {
-            currentWeekStart.setDate(currentWeekStart.getDate() - 7);
-            renderWeeklyCalendar();
-            updateCurrentDateDisplay();
-            renderAppointmentsOnCalendar();
-        };
-        
-        window.nextWeek = function() {
-            currentWeekStart.setDate(currentWeekStart.getDate() + 7);
-            renderWeeklyCalendar();
-            updateCurrentDateDisplay();
-            renderAppointmentsOnCalendar();
-        };
-        
-        window.goToToday = function() {
-            const today = new Date();
-            currentWeekStart = getWeekStart(today);
-            renderWeeklyCalendar();
-            updateCurrentDateDisplay();
-            renderAppointmentsOnCalendar();
-        };
-        
-        // View appointment details
-        window.viewAppointmentDetails = function(appointmentId) {
-            const appointment = appointments.find(a => a.id === appointmentId);
-            if (appointment) {
-                alert(`Appointment Details:\n
-Patient: ${appointment.patients ? appointment.patients.first_name + ' ' + appointment.patients.last_name : 'Unknown'}
-Date: ${new Date(appointment.appointment_date).toLocaleDateString('en-GB')}
-Time: ${appointment.appointment_time.substring(0, 5)}
-Type: ${appointment.appointment_type}
-Practitioner: ${appointment.practitioners ? appointment.practitioners.name : appointment.practitioner || 'TBD'}
-Status: ${appointment.status}
-${appointment.notes ? 'Notes: ' + appointment.notes : ''}`);
-            }
-        };
-        
-        function getWeekStart(date) {
-            const d = new Date(date);
-            const day = d.getDay();
-            const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-            return new Date(d.setDate(diff));
+        // Show message
+        function showMessage(text, type) {
+            const messageArea = document.getElementById('messageArea');
+            messageArea.innerHTML = `<div class="message ${type}">${text}</div>`;
+            setTimeout(() => {
+                messageArea.innerHTML = '';
+            }, 3000);
         }
         
-        function updateCurrentDateDisplay() {
-            const weekEnd = new Date(currentWeekStart);
-            weekEnd.setDate(weekEnd.getDate() + 6);
-            
-            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
-                'July', 'August', 'September', 'October', 'November', 'December'];
-            
-            const startMonth = monthNames[currentWeekStart.getMonth()];
-            const endMonth = monthNames[weekEnd.getMonth()];
-            const year = currentWeekStart.getFullYear();
-            
-            let displayText = '';
-            if (startMonth === endMonth) {
-                displayText = `${startMonth} ${currentWeekStart.getDate()}-${weekEnd.getDate()}, ${year}`;
-            } else {
-                displayText = `${startMonth} ${currentWeekStart.getDate()} - ${endMonth} ${weekEnd.getDate()}, ${year}`;
-            }
-            
-            document.getElementById('currentDate').textContent = displayText;
-        }
-        
-        // Tab switching
-        window.switchTab = function(tabName) {
-            // Remove active class from all tabs and contents
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-            
-            // Add active class to selected tab
-            event.target.classList.add('active');
-            document.getElementById(`${tabName}-tab`).classList.add('active');
-            
-            // Load specific tab data if needed
-            if (tabName === 'therapy-tracking') {
-                loadTherapyTracking();
-            }
-        };
-        
-        // Helper functions
-        window.viewPatientSessions = function(patientId) {
-            // Navigate to detailed session view
-            sessionStorage.setItem('selectedPatientId', patientId);
-            window.location.href = 'session-tracking.html';
-        };
-        
-        window.bookNextSession = function(patientId) {
-            // Pre-fill appointment form with patient
-            switchTab('new');
-            document.getElementById('patientSelect').value = patientId;
-            loadPatientTherapyInfo();
-            document.getElementById('appointmentType').value = 'therapy';
-            updateTherapySelection();
-        };
-        
-        window.editAppointment = function(appointmentId) {
-            alert('Edit functionality coming soon!');
-        };
-        
-        window.markComplete = async function(appointmentId) {
-            if (!confirm('Mark this appointment as completed?')) return;
-            
-            try {
-                const { error } = await supabase
-                    .from('appointments')
-                    .update({ status: 'completed' })
-                    .eq('id', appointmentId);
-                
-                if (error) throw error;
-                
-                await loadAppointments();
-                alert('Appointment marked as completed');
-                
-            } catch (error) {
-                console.error('Error updating appointment:', error);
-                alert('Error updating appointment status');
-            }
-        };
-        
-        window.cancelAppointment = async function(appointmentId) {
-            if (!confirm('Are you sure you want to cancel this appointment?')) return;
-            
-            try {
-                const { error } = await supabase
-                    .from('appointments')
-                    .update({ status: 'cancelled' })
-                    .eq('id', appointmentId);
-                
-                if (error) throw error;
-                
-                await loadAppointments();
-                alert('Appointment cancelled');
-                
-            } catch (error) {
-                console.error('Error cancelling appointment:', error);
-                alert('Error cancelling appointment');
-            }
-        };
-        
-        window.filterAppointments = function() {
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            const cards = document.querySelectorAll('.appointment-card');
-            
-            cards.forEach(card => {
-                const patientName = card.querySelector('.appointment-patient').textContent.toLowerCase();
-                if (patientName.includes(searchTerm)) {
-                    card.style.display = '';
-                } else {
-                    card.style.display = 'none';
-                }
-            });
-        };
-        
-        // Update dashboard statistics
-        async function updateDashboardStats() {
-            try {
-                const { data, error } = await supabase
-                    .from('appointments')
-                    .select('*')
-                    .eq('clinic_id', currentClinicId);
-                
-                if (error) throw error;
-                
-                const today = new Date().toISOString().split('T')[0];
-                const stats = {
-                    total: data.length,
-                    scheduled: data.filter(a => a.status === 'scheduled').length,
-                    completed: data.filter(a => a.status === 'completed').length,
-                    cancelled: data.filter(a => a.status === 'cancelled').length,
-                    today: data.filter(a => a.appointment_date === today).length,
-                    upcoming: data.filter(a => a.appointment_date > today && a.status === 'scheduled').length
-                };
-                
-                // You can display these stats in a dashboard section if needed
-                console.log('Appointment Statistics:', stats);
-                
-            } catch (error) {
-                console.error('Error updating dashboard stats:', error);
-            }
-        }
-        
-        // Navigation
-        window.goBack = function() {
+        // Go back to dashboard
+        function goBack() {
             window.location.href = 'clinic-dashboard.html';
-        };
-        
-        // Show/hide loading
-        function showLoading(show) {
-            document.getElementById('loadingOverlay').style.display = show ? 'flex' : 'none';
         }
     </script>
 </body>
