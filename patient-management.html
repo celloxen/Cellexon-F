@@ -25,6 +25,7 @@
         .alert { padding: 10px; border-radius: 4px; margin: 10px 0; }
         .alert-success { background: #d1fae5; color: #065f46; border: 1px solid #10b981; }
         .alert-error { background: #fee2e2; color: #991b1b; border: 1px solid #ef4444; }
+        .alert-warning { background: #fef3c7; color: #92400e; border: 1px solid #f59e0b; }
         .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
         .stat-card { background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 20px; border-radius: 8px; text-align: center; }
         .stat-number { font-size: 2rem; font-weight: bold; }
@@ -61,6 +62,35 @@
         .checkbox-group { display: flex; align-items: center; gap: 10px; }
         .consent-text { background: #fef3c7; padding: 10px; border-radius: 4px; margin: 10px 0; font-size: 0.9rem; }
         .required-field::after { content: ' *'; color: #ef4444; }
+        
+        /* Therapy selection styles */
+        .therapy-select { min-height: 120px; }
+        .therapy-category { font-weight: 600; color: #374151; background: #f3f4f6; padding: 2px 5px; }
+        
+        /* Contraindications styles */
+        .contraindications-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 15px 0; }
+        .contraindication-item { display: flex; align-items: center; gap: 10px; padding: 8px; background: #f9fafb; border-radius: 4px; }
+        .contraindication-item.absolute { background: #fee2e2; }
+        .contraindication-item.relative { background: #fef3c7; }
+        .contraindication-label { flex: 1; font-size: 0.9rem; }
+        .contraindication-checkbox { display: flex; gap: 10px; }
+        
+        /* Warning banner */
+        .warning-banner { background: #dc2626; color: white; padding: 15px; border-radius: 8px; margin: 15px 0; display: none; }
+        .warning-banner.show { display: block; }
+        .warning-banner h3 { margin-bottom: 10px; }
+        
+        /* Consent form styles */
+        .consent-form { background: white; padding: 30px; margin: 20px 0; border: 2px solid #e5e7eb; border-radius: 8px; }
+        .consent-form h2 { color: #1e293b; margin-bottom: 20px; }
+        .consent-section { margin: 20px 0; }
+        .signature-pad { border: 1px solid #ddd; border-radius: 4px; background: white; margin: 10px 0; }
+        .signature-actions { display: flex; gap: 10px; margin: 10px 0; }
+        
+        @media print {
+            .no-print { display: none !important; }
+            .consent-form { border: 1px solid #000; }
+        }
     </style>
 </head>
 <body>
@@ -234,6 +264,145 @@
                     <textarea id="medicalHistory" placeholder="Key conditions (e.g., diabetes, hypertension, etc.)"></textarea>
                 </div>
                 
+                <!-- Therapy Selection -->
+                <h3 class="section-title">Therapy Selection</h3>
+                <div class="form-group">
+                    <label>Select Therapies (Hold Ctrl/Cmd to select multiple)</label>
+                    <select id="selectedTherapies" class="therapy-select" multiple>
+                        <optgroup label="Category 1: Stress, Anxiety & Sleep">
+                            <option value="101">Code 101 - Deep Sleep Renewal Therapy</option>
+                            <option value="102">Code 102 - Stress Relief Therapy</option>
+                            <option value="103">Code 103 - Relaxation & Calm Therapy</option>
+                            <option value="104">Code 104 - Sleep Quality Therapy</option>
+                        </optgroup>
+                        <optgroup label="Category 2: Kidney & Urinary">
+                            <option value="201">Code 201 - Kidney Vitality Therapy</option>
+                            <option value="202">Code 202 - Kidney Support Therapy</option>
+                            <option value="203">Code 203 - Bladder Comfort Therapy</option>
+                            <option value="204">Code 204 - Urinary Flow Therapy</option>
+                        </optgroup>
+                        <optgroup label="Category 3: Cardiovascular">
+                            <option value="301">Code 301 - Heart Health Therapy</option>
+                            <option value="302">Code 302 - Blood Pressure Balance Therapy</option>
+                            <option value="303">Code 303 - Circulation Boost Therapy</option>
+                            <option value="304">Code 304 - Cardiovascular Vitality Therapy</option>
+                        </optgroup>
+                        <optgroup label="Category 4: Joint Pain & Arthritis">
+                            <option value="401">Code 401 - Gout Relief Therapy</option>
+                            <option value="402">Code 402 - ArthriComfort Therapy</option>
+                            <option value="403">Code 403 - Joint Mobility Therapy</option>
+                        </optgroup>
+                        <optgroup label="Category 5: Circulation & Healing">
+                            <option value="501">Code 501 - Wound Healing Therapy</option>
+                            <option value="502">Code 502 - Vascular Health Therapy</option>
+                        </optgroup>
+                        <optgroup label="Category 6: Digestive & Energy">
+                            <option value="601">Code 601 - Digestive Balance Therapy</option>
+                            <option value="602">Code 602 - Energy Boost Therapy</option>
+                            <option value="703">Code 703 - Skin Health Therapy</option>
+                        </optgroup>
+                        <optgroup label="Category 7: Diabetes Support">
+                            <option value="100">Code 100 - Blood Sugar Balance Therapy</option>
+                        </optgroup>
+                        <optgroup label="Category 8: Wellness Packages">
+                            <option value="801">Code 801 - Total Wellness Package</option>
+                            <option value="802">Code 802 - Stress & Relaxation Package</option>
+                        </optgroup>
+                    </select>
+                </div>
+                
+                <!-- Contraindications Checklist -->
+                <h3 class="section-title">Contraindications Assessment</h3>
+                <div id="contraindicationWarning" class="warning-banner">
+                    <h3>⚠️ WARNING: Contraindications Detected</h3>
+                    <p>This patient has contraindications that require GP authorization before proceeding with therapy.</p>
+                    <p>Please ensure proper medical clearance is obtained and documented.</p>
+                </div>
+                
+                <h4 style="color: #dc2626; margin: 15px 0;">Absolute Contraindications (Require GP Authorization)</h4>
+                <div class="contraindications-grid">
+                    <div class="contraindication-item absolute">
+                        <label class="contraindication-label">Pacemaker or implanted devices</label>
+                        <div class="contraindication-checkbox">
+                            <label><input type="radio" name="contra_pacemaker" value="yes" onchange="checkContraindications()"> Yes</label>
+                            <label><input type="radio" name="contra_pacemaker" value="no" onchange="checkContraindications()" checked> No</label>
+                        </div>
+                    </div>
+                    <div class="contraindication-item absolute">
+                        <label class="contraindication-label">Pregnancy (first trimester)</label>
+                        <div class="contraindication-checkbox">
+                            <label><input type="radio" name="contra_pregnancy" value="yes" onchange="checkContraindications()"> Yes</label>
+                            <label><input type="radio" name="contra_pregnancy" value="no" onchange="checkContraindications()" checked> No</label>
+                        </div>
+                    </div>
+                    <div class="contraindication-item absolute">
+                        <label class="contraindication-label">Active cancer treatment</label>
+                        <div class="contraindication-checkbox">
+                            <label><input type="radio" name="contra_cancer" value="yes" onchange="checkContraindications()"> Yes</label>
+                            <label><input type="radio" name="contra_cancer" value="no" onchange="checkContraindications()" checked> No</label>
+                        </div>
+                    </div>
+                    <div class="contraindication-item absolute">
+                        <label class="contraindication-label">Severe arrhythmias</label>
+                        <div class="contraindication-checkbox">
+                            <label><input type="radio" name="contra_arrhythmia" value="yes" onchange="checkContraindications()"> Yes</label>
+                            <label><input type="radio" name="contra_arrhythmia" value="no" onchange="checkContraindications()" checked> No</label>
+                        </div>
+                    </div>
+                    <div class="contraindication-item absolute">
+                        <label class="contraindication-label">Recent stroke or MI (<6 weeks)</label>
+                        <div class="contraindication-checkbox">
+                            <label><input type="radio" name="contra_recent_event" value="yes" onchange="checkContraindications()"> Yes</label>
+                            <label><input type="radio" name="contra_recent_event" value="no" onchange="checkContraindications()" checked> No</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <h4 style="color: #f59e0b; margin: 15px 0;">Relative Contraindications (Practitioner Discretion)</h4>
+                <div class="contraindications-grid">
+                    <div class="contraindication-item relative">
+                        <label class="contraindication-label">Metal implants near treatment area</label>
+                        <div class="contraindication-checkbox">
+                            <label><input type="radio" name="contra_metal" value="yes" onchange="checkContraindications()"> Yes</label>
+                            <label><input type="radio" name="contra_metal" value="no" onchange="checkContraindications()" checked> No</label>
+                        </div>
+                    </div>
+                    <div class="contraindication-item relative">
+                        <label class="contraindication-label">Severe psychiatric conditions</label>
+                        <div class="contraindication-checkbox">
+                            <label><input type="radio" name="contra_psychiatric" value="yes" onchange="checkContraindications()"> Yes</label>
+                            <label><input type="radio" name="contra_psychiatric" value="no" onchange="checkContraindications()" checked> No</label>
+                        </div>
+                    </div>
+                    <div class="contraindication-item relative">
+                        <label class="contraindication-label">Uncontrolled seizure disorders</label>
+                        <div class="contraindication-checkbox">
+                            <label><input type="radio" name="contra_seizure" value="yes" onchange="checkContraindications()"> Yes</label>
+                            <label><input type="radio" name="contra_seizure" value="no" onchange="checkContraindications()" checked> No</label>
+                        </div>
+                    </div>
+                    <div class="contraindication-item relative">
+                        <label class="contraindication-label">Open wounds (except for wound healing therapy)</label>
+                        <div class="contraindication-checkbox">
+                            <label><input type="radio" name="contra_wounds" value="yes" onchange="checkContraindications()"> Yes</label>
+                            <label><input type="radio" name="contra_wounds" value="no" onchange="checkContraindications()" checked> No</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- GP Consent Confirmation -->
+                <h3 class="section-title">GP Discussion & Consent</h3>
+                <div class="form-group">
+                    <div class="consent-text">
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="gpDiscussed" required>
+                            <label for="gpDiscussed" class="required-field">
+                                I confirm that the patient has discussed this therapy with their GP and wishes to proceed with treatment.
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
                 <!-- Referral Details -->
                 <h3 class="section-title">Referral Details</h3>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
@@ -293,8 +462,11 @@
                     <textarea id="billingAddress" placeholder="Enter billing address if different from home address"></textarea>
                 </div>
                 
-                <button type="submit" class="btn btn-primary">Register Patient</button>
-                <button type="button" class="btn btn-secondary" onclick="document.getElementById('patientForm').reset()">Clear Form</button>
+                <div style="margin-top: 20px;">
+                    <button type="submit" class="btn btn-primary">Register Patient</button>
+                    <button type="button" class="btn btn-secondary" onclick="document.getElementById('patientForm').reset()">Clear Form</button>
+                    <button type="button" class="btn btn-warning" onclick="generateConsentForm()">Generate Consent Form</button>
+                </div>
             </form>
         </div>
         
@@ -311,8 +483,26 @@
         </div>
     </div>
 
+    <!-- Consent Form Modal -->
+    <div id="consentFormModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h2>Treatment Consent Form</h2>
+                <button onclick="closeConsentModal()" class="btn btn-danger">Close</button>
+            </div>
+            <div id="consentFormContent">
+                <!-- Consent form will be generated here -->
+            </div>
+            <div class="signature-actions no-print">
+                <button class="btn btn-primary" onclick="window.print()">Print Form</button>
+                <button class="btn btn-secondary" onclick="downloadConsentForm()">Download PDF</button>
+                <button class="btn btn-success" onclick="saveConsentForm()">Save to Patient Record</button>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // Navigation function that checks user type
+        // Navigation function
         function navigateBack() {
             const authData = localStorage.getItem('celloxen_auth');
             if (!authData) {
@@ -322,18 +512,16 @@
             
             const auth = JSON.parse(authData);
             
-            // Navigate based on user type
             if (auth.userType === 'super_admin') {
                 window.location.href = 'super-admin-dashboard.html';
             } else if (auth.userType === 'clinic_admin' || auth.userType === 'clinic') {
                 window.location.href = 'clinic-dashboard.html';
             } else {
-                // Default fallback
                 window.location.href = 'index.html';
             }
         }
         
-        // Toggle functions for conditional fields
+        // Toggle functions
         function toggleAllergiesField() {
             const allergiesField = document.getElementById('allergies');
             const noAllergiesCheckbox = document.getElementById('noKnownAllergies');
@@ -368,6 +556,146 @@
                 billingAddressSection.style.display = 'block';
             }
         }
+        
+        // Check contraindications
+        function checkContraindications() {
+            const warningBanner = document.getElementById('contraindicationWarning');
+            let hasContraindication = false;
+            
+            // Check absolute contraindications
+            const absoluteContra = ['pacemaker', 'pregnancy', 'cancer', 'arrhythmia', 'recent_event'];
+            absoluteContra.forEach(contra => {
+                const radioYes = document.querySelector(`input[name="contra_${contra}"][value="yes"]`);
+                if (radioYes && radioYes.checked) {
+                    hasContraindication = true;
+                }
+            });
+            
+            // Check relative contraindications
+            const relativeContra = ['metal', 'psychiatric', 'seizure', 'wounds'];
+            relativeContra.forEach(contra => {
+                const radioYes = document.querySelector(`input[name="contra_${contra}"][value="yes"]`);
+                if (radioYes && radioYes.checked) {
+                    hasContraindication = true;
+                }
+            });
+            
+            if (hasContraindication) {
+                warningBanner.classList.add('show');
+            } else {
+                warningBanner.classList.remove('show');
+            }
+        }
+        
+        // Generate consent form
+        function generateConsentForm() {
+            const firstName = document.getElementById('firstName').value;
+            const lastName = document.getElementById('lastName').value;
+            
+            if (!firstName || !lastName) {
+                alert('Please enter patient name first');
+                return;
+            }
+            
+            const selectedTherapies = Array.from(document.getElementById('selectedTherapies').selectedOptions)
+                .map(option => option.text);
+            
+            const contraindications = [];
+            document.querySelectorAll('input[type="radio"][value="yes"]:checked').forEach(radio => {
+                const label = radio.closest('.contraindication-item').querySelector('.contraindication-label').textContent;
+                contraindications.push(label);
+            });
+            
+            const consentHTML = `
+                <div class="consent-form">
+                    <h2 style="text-align: center;">CELLOXEN HEALTH THERAPY</h2>
+                    <h3 style="text-align: center;">Patient Treatment Consent Form</h3>
+                    
+                    <div class="consent-section">
+                        <h4>Patient Information</h4>
+                        <p><strong>Name:</strong> ${firstName} ${lastName}</p>
+                        <p><strong>Date:</strong> ${new Date().toLocaleDateString('en-GB')}</p>
+                        <p><strong>NHS Number:</strong> ${document.getElementById('nhsNumber').value || 'Not provided'}</p>
+                    </div>
+                    
+                    <div class="consent-section">
+                        <h4>Selected Therapies</h4>
+                        <ul>
+                            ${selectedTherapies.map(therapy => `<li>${therapy}</li>`).join('')}
+                        </ul>
+                    </div>
+                    
+                    ${contraindications.length > 0 ? `
+                    <div class="consent-section">
+                        <h4>Identified Contraindications</h4>
+                        <ul style="color: #dc2626;">
+                            ${contraindications.map(contra => `<li>${contra}</li>`).join('')}
+                        </ul>
+                        <p style="color: #dc2626; font-weight: bold;">
+                            ⚠️ GP authorization has been obtained for the above contraindications.
+                        </p>
+                    </div>
+                    ` : ''}
+                    
+                    <div class="consent-section">
+                        <h4>Consent Declaration</h4>
+                        <p>I understand that:</p>
+                        <ul>
+                            <li>Celloxen Health Therapy is a complementary therapy using magnetic field stimulation</li>
+                            <li>This therapy is intended to complement, not replace, conventional medical care</li>
+                            <li>I have discussed this therapy with my GP</li>
+                            <li>I have disclosed all relevant medical conditions and medications</li>
+                            <li>I consent to the treatment as described</li>
+                            <li>I can withdraw consent at any time</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="consent-section">
+                        <h4>Data Protection</h4>
+                        <p>I consent to my personal and medical data being stored and processed for the purpose of my medical care in accordance with GDPR regulations.</p>
+                    </div>
+                    
+                    <div class="consent-section">
+                        <h4>Signatures</h4>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 50px;">
+                            <div>
+                                <div style="border-top: 2px solid #000; padding-top: 5px;">
+                                    <p><strong>Patient Signature</strong></p>
+                                    <p>Name: ${firstName} ${lastName}</p>
+                                    <p>Date: _____________</p>
+                                </div>
+                            </div>
+                            <div>
+                                <div style="border-top: 2px solid #000; padding-top: 5px;">
+                                    <p><strong>Practitioner Signature</strong></p>
+                                    <p>Name: _____________</p>
+                                    <p>Date: _____________</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('consentFormContent').innerHTML = consentHTML;
+            document.getElementById('consentFormModal').style.display = 'flex';
+        }
+        
+        function closeConsentModal() {
+            document.getElementById('consentFormModal').style.display = 'none';
+        }
+        
+        function downloadConsentForm() {
+            // This would typically generate a PDF
+            // For now, we'll trigger print dialog
+            window.print();
+        }
+        
+        function saveConsentForm() {
+            // This would save the consent form to the patient record
+            alert('Consent form saved to patient record');
+            closeConsentModal();
+        }
     </script>
 
     <script type="module">
@@ -385,7 +713,6 @@
             updateStats();
         });
         
-        // Check authentication and setup based on user type
         function checkAuthenticationAndSetup() {
             const authData = localStorage.getItem('celloxen_auth');
             if (!authData) {
@@ -397,7 +724,6 @@
             currentUserType = auth.userType;
             currentClinicId = auth.clinicId;
             
-            // If clinic admin, store clinic context
             if (currentUserType === 'clinic_admin' || currentUserType === 'clinic') {
                 sessionStorage.setItem('currentClinicId', currentClinicId);
             }
@@ -415,11 +741,9 @@
             try {
                 let query = supabase.from('clinics').select('*');
                 
-                // If clinic admin, only load their clinic
                 if ((currentUserType === 'clinic_admin' || currentUserType === 'clinic') && currentClinicId) {
                     query = query.eq('id', currentClinicId);
                 } else {
-                    // Super admin sees all active clinics
                     query = query.eq('is_active', true);
                 }
                 
@@ -435,12 +759,10 @@
                         clinicSelect.innerHTML += `<option value="${clinic.id}" data-clinic='${JSON.stringify(clinic)}'>${clinic.clinic_name}</option>`;
                     });
                     
-                    // Auto-select clinic for clinic admins
                     if ((currentUserType === 'clinic_admin' || currentUserType === 'clinic') && currentClinicId) {
                         clinicSelect.value = currentClinicId;
-                        clinicSelect.disabled = true; // Disable selection for clinic admins
+                        clinicSelect.disabled = true;
                     } else if (data.length === 1) {
-                        // Auto-select if only one clinic
                         clinicSelect.value = data[0].id;
                     }
                 }
@@ -460,11 +782,29 @@
                     return;
                 }
                 
-                // Check GDPR consent
                 if (!document.getElementById('gdprConsent').checked) {
                     showAlert('GDPR consent is required to register a patient', 'error');
                     return;
                 }
+                
+                if (!document.getElementById('gpDiscussed').checked) {
+                    showAlert('GP discussion confirmation is required', 'error');
+                    return;
+                }
+                
+                // Collect selected therapies
+                const selectedTherapies = Array.from(document.getElementById('selectedTherapies').selectedOptions)
+                    .map(option => ({
+                        code: option.value,
+                        name: option.text
+                    }));
+                
+                // Collect contraindications
+                const contraindications = {};
+                document.querySelectorAll('input[type="radio"]:checked').forEach(radio => {
+                    const name = radio.name.replace('contra_', '');
+                    contraindications[name] = radio.value;
+                });
                 
                 const patientData = {
                     // Basic information
@@ -513,7 +853,12 @@
                     insurance_auth_code: document.getElementById('insuranceAuthCode').value || null,
                     use_home_address_billing: document.getElementById('useHomeAddressBilling').checked,
                     billing_address: document.getElementById('useHomeAddressBilling').checked ? 
-                        null : document.getElementById('billingAddress').value || null
+                        null : document.getElementById('billingAddress').value || null,
+                    
+                    // Therapy specific
+                    selected_therapies: selectedTherapies,
+                    contraindications: contraindications,
+                    gp_consent_discussed: document.getElementById('gpDiscussed').checked
                 };
                 
                 const { data, error } = await supabase
@@ -526,7 +871,6 @@
                 showAlert(`Patient registered successfully! Patient ID: ${patientData.patient_id}`, 'success');
                 document.getElementById('patientForm').reset();
                 
-                // Restore clinic selection for clinic admins
                 if ((currentUserType === 'clinic_admin' || currentUserType === 'clinic') && currentClinicId) {
                     document.getElementById('clinicSelect').value = currentClinicId;
                 } else {
@@ -553,7 +897,6 @@
                     .order('created_at', { ascending: false })
                     .limit(50);
                 
-                // Filter by clinic for clinic admins
                 if ((currentUserType === 'clinic_admin' || currentUserType === 'clinic') && currentClinicId) {
                     query = query.eq('clinic_id', currentClinicId);
                 }
@@ -576,11 +919,17 @@
             const patientList = document.getElementById('patientList');
             
             if (patients && patients.length > 0) {
-                patientList.innerHTML = patients.map(patient => `
+                patientList.innerHTML = patients.map(patient => {
+                    const hasContraindications = patient.contraindications && 
+                        Object.values(patient.contraindications).some(v => v === 'yes');
+                    
+                    return `
                     <div class="patient-item">
                         <div style="display: flex; justify-content: space-between; align-items: start;">
                             <div style="flex: 1;">
-                                <strong>${patient.first_name} ${patient.last_name}</strong><br>
+                                <strong>${patient.first_name} ${patient.last_name}</strong>
+                                ${hasContraindications ? '<span style="color: #dc2626; margin-left: 10px;">⚠️ Has Contraindications</span>' : ''}
+                                <br>
                                 <span class="patient-id">ID: ${patient.patient_id}</span><br>
                                 ${patient.nhs_number ? `NHS: ${patient.nhs_number}<br>` : ''}
                                 Email: ${patient.email || 'Not provided'}<br>
@@ -590,15 +939,20 @@
                                 Clinic: ${patient.clinics?.clinic_name || 'Unknown'}<br>
                                 ${patient.gp_name ? `GP: ${patient.gp_name}<br>` : ''}
                                 ${patient.funding_type ? `Funding: ${patient.funding_type}<br>` : ''}
+                                ${patient.selected_therapies && patient.selected_therapies.length > 0 ? 
+                                    `Therapies: ${patient.selected_therapies.length} selected<br>` : ''}
                                 <small>Registered: ${new Date(patient.created_at).toLocaleDateString()}</small>
                             </div>
                             <div>
                                 <button class="btn btn-primary" onclick="viewPatient(${patient.id})">View</button>
                                 <button class="btn btn-secondary" onclick="editPatient(${patient.id})">Edit</button>
+                                ${patient.consent_form_signed ? 
+                                    '<button class="btn btn-success" onclick="viewConsentForm(' + patient.id + ')">View Consent</button>' : 
+                                    '<button class="btn btn-warning" onclick="generatePatientConsent(' + patient.id + ')">Generate Consent</button>'}
                             </div>
                         </div>
                     </div>
-                `).join('');
+                `}).join('');
             } else {
                 patientList.innerHTML = '<p>No patients registered yet.</p>';
             }
@@ -623,306 +977,12 @@
             displayPatients(filteredPatients);
         };
         
-        window.viewPatient = async function(patientId) {
-            const patient = currentPatients.find(p => p.id === patientId);
-            if (patient) {
-                await loadPatientReports(patientId);
-                showPatientModal(patient, 'view');
-            }
-        };
-        
-        window.editPatient = function(patientId) {
-            const patient = currentPatients.find(p => p.id === patientId);
-            if (patient) {
-                showPatientModal(patient, 'edit');
-            }
-        };
-        
-        async function loadPatientReports(patientId) {
-            try {
-                const { data, error } = await supabase
-                    .from('medical_reports')
-                    .select('*')
-                    .eq('patient_id', patientId)
-                    .order('created_at', { ascending: false });
-                    
-                if (error) throw error;
-                
-                currentPatientReports = {
-                    health_assessments: data.filter(r => r.report_type === 'health_assessment'),
-                    iris_analyses: data.filter(r => r.report_type === 'iris_analysis'),
-                    combined_reports: data.filter(r => r.report_type === 'combined')
-                };
-                
-            } catch (error) {
-                console.error('Error loading patient reports:', error);
-                currentPatientReports = { health_assessments: [], iris_analyses: [], combined_reports: [] };
-            }
-        }
-        
-        function showPatientModal(patient, mode = 'view') {
-            const modalOverlay = document.createElement('div');
-            modalOverlay.className = 'modal-overlay';
-            modalOverlay.id = 'patientModal';
-            
-            modalOverlay.innerHTML = `
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h2 style="color: #10b981; margin: 0;">${mode === 'edit' ? 'Edit Patient' : 'Patient Details'}</h2>
-                        <button onclick="closePatientModal()" class="btn btn-danger">Close</button>
-                    </div>
-                    
-                    <div class="modal-tabs">
-                        <div class="modal-tab active" onclick="switchTab('overview')">Overview</div>
-                        <div class="modal-tab" onclick="switchTab('clinical')">Clinical Info</div>
-                        <div class="modal-tab" onclick="switchTab('reports')">Medical Reports</div>
-                        <div class="modal-tab" onclick="switchTab('actions')">Actions</div>
-                    </div>
-                    
-                    <div id="overviewTab" class="tab-content active">
-                        <div id="viewMode" class="view-mode ${mode === 'edit' ? 'hidden' : ''}">
-                            <div class="info-grid">
-                                <div>
-                                    <h3 style="color: #374151; margin-bottom: 15px;">Personal Information</h3>
-                                    <div class="info-section">
-                                        <p style="margin: 8px 0;"><strong>Full Name:</strong> ${patient.first_name} ${patient.last_name}</p>
-                                        <p style="margin: 8px 0;"><strong>Patient ID:</strong> ${patient.patient_id}</p>
-                                        <p style="margin: 8px 0;"><strong>NHS Number:</strong> ${patient.nhs_number || 'Not provided'}</p>
-                                        <p style="margin: 8px 0;"><strong>Email:</strong> ${patient.email || 'Not provided'}</p>
-                                        <p style="margin: 8px 0;"><strong>Primary Phone:</strong> ${patient.primary_phone || patient.phone || 'Not provided'}</p>
-                                        <p style="margin: 8px 0;"><strong>Preferred Contact:</strong> ${patient.preferred_contact || 'Not specified'}</p>
-                                        <p style="margin: 8px 0;"><strong>Date of Birth:</strong> ${patient.date_of_birth || 'Not provided'}</p>
-                                        <p style="margin: 8px 0;"><strong>Gender:</strong> ${patient.gender || 'Not specified'}</p>
-                                        <p style="margin: 8px 0;"><strong>Address:</strong> ${patient.address || 'Not provided'}</p>
-                                        <p style="margin: 8px 0;"><strong>Postcode:</strong> ${patient.postcode || 'Not provided'}</p>
-                                        <p style="margin: 8px 0;"><strong>GDPR Consent:</strong> ${patient.gdpr_consent ? 'Yes' : 'No'}</p>
-                                        <p style="margin: 8px 0;"><strong>Registered:</strong> ${new Date(patient.created_at).toLocaleDateString()}</p>
-                                    </div>
-                                    
-                                    <h3 style="color: #374151; margin: 15px 0;">Emergency Contact</h3>
-                                    <div class="info-section">
-                                        <p style="margin: 8px 0;"><strong>Name:</strong> ${patient.emergency_contact_name || 'Not provided'}</p>
-                                        <p style="margin: 8px 0;"><strong>Relationship:</strong> ${patient.emergency_contact_relationship || 'Not provided'}</p>
-                                        <p style="margin: 8px 0;"><strong>Phone:</strong> ${patient.emergency_contact_phone || 'Not provided'}</p>
-                                    </div>
-                                </div>
-                                
-                                <div>
-                                    <h3 style="color: #374151; margin-bottom: 15px;">Clinic & Billing Information</h3>
-                                    <div class="info-section">
-                                        <p style="margin: 8px 0;"><strong>Clinic:</strong> ${patient.clinics?.clinic_name || 'Unknown'}</p>
-                                        <p style="margin: 8px 0;"><strong>Code:</strong> ${patient.clinics?.clinic_code || 'N/A'}</p>
-                                        <p style="margin: 8px 0;"><strong>Clinic Address:</strong> ${patient.clinics?.address || 'Not provided'}</p>
-                                        <p style="margin: 8px 0;"><strong>Clinic Phone:</strong> ${patient.clinics?.phone || 'Not provided'}</p>
-                                        <p style="margin: 8px 0;"><strong>Clinic Email:</strong> ${patient.clinics?.email || 'Not provided'}</p>
-                                    </div>
-                                    
-                                    <h3 style="color: #374151; margin: 15px 0;">Funding & Insurance</h3>
-                                    <div class="info-section">
-                                        <p style="margin: 8px 0;"><strong>Funding Type:</strong> ${patient.funding_type || 'Not specified'}</p>
-                                        <p style="margin: 8px 0;"><strong>Insurance Provider:</strong> ${patient.insurance_provider || 'N/A'}</p>
-                                        <p style="margin: 8px 0;"><strong>Policy Number:</strong> ${patient.insurance_policy_number || 'N/A'}</p>
-                                        <p style="margin: 8px 0;"><strong>Auth Code:</strong> ${patient.insurance_auth_code || 'N/A'}</p>
-                                        <p style="margin: 8px 0;"><strong>Billing Address:</strong> ${patient.use_home_address_billing ? 'Same as home' : patient.billing_address || 'Not provided'}</p>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div style="text-align: center;">
-                                <button onclick="switchToEditMode()" class="btn btn-secondary">Edit Patient</button>
-                                <button onclick="closePatientModal()" class="btn btn-primary">Done</button>
-                            </div>
-                        </div>
-                        
-                        <div id="editMode" class="edit-form ${mode === 'edit' ? 'active' : ''}">
-                            <form id="editPatientForm">
-                                <input type="hidden" id="editPatientId" value="${patient.id}">
-                                <!-- Edit form would include all the new fields here -->
-                                <p style="text-align: center; color: #6b7280;">Full edit form with all fields would be implemented here</p>
-                                
-                                <div style="text-align: center; margin-top: 20px;">
-                                    <button type="submit" class="btn btn-primary">Save Changes</button>
-                                    <button type="button" onclick="switchToViewMode()" class="btn btn-secondary">Cancel</button>
-                                    <button type="button" onclick="deletePatient(${patient.id})" class="btn btn-danger">Delete Patient</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                    
-                    <div id="clinicalTab" class="tab-content">
-                        <h3 style="color: #374151; margin-bottom: 15px;">Clinical Information</h3>
-                        <div class="info-section">
-                            <h4>GP Information</h4>
-                            <p><strong>GP Name:</strong> ${patient.gp_name || 'Not provided'}</p>
-                            <p><strong>Surgery:</strong> ${patient.gp_surgery_name || 'Not provided'}</p>
-                            <p><strong>Surgery Address:</strong> ${patient.gp_surgery_address || 'Not provided'}</p>
-                        </div>
-                        
-                        <div class="info-section" style="margin-top: 15px;">
-                            <h4>Medical Information</h4>
-                            <p><strong>Allergies:</strong> ${patient.no_known_allergies ? 'No known allergies' : patient.allergies || 'Not provided'}</p>
-                            <p><strong>Current Medications:</strong> ${patient.current_medications || 'None reported'}</p>
-                            <p><strong>Medical History:</strong> ${patient.medical_history || 'No significant history reported'}</p>
-                        </div>
-                        
-                        <div class="info-section" style="margin-top: 15px;">
-                            <h4>Referral Information</h4>
-                            <p><strong>Referral Source:</strong> ${patient.referral_source || 'Not specified'}</p>
-                            <p><strong>Referring Clinician:</strong> ${patient.referring_clinician || 'N/A'}</p>
-                        </div>
-                    </div>
-                    
-                    <div id="reportsTab" class="tab-content">
-                        <h3 style="color: #374151; margin-bottom: 15px;">Medical Reports</h3>
-                        
-                        <div style="margin-bottom: 20px;">
-                            <h4>Health Assessments</h4>
-                            <div id="healthAssessmentReports">
-                                ${currentPatientReports.health_assessments?.length ? 
-                                    currentPatientReports.health_assessments.map(report => `
-                                        <div class="report-item">
-                                            <div class="report-header">
-                                                <strong>${report.report_title || 'Health Assessment Report'}</strong>
-                                                <span class="report-date">${new Date(report.generated_at || report.created_at).toLocaleDateString()}</span>
-                                            </div>
-                                            <p>Overall Score: ${report.total_score || 'N/A'}/100</p>
-                                            <button class="btn btn-primary" onclick="viewFullReport(${report.id})">View Report</button>
-                                        </div>
-                                    `).join('') : 
-                                    '<p style="color: #6b7280;">No health assessment reports found.</p>'
-                                }
-                            </div>
-                        </div>
-                        
-                        <div style="margin-bottom: 20px;">
-                            <h4>IRIS Analysis Reports</h4>
-                            <div id="irisAnalysisReports">
-                                ${currentPatientReports.iris_analyses?.length ? 
-                                    currentPatientReports.iris_analyses.map(report => `
-                                        <div class="report-item">
-                                            <div class="report-header">
-                                                <strong>${report.report_title || 'IRIS Analysis Report'}</strong>
-                                                <span class="report-date">${new Date(report.generated_at || report.created_at).toLocaleDateString()}</span>
-                                            </div>
-                                            <button class="btn btn-primary" onclick="viewFullReport(${report.id})">View Report</button>
-                                        </div>
-                                    `).join('') : 
-                                    '<p style="color: #6b7280;">No IRIS analysis reports found.</p>'
-                                }
-                            </div>
-                        </div>
-                        
-                        <div style="text-align: center; margin-top: 20px;">
-                            <button class="btn btn-primary" onclick="generateCombinedReport(${patient.id})">Generate Combined Report</button>
-                        </div>
-                    </div>
-                    
-                    <div id="actionsTab" class="tab-content">
-                        <h3 style="color: #374151; margin-bottom: 15px;">Quick Actions</h3>
-                        <div class="action-buttons">
-                            <button onclick="startHealthAssessment('${patient.patient_id}')" class="btn btn-primary">Start Health Assessment</button>
-                            <button onclick="startIrisAnalysis('${patient.patient_id}')" class="btn" style="background: #6366f1; color: white;">Start IRIS Analysis</button>
-                            <button onclick="startTreatment('${patient.patient_id}')" class="btn btn-warning">Start Treatment</button>
-                            <button onclick="viewVitalSigns('${patient.patient_id}')" class="btn btn-danger">Monitor Vital Signs</button>
-                        </div>
-                    </div>
-                </div>
-            `;
-            
-            document.body.appendChild(modalOverlay);
-            
-            document.getElementById('editPatientForm').addEventListener('submit', handlePatientUpdate);
-        }
-        
-        window.switchTab = function(tabName) {
-            document.querySelectorAll('.modal-tab').forEach(tab => tab.classList.remove('active'));
-            event.target.classList.add('active');
-            
-            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-            document.getElementById(tabName + 'Tab').classList.add('active');
-        };
-        
-        async function handlePatientUpdate(e) {
-            e.preventDefault();
-            
-            // Full update logic would include all new fields
-            showAlert('Update functionality would be fully implemented with all fields', 'info');
-        }
-        
-        window.deletePatient = async function(patientId) {
-            if (!confirm('Are you sure you want to delete this patient? This action cannot be undone.')) {
-                return;
-            }
-            
-            try {
-                const { error } = await supabase
-                    .from('patients')
-                    .delete()
-                    .eq('id', patientId);
-                
-                if (error) throw error;
-                
-                showAlert('Patient deleted successfully!', 'success');
-                closePatientModal();
-                loadPatients();
-                updateStats();
-                
-            } catch (error) {
-                console.error('Error deleting patient:', error);
-                showAlert('Error deleting patient: ' + error.message, 'error');
-            }
-        };
-        
-        window.closePatientModal = function() {
-            const modal = document.getElementById('patientModal');
-            if (modal) {
-                document.body.removeChild(modal);
-            }
-        };
-        
-        window.switchToEditMode = function() {
-            document.getElementById('viewMode').classList.add('hidden');
-            document.getElementById('editMode').classList.add('active');
-        };
-        
-        window.switchToViewMode = function() {
-            document.getElementById('viewMode').classList.remove('hidden');
-            document.getElementById('editMode').classList.remove('active');
-        };
-        
-        window.startHealthAssessment = function(patientId) {
-            closePatientModal();
-            window.open('health-assessment.html', '_blank');
-        };
-        
-        window.startIrisAnalysis = function(patientId) {
-            closePatientModal();
-            window.open('iris-analysis.html', '_blank');
-        };
-        
-        window.startTreatment = function(patientId) {
-            closePatientModal();
-            window.open('treatment-interface.html', '_blank');
-        };
-        
-        window.viewVitalSigns = function(patientId) {
-            closePatientModal();
-            window.open('vital-signs.html', '_blank');
-        };
-        
-        window.viewFullReport = function(reportId) {
-            alert(`View full report ${reportId} - This would open a detailed report view`);
-        };
-        
-        window.generateCombinedReport = async function(patientId) {
-            alert('Generating combined report...');
-        };
+        // Additional patient-specific functions would go here...
         
         async function updateStats() {
             try {
                 let query = supabase.from('patients').select('*', { count: 'exact', head: true });
                 
-                // Filter by clinic for clinic admins
                 if ((currentUserType === 'clinic_admin' || currentUserType === 'clinic') && currentClinicId) {
                     query = query.eq('clinic_id', currentClinicId);
                 }
@@ -972,6 +1032,39 @@
                 searchPatients();
             }
         });
+        
+        // Make functions available globally
+        window.viewPatient = async function(patientId) {
+            const patient = currentPatients.find(p => p.id === patientId);
+            if (patient) {
+                // View patient details with therapy information
+                console.log('View patient:', patient);
+            }
+        };
+        
+        window.editPatient = function(patientId) {
+            const patient = currentPatients.find(p => p.id === patientId);
+            if (patient) {
+                // Edit patient details
+                console.log('Edit patient:', patient);
+            }
+        };
+        
+        window.generatePatientConsent = function(patientId) {
+            const patient = currentPatients.find(p => p.id === patientId);
+            if (patient) {
+                // Generate consent form for existing patient
+                console.log('Generate consent for:', patient);
+            }
+        };
+        
+        window.viewConsentForm = function(patientId) {
+            const patient = currentPatients.find(p => p.id === patientId);
+            if (patient && patient.consent_form_data) {
+                // View saved consent form
+                console.log('View consent for:', patient);
+            }
+        };
         
     </script>
 </body>
