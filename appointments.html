@@ -239,6 +239,128 @@
             color: #6b7280;
         }
         
+        /* Calendar Styles */
+        .calendar-container {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .calendar-nav {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .calendar-nav button {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .calendar-nav button:hover {
+            background: #059669;
+        }
+        
+        .current-month {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1f2937;
+        }
+        
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1px;
+            background: #e5e7eb;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .calendar-day-header {
+            background: #f9fafb;
+            padding: 10px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 13px;
+            color: #374151;
+        }
+        
+        .calendar-day {
+            background: white;
+            min-height: 80px;
+            padding: 8px;
+            position: relative;
+        }
+        
+        .calendar-day-number {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+        
+        .calendar-day.other-month .calendar-day-number {
+            color: #d1d5db;
+        }
+        
+        .calendar-day.today {
+            background: #f0fdf4;
+        }
+        
+        .calendar-day.today .calendar-day-number {
+            color: #10b981;
+            font-weight: 700;
+        }
+        
+        .calendar-appointment {
+            font-size: 11px;
+            padding: 2px 4px;
+            margin: 1px 0;
+            border-radius: 3px;
+            cursor: pointer;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .calendar-appointment.consultation {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        
+        .calendar-appointment.therapy {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .calendar-appointment.assessment {
+            background: #fed7aa;
+            color: #92400e;
+        }
+        
+        .calendar-appointment.follow-up {
+            background: #e9d5ff;
+            color: #6b21a8;
+        }
+        
+        .more-appointments {
+            font-size: 10px;
+            color: #6b7280;
+            text-align: center;
+            margin-top: 2px;
+        }
+        
         /* Filters */
         .filters {
             display: flex;
@@ -270,13 +392,34 @@
         
         <!-- Tabs -->
         <div class="tabs">
-            <button class="tab active" onclick="switchTab('list', event)">All Appointments</button>
+            <button class="tab active" onclick="switchTab('calendar', event)">Calendar View</button>
+            <button class="tab" onclick="switchTab('list', event)">All Appointments</button>
             <button class="tab" onclick="switchTab('new', event)">New Appointment</button>
         </div>
 
+        <!-- Calendar Tab -->
+        <div class="tab-content active" id="calendar-tab">
+            <div class="calendar-container">
+                <div class="calendar-header">
+                    <div class="calendar-nav">
+                        <button onclick="previousMonth()">←</button>
+                        <button onclick="goToToday()">Today</button>
+                        <button onclick="nextMonth()">→</button>
+                    </div>
+                    <div class="current-month" id="currentMonth">December 2024</div>
+                    <div>
+                        <button class="btn btn-primary btn-sm" onclick="switchTab('new', event)">+ New Appointment</button>
+                    </div>
+                </div>
+                <div class="calendar-grid" id="calendarGrid">
+                    <!-- Calendar will be generated here -->
+                </div>
+            </div>
+        </div>
+
         <!-- List Tab -->
-        <div class="tab-content active" id="list-tab">
-            <h2 style="margin-bottom: 20px;">Appointments</h2>
+        <div class="tab-content" id="list-tab">
+            <h2 style="margin-bottom: 20px;">All Appointments</h2>
             
             <!-- Filters -->
             <div class="filters">
@@ -376,6 +519,9 @@
         
         let clinicId = 1; // Default clinic ID
         let allAppointments = []; // Store all appointments for filtering
+        let currentDate = new Date();
+        let currentMonth = currentDate.getMonth();
+        let currentYear = currentDate.getFullYear();
         
         // Initialize
         document.addEventListener('DOMContentLoaded', async function() {
@@ -396,6 +542,9 @@
                 loadTherapies(),
                 loadAppointments()
             ]);
+            
+            // Render calendar
+            renderCalendar();
         });
         
         // Switch tabs
@@ -404,8 +553,20 @@
             document.querySelectorAll('.tab').forEach(tab => {
                 tab.classList.remove('active');
             });
+            
+            // Handle both event-based and programmatic calls
             if (event && event.target) {
                 event.target.classList.add('active');
+            } else {
+                // Find the right tab button when called programmatically
+                document.querySelectorAll('.tab').forEach(tab => {
+                    if (tab.textContent.toLowerCase().includes(tabName.toLowerCase()) ||
+                        (tabName === 'new' && tab.textContent.includes('New')) ||
+                        (tabName === 'list' && tab.textContent.includes('All')) ||
+                        (tabName === 'calendar' && tab.textContent.includes('Calendar'))) {
+                        tab.classList.add('active');
+                    }
+                });
             }
             
             // Update tab content
@@ -609,8 +770,8 @@
             
             if (searchFilter) {
                 filtered = filtered.filter(apt => 
-                    apt.patient_name.toLowerCase().includes(searchFilter) ||
-                    apt.patient_id.toLowerCase().includes(searchFilter)
+                    (apt.patient_name && apt.patient_name.toLowerCase().includes(searchFilter)) ||
+                    (apt.patient_id && apt.patient_id.toLowerCase().includes(searchFilter))
                 );
             }
             
@@ -645,8 +806,8 @@
                 clearForm();
                 await loadAppointments();
                 
-                // Switch to list view
-                document.querySelector('.tab').click();
+                // Switch to calendar view
+                switchTab('calendar');
                 
             } catch (error) {
                 console.error('Error saving appointment:', error);
@@ -710,6 +871,151 @@
         // Go back
         window.goBack = function() {
             window.location.href = 'clinic-dashboard.html';
+        };
+        
+        // Calendar Functions
+        window.renderCalendar = function() {
+            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                'July', 'August', 'September', 'October', 'November', 'December'];
+            
+            // Update month display
+            document.getElementById('currentMonth').textContent = 
+                `${monthNames[currentMonth]} ${currentYear}`;
+            
+            // Clear calendar
+            const calendarGrid = document.getElementById('calendarGrid');
+            calendarGrid.innerHTML = '';
+            
+            // Add day headers
+            const dayHeaders = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            dayHeaders.forEach(day => {
+                const dayHeader = document.createElement('div');
+                dayHeader.className = 'calendar-day-header';
+                dayHeader.textContent = day;
+                calendarGrid.appendChild(dayHeader);
+            });
+            
+            // Get first day of month and number of days
+            const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+            const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+            const daysInPrevMonth = new Date(currentYear, currentMonth, 0).getDate();
+            
+            // Add previous month's trailing days
+            for (let i = firstDay - 1; i >= 0; i--) {
+                const dayDiv = createDayElement(
+                    daysInPrevMonth - i,
+                    currentMonth - 1,
+                    currentYear,
+                    true
+                );
+                calendarGrid.appendChild(dayDiv);
+            }
+            
+            // Add current month's days
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dayDiv = createDayElement(day, currentMonth, currentYear, false);
+                calendarGrid.appendChild(dayDiv);
+            }
+            
+            // Add next month's leading days
+            const totalCells = calendarGrid.children.length - 7; // Subtract header row
+            const remainingCells = 35 - totalCells; // 5 weeks * 7 days
+            for (let day = 1; day <= remainingCells; day++) {
+                const dayDiv = createDayElement(day, currentMonth + 1, currentYear, true);
+                calendarGrid.appendChild(dayDiv);
+            }
+        };
+        
+        function createDayElement(day, month, year, isOtherMonth) {
+            const dayDiv = document.createElement('div');
+            dayDiv.className = 'calendar-day';
+            
+            if (isOtherMonth) {
+                dayDiv.classList.add('other-month');
+            }
+            
+            // Check if today
+            const today = new Date();
+            if (day === today.getDate() && 
+                month === today.getMonth() && 
+                year === today.getFullYear()) {
+                dayDiv.classList.add('today');
+            }
+            
+            // Add day number
+            const dayNumber = document.createElement('div');
+            dayNumber.className = 'calendar-day-number';
+            dayNumber.textContent = day;
+            dayDiv.appendChild(dayNumber);
+            
+            // Add appointments for this day
+            const dateStr = formatDateForComparison(new Date(year, month, day));
+            const dayAppointments = allAppointments.filter(apt => 
+                apt.appointment_date === dateStr && apt.status !== 'cancelled'
+            );
+            
+            // Show up to 3 appointments
+            dayAppointments.slice(0, 3).forEach(apt => {
+                const aptDiv = document.createElement('div');
+                aptDiv.className = `calendar-appointment ${apt.appointment_type}`;
+                const patientName = apt.patient_name ? apt.patient_name.split(' ')[0] : 'Patient';
+                aptDiv.textContent = `${apt.appointment_time.substring(0, 5)} ${patientName}`;
+                aptDiv.onclick = () => showAppointmentDetails(apt);
+                dayDiv.appendChild(aptDiv);
+            });
+            
+            // If more than 3, show count
+            if (dayAppointments.length > 3) {
+                const moreDiv = document.createElement('div');
+                moreDiv.className = 'more-appointments';
+                moreDiv.textContent = `+${dayAppointments.length - 3} more`;
+                dayDiv.appendChild(moreDiv);
+            }
+            
+            return dayDiv;
+        }
+        
+        function formatDateForComparison(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+        
+        window.previousMonth = function() {
+            currentMonth--;
+            if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+            }
+            renderCalendar();
+        };
+        
+        window.nextMonth = function() {
+            currentMonth++;
+            if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+            }
+            renderCalendar();
+        };
+        
+        window.goToToday = function() {
+            currentDate = new Date();
+            currentMonth = currentDate.getMonth();
+            currentYear = currentDate.getFullYear();
+            renderCalendar();
+        };
+        
+        window.showAppointmentDetails = function(appointment) {
+            alert(`Appointment Details:
+Patient: ${appointment.patient_name || 'Unknown'}
+Date: ${formatDate(appointment.appointment_date)}
+Time: ${appointment.appointment_time.substring(0, 5)}
+Type: ${appointment.appointment_type}
+Practitioner: ${appointment.practitioner_name}
+Status: ${appointment.status}
+${appointment.notes ? 'Notes: ' + appointment.notes : ''}`);
         };
     </script>
 </body>
