@@ -1357,7 +1357,7 @@
                 calendarHTML += `<div class="time-label">${hour}</div>`;
                 
                 for (let day = 0; day < 7; day++) {
-                    calendarHTML += '<div class="time-slot" onclick="quickAddAppointment(this)"></div>';
+                    calendarHTML += '<div class="time-slot" ondblclick="quickAddAppointment(this)"></div>';
                 }
             });
             
