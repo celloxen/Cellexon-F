@@ -303,22 +303,60 @@
             border: 1px solid #fecaca;
         }
         
-        .delete-warning {
-            background: #fef2f2;
-            border: 1px solid #fecaca;
-            border-radius: 8px;
-            padding: 15px;
-            margin: 20px 0;
+        .password-display {
+            background: #f3f4f6;
+            padding: 12px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 14px;
+            margin: 10px 0;
+            word-break: break-all;
+            user-select: all;
         }
         
-        .delete-warning h3 {
-            color: #991b1b;
-            margin-bottom: 10px;
+        .copy-btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-left: 10px;
         }
         
-        .delete-warning p {
-            color: #7f1d1d;
-            margin-bottom: 5px;
+        .copy-btn:hover {
+            background: #2563eb;
+        }
+        
+        .password-options {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        
+        .option-btn {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #e5e7eb;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .option-btn.selected {
+            border-color: #10b981;
+            background: #f0fdf4;
+        }
+        
+        .password-info {
+            background: #fef3c7;
+            padding: 10px;
+            border-radius: 6px;
+            margin: 10px 0;
+            font-size: 13px;
+            color: #92400e;
         }
     </style>
 </head>
@@ -436,7 +474,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h2 class="modal-title">Add New User</h2>
-                <button class="close-btn" onclick="closeModal()">&times;</button>
+                <button class="close-btn" onclick="closeModal('addUserModal')">&times;</button>
             </div>
             <form id="addUserForm" onsubmit="handleAddUser(event)">
                 <div class="form-group">
@@ -476,10 +514,67 @@
                 </div>
                 
                 <div style="display: flex; gap: 10px; justify-content: flex-end;">
-                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('addUserModal')">Cancel</button>
                     <button type="submit" class="btn btn-primary">Add User</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Reset Password Modal -->
+    <div id="resetPasswordModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Reset Password</h2>
+                <button class="close-btn" onclick="closeModal('resetPasswordModal')">&times;</button>
+            </div>
+            
+            <div class="password-info">
+                Resetting password for user: <strong id="resetUsername">-</strong>
+            </div>
+            
+            <div class="password-options">
+                <button class="option-btn selected" id="autoGenOption" onclick="selectPasswordOption('auto')">
+                    Auto-generate Password
+                </button>
+                <button class="option-btn" id="manualOption" onclick="selectPasswordOption('manual')">
+                    Enter Custom Password
+                </button>
+            </div>
+            
+            <div id="autoPasswordSection">
+                <div class="form-group">
+                    <label class="form-label">Generated Password</label>
+                    <div class="password-display" id="generatedPassword">
+                        Click "Generate" to create a new password
+                    </div>
+                    <button type="button" class="btn btn-primary" onclick="generateNewPassword()">
+                        Generate New Password
+                    </button>
+                    <button type="button" class="copy-btn" onclick="copyPassword()">
+                        Copy
+                    </button>
+                </div>
+            </div>
+            
+            <div id="manualPasswordSection" style="display: none;">
+                <div class="form-group">
+                    <label class="form-label">Enter New Password</label>
+                    <input type="text" class="form-input" id="manualPassword" placeholder="Enter password">
+                    <small style="color: #6b7280;">Minimum 8 characters recommended</small>
+                </div>
+            </div>
+            
+            <div class="password-info" style="background: #dcfce7; color: #166534;">
+                ⚠️ Make sure to save this password! It cannot be recovered once this window is closed.
+            </div>
+            
+            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('resetPasswordModal')">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="confirmPasswordReset()">
+                    Reset Password
+                </button>
+            </div>
         </div>
     </div>
 
@@ -494,6 +589,9 @@
         let clinicAdmins = [];
         let superAdmins = [];
         let clinicsList = [];
+        let currentResetUser = null;
+        let passwordOption = 'auto';
+        let currentGeneratedPassword = '';
         
         // Load users on page load
         document.addEventListener('DOMContentLoaded', function() {
@@ -589,7 +687,7 @@
                 <tr>
                     <td><strong>${user.username || '-'}</strong></td>
                     <td>${user.full_name || '-'}</td>
-                    <td>${user.email || user.contact_email || '-'}</td>
+                    <td>${user.email || user.email || '-'}</td>
                     <td>
                         <span class="role-badge ${user.role === 'super_admin' ? 'role-super-admin' : 'role-clinic-admin'}">
                             ${user.role === 'super_admin' ? 'Super Admin' : 'Clinic Admin'}
@@ -604,7 +702,7 @@
                     <td>${new Date(user.created_at).toLocaleDateString('en-GB')}</td>
                     <td>
                         <div class="action-buttons">
-                            <button class="btn btn-primary btn-small" onclick="resetPassword('${user.role}', ${user.id})">
+                            <button class="btn btn-primary btn-small" onclick="showResetPasswordModal('${user.role}', ${user.id}, '${user.username || user.clinic_name}')">
                                 Reset Pass
                             </button>
                             <button class="btn ${user.is_active !== false ? 'btn-warning' : 'btn-primary'} btn-small" 
@@ -632,8 +730,8 @@
                 <tr>
                     <td><strong>${admin.username || '-'}</strong></td>
                     <td>${admin.clinic_name}</td>
-                    <td>${admin.email || admin.contact_email || '-'}</td>
-                    <td>${admin.contact_phone || admin.phone || '-'}</td>
+                    <td>${admin.email || '-'}</td>
+                    <td>${admin.phone || '-'}</td>
                     <td>
                         <span class="${admin.is_active !== false ? 'status-active' : 'status-inactive'}">
                             ● ${admin.is_active !== false ? 'Active' : 'Inactive'}
@@ -641,7 +739,7 @@
                     </td>
                     <td>
                         <div class="action-buttons">
-                            <button class="btn btn-primary btn-small" onclick="resetPassword('clinic_admin', ${admin.id})">
+                            <button class="btn btn-primary btn-small" onclick="showResetPasswordModal('clinic_admin', ${admin.id}, '${admin.username || admin.clinic_name}')">
                                 Reset Password
                             </button>
                             <button class="btn ${admin.is_active !== false ? 'btn-warning' : 'btn-primary'} btn-small" 
@@ -675,7 +773,7 @@
                     <td>${new Date(admin.created_at).toLocaleDateString('en-GB')}</td>
                     <td>
                         <div class="action-buttons">
-                            <button class="btn btn-primary btn-small" onclick="resetPassword('super_admin', ${admin.id})">
+                            <button class="btn btn-primary btn-small" onclick="showResetPasswordModal('super_admin', ${admin.id}, '${admin.username}')">
                                 Reset Pass
                             </button>
                             <button class="btn ${admin.is_active !== false ? 'btn-warning' : 'btn-primary'} btn-small" 
@@ -710,7 +808,7 @@
                 <tr>
                     <td><strong>${user.username || '-'}</strong></td>
                     <td>${user.full_name || '-'}</td>
-                    <td>${user.email || user.contact_email || '-'}</td>
+                    <td>${user.email || '-'}</td>
                     <td>
                         <span class="role-badge ${user.role === 'super_admin' ? 'role-super-admin' : 'role-clinic-admin'}">
                             ${user.role === 'super_admin' ? 'Super Admin' : 'Clinic Admin'}
@@ -725,7 +823,7 @@
                     <td>${new Date(user.created_at).toLocaleDateString('en-GB')}</td>
                     <td>
                         <div class="action-buttons">
-                            <button class="btn btn-primary btn-small" onclick="resetPassword('${user.role}', ${user.id})">
+                            <button class="btn btn-primary btn-small" onclick="showResetPasswordModal('${user.role}', ${user.id}, '${user.username || user.clinic_name}')">
                                 Reset Pass
                             </button>
                             <button class="btn ${user.is_active !== false ? 'btn-warning' : 'btn-primary'} btn-small" 
@@ -779,9 +877,15 @@
             document.getElementById('addUserModal').classList.add('show');
         };
         
-        window.closeModal = function() {
-            document.getElementById('addUserModal').classList.remove('show');
-            document.getElementById('addUserForm').reset();
+        window.closeModal = function(modalId) {
+            document.getElementById(modalId).classList.remove('show');
+            if (modalId === 'addUserModal') {
+                document.getElementById('addUserForm').reset();
+            }
+            if (modalId === 'resetPasswordModal') {
+                currentResetUser = null;
+                currentGeneratedPassword = '';
+            }
         };
         
         window.toggleUserFields = function() {
@@ -792,6 +896,92 @@
                 clinicField.style.display = 'none';
             } else {
                 clinicField.style.display = 'block';
+            }
+        };
+        
+        window.showResetPasswordModal = function(role, userId, username) {
+            currentResetUser = { role, userId, username };
+            document.getElementById('resetUsername').textContent = username;
+            
+            // Reset to auto-generate option
+            selectPasswordOption('auto');
+            generateNewPassword();
+            
+            document.getElementById('resetPasswordModal').classList.add('show');
+        };
+        
+        window.selectPasswordOption = function(option) {
+            passwordOption = option;
+            
+            const autoBtn = document.getElementById('autoGenOption');
+            const manualBtn = document.getElementById('manualOption');
+            const autoSection = document.getElementById('autoPasswordSection');
+            const manualSection = document.getElementById('manualPasswordSection');
+            
+            if (option === 'auto') {
+                autoBtn.classList.add('selected');
+                manualBtn.classList.remove('selected');
+                autoSection.style.display = 'block';
+                manualSection.style.display = 'none';
+            } else {
+                autoBtn.classList.remove('selected');
+                manualBtn.classList.add('selected');
+                autoSection.style.display = 'none';
+                manualSection.style.display = 'block';
+            }
+        };
+        
+        window.generateNewPassword = function() {
+            currentGeneratedPassword = generatePassword();
+            document.getElementById('generatedPassword').textContent = currentGeneratedPassword;
+        };
+        
+        window.copyPassword = function() {
+            const password = document.getElementById('generatedPassword').textContent;
+            if (password && password !== 'Click "Generate" to create a new password') {
+                navigator.clipboard.writeText(password).then(() => {
+                    showAlert('Password copied to clipboard!', 'success');
+                });
+            }
+        };
+        
+        window.confirmPasswordReset = async function() {
+            if (!currentResetUser) return;
+            
+            let newPassword;
+            if (passwordOption === 'auto') {
+                newPassword = currentGeneratedPassword;
+                if (!newPassword || newPassword === 'Click "Generate" to create a new password') {
+                    showAlert('Please generate a password first', 'error');
+                    return;
+                }
+            } else {
+                newPassword = document.getElementById('manualPassword').value;
+                if (!newPassword || newPassword.length < 8) {
+                    showAlert('Password must be at least 8 characters', 'error');
+                    return;
+                }
+            }
+            
+            try {
+                const table = currentResetUser.role === 'super_admin' ? 'super_admin_users' : 'clinics';
+                
+                const { data, error } = await supabase
+                    .from(table)
+                    .update({ 
+                        password_hash: newPassword,
+                        updated_at: new Date().toISOString()
+                    })
+                    .eq('id', currentResetUser.userId);
+                
+                if (error) throw error;
+                
+                showAlert(`Password reset successfully for ${currentResetUser.username}!`, 'success');
+                closeModal('resetPasswordModal');
+                
+            } catch (error) {
+                console.error('Error resetting password:', error);
+                showAlert(`Error resetting password: ${error.message}`, 'error');
             }
         };
         
@@ -828,6 +1018,7 @@
                         throw error;
                     }
                     
+                    // Show password in copyable format
                     const alertMsg = `Super Admin created successfully!\n\nUsername: ${username}\nPassword: ${password}\n\nPlease save these credentials securely.`;
                     alert(alertMsg);
                     showAlert('Super Admin created successfully!', 'success');
@@ -844,7 +1035,7 @@
                         .update({
                             username: username,
                             password_hash: password,
-                            contact_email: email,
+                            email: email,
                             owner_name: fullName
                         })
                         .eq('id', clinicId);
@@ -859,40 +1050,12 @@
                     showAlert('Clinic Admin updated successfully!', 'success');
                 }
                 
-                closeModal();
+                closeModal('addUserModal');
                 await loadUsers();
                 
             } catch (error) {
                 console.error('Error adding user:', error);
                 showAlert(`Error: ${error.message || 'Failed to add user'}`, 'error');
-            }
-        };
-        
-        window.resetPassword = async function(role, userId) {
-            const newPassword = generatePassword();
-            const confirmReset = confirm(`Reset password for this user?\n\nNew password will be: ${newPassword}\n\nMake sure to save this password!`);
-            
-            if (!confirmReset) return;
-            
-            try {
-                const table = role === 'super_admin' ? 'super_admin_users' : 'clinics';
-                
-                const { data, error } = await supabase
-                    .from(table)
-                    .update({ 
-                        password_hash: newPassword,
-                        updated_at: new Date().toISOString()
-                    })
-                    .eq('id', userId);
-                
-                if (error) throw error;
-                
-                alert(`Password reset successfully!\n\nNew password: ${newPassword}\n\nPlease save this password securely.`);
-                showAlert('Password reset successfully!', 'success');
-                
-            } catch (error) {
-                console.error('Error resetting password:', error);
-                showAlert(`Error resetting password: ${error.message}`, 'error');
             }
         };
         
@@ -924,17 +1087,14 @@
         };
         
         window.deleteUser = async function(role, userId, userName) {
-            // Special warning for super admins
             const isSuperAdmin = role === 'super_admin';
             const userType = isSuperAdmin ? 'Super Admin' : 'Clinic Admin';
             
-            // Check if it's the last super admin
             if (isSuperAdmin && superAdmins.length === 1) {
                 alert('Cannot delete the last Super Admin!\n\nYou must have at least one Super Admin in the system.');
                 return;
             }
             
-            // For clinic admins, warn about data implications
             let warningMessage = `⚠️ WARNING: Delete ${userType} User\n\n`;
             warningMessage += `User: ${userName}\n`;
             warningMessage += `Type: ${userType}\n\n`;
@@ -949,7 +1109,6 @@
             
             if (!confirm(warningMessage)) return;
             
-            // Double confirmation for super admins
             if (isSuperAdmin) {
                 const secondConfirm = prompt(`Type "DELETE" to confirm deletion of Super Admin: ${userName}`);
                 if (secondConfirm !== 'DELETE') {
@@ -960,7 +1119,6 @@
             
             try {
                 if (isSuperAdmin) {
-                    // Delete from super_admin_users table
                     const { error } = await supabase
                         .from('super_admin_users')
                         .delete()
@@ -970,7 +1128,6 @@
                     
                     showAlert(`Super Admin "${userName}" has been permanently deleted.`, 'success');
                 } else {
-                    // For clinic admins, just clear their credentials
                     const { error } = await supabase
                         .from('clinics')
                         .update({
