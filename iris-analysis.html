@@ -405,7 +405,7 @@
                 <h1>CELLOXEN IRIS Analysis System</h1>
                 <p>AI-Powered Constitutional Assessment and Therapy Recommendations</p>
             </div>
-            <button class="btn btn-secondary" onclick="window.location.href='index.html'">Back to Dashboard</button>
+            <button class="btn btn-secondary" onclick="navigateBack()">Back to Dashboard</button>
         </div>
     </div>
     
@@ -570,6 +570,28 @@
         let cameraStream = null;
         let currentStep = 1;
         let finalRecommendations = [];
+        
+        // Navigation function - FIXED
+        function navigateBack() {
+            const authData = localStorage.getItem('celloxen_auth');
+            if (!authData) {
+                window.location.href = 'unified-login.html';
+                return;
+            }
+            
+            const auth = JSON.parse(authData);
+            
+            if (auth.userType === 'super_admin') {
+                window.location.href = 'super-admin-dashboard.html';
+            } else if (auth.userType === 'clinic_admin' || auth.userType === 'clinic') {
+                window.location.href = 'clinic-dashboard.html';
+            } else {
+                window.location.href = 'index.html';
+            }
+        }
+        
+        // Make it available globally
+        window.navigateBack = navigateBack;
         
         // IRIS Analysis patterns and health correlations
         const irisPatterns = {
@@ -961,7 +983,7 @@
                     .insert([irisData]);
                     
                 if (irisError) {
-                    console.log('Note: iris_analyses table not found or error:', irisError.message);
+                    console.log('Note: iris_analyses table save error:', irisError.message);
                 }
                 
             } catch (error) {
