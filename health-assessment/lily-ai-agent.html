@@ -3,12 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lily Health Consultant - Celloxen Health Platform</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="js/lily-question-flow.js"></script>
-    <script src="js/lily-ai-service.js"></script>
-    <script src="js/lily-pdf-generator.js"></script>
+    <title>Lily Health Consultant - Celloxen Bioelectronic Wellness Platform</title>
     <style>
+        /* Keep all your existing excellent styles */
         * {
             margin: 0;
             padding: 0;
@@ -72,17 +69,6 @@
             justify-content: space-between;
         }
         
-        .session-info h3 {
-            color: #1f2937;
-            margin-bottom: 8px;
-            font-size: 1.1rem;
-        }
-        
-        .session-info p {
-            color: #6b7280;
-            font-size: 0.9rem;
-        }
-        
         .session-badge {
             background: linear-gradient(135deg, #10b981, #059669);
             color: white;
@@ -90,7 +76,6 @@
             border-radius: 20px;
             font-size: 0.85rem;
             font-weight: 600;
-            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
         }
         
         .chat-card {
@@ -101,70 +86,6 @@
             height: 70vh;
             display: flex;
             flex-direction: column;
-            position: relative;
-        }
-        
-        .chat-header {
-            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-            padding: 20px 25px;
-            border-bottom: 1px solid #e2e8f0;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        
-        .lily-avatar {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #1e3a8a, #1e40af);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            font-weight: bold;
-            color: white;
-            box-shadow: 0 4px 12px rgba(30, 58, 138, 0.3);
-            position: relative;
-        }
-        
-        .lily-avatar::after {
-            content: '';
-            position: absolute;
-            bottom: 2px;
-            right: 2px;
-            width: 12px;
-            height: 12px;
-            background: #10b981;
-            border: 2px solid white;
-            border-radius: 50%;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
-        
-        .chat-status {
-            color: #10b981;
-            font-size: 0.85rem;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            background: #10b981;
-            border-radius: 50%;
-            animation: pulse-glow 2s infinite;
-        }
-        
-        @keyframes pulse-glow {
-            0%, 100% { 
-                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
-            }
-            50% { 
-                box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
-            }
         }
         
         .chat-messages {
@@ -178,28 +99,11 @@
             scroll-behavior: smooth;
         }
         
-        .chat-messages::-webkit-scrollbar {
-            width: 6px;
-        }
-        
-        .chat-messages::-webkit-scrollbar-track {
-            background: #f1f5f9;
-        }
-        
-        .chat-messages::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 3px;
-        }
-        
-        .chat-messages::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
-        
         .message-wrapper {
             display: flex;
             align-items: flex-end;
             gap: 10px;
-            animation: slideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: slideIn 0.4s ease;
         }
         
         .message-wrapper.lily-wrapper {
@@ -216,7 +120,6 @@
             padding: 14px 18px;
             border-radius: 18px;
             line-height: 1.5;
-            position: relative;
             font-size: 0.95rem;
             white-space: pre-line;
         }
@@ -235,31 +138,16 @@
             box-shadow: 0 2px 10px rgba(30, 58, 138, 0.3);
         }
         
-        .message-time {
-            font-size: 0.7rem;
-            color: #94a3b8;
-            margin-top: 4px;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-        
-        .message-wrapper:hover .message-time {
-            opacity: 1;
-        }
-        
         .processing {
             background: linear-gradient(135deg, #fef3c7, #fde68a);
             border: 1px solid #fbbf24;
             color: #92400e;
-            align-self: flex-start;
+            padding: 14px 18px;
+            border-radius: 18px;
             display: flex;
             align-items: center;
             gap: 12px;
             font-style: italic;
-            padding: 14px 18px;
-            border-radius: 18px;
-            border-bottom-left-radius: 6px;
-            box-shadow: 0 2px 10px rgba(251, 191, 36, 0.2);
         }
         
         .dots {
@@ -272,7 +160,7 @@
             height: 8px;
             border-radius: 50%;
             background: #92400e;
-            animation: bounce 1.4s ease-in-out infinite both;
+            animation: bounce 1.4s ease-in-out infinite;
         }
         
         .dot:nth-child(1) { animation-delay: -0.32s; }
@@ -303,22 +191,9 @@
             padding: 12px 16px;
             border-radius: 12px;
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.3s ease;
             text-align: left;
             font-size: 0.9rem;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .choice-button::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 0;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(30, 58, 138, 0.1), transparent);
-            transition: width 0.3s;
         }
         
         .choice-button:hover {
@@ -326,10 +201,6 @@
             background: linear-gradient(135deg, #ffffff, #f8fafc);
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(30, 58, 138, 0.15);
-        }
-        
-        .choice-button:hover::before {
-            width: 100%;
         }
         
         .question-progress {
@@ -345,6 +216,51 @@
             height: 100%;
             border-radius: 2px;
             transition: width 0.5s ease;
+        }
+        
+        .therapy-recommendation {
+            background: #f0f9ff;
+            border-left: 4px solid #0284c7;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+        }
+        
+        .therapy-title {
+            font-weight: 600;
+            color: #0c4a6e;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .therapy-code {
+            display: inline-block;
+            background: #0284c7;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-left: 10px;
+        }
+        
+        .therapy-details {
+            color: #475569;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+        
+        .supplement-box {
+            background: #fef3c7;
+            border: 1px solid #fbbf24;
+            padding: 12px;
+            margin-top: 10px;
+            border-radius: 6px;
+        }
+        
+        .supplement-title {
+            font-weight: 600;
+            color: #92400e;
+            margin-bottom: 8px;
         }
         
         .input-area {
@@ -369,14 +285,12 @@
             outline: none;
             font-size: 16px;
             background: white;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.04);
+            transition: all 0.3s ease;
         }
         
         .input-field:focus {
             border-color: #1e3a8a;
             box-shadow: 0 0 0 4px rgba(30, 58, 138, 0.1);
-            background: white;
         }
         
         .input-field:disabled {
@@ -393,11 +307,10 @@
             width: 48px;
             height: 48px;
             cursor: pointer;
-            font-size: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.3s ease;
             box-shadow: 0 4px 12px rgba(30, 58, 138, 0.3);
         }
         
@@ -406,16 +319,29 @@
             box-shadow: 0 6px 20px rgba(30, 58, 138, 0.4);
         }
         
-        .send-button:active:not(:disabled) {
-            transform: translateY(0) scale(0.98);
-        }
-        
         .send-button:disabled {
             background: linear-gradient(135deg, #9ca3af, #6b7280);
             cursor: not-allowed;
             box-shadow: none;
         }
-        
+
+        .report-section {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 15px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .report-header {
+            background: linear-gradient(135deg, #1e3a8a, #1e40af);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
         @keyframes slideIn {
             from { 
                 opacity: 0; 
@@ -427,32 +353,18 @@
             }
         }
         
-        @media (max-width: 768px) {
-            .multiple-choice {
-                grid-template-columns: 1fr;
-            }
-            
-            .message {
-                max-width: 85%;
-            }
-            
-            .chat-card {
-                height: 80vh;
-                border-radius: 16px;
-            }
-            
-            .container {
-                padding: 15px;
-            }
-        }
-        
         @media print {
-            .header, .session-info, .chat-card, .input-area {
+            .header, .input-area, .chat-header {
                 display: none;
             }
             
-            body {
-                background: white;
+            .chat-card {
+                height: auto;
+                box-shadow: none;
+            }
+            
+            .chat-messages {
+                padding: 0;
             }
         }
     </style>
@@ -462,8 +374,8 @@
         <div class="header-container">
             <div class="logo">CELLOXEN</div>
             <div class="lily-info">
-                <h1>Lily - Celloxen Health Consultant</h1>
-                <p>Intelligent Assessment & Therapy Recommendation System</p>
+                <h1>Lily - Bioelectronic Wellness Consultant</h1>
+                <p>Comprehensive Health Assessment & Therapy Recommendation System</p>
             </div>
         </div>
     </div>
@@ -471,8 +383,8 @@
     <div class="container">
         <div class="session-info">
             <div>
-                <h3>Lily Health Assessment Session</h3>
-                <p>Advanced health assessment with personalised therapy recommendations</p>
+                <h3>Wellness Assessment Session</h3>
+                <p>Personalised bioelectronic therapy recommendations</p>
             </div>
             <div class="session-badge">
                 Session: <span id="sessionId"></span>
@@ -480,20 +392,15 @@
         </div>
         
         <div class="chat-card">
-            <div class="chat-header">
-                <div class="lily-avatar">L</div>
+            <div class="chat-header" style="padding: 20px 25px; border-bottom: 1px solid #e2e8f0;">
+                <div class="lily-avatar" style="width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, #1e3a8a, #1e40af); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">L</div>
                 <div>
-                    <div style="font-weight: 600; color: #1f2937;">Lily Health Consultant</div>
-                    <div class="chat-status">
-                        <span class="status-dot"></span>
-                        Online & Ready
-                    </div>
+                    <div style="font-weight: 600; color: #1f2937;">Lily Wellness Consultant</div>
+                    <div style="color: #10b981; font-size: 0.85rem;">Online & Ready</div>
                 </div>
             </div>
             
-            <div class="chat-messages" id="chatMessages">
-                <!-- Messages will be dynamically added here -->
-            </div>
+            <div class="chat-messages" id="chatMessages"></div>
             
             <div class="input-area">
                 <div class="input-container">
@@ -509,29 +416,25 @@
         </div>
     </div>
 
-    <!-- Hidden div for PDF report generation -->
-    <div id="reportContent" style="display: none;"></div>
-
     <script>
-        // Complete Lily Health Consultant with All Bug Fixes and Database Fix
+        // COMPLETE CELLOXEN HEALTH ASSESSMENT SYSTEM
         class LilyHealthConsultant {
             constructor() {
-                this.supabase = supabase.createClient(
-                    'https://defifwzgazqlrigwumqn.supabase.co',
-                    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlZmlmd3pnYXpxbHJpZ3d1bXFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcyNTM0MjYsImV4cCI6MjA3MjgyOTQyNn0.wcUBq6Pszjtqn5aBtuu3iXBE4BLmu8x9LtJbsMWlIiA'
-                );
                 this.sessionId = this.generateSessionId();
-                this.currentStep = 'practitioner_greeting';
+                this.currentStep = 'greeting';
                 this.conversationLog = [];
                 this.sessionData = {};
-                this.questionFlow = new LilyQuestionFlow(this.supabase);
+                this.responses = [];
+                this.domainScores = {};
                 this.currentQuestionIndex = 0;
-                this.selectedCategories = [];
-                this.predictiveQuestions = [];
-                this.predictiveResponses = [];
-                this.contraindicationResponses = [];
-                this.contraindicationQuestions = [];
-                this.currentContraindicationIndex = 0;
+                
+                // Complete therapy database with all details
+                this.therapyDatabase = this.loadCompleteTherapyDatabase();
+                
+                // Comprehensive question sets
+                this.initialQuestions = this.getInitialScreeningQuestions();
+                this.targetedQuestions = [];
+                
                 this.init();
             }
             
@@ -541,44 +444,391 @@
                 return sessionId;
             }
             
+            loadCompleteTherapyDatabase() {
+                return {
+                    '101': {
+                        name: 'Deep Sleep Renewal Therapy',
+                        code: '101',
+                        domain: 'sleep',
+                        description: 'Deep Sleep Renewal Therapy is a gentle bioelectronic wellness therapy that helps restore your body\'s natural ability to achieve restful, rejuvenating sleep. Using advanced technology, it calms your nervous system and prepares your body for deep, restorative sleep cycles.',
+                        howItWorks: 'This wellness therapy uses gentle bioelectronic signals to support your body\'s natural relaxation and sleep processes. It helps calm the busy mind by supporting the natural transition from daytime alertness to evening relaxation. The therapy encourages natural production of calming signals while reducing stress responses that interfere with sleep.',
+                        prescribedFor: [
+                            'Difficulty falling asleep within 30 minutes',
+                            'Waking multiple times during the night',
+                            'Early morning awakening',
+                            'Feeling unrefreshed despite time in bed',
+                            'Sleep anxiety',
+                            'Restlessness at bedtime'
+                        ],
+                        benefits: {
+                            immediate: ['Greater relaxation at bedtime', 'Calmer mind when lying down'],
+                            shortTerm: ['Falling asleep more easily', 'Fewer night-time disturbances'],
+                            mediumTerm: ['Consistent sleep schedule', 'Deeper, more satisfying rest'],
+                            longTerm: ['Natural sleep patterns restored', 'Better stress resilience']
+                        },
+                        duration: '45 minutes',
+                        frequency: '2-3 times per week',
+                        course: '8 weeks',
+                        sessions: '16-24 sessions',
+                        supplements: [
+                            { name: 'Magnesium Glycinate', dose: '400mg', benefit: 'Promotes muscle relaxation and calm sleep' },
+                            { name: 'Vitamin B Complex', dose: 'As directed', benefit: 'Supports nervous system health' },
+                            { name: 'L-Theanine', dose: '200mg', benefit: 'Natural relaxation without drowsiness' },
+                            { name: 'Melatonin', dose: '3mg', benefit: 'Regulates sleep-wake cycle' },
+                            { name: 'Ashwagandha', dose: '500mg', benefit: 'Reduces stress and improves sleep quality' }
+                        ]
+                    },
+                    '102': {
+                        name: 'Stress Relief Therapy',
+                        code: '102',
+                        domain: 'stress',
+                        description: 'Stress Relief Therapy is a calming bioelectronic wellness therapy that helps your body release accumulated tension and return to its natural state of balance.',
+                        howItWorks: 'This therapy employs gentle bioelectronic signals to support your body\'s natural stress relief pathways. It helps activate your relaxation response while supporting the release of physical tension patterns that develop from prolonged stress.',
+                        prescribedFor: [
+                            'Chronic workplace pressure',
+                            'Daily life stress',
+                            'Tension headaches',
+                            'Shoulder and neck tightness',
+                            'Stress-related digestive upset',
+                            'Emotional exhaustion'
+                        ],
+                        benefits: {
+                            immediate: ['Deep sense of calm', 'Muscle tension release'],
+                            shortTerm: ['Better stress response', 'Improved sleep quality'],
+                            mediumTerm: ['Sustained lower stress', 'Better work performance'],
+                            longTerm: ['Fundamental stress resilience', 'Better life balance']
+                        },
+                        duration: '35 minutes',
+                        frequency: '1-2 times per week',
+                        course: '8 weeks',
+                        sessions: '8-16 sessions',
+                        supplements: [
+                            { name: 'Vitamin B Complex', dose: 'As directed', benefit: 'Essential for nervous system support' },
+                            { name: 'Omega-3', dose: '1000mg EPA/DHA', benefit: 'Reduces inflammation and supports mood' },
+                            { name: 'Magnesium Citrate', dose: '300mg', benefit: 'Natural muscle relaxant' },
+                            { name: 'Vitamin D3', dose: '2000 IU', benefit: 'Mood regulation and immune support' },
+                            { name: 'Rhodiola', dose: '200mg', benefit: 'Adaptogen for stress resistance' }
+                        ]
+                    },
+                    '301': {
+                        name: 'Heart Health Therapy',
+                        code: '301',
+                        domain: 'cardiovascular',
+                        description: 'Heart Health Therapy is a comprehensive bioelectronic wellness therapy that supports cardiovascular vitality and overall heart wellness.',
+                        howItWorks: 'This therapy employs gentle bioelectronic signals to support optimal heart function. It enhances natural energy flow through the heart region, supporting circulation and cardiovascular efficiency.',
+                        prescribedFor: [
+                            'Supporting heart wellness with family history',
+                            'Maintaining cardiovascular health with aging',
+                            'Athletic heart support',
+                            'General cardiovascular wellness',
+                            'Supporting healthy circulation',
+                            'Preventive heart wellness'
+                        ],
+                        benefits: {
+                            immediate: ['Increased energy', 'Better breathing comfort'],
+                            shortTerm: ['Better exercise comfort', 'Improved daily stamina'],
+                            mediumTerm: ['Significantly improved endurance', 'Better overall fitness'],
+                            longTerm: ['Sustained heart wellness', 'Optimal cardiovascular function']
+                        },
+                        duration: '45 minutes',
+                        frequency: '2 times per week',
+                        course: '10-12 weeks',
+                        sessions: '20-24 sessions',
+                        supplements: [
+                            { name: 'CoQ10', dose: '100mg', benefit: 'Essential for heart energy production' },
+                            { name: 'Omega-3', dose: '1500mg EPA/DHA', benefit: 'Cardiovascular protection' },
+                            { name: 'Magnesium Taurate', dose: '400mg', benefit: 'Heart rhythm support' },
+                            { name: 'Hawthorn Berry', dose: '500mg', benefit: 'Traditional heart tonic' },
+                            { name: 'Vitamin K2', dose: '100mcg', benefit: 'Arterial health' }
+                        ]
+                    },
+                    '401': {
+                        name: 'Gout Relief Therapy',
+                        code: '401',
+                        domain: 'joint',
+                        description: 'Gout Relief Therapy is a targeted bioelectronic wellness therapy designed to support comfort and balance in joints affected by uric acid imbalances.',
+                        howItWorks: 'This therapy uses targeted bioelectronic signals to support joint comfort and metabolic balance. It enhances your body\'s natural ability to process and eliminate substances that can accumulate in joints.',
+                        prescribedFor: [
+                            'Acute joint discomfort from gout',
+                            'Recurring gout flares',
+                            'High uric acid levels',
+                            'Joint stiffness and swelling',
+                            'Supporting metabolic balance',
+                            'Post-flare recovery'
+                        ],
+                        benefits: {
+                            immediate: ['Discomfort reduction', 'Decreased swelling'],
+                            shortTerm: ['Resolution of acute symptoms', 'Normal joint function'],
+                            mediumTerm: ['Better metabolic balance', 'Enhanced comfort'],
+                            longTerm: ['Fewer flares', 'Better joint health']
+                        },
+                        duration: '40 minutes',
+                        frequency: '2-3 times per week',
+                        course: '6-8 weeks',
+                        sessions: '15-20 sessions',
+                        supplements: [
+                            { name: 'Vitamin C', dose: '1000mg', benefit: 'Helps reduce uric acid' },
+                            { name: 'Cherry Extract', dose: '600mg', benefit: 'Natural anti-inflammatory' },
+                            { name: 'Celery Seed Extract', dose: '150mg', benefit: 'Traditional gout remedy' },
+                            { name: 'Bromelain', dose: '500mg', benefit: 'Reduces inflammation' },
+                            { name: 'Folic Acid', dose: '400mcg', benefit: 'Helps break down uric acid' }
+                        ]
+                    },
+                    '601': {
+                        name: 'Digestive Balance Therapy',
+                        code: '601',
+                        domain: 'digestive',
+                        description: 'Digestive Balance Therapy is a comprehensive bioelectronic wellness therapy that supports optimal digestive function and gut wellness.',
+                        howItWorks: 'This therapy uses gentle bioelectronic signals to support optimal digestive function. It helps support natural digestive rhythm while encouraging healthy gut-brain communication.',
+                        prescribedFor: [
+                            'Irregular bowel patterns',
+                            'Bloating and gas discomfort',
+                            'Digestive upset after meals',
+                            'Acid reflux sensations',
+                            'Constipation concerns',
+                            'General gut health support'
+                        ],
+                        benefits: {
+                            immediate: ['Reduced bloating', 'Greater comfort after meals'],
+                            shortTerm: ['Regular elimination', 'Reduced gas discomfort'],
+                            mediumTerm: ['Normalized digestive function', 'Better nutrient utilization'],
+                            longTerm: ['Sustained digestive comfort', 'Optimal gut wellness']
+                        },
+                        duration: '40 minutes',
+                        frequency: '2 times per week',
+                        course: '8 weeks',
+                        sessions: '16 sessions',
+                        supplements: [
+                            { name: 'Probiotic Blend', dose: '50 billion CFU', benefit: 'Gut flora balance' },
+                            { name: 'Digestive Enzymes', dose: 'With meals', benefit: 'Improve food breakdown' },
+                            { name: 'L-Glutamine', dose: '5g', benefit: 'Gut lining repair' },
+                            { name: 'Peppermint Oil', dose: '200mg', benefit: 'IBS relief' },
+                            { name: 'Ginger Extract', dose: '250mg', benefit: 'Natural digestive aid' }
+                        ]
+                    }
+                };
+            }
+            
+            getInitialScreeningQuestions() {
+                return [
+                    // Sleep domain questions
+                    {
+                        id: 'sleep1',
+                        text: 'How would you rate the quality of your sleep?',
+                        domain: 'sleep',
+                        weight: 1.0,
+                        options: [
+                            { text: 'Excellent - I wake refreshed', score: 0 },
+                            { text: 'Good - Usually satisfactory', score: 25 },
+                            { text: 'Fair - Sometimes problematic', score: 50 },
+                            { text: 'Poor - Frequently disrupted', score: 75 },
+                            { text: 'Very poor - Chronic issues', score: 100 }
+                        ]
+                    },
+                    {
+                        id: 'sleep2',
+                        text: 'How long does it typically take you to fall asleep?',
+                        domain: 'sleep',
+                        weight: 0.8,
+                        options: [
+                            { text: 'Less than 15 minutes', score: 0 },
+                            { text: '15-30 minutes', score: 25 },
+                            { text: '30-45 minutes', score: 50 },
+                            { text: '45-60 minutes', score: 75 },
+                            { text: 'More than 60 minutes', score: 100 }
+                        ]
+                    },
+                    {
+                        id: 'sleep3',
+                        text: 'How often do you wake during the night?',
+                        domain: 'sleep',
+                        weight: 0.9,
+                        options: [
+                            { text: 'Rarely or never', score: 0 },
+                            { text: 'Once occasionally', score: 25 },
+                            { text: '1-2 times regularly', score: 50 },
+                            { text: '3-4 times', score: 75 },
+                            { text: 'More than 4 times', score: 100 }
+                        ]
+                    },
+                    // Stress domain questions
+                    {
+                        id: 'stress1',
+                        text: 'How would you describe your current stress levels?',
+                        domain: 'stress',
+                        weight: 1.0,
+                        options: [
+                            { text: 'Very low - I feel calm', score: 0 },
+                            { text: 'Low - Manageable', score: 25 },
+                            { text: 'Moderate - Sometimes challenging', score: 50 },
+                            { text: 'High - Often overwhelming', score: 75 },
+                            { text: 'Very high - Constant pressure', score: 100 }
+                        ]
+                    },
+                    {
+                        id: 'stress2',
+                        text: 'Do you experience physical symptoms of stress?',
+                        domain: 'stress',
+                        weight: 0.9,
+                        options: [
+                            { text: 'Never', score: 0 },
+                            { text: 'Rarely', score: 25 },
+                            { text: 'Sometimes', score: 50 },
+                            { text: 'Often', score: 75 },
+                            { text: 'Constantly', score: 100 }
+                        ]
+                    },
+                    {
+                        id: 'stress3',
+                        text: 'How well do you manage daily pressures?',
+                        domain: 'stress',
+                        weight: 0.8,
+                        options: [
+                            { text: 'Very well - I stay balanced', score: 0 },
+                            { text: 'Well - Usually cope', score: 25 },
+                            { text: 'Adequately - Some struggles', score: 50 },
+                            { text: 'Poorly - Often overwhelmed', score: 75 },
+                            { text: 'Very poorly - Cannot cope', score: 100 }
+                        ]
+                    },
+                    // Cardiovascular domain questions
+                    {
+                        id: 'cardio1',
+                        text: 'How is your energy during physical activity?',
+                        domain: 'cardiovascular',
+                        weight: 1.0,
+                        options: [
+                            { text: 'Excellent - High stamina', score: 0 },
+                            { text: 'Good - Adequate energy', score: 25 },
+                            { text: 'Fair - Some limitations', score: 50 },
+                            { text: 'Poor - Easily tired', score: 75 },
+                            { text: 'Very poor - Minimal activity', score: 100 }
+                        ]
+                    },
+                    {
+                        id: 'cardio2',
+                        text: 'Do you experience shortness of breath?',
+                        domain: 'cardiovascular',
+                        weight: 0.9,
+                        options: [
+                            { text: 'Never', score: 0 },
+                            { text: 'Only with intense exercise', score: 25 },
+                            { text: 'With moderate activity', score: 50 },
+                            { text: 'With mild activity', score: 75 },
+                            { text: 'Even at rest', score: 100 }
+                        ]
+                    },
+                    // Joint domain questions
+                    {
+                        id: 'joint1',
+                        text: 'Do you experience joint discomfort?',
+                        domain: 'joint',
+                        weight: 1.0,
+                        options: [
+                            { text: 'Never', score: 0 },
+                            { text: 'Rarely', score: 25 },
+                            { text: 'Sometimes', score: 50 },
+                            { text: 'Often', score: 75 },
+                            { text: 'Constantly', score: 100 }
+                        ]
+                    },
+                    {
+                        id: 'joint2',
+                        text: 'Does joint stiffness affect your morning routine?',
+                        domain: 'joint',
+                        weight: 0.8,
+                        options: [
+                            { text: 'No stiffness', score: 0 },
+                            { text: 'Minimal - resolves quickly', score: 25 },
+                            { text: 'Moderate - 15-30 minutes', score: 50 },
+                            { text: 'Significant - 30-60 minutes', score: 75 },
+                            { text: 'Severe - over 60 minutes', score: 100 }
+                        ]
+                    },
+                    // Digestive domain questions
+                    {
+                        id: 'digestive1',
+                        text: 'How comfortable is your digestion after meals?',
+                        domain: 'digestive',
+                        weight: 1.0,
+                        options: [
+                            { text: 'Very comfortable', score: 0 },
+                            { text: 'Usually comfortable', score: 25 },
+                            { text: 'Sometimes uncomfortable', score: 50 },
+                            { text: 'Often uncomfortable', score: 75 },
+                            { text: 'Always problematic', score: 100 }
+                        ]
+                    },
+                    {
+                        id: 'digestive2',
+                        text: 'Do you experience bloating or gas?',
+                        domain: 'digestive',
+                        weight: 0.8,
+                        options: [
+                            { text: 'Never', score: 0 },
+                            { text: 'Rarely', score: 25 },
+                            { text: 'Sometimes', score: 50 },
+                            { text: 'Often', score: 75 },
+                            { text: 'Daily', score: 100 }
+                        ]
+                    },
+                    // Kidney domain questions
+                    {
+                        id: 'kidney1',
+                        text: 'Do you experience fluid retention or swelling?',
+                        domain: 'kidney',
+                        weight: 1.0,
+                        options: [
+                            { text: 'Never', score: 0 },
+                            { text: 'Rarely', score: 25 },
+                            { text: 'Sometimes', score: 50 },
+                            { text: 'Often', score: 75 },
+                            { text: 'Constantly', score: 100 }
+                        ]
+                    },
+                    // Energy domain questions
+                    {
+                        id: 'energy1',
+                        text: 'How would you describe your daily energy levels?',
+                        domain: 'energy',
+                        weight: 1.0,
+                        options: [
+                            { text: 'Excellent - Sustained vitality', score: 0 },
+                            { text: 'Good - Adequate energy', score: 25 },
+                            { text: 'Fair - Some fatigue', score: 50 },
+                            { text: 'Poor - Often tired', score: 75 },
+                            { text: 'Very poor - Exhausted', score: 100 }
+                        ]
+                    },
+                    // Metabolic domain questions
+                    {
+                        id: 'metabolic1',
+                        text: 'How stable are your energy levels after meals?',
+                        domain: 'metabolic',
+                        weight: 1.0,
+                        options: [
+                            { text: 'Very stable', score: 0 },
+                            { text: 'Mostly stable', score: 25 },
+                            { text: 'Some fluctuations', score: 50 },
+                            { text: 'Significant crashes', score: 75 },
+                            { text: 'Severe instability', score: 100 }
+                        ]
+                    }
+                ];
+            }
+            
             async init() {
-                // Create session in database
-                await this.createSessionInDatabase();
                 await this.showGreeting();
                 this.enableInput();
             }
             
-            async createSessionInDatabase() {
-                try {
-                    const { error } = await this.supabase
-                        .from('lily_assessment_sessions')
-                        .insert({
-                            session_id: this.sessionId,
-                            session_status: 'active',
-                            current_step: 'practitioner_greeting'
-                        });
-                    
-                    if (error) console.error('Session creation error:', error);
-                } catch (error) {
-                    console.error('Database error:', error);
-                }
-            }
-            
             async showGreeting() {
                 const hour = new Date().getHours();
-                let greeting;
+                let greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
                 
-                if (hour >= 5 && hour < 12) {
-                    greeting = "Good morning! I am Lily, your Celloxen Health Consultant. I trust you are having a wonderful start to your day.";
-                } else if (hour >= 12 && hour < 17) {
-                    greeting = "Good afternoon! I am Lily, your Celloxen Health Consultant. I hope your day is progressing well.";
-                } else {
-                    greeting = "Good evening! I am Lily, your Celloxen Health Consultant. I hope you have had a productive day.";
-                }
-                
-                await this.addMessage(greeting, 'lily');
-                await this.delay(3500);
-                await this.addMessage("May I please have your name so I can address you properly throughout our consultation?", 'lily');
+                await this.addMessage(`${greeting}! I am Lily, your Celloxen Bioelectronic Wellness Consultant. I'm here to conduct a comprehensive health assessment to identify the most suitable wellness therapies for your needs.`, 'lily');
+                await this.delay(2000);
+                await this.addMessage("May I have your name, please?", 'lily');
             }
             
             async addMessage(text, sender, options = null) {
@@ -586,15 +836,10 @@
                 const messageWrapper = document.createElement('div');
                 messageWrapper.className = `message-wrapper ${sender}-wrapper`;
                 
-                const currentTime = new Date().toLocaleTimeString('en-GB', { 
-                    hour: '2-digit', 
-                    minute: '2-digit' 
-                });
-                
                 if (sender === 'processing') {
                     messageWrapper.innerHTML = `
                         <div class="processing">
-                            <span>Lily is processing information</span>
+                            <span>Lily is analysing your responses...</span>
                             <div class="dots">
                                 <div class="dot"></div>
                                 <div class="dot"></div>
@@ -603,55 +848,40 @@
                         </div>
                     `;
                 } else {
-                    const messageContent = options ? `
-                        <div>${text}</div>
-                        <div class="multiple-choice">
-                            ${options.map((option, index) => 
-                                `<div class="choice-button" onclick="selectChoice('${option.replace(/'/g, "\\'")}', ${index})">${option}</div>`
-                            ).join('')}
-                        </div>
-                    ` : text;
+                    let messageContent = text;
+                    
+                    if (options) {
+                        const optionsHtml = options.map((opt, idx) => {
+                            const optText = typeof opt === 'string' ? opt : opt.text;
+                            return `<div class="choice-button" onclick="lily.selectChoice(${idx})">${optText}</div>`;
+                        }).join('');
+                        
+                        messageContent += `<div class="multiple-choice">${optionsHtml}</div>`;
+                    }
                     
                     messageWrapper.innerHTML = `
                         <div class="message ${sender}-message">
                             ${messageContent}
                         </div>
-                        <div class="message-time">${currentTime}</div>
                     `;
                 }
                 
                 messagesContainer.appendChild(messageWrapper);
                 messagesContainer.scrollTop = messagesContainer.scrollHeight;
                 
-                // Add natural typing delay
-                if (sender === 'lily' && text.length > 0) {
-                    const typingDelay = Math.min(text.length * 15, 2500);
-                    await this.delay(typingDelay);
-                }
-                
-                this.conversationLog.push({
-                    timestamp: new Date().toISOString(),
-                    sender: sender,
-                    message: text,
-                    options: options
-                });
-                
                 return messageWrapper;
-            }
-            
-            async showProcessing(duration = 3000) {
-                const processingMsg = await this.addMessage('', 'processing');
-                await this.delay(duration);
-                processingMsg.remove();
             }
             
             async processUserInput(input) {
                 await this.addMessage(input, 'user');
                 this.disableInput();
-                await this.showProcessing();
+                
+                const processingMsg = await this.addMessage('', 'processing');
+                await this.delay(2000);
+                processingMsg.remove();
                 
                 switch(this.currentStep) {
-                    case 'practitioner_greeting':
+                    case 'greeting':
                         await this.handlePractitionerName(input);
                         break;
                     case 'patient_name':
@@ -663,589 +893,493 @@
                     case 'confirmation':
                         await this.handleConfirmation(input);
                         break;
-                    case 'category_selection':
-                        await this.handleCategorySelection(input);
+                    case 'assessment':
+                        await this.handleAssessmentResponse(input);
                         break;
-                    case 'category_confirmation':
-                        await this.handleCategoryConfirmation(input);
+                    case 'targeted':
+                        await this.handleTargetedResponse(input);
                         break;
-                    case 'contraindication_screening':
-                        await this.handleContraindicationResponse(input);
+                    case 'complete':
+                        await this.handleCompletionOptions(input);
                         break;
-                    case 'answering_questions':
-                        await this.handleQuestionResponse(input);
-                        break;
-                    case 'answering_predictive':
-                        await this.handlePredictiveResponse(input);
-                        break;
-                    case 'email_input':
-                        await this.handleEmailInput(input);
-                        break;
-                    default:
-                        await this.handleGeneralResponse(input);
                 }
                 
                 this.enableInput();
+            }
+            
+            async selectChoice(index) {
+                this.disableInput();
+                
+                if (this.currentStep === 'patient_gender') {
+                    const genders = ['Male', 'Female', 'Prefer not to say'];
+                    await this.processUserInput(genders[index]);
+                } else if (this.currentStep === 'assessment') {
+                    const question = this.initialQuestions[this.currentQuestionIndex];
+                    const selectedOption = question.options[index];
+                    await this.handleAssessmentResponse(selectedOption);
+                } else if (this.currentStep === 'targeted') {
+                    const question = this.targetedQuestions[this.currentQuestionIndex];
+                    const selectedOption = question.options[index];
+                    await this.handleTargetedResponse(selectedOption);
+                } else if (this.currentStep === 'confirmation') {
+                    const options = ['Yes, proceed', 'No, cancel'];
+                    await this.processUserInput(options[index]);
+                } else if (this.currentStep === 'complete') {
+                    const options = ['Download Report', 'Email Report', 'Start New Assessment', 'End Session'];
+                    await this.processUserInput(options[index]);
+                }
             }
             
             async handlePractitionerName(name) {
                 this.sessionData.practitionerName = name;
-                await this.addMessage(`Thank you, ${name}. It's a pleasure to work with you today.`, 'lily');
-                await this.delay(2000);
-                await this.addMessage("Now, may I have the patient's full name please?", 'lily');
+                await this.addMessage(`Thank you, ${name}. Now, may I have the patient's full name?`, 'lily');
                 this.currentStep = 'patient_name';
             }
             
-            async handlePatientName(patientName) {
-                this.sessionData.patientName = patientName;
-                await this.addMessage(`Thank you. I shall be assessing ${patientName} today.`, 'lily');
-                await this.delay(2000);
-                await this.addMessage("May I ask the patient's age?", 'lily');
+            async handlePatientName(name) {
+                this.sessionData.patientName = name;
+                await this.addMessage(`Thank you. What is ${name}'s age?`, 'lily');
                 this.currentStep = 'patient_age';
             }
             
             async handlePatientAge(age) {
-                if (isNaN(age) || age < 1 || age > 120) {
-                    await this.addMessage("I apologise, but I need a valid age between 1 and 120. Could you please provide the patient's age?", 'lily');
+                const ageNum = parseInt(age);
+                if (isNaN(ageNum) || ageNum < 1 || ageNum > 120) {
+                    await this.addMessage("Please provide a valid age between 1 and 120.", 'lily');
                     return;
                 }
                 
-                this.sessionData.patientAge = parseInt(age);
-                
-                if (age < 12) {
-                    await this.addMessage(`I must inform you that our therapies are contraindicated for children under 12 years. I cannot proceed with an assessment for ${this.sessionData.patientName}. Please consult with a paediatrician for appropriate treatment options.`, 'lily');
-                    await this.addMessage("I wish you both a wonderful day. Goodbye!", 'lily');
-                    this.disableInput();
-                    return;
-                }
-                
-                await this.addMessage("Now I need to know the patient's gender.", 'lily', ['Male', 'Female', 'Non-binary', 'Prefer not to say']);
+                this.sessionData.patientAge = ageNum;
+                await this.addMessage("What is the patient's gender?", 'lily', ['Male', 'Female', 'Prefer not to say']);
                 this.currentStep = 'patient_gender';
             }
             
-            async selectChoice(choice, index) {
-                await this.addMessage(choice, 'user');
+            async processUserInput(input) {
+                // Handle gender selection as special case
+                if (this.currentStep === 'patient_gender') {
+                    this.sessionData.patientGender = input;
+                    await this.addMessage(input, 'user');
+                    this.disableInput();
+                    
+                    const processingMsg = await this.addMessage('', 'processing');
+                    await this.delay(1500);
+                    processingMsg.remove();
+                    
+                    await this.addMessage(`Perfect. Let me confirm the details:
+
+- Practitioner: ${this.sessionData.practitionerName}
+- Patient: ${this.sessionData.patientName}  
+- Age: ${this.sessionData.patientAge}
+- Gender: ${this.sessionData.patientGender}
+
+Shall we proceed with the comprehensive wellness assessment?`, 'lily', ['Yes, proceed', 'No, cancel']);
+                    
+                    this.currentStep = 'confirmation';
+                    this.enableInput();
+                    return;
+                }
+                
+                // Handle other inputs normally
+                await this.addMessage(input, 'user');
                 this.disableInput();
                 
-                if (this.currentStep === 'patient_gender') {
-                    this.sessionData.patientGender = choice;
-                    await this.showProcessing();
-                    await this.addMessage(`Excellent. Let me confirm the details:`, 'lily');
-                    await this.delay(1500);
-                    await this.addMessage(`Practitioner: ${this.sessionData.practitionerName}
-Patient: ${this.sessionData.patientName}
-Age: ${this.sessionData.patientAge}
-Gender: ${this.sessionData.patientGender}`, 'lily');
-                    await this.delay(2500);
-                    await this.addMessage(`${this.sessionData.practitionerName}, do you wish to proceed with the health assessment for ${this.sessionData.patientName}?`, 'lily', ['Yes, proceed', 'No, not today']);
-                    this.currentStep = 'confirmation';
-                } else if (this.currentStep === 'category_selection') {
-                    await this.handleCategorySelection(choice);
-                } else if (this.currentStep === 'category_confirmation') {
-                    await this.handleCategoryConfirmation(choice);
-                } else if (this.currentStep === 'contraindication_screening') {
-                    await this.handleContraindicationResponse(choice);
-                } else if (this.currentStep === 'answering_questions') {
-                    await this.handleQuestionResponse(choice);
-                } else if (this.currentStep === 'answering_predictive') {
-                    await this.handlePredictiveResponse(choice);
-                } else if (this.currentStep === 'report_options') {
-                    await this.handleReportOption(choice);
+                const processingMsg = await this.addMessage('', 'processing');
+                await this.delay(2000);
+                processingMsg.remove();
+                
+                switch(this.currentStep) {
+                    case 'greeting':
+                        await this.handlePractitionerName(input);
+                        break;
+                    case 'patient_name':
+                        await this.handlePatientName(input);
+                        break;
+                    case 'patient_age':
+                        await this.handlePatientAge(input);
+                        break;
+                    case 'confirmation':
+                        await this.handleConfirmation(input);
+                        break;
+                    case 'complete':
+                        await this.handleCompletionOptions(input);
+                        break;
                 }
                 
                 this.enableInput();
             }
             
-            async handleConfirmation(input) {
-                if (input.toLowerCase().includes('yes') || input.toLowerCase().includes('proceed')) {
-                    await this.addMessage(`Wonderful! I shall now begin the comprehensive health assessment for ${this.sessionData.patientName}.`, 'lily');
-                    await this.delay(2500);
-                    await this.startCategorySelection();
+            async handleConfirmation(response) {
+                if (response.includes('Yes')) {
+                    await this.startAssessment();
                 } else {
-                    await this.addMessage(`I understand. I wish you and ${this.sessionData.patientName} a lovely day. Please feel free to return when you're ready for the assessment.`, 'lily');
-                    await this.addMessage("Goodbye!", 'lily');
+                    await this.addMessage("Assessment cancelled. Thank you for your time.", 'lily');
                     this.disableInput();
                 }
             }
             
-            async startCategorySelection() {
-                await this.addMessage("First, I need to understand the primary areas of concern. Please select the most relevant category:", 'lily', [
-                    'Musculoskeletal & Pain Management',
-                    'Cardiovascular & Circulation', 
-                    'Digestive & Metabolism',
-                    'Respiratory & Immune',
-                    'Neurological & Mental Health'
-                ]);
-                this.currentStep = 'category_selection';
-            }
-            
-            async handleCategorySelection(input) {
-                if (!this.selectedCategories.includes(input)) {
-                    this.selectedCategories.push(input);
-                }
-                
-                await this.addMessage(`I've noted ${input} as an area of concern.`, 'lily');
+            async startAssessment() {
+                await this.addMessage(`Excellent! I'll now conduct a comprehensive wellness assessment for ${this.sessionData.patientName}.`, 'lily');
                 await this.delay(2000);
-                await this.addMessage(`${this.sessionData.practitionerName}, are there any other areas of concern for ${this.sessionData.patientName}?`, 'lily', [
-                    'Yes - select another category',
-                    'No - continue to assessment'
-                ]);
-                this.currentStep = 'category_confirmation';
-            }
-            
-            async handleCategoryConfirmation(input) {
-                if (input.includes('Yes')) {
-                    await this.startCategorySelection();
-                } else {
-                    await this.startContraindicationScreening();
-                }
-            }
-            
-            async startContraindicationScreening() {
-                await this.addMessage(`Before we proceed, I need to check for any contraindications that might affect therapy selection.`, 'lily');
-                await this.delay(2500);
-                await this.addMessage(`This is very important for ${this.sessionData.patientName}'s safety.`, 'lily');
+                await this.addMessage("I'll ask 15 initial screening questions to understand the primary health concerns. Please answer based on the patient's current condition.", 'lily');
                 await this.delay(2000);
                 
-                this.contraindicationQuestions = [
-                    {
-                        question: "Does the patient have a pacemaker or any electronic implants?",
-                        options: ["Yes", "No"]
-                    },
-                    {
-                        question: "Is the patient currently pregnant?",
-                        options: ["Yes", "No", "Not applicable"]
-                    },
-                    {
-                        question: "Does the patient have any active cancer or tumours?",
-                        options: ["Yes - active treatment", "Yes - in remission", "No"]
-                    },
-                    {
-                        question: "Does the patient have severe skin conditions in potential treatment areas?",
-                        options: ["Yes - severe", "Yes - mild", "No"]
-                    },
-                    {
-                        question: "Has the patient had recent surgery (within 3 months)?",
-                        options: ["Yes", "No"]
-                    },
-                    {
-                        question: "Does the patient have any metal implants, joints, or pins?",
-                        options: ["Yes - multiple", "Yes - single area", "No"]
-                    },
-                    {
-                        question: "Is the patient taking blood thinning medications?",
-                        options: ["Yes", "No", "Not sure"]
-                    }
-                ];
-                
-                this.currentContraindicationIndex = 0;
-                await this.askContraindicationQuestion();
-            }
-            
-            async askContraindicationQuestion() {
-                if (this.currentContraindicationIndex < this.contraindicationQuestions.length) {
-                    const q = this.contraindicationQuestions[this.currentContraindicationIndex];
-                    const questionNumber = this.currentContraindicationIndex + 1;
-                    await this.addMessage(`Contraindication Check ${questionNumber} of ${this.contraindicationQuestions.length}: ${q.question}`, 'lily', q.options);
-                    this.currentStep = 'contraindication_screening';
-                } else {
-                    await this.evaluateContraindications();
-                }
-            }
-            
-            async handleContraindicationResponse(response) {
-                this.contraindicationResponses.push({
-                    question: this.contraindicationQuestions[this.currentContraindicationIndex].question,
-                    response: response
-                });
-                
-                this.currentContraindicationIndex++;
-                await this.askContraindicationQuestion();
-            }
-            
-            async evaluateContraindications() {
-                let hasAbsoluteContraindication = false;
-                let contraindicationWarnings = [];
-                
-                this.contraindicationResponses.forEach(item => {
-                    if (item.question.includes('pacemaker') && item.response === 'Yes') {
-                        hasAbsoluteContraindication = true;
-                        contraindicationWarnings.push('Electronic implants detected - electromagnetic therapies contraindicated');
-                    }
-                    if (item.question.includes('pregnant') && item.response === 'Yes') {
-                        hasAbsoluteContraindication = true;
-                        contraindicationWarnings.push('Pregnancy detected - most therapies contraindicated');
-                    }
-                    if (item.question.includes('cancer') && item.response.includes('active')) {
-                        contraindicationWarnings.push('Active cancer treatment - requires oncologist clearance');
-                    }
-                });
-                
-                if (contraindicationWarnings.length > 0) {
-                    await this.addMessage(`⚠️ Important contraindications identified:`, 'lily');
-                    await this.delay(1500);
-                    for (const warning of contraindicationWarnings) {
-                        await this.addMessage(`• ${warning}`, 'lily');
-                        await this.delay(1000);
-                    }
-                    await this.addMessage(`These will be noted in the final report. Medical clearance may be required.`, 'lily');
-                    await this.delay(2500);
-                }
-                
-                await this.startGeneralAssessment();
-            }
-            
-            async startGeneralAssessment() {
-                await this.addMessage(`Thank you for that important information, ${this.sessionData.practitionerName}.`, 'lily');
-                await this.delay(2000);
-                await this.addMessage(`I will now begin the comprehensive assessment for ${this.sessionData.patientName}.`, 'lily');
-                await this.delay(2500);
-                await this.addMessage("I'll ask 20 general health questions first. Please answer each one honestly based on the patient's current condition.", 'lily');
-                await this.delay(2000);
-                
-                // Load questions from database
-                const questions = await this.questionFlow.loadGeneralQuestions();
-                if (questions.length > 0) {
-                    this.currentQuestionIndex = 0;
-                    await this.askNextQuestion();
-                }
+                this.currentQuestionIndex = 0;
+                this.currentStep = 'assessment';
+                await this.askNextQuestion();
             }
             
             async askNextQuestion() {
-                const questions = this.questionFlow.currentQuestions;
+                const questions = this.initialQuestions;
                 if (this.currentQuestionIndex < questions.length) {
                     const question = questions[this.currentQuestionIndex];
                     const questionNumber = this.currentQuestionIndex + 1;
+                    const totalQuestions = questions.length;
                     
-                    const progressPercentage = (questionNumber / 20) * 100;
+                    const progressPercentage = (questionNumber / totalQuestions) * 100;
+                    
                     const progressHtml = `
                         <div class="question-progress">
                             <div class="question-progress-bar" style="width: ${progressPercentage}%"></div>
                         </div>
-                        Question ${questionNumber} of 20: ${question.question_text}
+                        Question ${questionNumber} of ${totalQuestions}: ${question.text}
                     `;
                     
-                    await this.addMessage(progressHtml, 'lily', Object.values(question.options));
-                    this.currentStep = 'answering_questions';
+                    const options = question.options.map(opt => opt.text);
+                    await this.addMessage(progressHtml, 'lily', options);
                 } else {
-                    await this.completeGeneralAssessment();
+                    await this.completeInitialAssessment();
                 }
             }
             
-            async handleQuestionResponse(response) {
-                const question = this.questionFlow.currentQuestions[this.currentQuestionIndex];
+            async handleAssessmentResponse(response) {
+                const question = this.initialQuestions[this.currentQuestionIndex];
                 
-                // Find the correct option key by matching the response text
-                let optionKey = null;
-                for (const [key, value] of Object.entries(question.options)) {
-                    if (value === response) {
-                        optionKey = key;
-                        break;
-                    }
+                // Find the selected option
+                let selectedOption = question.options.find(opt => opt.text === response.text || opt.text === response);
+                if (!selectedOption && typeof response === 'object') {
+                    selectedOption = response;
                 }
                 
-                if (!optionKey) {
-                    console.error('Could not match response to option');
-                    optionKey = 'c'; // Default to middle option
+                // Store response with weighted score
+                this.responses.push({
+                    question: question.text,
+                    response: selectedOption.text,
+                    domain: question.domain,
+                    score: selectedOption.score,
+                    weightedScore: selectedOption.score * question.weight
+                });
+                
+                // Update domain scores
+                if (!this.domainScores[question.domain]) {
+                    this.domainScores[question.domain] = {
+                        totalScore: 0,
+                        totalWeight: 0,
+                        responses: 0
+                    };
                 }
                 
-                // Fixed: Save response with proper structure
-                await this.questionFlow.saveResponse(
-                    this.sessionId,
-                    question.id,
-                    optionKey,
-                    response  // This is the response_text that was missing
-                );
+                this.domainScores[question.domain].totalScore += selectedOption.score * question.weight;
+                this.domainScores[question.domain].totalWeight += question.weight;
+                this.domainScores[question.domain].responses++;
                 
                 this.currentQuestionIndex++;
                 await this.askNextQuestion();
             }
             
-            async completeGeneralAssessment() {
-                await this.addMessage("Thank you for completing the initial assessment. Let me carefully analyse these responses...", 'lily');
-                await this.showProcessing(4000);
+            async completeInitialAssessment() {
+                await this.addMessage("Initial assessment complete! Let me analyse these responses...", 'lily');
                 
-                // Calculate scores
-                this.questionFlow.calculateCategoryScores();
-                const scores = this.questionFlow.categoryScores;
+                const processingMsg = await this.addMessage('', 'processing');
+                await this.delay(3000);
+                processingMsg.remove();
                 
-                // Provide detailed interpretation
-                let interpretation = `Based on my analysis of ${this.sessionData.patientName}'s responses:\n\n`;
+                // Calculate final domain scores
+                const finalScores = {};
+                for (const [domain, data] of Object.entries(this.domainScores)) {
+                    finalScores[domain] = Math.round(data.totalScore / data.totalWeight);
+                }
                 
-                Object.entries(scores).forEach(([category, score]) => {
-                    let status = '';
-                    if (score >= 80) status = 'Excellent condition';
-                    else if (score >= 60) status = 'Good, minor attention needed';
-                    else if (score >= 40) status = 'Moderate, requires attention';
-                    else status = 'Poor, immediate attention required';
+                // Sort domains by score (highest concern first)
+                const sortedDomains = Object.entries(finalScores)
+                    .sort((a, b) => b[1] - a[1])
+                    .filter(([domain, score]) => score > 30); // Only consider domains with significant issues
+                
+                // Generate targeted questions based on top concerns
+                await this.generateTargetedQuestions(sortedDomains.slice(0, 3));
+                
+                // Display initial findings
+                let findingsMessage = `Initial Assessment Findings for ${this.sessionData.patientName}:\n\n`;
+                
+                for (const [domain, score] of Object.entries(finalScores)) {
+                    const status = score < 30 ? '✅ Excellent' : 
+                                 score < 50 ? '🟡 Good' : 
+                                 score < 70 ? '🟠 Needs attention' : '🔴 Significant concern';
+                    findingsMessage += `${this.formatDomain(domain)}: ${status} (${100-score}% wellness)\n`;
+                }
+                
+                await this.addMessage(findingsMessage, 'lily');
+                await this.delay(2500);
+                
+                if (this.targetedQuestions.length > 0) {
+                    await this.addMessage(`Based on these findings, I need to ask ${this.targetedQuestions.length} targeted questions to refine my therapy recommendations.`, 'lily');
+                    await this.delay(2000);
                     
-                    interpretation += `• ${this.formatCategoryName(category)}: ${score}% - ${status}\n`;
-                });
-                
-                interpretation += `\nOverall Health Score: ${this.questionFlow.totalScore}%`;
-                
-                await this.addMessage(interpretation, 'lily');
-                await this.delay(3500);
-                
-                // Provide detailed explanation
-                await this.addMessage(`This initial assessment gives us a baseline understanding of ${this.sessionData.patientName}'s health status across multiple dimensions.`, 'lily');
-                await this.delay(2500);
-                
-                await this.proceedToPredictiveQuestions();
+                    this.currentQuestionIndex = 0;
+                    this.currentStep = 'targeted';
+                    await this.askTargetedQuestion();
+                } else {
+                    await this.generateFinalReport();
+                }
             }
             
-            formatCategoryName(category) {
-                const names = {
-                    physical: 'Physical Health',
-                    mental: 'Mental Health',
-                    lifestyle: 'Lifestyle Factors',
-                    environment: 'Environmental Health',
-                    history: 'Medical History'
-                };
-                return names[category] || category;
+            async generateTargetedQuestions(topDomains) {
+                this.targetedQuestions = [];
+                
+                for (const [domain, score] of topDomains) {
+                    if (domain === 'sleep' && score > 50) {
+                        this.targetedQuestions.push(
+                            {
+                                text: 'What is the main sleep challenge?',
+                                domain: 'sleep',
+                                weight: 1.2,
+                                options: [
+                                    { text: 'Falling asleep', score: 100 },
+                                    { text: 'Staying asleep', score: 80 },
+                                    { text: 'Early waking', score: 60 },
+                                    { text: 'Non-restorative sleep', score: 70 }
+                                ]
+                            },
+                            {
+                                text: 'Are there contributing factors to sleep issues?',
+                                domain: 'sleep',
+                                weight: 0.8,
+                                options: [
+                                    { text: 'Stress/anxiety', score: 90 },
+                                    { text: 'Physical discomfort', score: 70 },
+                                    { text: 'Environmental factors', score: 50 },
+                                    { text: 'No clear cause', score: 60 }
+                                ]
+                            }
+                        );
+                    }
+                    
+                    if (domain === 'stress' && score > 50) {
+                        this.targetedQuestions.push(
+                            {
+                                text: 'What is the primary source of stress?',
+                                domain: 'stress',
+                                weight: 1.2,
+                                options: [
+                                    { text: 'Work/career', score: 80 },
+                                    { text: 'Personal relationships', score: 70 },
+                                    { text: 'Health concerns', score: 90 },
+                                    { text: 'Financial pressures', score: 75 }
+                                ]
+                            },
+                            {
+                                text: 'How is stress affecting daily life?',
+                                domain: 'stress',
+                                weight: 1.0,
+                                options: [
+                                    { text: 'Severely limiting activities', score: 100 },
+                                    { text: 'Moderately affecting function', score: 70 },
+                                    { text: 'Mild interference', score: 40 },
+                                    { text: 'Minimal impact', score: 20 }
+                                ]
+                            }
+                        );
+                    }
+                    
+                    if (domain === 'joint' && score > 50) {
+                        this.targetedQuestions.push(
+                            {
+                                text: 'Which joints are most affected?',
+                                domain: 'joint',
+                                weight: 1.0,
+                                options: [
+                                    { text: 'Large joints (knees, hips)', score: 90 },
+                                    { text: 'Small joints (fingers, toes)', score: 80 },
+                                    { text: 'Spine', score: 85 },
+                                    { text: 'Multiple areas', score: 100 }
+                                ]
+                            }
+                        );
+                    }
+                }
             }
             
-            async proceedToPredictiveQuestions() {
-                await this.addMessage("Now I will generate personalised follow-up questions based on the initial assessment...", 'lily');
-                await this.showProcessing(3500);
-                
-                // Initialize AI service
-                const aiService = new LilyAIService();
-                const predictiveQuestions = await aiService.generatePredictiveQuestions(
-                    this.sessionData,
-                    this.questionFlow.categoryScores
-                );
-                
-                this.predictiveQuestions = predictiveQuestions;
-                this.currentQuestionIndex = 0;
-                
-                await this.addMessage(`${this.sessionData.practitionerName}, I've prepared 20 targeted questions specifically for ${this.sessionData.patientName} based on their initial responses.`, 'lily');
-                await this.delay(2500);
-                await this.addMessage(`These questions will help me determine the most suitable therapy protocols for their specific needs.`, 'lily');
-                await this.delay(2500);
-                
-                this.currentStep = 'answering_predictive';
-                await this.askPredictiveQuestion();
-            }
-            
-            async askPredictiveQuestion() {
-                if (this.currentQuestionIndex < this.predictiveQuestions.length) {
-                    const question = this.predictiveQuestions[this.currentQuestionIndex];
+            async askTargetedQuestion() {
+                if (this.currentQuestionIndex < this.targetedQuestions.length) {
+                    const question = this.targetedQuestions[this.currentQuestionIndex];
                     const questionNumber = this.currentQuestionIndex + 1;
                     
-                    const progressPercentage = (questionNumber / 20) * 100;
+                    const progressPercentage = (questionNumber / this.targetedQuestions.length) * 100;
+                    
                     const progressHtml = `
                         <div class="question-progress">
                             <div class="question-progress-bar" style="width: ${progressPercentage}%"></div>
                         </div>
-                        Targeted Question ${questionNumber} of 20: ${question.question}
+                        Targeted Question ${questionNumber} of ${this.targetedQuestions.length}: ${question.text}
                     `;
                     
-                    await this.addMessage(progressHtml, 'lily', Object.values(question.options));
+                    const options = question.options.map(opt => opt.text);
+                    await this.addMessage(progressHtml, 'lily', options);
                 } else {
-                    await this.completePredictiveAssessment();
+                    await this.generateFinalReport();
                 }
             }
             
-            async handlePredictiveResponse(response) {
-                const question = this.predictiveQuestions[this.currentQuestionIndex];
-                const optionKey = Object.keys(question.options).find(key => 
-                    question.options[key] === response
-                );
+            async handleTargetedResponse(response) {
+                const question = this.targetedQuestions[this.currentQuestionIndex];
                 
-                this.predictiveResponses.push({
-                    question: question.question,
-                    response: response,
-                    optionKey: optionKey,
-                    category: question.category,
-                    focus_area: question.focus_area
-                });
+                let selectedOption = question.options.find(opt => opt.text === response.text || opt.text === response);
+                if (!selectedOption && typeof response === 'object') {
+                    selectedOption = response;
+                }
+                
+                // Update domain scores with targeted responses
+                this.domainScores[question.domain].totalScore += selectedOption.score * question.weight;
+                this.domainScores[question.domain].totalWeight += question.weight;
                 
                 this.currentQuestionIndex++;
-                await this.askPredictiveQuestion();
-            }
-            
-            async completePredictiveAssessment() {
-                await this.addMessage("Excellent! I've completed the comprehensive assessment.", 'lily');
-                await this.delay(2000);
-                await this.addMessage("Now I'll analyse all 40 responses to generate personalised therapy recommendations...", 'lily');
-                await this.showProcessing(5000);
-                
-                // Generate therapy recommendations
-                await this.questionFlow.generateTherapyRecommendations();
-                const recommendations = this.questionFlow.recommendedTherapies;
-                
-                if (recommendations.length > 0) {
-                    await this.addMessage(`Based on my comprehensive analysis, I recommend the following therapy protocols for ${this.sessionData.patientName}:`, 'lily');
-                    await this.delay(2500);
-                    
-                    for (const therapy of recommendations) {
-                        const priorityEmoji = therapy.priority === 'essential' ? '🔴' : '🟡';
-                        await this.addMessage(`${priorityEmoji} ${therapy.category}
-Priority: ${therapy.priority.toUpperCase()}
-Reason: ${therapy.reason}
-Protocol Codes: ${therapy.codes.join(', ')}
-Recommended Frequency: 2-3 times per week
-Initial Course Duration: 6-8 weeks`, 'lily');
-                        await this.delay(2000);
-                    }
-                }
-                
-                await this.generateFinalReport();
+                await this.askTargetedQuestion();
             }
             
             async generateFinalReport() {
-                await this.addMessage("I'm now generating the comprehensive PDF report with all findings and recommendations...", 'lily');
-                await this.showProcessing(4000);
+                await this.addMessage("Assessment complete! Generating your comprehensive wellness report...", 'lily');
                 
-                // Initialize PDF generator
-                const pdfGenerator = new LilyPDFGenerator();
+                const processingMsg = await this.addMessage('', 'processing');
+                await this.delay(4000);
+                processingMsg.remove();
                 
-                // Prepare report data
-                const reportData = {
-                    sessionId: this.sessionId,
-                    practitionerName: this.sessionData.practitionerName,
-                    patientName: this.sessionData.patientName,
-                    patientAge: this.sessionData.patientAge,
-                    patientGender: this.sessionData.patientGender,
-                    clinicName: this.sessionData.clinicName || 'Celloxen Health Clinic',
-                    clinicAddress: this.sessionData.clinicAddress || '123 Health Street, London, UK',
-                    clinicPhone: this.sessionData.clinicPhone || '+44 20 1234 5678',
-                    clinicEmail: this.sessionData.clinicEmail || 'health@celloxen.com'
-                };
+                // Recalculate final scores
+                const finalScores = {};
+                for (const [domain, data] of Object.entries(this.domainScores)) {
+                    finalScores[domain] = Math.round(data.totalScore / data.totalWeight);
+                }
                 
-                const assessmentResults = {
-                    categoryScores: this.questionFlow.categoryScores,
-                    totalScore: this.questionFlow.totalScore,
-                    contraindications: this.contraindicationResponses
-                };
+                // Generate therapy recommendations
+                const recommendations = [];
+                for (const [domain, score] of Object.entries(finalScores)) {
+                    if (score > 40) { // Recommend therapy for domains with issues
+                        const therapies = Object.values(this.therapyDatabase)
+                            .filter(t => t.domain === domain);
+                        
+                        if (therapies.length > 0) {
+                            recommendations.push({
+                                therapy: therapies[0],
+                                priority: score > 70 ? 'PRIMARY' : score > 50 ? 'SECONDARY' : 'SUPPORTIVE',
+                                score: score
+                            });
+                        }
+                    }
+                }
                 
-                // Generate HTML report
-                const reportHTML = await pdfGenerator.generateReport(
-                    reportData,
-                    assessmentResults,
-                    this.questionFlow.recommendedTherapies
-                );
+                // Sort recommendations by priority
+                recommendations.sort((a, b) => b.score - a.score);
                 
-                // Store report for printing
-                this.currentReport = reportHTML;
+                // Display comprehensive report
+                const reportHtml = `
+                    <div class="report-section">
+                        <div class="report-header">
+                            <h2>Comprehensive Wellness Assessment Report</h2>
+                            <p>Patient: ${this.sessionData.patientName} | Age: ${this.sessionData.patientAge} | Gender: ${this.sessionData.patientGender}</p>
+                            <p>Assessment Date: ${new Date().toLocaleDateString()}</p>
+                        </div>
+                    </div>
+                `;
                 
-                // Save report to database
-                await this.saveReportToDatabase(reportHTML);
+                await this.addMessage(reportHtml, 'lily');
                 
-                await this.addMessage(`✅ Assessment Complete!
-    
-The comprehensive health assessment for ${this.sessionData.patientName} has been completed successfully.
-
-📊 Overall Health Score: ${this.questionFlow.totalScore}%
-
-📄 The detailed PDF report has been generated and saved.
-
-${this.contraindicationResponses.length > 0 ? '⚠️ Important: Contraindications have been identified. Please review the report carefully.' : '✅ No major contraindications identified.'}
-
-Would you like to:`, 'lily', [
-                    'Download PDF Report',
-                    'Email Report',
+                // Display recommended therapies with full details
+                if (recommendations.length > 0) {
+                    await this.addMessage(`Based on comprehensive analysis, I recommend the following bioelectronic wellness therapies:`, 'lily');
+                    
+                    for (const rec of recommendations.slice(0, 3)) { // Top 3 recommendations
+                        const therapy = rec.therapy;
+                        
+                        const therapyHtml = `
+                            <div class="therapy-recommendation">
+                                <div class="therapy-title">
+                                    ${rec.priority} RECOMMENDATION: ${therapy.name}
+                                    <span class="therapy-code">Code ${therapy.code}</span>
+                                </div>
+                                
+                                <div class="therapy-details">
+                                    <strong>What is This Therapy?</strong><br>
+                                    ${therapy.description}<br><br>
+                                    
+                                    <strong>How Does It Work?</strong><br>
+                                    ${therapy.howItWorks}<br><br>
+                                    
+                                    <strong>Expected Benefits:</strong><br>
+                                    • Immediate: ${therapy.benefits.immediate.join(', ')}<br>
+                                    • Short-term (2-4 weeks): ${therapy.benefits.shortTerm.join(', ')}<br>
+                                    • Medium-term (5-6 weeks): ${therapy.benefits.mediumTerm.join(', ')}<br>
+                                    • Long-term (7-8+ weeks): ${therapy.benefits.longTerm.join(', ')}<br><br>
+                                    
+                                    <strong>Treatment Plan:</strong><br>
+                                    • Duration: ${therapy.duration} per session<br>
+                                    • Frequency: ${therapy.frequency}<br>
+                                    • Full Course: ${therapy.course}<br>
+                                    • Total Sessions: ${therapy.sessions}
+                                </div>
+                                
+                                <div class="supplement-box">
+                                    <div class="supplement-title">💊 Recommended Nutritional Support:</div>
+                                    ${therapy.supplements.map(s => 
+                                        `• <strong>${s.name}</strong> (${s.dose}) - ${s.benefit}`
+                                    ).join('<br>')}
+                                </div>
+                            </div>
+                        `;
+                        
+                        await this.addMessage(therapyHtml, 'lily');
+                        await this.delay(1500);
+                    }
+                }
+                
+                await this.addMessage("Would you like to:", 'lily', [
+                    'Download Report',
+                    'Email Report',  
                     'Start New Assessment',
                     'End Session'
                 ]);
                 
-                this.currentStep = 'report_options';
+                this.currentStep = 'complete';
             }
             
-            async saveReportToDatabase(reportHTML) {
-                try {
-                    const { error } = await this.supabase
-                        .from('lily_assessment_sessions')
-                        .update({
-                            practitioner_name: this.sessionData.practitionerName,
-                            patient_name: this.sessionData.patientName,
-                            patient_age: this.sessionData.patientAge,
-                            patient_gender: this.sessionData.patientGender,
-                            assessment_categories: this.selectedCategories,
-                            general_responses: Object.fromEntries(this.questionFlow.responses),
-                            predictive_responses: this.predictiveResponses,
-                            contraindications_found: this.contraindicationResponses,
-                            category_scores: this.questionFlow.categoryScores,
-                            total_score: this.questionFlow.totalScore,
-                            recommended_therapies: this.questionFlow.recommendedTherapies,
-                            final_report: reportHTML,
-                            session_status: 'completed',
-                            completed_at: new Date().toISOString(),
-                            assessment_completed: true
-                        })
-                        .eq('session_id', this.sessionId);
-                        
-                    if (error) throw error;
-                } catch (error) {
-                    console.error('Error saving report:', error);
-                }
-            }
-            
-            async handleReportOption(option) {
+            async handleCompletionOptions(option) {
                 switch(option) {
-                    case 'Download PDF Report':
-                        await this.downloadReport();
+                    case 'Download Report':
+                        await this.addMessage("To download the report, please print this page using your browser's print function (Ctrl+P or Cmd+P) and save as PDF.", 'lily');
+                        window.print();
                         break;
                     case 'Email Report':
-                        await this.emailReport();
+                        await this.addMessage("Email functionality will be available soon. For now, please use the download option.", 'lily');
                         break;
                     case 'Start New Assessment':
-                        await this.startNewAssessment();
+                        location.reload();
                         break;
                     case 'End Session':
-                        await this.endSession();
+                        await this.addMessage(`Thank you for using the Celloxen Wellness Assessment System. The recommendations provided will help ${this.sessionData.patientName} on their wellness journey. Have a wonderful day!`, 'lily');
+                        this.disableInput();
                         break;
                 }
             }
             
-            async downloadReport() {
-                await this.addMessage("Preparing your PDF download...", 'lily');
-                
-                // Create a new window with the report content for printing
-                const reportWindow = window.open('', '_blank');
-                reportWindow.document.write(this.currentReport);
-                reportWindow.document.close();
-                
-                // Trigger print dialog
-                setTimeout(() => {
-                    reportWindow.print();
-                }, 500);
-                
-                await this.addMessage("The report should now be available for printing or saving as PDF. Use your browser's print function to save as PDF.", 'lily');
-            }
-            
-            async emailReport() {
-                await this.addMessage("Please provide the email address where you'd like the report sent:", 'lily');
-                this.currentStep = 'email_input';
-            }
-            
-            async handleEmailInput(email) {
-                if (!email.includes('@')) {
-                    await this.addMessage("Please provide a valid email address.", 'lily');
-                    return;
-                }
-                
-                await this.addMessage(`Report will be sent to ${email}. (Note: Email integration pending implementation)`, 'lily');
-                this.currentStep = 'report_options';
-            }
-            
-            async startNewAssessment() {
-                await this.addMessage("Starting a new assessment. Please refresh the page to begin.", 'lily');
-                setTimeout(() => location.reload(), 2000);
-            }
-            
-            async endSession() {
-                await this.addMessage(`Thank you for using the Celloxen Health Assessment System, ${this.sessionData.practitionerName}.`, 'lily');
-                await this.delay(2000);
-                await this.addMessage(`I hope this assessment proves valuable for ${this.sessionData.patientName}'s health journey.`, 'lily');
-                await this.delay(2000);
-                await this.addMessage("Have a wonderful day! Goodbye.", 'lily');
-                this.disableInput();
-            }
-            
-            async handleGeneralResponse(input) {
-                await this.addMessage("Thank you for that information. I'm processing your response and will continue with the assessment shortly.", 'lily');
+            formatDomain(domain) {
+                const formats = {
+                    sleep: 'Sleep Quality',
+                    stress: 'Stress Management',
+                    cardiovascular: 'Cardiovascular Health',
+                    joint: 'Joint Health',
+                    digestive: 'Digestive Wellness',
+                    kidney: 'Kidney Function',
+                    energy: 'Energy Levels',
+                    metabolic: 'Metabolic Health'
+                };
+                return formats[domain] || domain;
             }
             
             delay(ms) {
@@ -1278,10 +1412,6 @@ Would you like to:`, 'lily', [
                 lily.processUserInput(message);
                 input.value = '';
             }
-        }
-        
-        function selectChoice(choice, index) {
-            lily.selectChoice(choice, index);
         }
         
         document.getElementById('userInput').addEventListener('keypress', function(e) {
