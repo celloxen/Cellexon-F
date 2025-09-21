@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Treatment Schedule - Celloxen Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+            color: white;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        
+        .header-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+        }
+        
+        .header p {
+            color: #cbd5e1;
+            margin-top: 5px;
+            font-size: 14px;
+        }
+        
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        
+        .patient-info-bar {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .patient-details {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+        
+        .patient-name {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .info-badge {
+            background: #f0f9ff;
+            color: #1e3a8a;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .view-controls {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .view-btn {
+            padding: 8px 16px;
+            border: 1px solid #e2e8f0;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .view-btn:hover {
+            background: #f8fafc;
+        }
+        
+        .view-btn.active {
+            background: linear-gradient(135deg, #1e3a8a, #1e40af);
+            color: white;
+            border-color: #1e3a8a;
+        }
+        
+        .calendar-header {
+            background: white;
+            border-radius: 12px 12px 0 0;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .month-nav {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .nav-btn {
+            background: #f1f5f9;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-btn:hover {
+            background: #e2e8f0;
+        }
+        
+        .current-month {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .legend {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: #64748b;
+        }
+        
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+        }
+        
+        .calendar-grid {
+            background: white;
+            border-radius: 0 0 12px 12px;
+            padding: 0 20px 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        .weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            border-bottom: 2px solid #f1f5f9;
+            padding: 15px 0;
+        }
+        
+        .weekday {
+            text-align: center;
+            font-size: 13px;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+        }
+        
+        .days-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1px;
+            background: #e2e8f0;
+            margin-top: 1px;
+        }
+        
+        .calendar-day {
+            background: white;
+            min-height: 100px;
+            padding: 8px;
+            position: relative;
+        }
+        
+        .calendar-day.other-month {
+            background: #f8fafc;
+        }
+        
+        .calendar-day.today {
+            background: #fef3c7;
+        }
+        
+        .day-number {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 5px;
+        }
+        
+        .other-month .day-number {
+            color: #cbd5e1;
+        }
+        
+        .session-item {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            margin: 2px 0;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .session-item:hover {
+            transform: translateX(2px);
+        }
+        
+        .session-item.completed {
+            background: linear-gradient(135deg, #cbd5e1, #94a3b8);
+            text-decoration: line-through;
+        }
+        
+        .session-item.cancelled {
+            background: linear-gradient(135deg, #fee2e2, #fecaca);
+            color: #991b1b;
+        }
+        
+        /* List View */
+        .list-view {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            display: none;
+        }
+        
+        .list-view.active {
+            display: block;
+        }
+        
+        .session-list-item {
+            border-bottom: 1px solid #f1f5f9;
+            padding: 20px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .session-list-item:last-child {
+            border-bottom: none;
+        }
+        
+        .session-info {
+            flex: 1;
+        }
+        
+        .session-date {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 5px;
+        }
+        
+        .session-details {
+            font-size: 14px;
+            color: #64748b;
+        }
+        
+        .session-status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .status-scheduled {
+            background: #dbeafe;
+            color: #1e3a8a;
+        }
+        
+        .status-completed {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .status-today {
+            background: #fed7aa;
+            color: #92400e;
+        }
+        
+        .status-cancelled {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        /* Timeline View */
+        .timeline-view {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            display: none;
+        }
+        
+        .timeline-view.active {
+            display: block;
+        }
+        
+        .week-section {
+            margin-bottom: 30px;
+        }
+        
+        .week-header {
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .week-sessions {
+            padding-left: 30px;
+            border-left: 3px solid #e2e8f0;
+            position: relative;
+        }
+        
+        .timeline-session {
+            position: relative;
+            padding: 15px;
+            margin-bottom: 20px;
+            background: #f8fafc;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .timeline-session::before {
+            content: '';
+            position: absolute;
+            left: -34px;
+            top: 20px;
+            width: 12px;
+            height: 12px;
+            background: #10b981;
+            border-radius: 50%;
+            border: 3px solid white;
+        }
+        
+        .timeline-session.completed::before {
+            background: #cbd5e1;
+        }
+        
+        .timeline-session:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        
+        /* Summary Stats */
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin: 25px 0;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1e3a8a;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #64748b;
+            text-transform: uppercase;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+        
+        .btn-secondary {
+            background: #f1f5f9;
+            color: #475569;
+        }
+        
+        .action-buttons {
+            text-align: center;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-container">
+            <div>
+                <h1>Treatment Schedule</h1>
+                <p>Complete therapy session calendar</p>
+            </div>
+            <a href="clinic-dashboard.html" class="back-btn">← Back to Dashboard</a>
+        </div>
+    </div>
+    
+    <div class="container">
+        <!-- Patient Info Bar -->
+        <div class="patient-info-bar">
+            <div class="patient-details">
+                <div class="patient-name" id="patientName">Loading...</div>
+                <span class="info-badge" id="planDuration">8-Week Plan</span>
+                <span class="info-badge" id="sessionsInfo">0/0 Sessions</span>
+            </div>
+            <div class="view-controls">
+                <button class="view-btn active" onclick="switchView('calendar')">Calendar</button>
+                <button class="view-btn" onclick="switchView('list')">List</button>
+                <button class="view-btn" onclick="switchView('timeline')">Timeline</button>
+            </div>
+        </div>
+        
+        <!-- Summary Statistics -->
+        <div class="summary-stats">
+            <div class="stat-card">
+                <div class="stat-value" id="totalSessions">0</div>
+                <div class="stat-label">Total Sessions</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="completedSessions">0</div>
+                <div class="stat-label">Completed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="upcomingSessions">0</div>
+                <div class="stat-label">Upcoming</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="weekProgress">0/8</div>
+                <div class="stat-label">Weeks Progress</div>
+            </div>
+        </div>
+        
+        <!-- Calendar View -->
+        <div id="calendarView">
+            <div class="calendar-header">
+                <div class="month-nav">
+                    <button class="nav-btn" onclick="changeMonth(-1)">←</button>
+                    <div class="current-month" id="currentMonth">January 2025</div>
+                    <button class="nav-btn" onclick="changeMonth(1)">→</button>
+                </div>
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #10b981;"></div>
+                        <span>Scheduled</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #cbd5e1;"></div>
+                        <span>Completed</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #fbbf24;"></div>
+                        <span>Today</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="calendar-grid">
+                <div class="weekdays">
+                    <div class="weekday">Sun</div>
+                    <div class="weekday">Mon</div>
+                    <div class="weekday">Tue</div>
+                    <div class="weekday">Wed</div>
+                    <div class="weekday">Thu</div>
+                    <div class="weekday">Fri</div>
+                    <div class="weekday">Sat</div>
+                </div>
+                <div class="days-grid" id="calendarDays">
+                    <!-- Calendar days will be generated here -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- List View -->
+        <div class="list-view" id="listView">
+            <h3 style="margin-bottom: 20px;">All Sessions</h3>
+            <div id="sessionsList">
+                <!-- Sessions list will be generated here -->
+            </div>
+        </div>
+        
+        <!-- Timeline View -->
+        <div class="timeline-view" id="timelineView">
+            <h3 style="margin-bottom: 20px;">8-Week Treatment Timeline</h3>
+            <div id="timelineContent">
+                <!-- Timeline will be generated here -->
+            </div>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <button class="btn btn-primary" onclick="exportSchedule()">Export Schedule</button>
+            <button class="btn btn-secondary" onclick="printSchedule()">Print Schedule</button>
+            <button class="btn btn-secondary" onclick="backToProgress()">Back to Progress</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { supabase } from './supabase-config.js';
+        
+        let selectedPatient = null;
+        let treatmentPlan = null;
+        let allSessions = [];
+        let currentMonth = new Date();
+        let currentView = 'calendar';
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const patientId = urlParams.get('patient') || sessionStorage.getItem('currentPatientId');
+            
+            if (patientId) {
+                await loadPatientData(patientId);
+                await loadTreatmentPlan(patientId);
+                await loadCompletedSessions(patientId);
+                renderCalendar();
+                renderListView();
+                renderTimelineView();
+                updateStatistics();
+            } else {
+                alert('No patient selected');
+                window.location.href = 'clinic-dashboard.html';
+            }
+        });
+        
+        async function loadPatientData(patientId) {
+            try {
+                const { data, error } = await supabase
+                    .from('patients')
+                    .select('*')
+                    .eq('id', patientId)
+                    .single();
+                
+                if (error) throw error;
+                
+                selectedPatient = data;
+                document.getElementById('patientName').textContent = 
+                    `${data.first_name} ${data.last_name}`;
+                
+            } catch (error) {
+                console.error('Error loading patient:', error);
+            }
+        }
+        
+        async function loadTreatmentPlan(patientId) {
+            try {
+                const { data, error } = await supabase
+                    .from('treatment_plans')
+                    .select('*')
+                    .eq('patient_id', patientId)
+                    .eq('status', 'active')
+                    .order('created_at', { ascending: false })
+                    .limit(1)
+                    .single();
+                
+                if (data) {
+                    treatmentPlan = data;
+                    allSessions = data.schedule || generateSampleSessions();
+                } else {
+                    allSessions = generateSampleSessions();
+                }
+                
+            } catch (error) {
+                console.error('Error loading treatment plan:', error);
+                allSessions = generateSampleSessions();
+            }
+        }
+        
+        async function loadCompletedSessions(patientId) {
+            try {
+                const { data, error } = await supabase
+                    .from('therapy_sessions')
+                    .select('session_date, therapy_code, completed')
+                    .eq('patient_id', patientId)
+                    .eq('completed', true);
+                
+                if (data) {
+                    // Mark sessions as completed in our schedule
+                    data.forEach(session => {
+                        const matchingSession = allSessions.find(s => 
+                            s.date.split('T')[0] === session.session_date &&
+                            s.therapyCode === session.therapy_code
+                        );
+                        if (matchingSession) {
+                            matchingSession.completed = true;
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading completed sessions:', error);
+            }
+        }
+        
+        function generateSampleSessions() {
+            const sessions = [];
+            const startDate = new Date();
+            startDate.setDate(startDate.getDate() - 14); // Start 2 weeks ago
+            
+            for (let week = 0; week < 8; week++) {
+                for (let session = 0; session < 2; session++) {
+                    const sessionDate = new Date(startDate);
+                    sessionDate.setDate(startDate.getDate() + (week * 7) + (session * 3));
+                    
+                    sessions.push({
+                        date: sessionDate.toISOString(),
+                        time: session === 0 ? '10:00' : '14:00',
+                        therapy: session === 0 ? 'Detoxification Protocol' : 'Stress Relief Therapy',
+                        therapyCode: session === 0 ? '201' : '102',
+                        duration: '45 minutes',
+                        completed: sessionDate < new Date(new Date().setDate(new Date().getDate() - 7))
+                    });
+                }
+            }
+            
+            return sessions;
+        }
+        
+        function renderCalendar() {
+            const year = currentMonth.getFullYear();
+            const month = currentMonth.getMonth();
+            
+            // Update month display
+            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                              'July', 'August', 'September', 'October', 'November', 'December'];
+            document.getElementById('currentMonth').textContent = `${monthNames[month]} ${year}`;
+            
+            // Get first day of month and total days
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const totalDays = lastDay.getDate();
+            const startingDayOfWeek = firstDay.getDay();
+            
+            // Generate calendar days
+            let html = '';
+            const today = new Date().toDateString();
+            
+            // Add empty cells for days before month starts
+            for (let i = 0; i < startingDayOfWeek; i++) {
+                html += '<div class="calendar-day other-month"></div>';
+            }
+            
+            // Add days of the month
+            for (let day = 1; day <= totalDays; day++) {
+                const currentDate = new Date(year, month, day);
+                const dateStr = currentDate.toISOString().split('T')[0];
+                const isToday = currentDate.toDateString() === today;
+                
+                // Find sessions for this day
+                const daySessions = allSessions.filter(s => 
+                    s.date.split('T')[0] === dateStr
+                );
+                
+                let dayClass = 'calendar-day';
+                if (isToday) dayClass += ' today';
+                
+                html += `
+                    <div class="${dayClass}">
+                        <div class="day-number">${day}</div>
+                        ${daySessions.map(session => `
+                            <div class="session-item ${session.completed ? 'completed' : ''}" 
+                                 title="${session.therapy} at ${formatTime(session.time)}">
+                                ${formatTime(session.time)} - ${session.therapyCode}
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+            
+            // Add empty cells to complete the grid
+            const remainingCells = 42 - (startingDayOfWeek + totalDays);
+            for (let i = 0; i < remainingCells; i++) {
+                html += '<div class="calendar-day other-month"></div>';
+            }
+            
+            document.getElementById('calendarDays').innerHTML = html;
+        }
+        
+        function renderListView() {
+            const sortedSessions = [...allSessions].sort((a, b) => 
+                new Date(a.date) - new Date(b.date)
+            );
+            
+            const html = sortedSessions.map(session => {
+                const sessionDate = new Date(session.date);
+                const isToday = sessionDate.toDateString() === new Date().toDateString();
+                const isPast = sessionDate < new Date() && !isToday;
+                
+                let status = 'scheduled';
+                if (session.completed) status = 'completed';
+                else if (isToday) status = 'today';
+                else if (isPast) status = 'missed';
+                
+                return `
+                    <div class="session-list-item">
+                        <div class="session-info">
+                            <div class="session-date">
+                                ${sessionDate.toLocaleDateString('en-GB', { 
+                                    weekday: 'long', 
+                                    day: 'numeric', 
+                                    month: 'long', 
+                                    year: 'numeric' 
+                                })}
+                            </div>
+                            <div class="session-details">
+                                ${session.therapy} • ${formatTime(session.time)} • ${session.duration}
+                            </div>
+                        </div>
+                        <span class="session-status status-${status}">
+                            ${status}
+                        </span>
+                    </div>
+                `;
+            }).join('');
+            
+            document.getElementById('sessionsList').innerHTML = html;
+        }
+        
+        function renderTimelineView() {
+            // Group sessions by week
+            const weeks = {};
+            allSessions.forEach(session => {
+                const sessionDate = new Date(session.date);
+                const weekNumber = Math.ceil((sessionDate - new Date(allSessions[0].date)) / (7 * 24 * 60 * 60 * 1000)) + 1;
+                
+                if (!weeks[weekNumber]) {
+                    weeks[weekNumber] = [];
+                }
+                weeks[weekNumber].push(session);
+            });
+            
+            const html = Object.keys(weeks).map(weekNum => `
+                <div class="week-section">
+                    <div class="week-header">Week ${weekNum} of 8</div>
+                    <div class="week-sessions">
+                        ${weeks[weekNum].map(session => {
+                            const sessionDate = new Date(session.date);
+                            return `
+                                <div class="timeline-session ${session.completed ? 'completed' : ''}">
+                                    <strong>${sessionDate.toLocaleDateString('en-GB', { 
+                                        weekday: 'short', 
+                                        day: 'numeric', 
+                                        month: 'short' 
+                                    })}</strong> at ${formatTime(session.time)}<br>
+                                    <span style="color: #64748b;">${session.therapy}</span>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `).join('');
+            
+            document.getElementById('timelineContent').innerHTML = html;
+        }
+        
+        function updateStatistics() {
+            const total = allSessions.length;
+            const completed = allSessions.filter(s => s.completed).length;
+            const upcoming = allSessions.filter(s => 
+                !s.completed && new Date(s.date) >= new Date()
+            ).length;
+            
+            // Calculate current week
+            const startDate = allSessions[0] ? new Date(allSessions[0].date) : new Date();
+            const currentWeek = Math.min(8, Math.ceil((new Date() - startDate) / (7 * 24 * 60 * 60 * 1000)));
+            
+            document.getElementById('totalSessions').textContent = total;
+            document.getElementById('completedSessions').textContent = completed;
+            document.getElementById('upcomingSessions').textContent = upcoming;
+            document.getElementById('weekProgress').textContent = `${currentWeek}/8`;
+            document.getElementById('sessionsInfo').textContent = `${completed}/${total} Sessions`;
+        }
+        
+        function formatTime(time) {
+            if (!time) return '';
+            const [hours, minutes] = time.split(':');
+            const hour = parseInt(hours);
+            const ampm = hour >= 12 ? 'PM' : 'AM';
+            const displayHour = hour > 12 ? hour - 12 : hour || 12;
+            return `${displayHour}:${minutes || '00'} ${ampm}`;
+        }
+        
+        // View switching
+        window.switchView = function(view) {
+            currentView = view;
+            
+            // Update buttons
+            document.querySelectorAll('.view-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Show/hide views
+            document.getElementById('calendarView').style.display = view === 'calendar' ? 'block' : 'none';
+            document.getElementById('listView').classList.toggle('active', view === 'list');
+            document.getElementById('timelineView').classList.toggle('active', view === 'timeline');
+        };
+        
+        // Calendar navigation
+        window.changeMonth = function(direction) {
+            currentMonth.setMonth(currentMonth.getMonth() + direction);
+            renderCalendar();
+        };
+        
+        // Export functions
+        window.exportSchedule = function() {
+            // Generate CSV content
+            let csv = 'Date,Time,Therapy,Code,Duration,Status\n';
+            allSessions.forEach(session => {
+                const date = new Date(session.date).toLocaleDateString('en-GB');
+                const status = session.completed ? 'Completed' : 'Scheduled';
+                csv += `${date},${session.time},${session.therapy},${session.therapyCode},${session.duration},${status}\n`;
+            });
+            
+            // Download CSV
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `treatment-schedule-${selectedPatient.first_name}-${selectedPatient.last_name}.csv`;
+            a.click();
+        };
+        
+        window.printSchedule = function() {
+            window.print();
+        };
+        
+        window.backToProgress = function() {
+            window.location.href = `treatment-progress.html?patient=${selectedPatient.id}`;
+        };
+    </script>
+</body>
+</html>
