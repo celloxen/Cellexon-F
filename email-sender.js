@@ -9,6 +9,13 @@ async function sendReportEmail(patient, pdfBlob, reportType) {
             return false;
         }
 
+        // Check if we have supabase available
+        if (typeof window.supabase === 'undefined') {
+            // Try to get it from the module
+            const module = await import('./supabase-config.js');
+            window.supabase = module.supabase;
+        }
+
         // Convert PDF blob to base64
         const reader = new FileReader();
         const base64Promise = new Promise((resolve) => {
@@ -21,7 +28,7 @@ async function sendReportEmail(patient, pdfBlob, reportType) {
         const pdfBase64 = await base64Promise;
 
         // Get current session token
-        const session = await supabase.auth.getSession();
+        const session = await window.supabase.auth.getSession();
         const token = session.data.session?.access_token;
 
         if (!token) {
@@ -80,9 +87,9 @@ async function sendReportEmail(patient, pdfBlob, reportType) {
         const result = await response.json();
 
         if (response.ok && result.success) {
-            // Log successful email to database
+            // Log successful email to database (optional - ignore errors)
             try {
-                await supabase.from('email_logs').insert({
+                await window.supabase.from('email_logs').insert({
                     patient_id: patient.id,
                     email_type: 'report',
                     recipient_email: patient.email,
@@ -96,7 +103,6 @@ async function sendReportEmail(patient, pdfBlob, reportType) {
                 });
             } catch (logError) {
                 console.error('Failed to log email:', logError);
-                // Don't fail the whole operation if logging fails
             }
 
             return true;
