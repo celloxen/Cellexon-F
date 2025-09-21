@@ -148,6 +148,16 @@
             border-color: #10b981;
         }
         
+        .calendar-day.other-month {
+            background: #f9fafb;
+            opacity: 0.5;
+        }
+        
+        .calendar-day.today {
+            background: #eff6ff;
+            border-color: #3b82f6;
+        }
+        
         .day-number {
             font-weight: 600;
             color: #374151;
@@ -347,6 +357,13 @@
             background: #e5e7eb;
             color: #374151;
         }
+        
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #9ca3af;
+        }
     </style>
 </head>
 <body>
@@ -361,9 +378,9 @@
         <!-- View Controls -->
         <div class="view-controls">
             <div class="view-tabs">
-                <button class="view-tab active" onclick="switchView('list')">List View</button>
-                <button class="view-tab" onclick="switchView('calendar')">Calendar View</button>
-                <button class="view-tab" onclick="switchView('day')">Day View</button>
+                <button class="view-tab active" id="listTab" onclick="switchView('list')">List View</button>
+                <button class="view-tab" id="calendarTab" onclick="switchView('calendar')">Calendar View</button>
+                <button class="view-tab" id="dayTab" onclick="switchView('day')">Day View</button>
             </div>
             
             <div class="date-controls">
@@ -379,7 +396,7 @@
 
         <!-- List View -->
         <div id="listView" class="appointments-list">
-            <h3 style="margin-bottom: 20px;">Today's Appointments</h3>
+            <h3 style="margin-bottom: 20px;">Appointments</h3>
             <div id="appointmentsList">
                 <!-- Dynamic appointments -->
             </div>
@@ -398,6 +415,14 @@
             </div>
             <div class="calendar-grid" id="calendarGrid">
                 <!-- Dynamic calendar -->
+            </div>
+        </div>
+
+        <!-- Day View -->
+        <div id="dayView" class="appointments-list" style="display: none;">
+            <h3 style="margin-bottom: 20px;">Day Schedule</h3>
+            <div id="daySchedule">
+                <!-- Dynamic day schedule -->
             </div>
         </div>
     </div>
@@ -445,7 +470,7 @@
                 
                 <div class="form-group">
                     <label class="form-label">Therapy Code (if treatment)</label>
-                    <input type="text" class="form-input" id="therapyCode" placeholder="e.g., BAFE-01">
+                    <input type="text" class="form-input" id="therapyCode" placeholder="e.g., 101, 102">
                 </div>
                 
                 <div class="form-group">
@@ -468,7 +493,16 @@
         let currentView = 'list';
         let currentDate = new Date();
         let appointments = [];
+        let allAppointments = []; // For calendar view
         let patients = [];
+        
+        // Make functions globally accessible
+        window.switchView = switchView;
+        window.navigateDate = navigateDate;
+        window.openNewAppointment = openNewAppointment;
+        window.editAppointment = editAppointment;
+        window.cancelAppointment = cancelAppointment;
+        window.closeModal = closeModal;
         
         document.addEventListener('DOMContentLoaded', async function() {
             await loadClinicId();
@@ -482,7 +516,7 @@
             const authData = localStorage.getItem('celloxen_auth');
             if (authData) {
                 const auth = JSON.parse(authData);
-                currentClinicId = auth.clinicId;
+                currentClinicId = auth.clinicId || sessionStorage.getItem('currentClinicId');
             }
         }
         
@@ -522,27 +556,43 @@
             if (!currentClinicId) return;
             
             try {
-                const startDate = new Date(currentDate);
-                startDate.setHours(0, 0, 0, 0);
-                
-                const endDate = new Date(currentDate);
-                endDate.setHours(23, 59, 59, 999);
-                
-                const { data, error } = await supabase
-                    .from('appointments')
-                    .select(`
-                        *,
-                        patients(first_name, last_name, patient_id)
-                    `)
-                    .eq('clinic_id', currentClinicId)
-                    .gte('appointment_date', startDate.toISOString().split('T')[0])
-                    .lte('appointment_date', endDate.toISOString().split('T')[0])
-                    .order('appointment_time');
-                
-                if (error) throw error;
-                
-                appointments = data || [];
-                displayAppointments();
+                if (currentView === 'calendar') {
+                    // Load month's appointments for calendar
+                    const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+                    const endOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+                    
+                    const { data, error } = await supabase
+                        .from('appointments')
+                        .select(`
+                            *,
+                            patients(first_name, last_name, patient_id)
+                        `)
+                        .eq('clinic_id', currentClinicId)
+                        .gte('appointment_date', startOfMonth.toISOString().split('T')[0])
+                        .lte('appointment_date', endOfMonth.toISOString().split('T')[0])
+                        .order('appointment_time');
+                    
+                    if (error) throw error;
+                    allAppointments = data || [];
+                    displayCalendarView();
+                } else {
+                    // Load single day appointments
+                    const dateStr = currentDate.toISOString().split('T')[0];
+                    
+                    const { data, error } = await supabase
+                        .from('appointments')
+                        .select(`
+                            *,
+                            patients(first_name, last_name, patient_id)
+                        `)
+                        .eq('clinic_id', currentClinicId)
+                        .eq('appointment_date', dateStr)
+                        .order('appointment_time');
+                    
+                    if (error) throw error;
+                    appointments = data || [];
+                    displayAppointments();
+                }
                 
             } catch (error) {
                 console.error('Error loading appointments:', error);
@@ -552,6 +602,8 @@
         function displayAppointments() {
             if (currentView === 'list') {
                 displayListView();
+            } else if (currentView === 'day') {
+                displayDayView();
             } else if (currentView === 'calendar') {
                 displayCalendarView();
             }
@@ -562,9 +614,9 @@
             
             if (appointments.length === 0) {
                 listDiv.innerHTML = `
-                    <div style="text-align: center; padding: 40px; color: #9ca3af;">
+                    <div class="empty-state">
                         <div style="font-size: 48px;">📅</div>
-                        <p>No appointments scheduled</p>
+                        <p>No appointments scheduled for this date</p>
                     </div>
                 `;
                 return;
@@ -573,22 +625,100 @@
             listDiv.innerHTML = appointments.map(apt => `
                 <div class="appointment-item">
                     <div style="display: flex; align-items: center;">
-                        <span class="appointment-time">${apt.appointment_time.substring(0, 5)}</span>
+                        <span class="appointment-time">${apt.appointment_time?.substring(0, 5) || ''}</span>
                         <div class="appointment-details">
                             <div class="patient-name">
                                 ${apt.patients ? `${apt.patients.first_name} ${apt.patients.last_name}` : 'Unknown'}
                             </div>
                             <div class="appointment-type">
-                                ${apt.appointment_type} ${apt.therapy_code ? `- ${apt.therapy_code}` : ''}
+                                ${apt.appointment_type || ''} ${apt.therapy_code ? `- ${apt.therapy_code}` : ''}
+                                ${apt.status === 'cancelled' ? '(CANCELLED)' : ''}
                             </div>
                         </div>
                     </div>
                     <div class="appointment-actions-btns">
                         <button class="action-btn btn-edit" onclick="editAppointment(${apt.id})">Edit</button>
-                        <button class="action-btn btn-cancel" onclick="cancelAppointment(${apt.id})">Cancel</button>
+                        <button class="action-btn btn-cancel" onclick="cancelAppointment(${apt.id})">
+                            ${apt.status === 'cancelled' ? 'Delete' : 'Cancel'}
+                        </button>
                     </div>
                 </div>
             `).join('');
+        }
+        
+        function displayDayView() {
+            const dayDiv = document.getElementById('daySchedule');
+            
+            // Create hourly slots from 8am to 6pm
+            const hours = [];
+            for (let h = 8; h <= 18; h++) {
+                hours.push(h);
+            }
+            
+            let dayHTML = '';
+            hours.forEach(hour => {
+                const hourStr = hour.toString().padStart(2, '0') + ':00';
+                const hourAppointments = appointments.filter(apt => 
+                    apt.appointment_time && apt.appointment_time.startsWith(hourStr.substring(0, 2))
+                );
+                
+                dayHTML += `
+                    <div style="border-bottom: 1px solid #e5e7eb; padding: 10px;">
+                        <strong>${hourStr}</strong>
+                        ${hourAppointments.length > 0 ? 
+                            hourAppointments.map(apt => `
+                                <div style="margin-left: 60px; margin-top: 10px; padding: 10px; background: #f9fafb; border-radius: 6px;">
+                                    <strong>${apt.patients?.first_name || ''} ${apt.patients?.last_name || ''}</strong><br>
+                                    ${apt.appointment_type || ''} ${apt.therapy_code ? `- ${apt.therapy_code}` : ''}
+                                </div>
+                            `).join('') : 
+                            '<span style="margin-left: 60px; color: #9ca3af;">-</span>'
+                        }
+                    </div>
+                `;
+            });
+            
+            dayDiv.innerHTML = dayHTML || '<div class="empty-state">No appointments</div>';
+        }
+        
+        function displayCalendarView() {
+            const grid = document.getElementById('calendarGrid');
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            
+            // Get first day of month and how many days in month
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const today = new Date();
+            
+            let calendarHTML = '';
+            
+            // Add empty cells for days before month starts
+            for (let i = 0; i < firstDay; i++) {
+                calendarHTML += '<div class="calendar-day other-month"></div>';
+            }
+            
+            // Add days of month
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateStr = `${year}-${(month + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+                const dayAppointments = allAppointments.filter(apt => apt.appointment_date === dateStr);
+                
+                const isToday = today.getDate() === day && today.getMonth() === month && today.getFullYear() === year;
+                
+                calendarHTML += `
+                    <div class="calendar-day ${isToday ? 'today' : ''}" onclick="selectDate('${dateStr}')">
+                        <div class="day-number">${day}</div>
+                        ${dayAppointments.slice(0, 3).map(apt => `
+                            <div class="day-appointment">
+                                ${apt.appointment_time?.substring(0, 5) || ''} ${apt.patients?.last_name || 'Unknown'}
+                            </div>
+                        `).join('')}
+                        ${dayAppointments.length > 3 ? `<div style="font-size: 11px; color: #6b7280;">+${dayAppointments.length - 3} more</div>` : ''}
+                    </div>
+                `;
+            }
+            
+            grid.innerHTML = calendarHTML;
         }
         
         function setupEventListeners() {
@@ -614,7 +744,6 @@
             
             try {
                 if (appointmentId) {
-                    // Update existing
                     const { error } = await supabase
                         .from('appointments')
                         .update(appointmentData)
@@ -622,7 +751,6 @@
                     
                     if (error) throw error;
                 } else {
-                    // Create new
                     const { error } = await supabase
                         .from('appointments')
                         .insert(appointmentData);
@@ -643,42 +771,65 @@
         function updateDateDisplay() {
             const dateElement = document.getElementById('currentDate');
             const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            dateElement.textContent = currentDate.toLocaleDateString('en-GB', options);
+            
+            if (currentView === 'calendar') {
+                const monthYear = currentDate.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+                dateElement.textContent = monthYear;
+            } else {
+                dateElement.textContent = currentDate.toLocaleDateString('en-GB', options);
+            }
         }
         
         // Global functions
-        window.switchView = function(view) {
+        function switchView(view) {
             currentView = view;
             
             // Update tabs
-            document.querySelectorAll('.view-tab').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            event.target.classList.add('active');
+            document.getElementById('listTab').classList.remove('active');
+            document.getElementById('calendarTab').classList.remove('active');
+            document.getElementById('dayTab').classList.remove('active');
             
-            // Show/hide views
-            document.getElementById('listView').style.display = view === 'list' ? 'block' : 'none';
-            document.getElementById('calendarView').style.display = view === 'calendar' ? 'block' : 'none';
+            if (view === 'list') {
+                document.getElementById('listTab').classList.add('active');
+                document.getElementById('listView').style.display = 'block';
+                document.getElementById('calendarView').style.display = 'none';
+                document.getElementById('dayView').style.display = 'none';
+            } else if (view === 'calendar') {
+                document.getElementById('calendarTab').classList.add('active');
+                document.getElementById('listView').style.display = 'none';
+                document.getElementById('calendarView').style.display = 'block';
+                document.getElementById('dayView').style.display = 'none';
+            } else if (view === 'day') {
+                document.getElementById('dayTab').classList.add('active');
+                document.getElementById('listView').style.display = 'none';
+                document.getElementById('calendarView').style.display = 'none';
+                document.getElementById('dayView').style.display = 'block';
+            }
             
-            displayAppointments();
-        };
+            updateDateDisplay();
+            loadAppointments();
+        }
         
-        window.navigateDate = async function(direction) {
-            currentDate.setDate(currentDate.getDate() + direction);
+        async function navigateDate(direction) {
+            if (currentView === 'calendar') {
+                currentDate.setMonth(currentDate.getMonth() + direction);
+            } else {
+                currentDate.setDate(currentDate.getDate() + direction);
+            }
             updateDateDisplay();
             await loadAppointments();
-        };
+        }
         
-        window.openNewAppointment = function() {
+        function openNewAppointment() {
             document.getElementById('modalTitle').textContent = 'New Appointment';
             document.getElementById('appointmentForm').reset();
             document.getElementById('appointmentId').value = '';
             document.getElementById('appointmentDate').value = currentDate.toISOString().split('T')[0];
             document.getElementById('appointmentModal').classList.add('active');
-        };
+        }
         
-        window.editAppointment = function(id) {
-            const appointment = appointments.find(a => a.id === id);
+        function editAppointment(id) {
+            const appointment = [...appointments, ...allAppointments].find(a => a.id === id);
             if (!appointment) return;
             
             document.getElementById('modalTitle').textContent = 'Edit Appointment';
@@ -691,30 +842,58 @@
             document.getElementById('appointmentNotes').value = appointment.notes || '';
             
             document.getElementById('appointmentModal').classList.add('active');
-        };
+        }
         
-        window.cancelAppointment = async function(id) {
-            if (!confirm('Are you sure you want to cancel this appointment?')) return;
+        async function cancelAppointment(id) {
+            const appointment = [...appointments, ...allAppointments].find(a => a.id === id);
             
-            try {
-                const { error } = await supabase
-                    .from('appointments')
-                    .update({ status: 'cancelled' })
-                    .eq('id', id);
+            if (appointment?.status === 'cancelled') {
+                // Delete cancelled appointment
+                if (!confirm('Permanently delete this appointment?')) return;
                 
-                if (error) throw error;
+                try {
+                    const { error } = await supabase
+                        .from('appointments')
+                        .delete()
+                        .eq('id', id);
+                    
+                    if (error) throw error;
+                    
+                    await loadAppointments();
+                    alert('Appointment deleted');
+                } catch (error) {
+                    console.error('Error deleting appointment:', error);
+                    alert('Error deleting appointment');
+                }
+            } else {
+                // Cancel appointment
+                if (!confirm('Cancel this appointment?')) return;
                 
-                await loadAppointments();
-                alert('Appointment cancelled');
-                
-            } catch (error) {
-                console.error('Error cancelling appointment:', error);
-                alert('Error cancelling appointment');
+                try {
+                    const { error } = await supabase
+                        .from('appointments')
+                        .update({ status: 'cancelled' })
+                        .eq('id', id);
+                    
+                    if (error) throw error;
+                    
+                    await loadAppointments();
+                    alert('Appointment cancelled');
+                } catch (error) {
+                    console.error('Error cancelling appointment:', error);
+                    alert('Error cancelling appointment');
+                }
             }
-        };
+        }
         
-        window.closeModal = function() {
+        function closeModal() {
             document.getElementById('appointmentModal').classList.remove('active');
+        }
+        
+        // Helper function to select a date from calendar
+        window.selectDate = function(dateStr) {
+            currentDate = new Date(dateStr + 'T00:00:00');
+            switchView('list');
         };
     </script>
 </body>
