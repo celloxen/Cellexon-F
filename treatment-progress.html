@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Treatment Progress - Celloxen Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+            color: white;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        
+        .header-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+        }
+        
+        .header p {
+            color: #cbd5e1;
+            margin-top: 5px;
+            font-size: 14px;
+        }
+        
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+            margin-bottom: 25px;
+        }
+        
+        .card h2 {
+            font-size: 24px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f1f5f9;
+        }
+        
+        .progress-overview {
+            background: linear-gradient(135deg, #1e3a8a, #1e40af);
+            color: white;
+            padding: 30px;
+            border-radius: 16px;
+            margin-bottom: 25px;
+        }
+        
+        .progress-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .stat-box {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 32px;
+            font-weight: bold;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.9;
+            text-transform: uppercase;
+            margin-top: 5px;
+        }
+        
+        .progress-bar {
+            background: rgba(255,255,255,0.2);
+            height: 8px;
+            border-radius: 10px;
+            margin: 20px 0 10px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            background: linear-gradient(90deg, #10b981, #059669);
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+        
+        .session-card {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .session-card:hover {
+            border-color: #1e3a8a;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        
+        .session-card.completed {
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+            border-color: #10b981;
+        }
+        
+        .session-card.today {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border-color: #f59e0b;
+        }
+        
+        .session-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .session-date {
+            font-weight: 600;
+            font-size: 16px;
+            color: #1e293b;
+        }
+        
+        .session-status {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .status-completed {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .status-scheduled {
+            background: #dbeafe;
+            color: #1e3a8a;
+        }
+        
+        .status-today {
+            background: #fed7aa;
+            color: #92400e;
+        }
+        
+        .session-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .detail-item {
+            font-size: 14px;
+        }
+        
+        .detail-label {
+            color: #64748b;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+        
+        .detail-value {
+            color: #1e293b;
+            font-weight: 600;
+            margin-top: 5px;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #f1f5f9;
+            color: #475569;
+        }
+        
+        .btn-secondary:hover {
+            background: #e2e8f0;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .wellness-chart {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 20px;
+        }
+        
+        .chart-bar {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+        }
+        
+        .chart-label {
+            width: 150px;
+            font-size: 14px;
+            color: #475569;
+        }
+        
+        .chart-progress {
+            flex: 1;
+            background: #e2e8f0;
+            height: 24px;
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 0 15px;
+        }
+        
+        .chart-fill {
+            height: 100%;
+            border-radius: 12px;
+            transition: width 0.5s ease;
+        }
+        
+        .chart-value {
+            width: 60px;
+            text-align: right;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .alert {
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin: 15px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .alert-success {
+            background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+            color: #065f46;
+            border-left: 4px solid #10b981;
+        }
+        
+        .alert-info {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            color: #92400e;
+            border-left: 4px solid #f59e0b;
+        }
+        
+        .notes-section {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 20px;
+        }
+        
+        .notes-section h3 {
+            color: #1e293b;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: #1e3a8a;
+            box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.show {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            margin-bottom: 20px;
+        }
+        
+        .modal h2 {
+            color: #1e293b;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #475569;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 15px;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #1e3a8a;
+            box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-container">
+            <div>
+                <h1>Treatment Progress</h1>
+                <p>Monitor and deliver therapy sessions</p>
+            </div>
+            <a href="clinic-dashboard.html" class="back-btn">← Back to Dashboard</a>
+        </div>
+    </div>
+    
+    <div class="container">
+        <!-- Progress Overview -->
+        <div class="progress-overview">
+            <h2 style="margin: 0; font-size: 28px;">Treatment Progress Overview</h2>
+            <p style="opacity: 0.9; margin-top: 5px;" id="patientName">Loading patient...</p>
+            
+            <div class="progress-stats">
+                <div class="stat-box">
+                    <div class="stat-number" id="completedSessions">0</div>
+                    <div class="stat-label">Completed</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number" id="remainingSessions">0</div>
+                    <div class="stat-label">Remaining</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number" id="totalSessions">0</div>
+                    <div class="stat-label">Total Sessions</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number" id="weekNumber">0</div>
+                    <div class="stat-label">Current Week</div>
+                </div>
+            </div>
+            
+            <div class="progress-bar">
+                <div class="progress-fill" id="overallProgress" style="width: 0%"></div>
+            </div>
+            <p style="text-align: center; opacity: 0.9; font-size: 14px;">
+                Overall Progress: <span id="progressPercentage">0%</span>
+            </p>
+        </div>
+        
+        <!-- Today's Session -->
+        <div class="card" id="todaySessionCard" style="display: none;">
+            <h2>Today's Session</h2>
+            <div class="alert alert-info">
+                <strong>Session Scheduled:</strong> <span id="todaySessionInfo"></span>
+            </div>
+            <div id="todaySessionDetails">
+                <!-- Today's session details will be populated here -->
+            </div>
+        </div>
+        
+        <!-- Wellness Tracking -->
+        <div class="card">
+            <h2>Wellness Improvement Tracking</h2>
+            <div class="wellness-chart">
+                <div class="chart-bar">
+                    <div class="chart-label">Sleep Quality</div>
+                    <div class="chart-progress">
+                        <div class="chart-fill" style="width: 65%; background: linear-gradient(90deg, #10b981, #059669);" id="sleepProgress"></div>
+                    </div>
+                    <div class="chart-value">65%</div>
+                </div>
+                <div class="chart-bar">
+                    <div class="chart-label">Stress Levels</div>
+                    <div class="chart-progress">
+                        <div class="chart-fill" style="width: 45%; background: linear-gradient(90deg, #f59e0b, #d97706);" id="stressProgress"></div>
+                    </div>
+                    <div class="chart-value">45%</div>
+                </div>
+                <div class="chart-bar">
+                    <div class="chart-label">Energy Levels</div>
+                    <div class="chart-progress">
+                        <div class="chart-fill" style="width: 70%; background: linear-gradient(90deg, #10b981, #059669);" id="energyProgress"></div>
+                    </div>
+                    <div class="chart-value">70%</div>
+                </div>
+                <div class="chart-bar">
+                    <div class="chart-label">Overall Wellness</div>
+                    <div class="chart-progress">
+                        <div class="chart-fill" style="width: 60%; background: linear-gradient(90deg, #1e3a8a, #1e40af);" id="wellnessProgress"></div>
+                    </div>
+                    <div class="chart-value">60%</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Session History -->
+        <div class="card">
+            <h2>Session Schedule & History</h2>
+            <div style="margin-bottom: 20px;">
+                <button class="btn btn-primary" onclick="showCheckInModal()">
+                    Check-In for Session
+                </button>
+                <button class="btn btn-secondary" onclick="viewFullSchedule()">
+                    View Full Schedule
+                </button>
+            </div>
+            <div id="sessionsList">
+                <!-- Sessions will be populated here -->
+            </div>
+        </div>
+        
+        <!-- Clinical Notes -->
+        <div class="card">
+            <h2>Clinical Notes</h2>
+            <div class="notes-section">
+                <h3>Latest Progress Note</h3>
+                <div id="latestNote" style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                    <p style="color: #64748b;">No notes yet. Add a note after completing a session.</p>
+                </div>
+                <h3>Add New Note</h3>
+                <textarea id="newNote" placeholder="Enter clinical observations, patient response, or progress notes..."></textarea>
+                <button class="btn btn-primary" style="margin-top: 15px;" onclick="saveNote()">
+                    Save Note
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Check-In Modal -->
+    <div class="modal" id="checkInModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Session Check-In</h2>
+                <p style="color: #64748b;">Complete check-in for therapy session</p>
+            </div>
+            
+            <div class="form-group">
+                <label>Session Date</label>
+                <input type="date" id="sessionDate" value="">
+            </div>
+            
+            <div class="form-group">
+                <label>Therapy Type</label>
+                <select id="therapyType">
+                    <option>Detoxification Protocol</option>
+                    <option>Stress Relief Therapy</option>
+                    <option>Sleep Enhancement</option>
+                    <option>Cardiovascular Support</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Pre-Session Assessment</label>
+                <select id="preAssessment">
+                    <option>Patient feels well</option>
+                    <option>Minor discomfort reported</option>
+                    <option>Moderate symptoms present</option>
+                    <option>Significant symptoms - adjusted protocol</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Session Duration (minutes)</label>
+                <input type="number" id="sessionDuration" value="45" min="15" max="120">
+            </div>
+            
+            <div class="form-group">
+                <label>Session Notes</label>
+                <textarea id="sessionNotes" placeholder="Enter any observations during the session..."></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label>Post-Session Response</label>
+                <select id="postResponse">
+                    <option>Excellent - No issues</option>
+                    <option>Good - Minor fatigue</option>
+                    <option>Fair - Some discomfort</option>
+                    <option>Poor - Significant reaction</option>
+                </select>
+            </div>
+            
+            <div class="action-buttons">
+                <button class="btn btn-primary" onclick="completeCheckIn()">
+                    Complete Session
+                </button>
+                <button class="btn btn-secondary" onclick="closeModal()">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { supabase } from './supabase-config.js';
+        import { workflowManager, workflowStages } from './workflow-manager.js';
+        
+        let selectedPatient = null;
+        let treatmentPlan = null;
+        let sessions = [];
+        let completedCount = 0;
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Set today's date for session check-in
+            document.getElementById('sessionDate').value = new Date().toISOString().split('T')[0];
+            
+            // Get patient ID from URL or session
+            const urlParams = new URLSearchParams(window.location.search);
+            const patientId = urlParams.get('patient') || sessionStorage.getItem('currentPatientId');
+            
+            if (patientId) {
+                await loadPatientData(patientId);
+                await loadTreatmentPlan(patientId);
+                displaySessions();
+                checkTodaySession();
+                updateProgressMetrics();
+            } else {
+                alert('No patient selected. Please select a patient first.');
+                window.location.href = 'patient-management.html';
+            }
+        });
+        
+        async function loadPatientData(patientId) {
+            try {
+                const { data, error } = await supabase
+                    .from('patients')
+                    .select('*')
+                    .eq('id', patientId)
+                    .single();
+                
+                if (error) throw error;
+                
+                selectedPatient = data;
+                document.getElementById('patientName').textContent = 
+                    `Patient: ${data.first_name} ${data.last_name} (${data.patient_id})`;
+                
+            } catch (error) {
+                console.error('Error loading patient:', error);
+            }
+        }
+        
+        async function loadTreatmentPlan(patientId) {
+            try {
+                const { data, error } = await supabase
+                    .from('treatment_plans')
+                    .select('*')
+                    .eq('patient_id', patientId)
+                    .eq('status', 'active')
+                    .order('created_at', { ascending: false })
+                    .limit(1)
+                    .single();
+                
+                if (data) {
+                    treatmentPlan = data;
+                    sessions = data.schedule || [];
+                } else {
+                    // Create sample sessions if no plan exists
+                    sessions = generateSampleSessions();
+                }
+                
+            } catch (error) {
+                console.error('Error loading treatment plan:', error);
+                // Use sample sessions
+                sessions = generateSampleSessions();
+            }
+        }
+        
+        function generateSampleSessions() {
+            const sampleSessions = [];
+            const today = new Date();
+            
+            for (let i = -5; i <= 15; i++) {
+                const sessionDate = new Date(today);
+                sessionDate.setDate(today.getDate() + (i * 3));
+                
+                if (sessionDate.getDay() !== 0 && sessionDate.getDay() !== 6) {
+                    sampleSessions.push({
+                        date: sessionDate.toISOString(),
+                        time: '10:00',
+                        therapy: i % 2 === 0 ? 'Detoxification Protocol' : 'Stress Relief Therapy',
+                        duration: '45 minutes',
+                        status: i < 0 ? 'completed' : i === 0 ? 'today' : 'scheduled',
+                        completed: i < 0
+                    });
+                }
+            }
+            
+            return sampleSessions;
+        }
+        
+        function displaySessions() {
+            const sessionsList = document.getElementById('sessionsList');
+            const today = new Date().toDateString();
+            
+            // Sort sessions by date
+            sessions.sort((a, b) => new Date(a.date) - new Date(b.date));
+            
+            // Display next 5 sessions
+            const upcomingSessions = sessions.slice(0, 8);
+            
+            const html = upcomingSessions.map(session => {
+                const sessionDate = new Date(session.date);
+                const isToday = sessionDate.toDateString() === today;
+                const isCompleted = session.completed || sessionDate < new Date(today);
+                
+                if (isCompleted) completedCount++;
+                
+                return `
+                    <div class="session-card ${isCompleted ? 'completed' : ''} ${isToday ? 'today' : ''}">
+                        <div class="session-header">
+                            <div class="session-date">
+                                ${sessionDate.toLocaleDateString('en-GB', { 
+                                    weekday: 'long', 
+                                    day: 'numeric', 
+                                    month: 'short' 
+                                })}
+                            </div>
+                            <div class="session-status status-${isCompleted ? 'completed' : isToday ? 'today' : 'scheduled'}">
+                                ${isCompleted ? 'Completed' : isToday ? 'Today' : 'Scheduled'}
+                            </div>
+                        </div>
+                        <div class="session-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Therapy</div>
+                                <div class="detail-value">${session.therapy}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Time</div>
+                                <div class="detail-value">${formatTime(session.time)}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Duration</div>
+                                <div class="detail-value">${session.duration}</div>
+                            </div>
+                        </div>
+                        ${!isCompleted && isToday ? `
+                            <div class="action-buttons">
+                                <button class="btn btn-primary" onclick="showCheckInModal()">
+                                    Start Session
+                                </button>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }).join('');
+            
+            sessionsList.innerHTML = html;
+        }
+        
+        function checkTodaySession() {
+            const today = new Date().toDateString();
+            const todaySession = sessions.find(s => 
+                new Date(s.date).toDateString() === today && !s.completed
+            );
+            
+            if (todaySession) {
+                document.getElementById('todaySessionCard').style.display = 'block';
+                document.getElementById('todaySessionInfo').textContent = 
+                    `${todaySession.therapy} at ${formatTime(todaySession.time)}`;
+                
+                document.getElementById('todaySessionDetails').innerHTML = `
+                    <div style="background: white; padding: 20px; border-radius: 12px; margin-top: 15px;">
+                        <h3 style="margin-bottom: 15px;">${todaySession.therapy}</h3>
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
+                            <div>
+                                <div style="font-size: 12px; color: #64748b;">Time</div>
+                                <div style="font-weight: 600;">${formatTime(todaySession.time)}</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 12px; color: #64748b;">Duration</div>
+                                <div style="font-weight: 600;">${todaySession.duration}</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 12px; color: #64748b;">Room</div>
+                                <div style="font-weight: 600;">Treatment Room 1</div>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary" style="margin-top: 20px; width: 100%;" onclick="showCheckInModal()">
+                            Begin Session Check-In
+                        </button>
+                    </div>
+                `;
+            }
+        }
+        
+        function updateProgressMetrics() {
+            const total = sessions.length;
+            const completed = sessions.filter(s => s.completed || new Date(s.date) < new Date()).length;
+            const remaining = total - completed;
+            const percentage = Math.round((completed / total) * 100);
+            
+            // Calculate current week
+            const startDate = sessions[0] ? new Date(sessions[0].date) : new Date();
+            const today = new Date();
+            const weekNumber = Math.ceil((today - startDate) / (7 * 24 * 60 * 60 * 1000));
+            
+            document.getElementById('completedSessions').textContent = completed;
+            document.getElementById('remainingSessions').textContent = remaining;
+            document.getElementById('totalSessions').textContent = total;
+            document.getElementById('weekNumber').textContent = Math.min(weekNumber, 8);
+            document.getElementById('overallProgress').style.width = percentage + '%';
+            document.getElementById('progressPercentage').textContent = percentage + '%';
+        }
+        
+        function formatTime(time) {
+            if (!time) return 'TBD';
+            const [hours, minutes] = time.split(':');
+            const hour = parseInt(hours);
+            const ampm = hour >= 12 ? 'PM' : 'AM';
+            const displayHour = hour > 12 ? hour - 12 : hour || 12;
+            return `${displayHour}:${minutes || '00'} ${ampm}`;
+        }
+        
+        window.showCheckInModal = function() {
+            document.getElementById('checkInModal').classList.add('show');
+        };
+        
+        window.closeModal = function() {
+            document.getElementById('checkInModal').classList.remove('show');
+        };
+        
+        window.completeCheckIn = async function() {
+            const sessionData = {
+                patient_id: selectedPatient.id,
+                date: document.getElementById('sessionDate').value,
+                therapy_type: document.getElementById('therapyType').value,
+                duration: document.getElementById('sessionDuration').value,
+                pre_assessment: document.getElementById('preAssessment').value,
+                post_response: document.getElementById('postResponse').value,
+                notes: document.getElementById('sessionNotes').value,
+                completed: true,
+                completed_at: new Date().toISOString()
+            };
+            
+            // Save session data (you'll need to create a sessions table)
+            console.log('Session completed:', sessionData);
+            
+            alert('Session completed successfully!');
+            closeModal();
+            
+            // Reload sessions
+            location.reload();
+        };
+        
+        window.saveNote = async function() {
+            const noteText = document.getElementById('newNote').value;
+            if (!noteText.trim()) {
+                alert('Please enter a note before saving.');
+                return;
+            }
+            
+            // Save clinical note (you'll need a notes table)
+            const noteData = {
+                patient_id: selectedPatient.id,
+                note_text: noteText,
+                created_by: 'Current Practitioner',
+                created_at: new Date().toISOString()
+            };
+            
+            console.log('Note saved:', noteData);
+            
+            // Display the note
+            document.getElementById('latestNote').innerHTML = `
+                <div style="margin-bottom: 10px;">
+                    <strong>Date:</strong> ${new Date().toLocaleDateString('en-GB')}
+                </div>
+                <p>${noteText}</p>
+                <div style="margin-top: 10px; font-size: 12px; color: #64748b;">
+                    By: Current Practitioner
+                </div>
+            `;
+            
+            document.getElementById('newNote').value = '';
+            alert('Note saved successfully!');
+        };
+        
+        window.viewFullSchedule = function() {
+            window.location.href = `treatment-schedule.html?patient=${selectedPatient.id}`;
+        };
+    </script>
+</body>
+</html>
