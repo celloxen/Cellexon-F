@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Comprehensive Report Generator - Celloxen Platform</title>
+    <title>Report Generator with PDF Export - Celloxen</title>
     <style>
         * {
             margin: 0;
@@ -13,104 +13,288 @@
         
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+            background: #f0f4f8;
             min-height: 100vh;
         }
         
+        /* Header - Matching original design */
         .header {
-            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
             color: white;
-            padding: 20px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            padding: 20px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
         
         .header-container {
             max-width: 1400px;
             margin: 0 auto;
+            padding: 0 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
         
-        .header h1 {
-            font-size: 28px;
-            font-weight: 700;
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            letter-spacing: 1px;
         }
         
-        .header p {
-            color: #cbd5e1;
-            margin-top: 5px;
-            font-size: 14px;
+        .nav-buttons {
+            display: flex;
+            gap: 15px;
         }
         
-        .back-btn {
+        .btn-nav {
             background: rgba(255,255,255,0.2);
             border: 1px solid rgba(255,255,255,0.3);
             color: white;
             padding: 8px 20px;
             border-radius: 6px;
             cursor: pointer;
+            transition: all 0.3s;
             text-decoration: none;
-            transition: all 0.3s ease;
+            font-size: 14px;
         }
         
-        .back-btn:hover {
+        .btn-nav:hover {
             background: rgba(255,255,255,0.3);
         }
         
+        /* Main Container */
         .container {
-            max-width: 1400px;
-            margin: 30px auto;
-            padding: 0 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px 20px;
         }
         
-        .card {
+        /* Page Header */
+        .page-header {
+            margin-bottom: 30px;
+        }
+        
+        .page-title {
+            font-size: 28px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 10px;
+        }
+        
+        .page-subtitle {
+            color: #64748b;
+        }
+        
+        /* Content Card */
+        .content-card {
             background: white;
-            border-radius: 20px;
+            border-radius: 12px;
             padding: 30px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
             margin-bottom: 25px;
         }
         
-        .card h2 {
-            font-size: 24px;
+        .section-title {
+            font-size: 20px;
             font-weight: 600;
             color: #1e293b;
             margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e5e7eb;
         }
         
-        .card h3 {
-            font-size: 20px;
-            font-weight: 600;
-            color: #475569;
-            margin: 25px 0 15px;
+        /* Patient Selection */
+        .patient-selection {
+            margin-bottom: 20px;
         }
         
-        .grid-2 {
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #374151;
+            font-size: 14px;
+        }
+        
+        .form-select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .form-select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        /* Report Type Selection */
+        .report-types {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 25px;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
         }
         
-        @media (max-width: 968px) {
-            .grid-2 {
-                grid-template-columns: 1fr;
-            }
-        }
-        
-        .loading {
+        .report-type-card {
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
             text-align: center;
-            padding: 60px;
+        }
+        
+        .report-type-card:hover {
+            border-color: #3b82f6;
+            background: #f0f9ff;
+        }
+        
+        .report-type-card.selected {
+            border-color: #3b82f6;
+            background: #eff6ff;
+        }
+        
+        .report-icon {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        
+        .report-name {
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 5px;
+        }
+        
+        .report-desc {
+            font-size: 12px;
+            color: #6b7280;
+        }
+        
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+        
+        .btn-secondary {
+            background: #10b981;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #059669;
+        }
+        
+        .btn-outline {
+            background: white;
+            color: #3b82f6;
+            border: 2px solid #3b82f6;
+        }
+        
+        .btn-outline:hover {
+            background: #eff6ff;
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        /* Report Preview */
+        .report-preview {
+            background: #f9fafb;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            min-height: 400px;
+            max-height: 600px;
+            overflow-y: auto;
+            display: none;
+        }
+        
+        .report-preview.show {
+            display: block;
+        }
+        
+        .preview-header {
+            background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .preview-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .preview-section {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .preview-section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        /* Loading Spinner */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .loading.show {
+            display: block;
         }
         
         .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #1e3a8a;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3b82f6;
             border-radius: 50%;
-            width: 60px;
-            height: 60px;
+            width: 40px;
+            height: 40px;
             animation: spin 1s linear infinite;
             margin: 0 auto 20px;
         }
@@ -120,922 +304,496 @@
             100% { transform: rotate(360deg); }
         }
         
-        .assessment-box {
-            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
-            border-radius: 12px;
-            padding: 20px;
-            border-left: 4px solid #1e3a8a;
-        }
-        
-        .assessment-box h4 {
-            color: #1e293b;
-            margin-bottom: 15px;
-            font-size: 18px;
-        }
-        
-        .score-item {
-            background: white;
-            padding: 12px;
-            border-radius: 8px;
-            margin: 8px 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .score-label {
-            color: #475569;
-            font-weight: 500;
-        }
-        
-        .score-value {
-            font-weight: 600;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 14px;
-        }
-        
-        .score-excellent {
-            background: #d1fae5;
-            color: #065f46;
-        }
-        
-        .score-good {
-            background: #fed7aa;
-            color: #92400e;
-        }
-        
-        .score-concern {
-            background: #fee2e2;
-            color: #991b1b;
-        }
-        
-        .therapy-card {
-            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
-            border: 1px solid #1e3a8a;
-            border-radius: 16px;
-            padding: 25px;
-            margin: 20px 0;
-        }
-        
-        .therapy-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: start;
-            margin-bottom: 20px;
-        }
-        
-        .therapy-title {
-            color: #1e293b;
-            font-size: 20px;
-            font-weight: 600;
-        }
-        
-        .therapy-code {
-            background: #1e3a8a;
-            color: white;
-            padding: 4px 12px;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 600;
-        }
-        
-        .therapy-priority {
-            display: inline-block;
-            padding: 6px 16px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 15px;
-        }
-        
-        .priority-primary {
-            background: #dc2626;
-            color: white;
-        }
-        
-        .priority-secondary {
-            background: #f59e0b;
-            color: white;
-        }
-        
-        .priority-supportive {
-            background: #10b981;
-            color: white;
-        }
-        
-        .therapy-details {
-            color: #475569;
-            line-height: 1.6;
-            margin: 15px 0;
-        }
-        
-        .therapy-params {
-            background: white;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 15px 0;
-        }
-        
-        .therapy-params strong {
-            color: #1e293b;
-            display: inline-block;
-            width: 120px;
-        }
-        
-        .supplement-box {
-            background: #fef3c7;
-            border: 1px solid #fbbf24;
-            padding: 20px;
-            border-radius: 12px;
-            margin-top: 20px;
-        }
-        
-        .supplement-title {
-            font-weight: 600;
-            color: #92400e;
-            margin-bottom: 15px;
-            font-size: 18px;
-        }
-        
-        .supplement-item {
-            background: white;
-            padding: 10px;
-            border-radius: 6px;
-            margin: 8px 0;
-        }
-        
+        /* Success Message */
         .alert {
-            padding: 16px 20px;
-            border-radius: 12px;
-            margin: 15px 0;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .alert.show {
+            display: block;
         }
         
         .alert-success {
-            background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+            background: #d1fae5;
             color: #065f46;
-            border-left: 4px solid #10b981;
+            border: 1px solid #a7f3d0;
         }
         
         .alert-info {
-            background: linear-gradient(135deg, #fef3c7, #fde68a);
-            color: #92400e;
-            border-left: 4px solid #f59e0b;
+            background: #dbeafe;
+            color: #1e3a8a;
+            border: 1px solid #bfdbfe;
         }
         
-        .action-buttons {
+        /* PDF Actions */
+        .pdf-actions {
+            background: #f0f9ff;
+            border: 2px solid #3b82f6;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .pdf-actions.show {
+            display: block;
+        }
+        
+        .pdf-actions-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1e3a8a;
+            margin-bottom: 15px;
+        }
+        
+        .pdf-buttons {
             display: flex;
             gap: 15px;
-            justify-content: center;
-            margin-top: 30px;
-        }
-        
-        .btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            font-size: 15px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            color: white;
-            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
-        }
-        
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
-        }
-        
-        .btn-secondary {
-            background: #f1f5f9;
-            color: #475569;
-        }
-        
-        .btn-secondary:hover {
-            background: #e2e8f0;
-        }
-        
-        .correlation-badge {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 600;
-            margin-left: 10px;
-        }
-        
-        .correlation-high {
-            background: #d1fae5;
-            color: #065f46;
-        }
-        
-        .correlation-moderate {
-            background: #fed7aa;
-            color: #92400e;
-        }
-        
-        .correlation-low {
-            background: #e0e7ff;
-            color: #3730a3;
-        }
-        
-        .report-header {
-            background: linear-gradient(135deg, #1e3a8a, #1e40af);
-            color: white;
-            padding: 30px;
-            border-radius: 16px;
-            margin-bottom: 25px;
-            text-align: center;
-        }
-        
-        .report-header h1 {
-            font-size: 28px;
-            margin-bottom: 10px;
-        }
-        
-        .report-header p {
-            opacity: 0.9;
-            font-size: 16px;
-        }
-        
-        select {
-            width: 100%;
-            padding: 12px 16px;
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
-            font-size: 15px;
-            background: white;
-            transition: all 0.3s ease;
-        }
-        
-        select:focus {
-            outline: none;
-            border-color: #1e3a8a;
-            box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
-        }
-        
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            color: #475569;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            flex-wrap: wrap;
         }
     </style>
 </head>
 <body>
+    <!-- Header -->
     <div class="header">
         <div class="header-container">
-            <div>
-                <h1>Comprehensive Diagnostic Report</h1>
-                <p>Integrated Health & IRIS Assessment Analysis</p>
-            </div>
-            <a href="clinic-dashboard.html" class="back-btn">← Back to Dashboard</a>
-        </div>
-    </div>
-    
-    <div class="container">
-        <!-- Patient Selection -->
-        <div class="card" id="patientSelection">
-            <h2>Generate Comprehensive Report</h2>
-            <div class="alert alert-info">
-                <strong>Note:</strong> This report requires both Health and IRIS assessments to be completed.
-            </div>
-            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 25px;">
-                <div>
-                    <label>Select Patient:</label>
-                    <select id="patientSelect">
-                        <option value="">Select a patient...</option>
-                    </select>
-                </div>
-                <div style="display: flex; align-items: end;">
-                    <button class="btn btn-primary" style="width: 100%;" onclick="generateReport()">
-                        Generate Report
-                    </button>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Loading State -->
-        <div class="card loading" id="loadingSection" style="display: none;">
-            <div class="spinner"></div>
-            <h3>Generating Comprehensive Report</h3>
-            <p style="color: #64748b;">Analysing health assessment data...</p>
-            <p style="color: #64748b;">Processing iris patterns...</p>
-            <p style="color: #64748b;">Correlating findings...</p>
-            <p style="color: #64748b;">Generating therapy recommendations...</p>
-        </div>
-        
-        <!-- Report Display -->
-        <div id="reportSection" style="display: none;">
-            <!-- Report Header -->
-            <div class="report-header">
-                <h1>Comprehensive Wellness Diagnostic Report</h1>
-                <p id="reportDate"></p>
-                <p id="patientInfo"></p>
-            </div>
-            
-            <!-- Executive Summary -->
-            <div class="card">
-                <h2>Executive Summary</h2>
-                <div class="grid-2">
-                    <div class="assessment-box">
-                        <h4>Overall Wellness Score</h4>
-                        <div style="font-size: 48px; font-weight: bold; color: #1e3a8a; text-align: center;" id="overallScore">--</div>
-                    </div>
-                    <div class="assessment-box">
-                        <h4>Assessment Confidence</h4>
-                        <div style="font-size: 24px; font-weight: bold; text-align: center;" id="confidenceLevel">--</div>
-                    </div>
-                </div>
-                <div class="alert alert-success" style="margin-top: 20px;">
-                    <strong>Priority Areas:</strong> <span id="priorityAreas">Loading...</span>
-                </div>
-            </div>
-            
-            <!-- Assessment Results -->
-            <div class="card">
-                <h2>Assessment Findings</h2>
-                <div class="grid-2">
-                    <div>
-                        <h3>Health Assessment (Subjective)</h3>
-                        <div id="healthResults" class="assessment-box">
-                            <!-- Health scores will be populated here -->
-                        </div>
-                    </div>
-                    <div>
-                        <h3>IRIS Assessment (Objective)</h3>
-                        <div id="irisResults" class="assessment-box">
-                            <!-- IRIS findings will be populated here -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Correlation Analysis -->
-            <div class="card">
-                <h2>Integrated Analysis</h2>
-                <div id="correlationAnalysis">
-                    <!-- Correlation findings will be populated here -->
-                </div>
-            </div>
-            
-            <!-- Therapy Recommendations -->
-            <div class="card">
-                <h2>Therapy Recommendations</h2>
-                <div class="alert alert-success">
-                    <strong>Mandatory Protocol:</strong> Detoxification therapy is automatically included in all treatment plans.
-                </div>
-                <div id="therapyRecommendations">
-                    <!-- Therapy cards will be populated here -->
-                </div>
-            </div>
-            
-            <!-- Treatment Plan -->
-            <div class="card">
-                <h2>Proposed Treatment Plan</h2>
-                <div id="treatmentPlan">
-                    <!-- Treatment plan will be populated here -->
-                </div>
-                <div class="action-buttons">
-                    <button class="btn btn-primary" onclick="approveAndProceed()">
-                        Approve & Create Treatment Plan
-                    </button>
-                    <button class="btn btn-secondary" onclick="saveReport()">
-                        Save Report
-                    </button>
-                    <button class="btn btn-secondary" onclick="printReport()">
-                        Print Report
-                    </button>
-                </div>
+            <div class="logo">CELLOXEN - Report Generator</div>
+            <div class="nav-buttons">
+                <a href="clinic-dashboard.html" class="btn-nav">← Back to Dashboard</a>
             </div>
         </div>
     </div>
 
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1 class="page-title">Medical Report Generator</h1>
+            <p class="page-subtitle">Generate comprehensive reports with PDF export</p>
+        </div>
+
+        <!-- Alert Messages -->
+        <div id="alertMessage" class="alert"></div>
+
+        <!-- Report Configuration -->
+        <div class="content-card">
+            <h2 class="section-title">Configure Report</h2>
+            
+            <!-- Patient Selection -->
+            <div class="form-group">
+                <label class="form-label">Select Patient</label>
+                <select class="form-select" id="patientSelect">
+                    <option value="">-- Select Patient --</option>
+                </select>
+            </div>
+            
+            <!-- Report Type Selection -->
+            <div class="form-group">
+                <label class="form-label">Select Report Type</label>
+                <div class="report-types">
+                    <div class="report-type-card" data-type="comprehensive" onclick="selectReportType('comprehensive')">
+                        <div class="report-icon">📊</div>
+                        <div class="report-name">Comprehensive Report</div>
+                        <div class="report-desc">Full diagnostic & treatment plan</div>
+                    </div>
+                    <div class="report-type-card" data-type="progress" onclick="selectReportType('progress')">
+                        <div class="report-icon">📈</div>
+                        <div class="report-name">Progress Report</div>
+                        <div class="report-desc">Treatment progress & metrics</div>
+                    </div>
+                    <div class="report-type-card" data-type="assessment" onclick="selectReportType('assessment')">
+                        <div class="report-icon">🔍</div>
+                        <div class="report-name">Assessment Report</div>
+                        <div class="report-desc">Health & IRIS assessments</div>
+                    </div>
+                    <div class="report-type-card" data-type="summary" onclick="selectReportType('summary')">
+                        <div class="report-icon">📝</div>
+                        <div class="report-name">Summary Report</div>
+                        <div class="report-desc">Brief treatment summary</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <button class="btn btn-primary" onclick="generateReport()" disabled id="generateBtn">
+                    <span>🔄</span> Generate Report
+                </button>
+                <button class="btn btn-outline" onclick="previewReport()" disabled id="previewBtn">
+                    <span>👁️</span> Preview
+                </button>
+            </div>
+        </div>
+
+        <!-- Loading Indicator -->
+        <div class="loading" id="loadingIndicator">
+            <div class="spinner"></div>
+            <p>Generating report...</p>
+        </div>
+
+        <!-- Report Preview -->
+        <div class="content-card report-preview" id="reportPreview">
+            <h2 class="section-title">Report Preview</h2>
+            <div id="previewContent">
+                <!-- Preview content will be loaded here -->
+            </div>
+        </div>
+
+        <!-- PDF Actions -->
+        <div class="pdf-actions" id="pdfActions">
+            <div class="pdf-actions-title">📄 PDF Report Generated Successfully!</div>
+            <div class="pdf-buttons">
+                <button class="btn btn-primary" onclick="downloadPDF()">
+                    <span>⬇️</span> Download PDF
+                </button>
+                <button class="btn btn-secondary" onclick="emailPDF()">
+                    <span>📧</span> Email to Patient
+                </button>
+                <button class="btn btn-outline" onclick="savePDFToDatabase()">
+                    <span>💾</span> Save to Records
+                </button>
+                <button class="btn btn-outline" onclick="printPDF()">
+                    <span>🖨️</span> Print Report
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Include jsPDF library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <!-- Include Supabase -->
     <script type="module">
         import { supabase } from './supabase-config.js';
-        import { workflowManager, workflowStages } from './workflow-manager.js';
+        import { pdfGenerator } from './pdf-generator.js';
         
         let selectedPatient = null;
-        let healthAssessmentData = null;
-        let irisAssessmentData = null;
-        let correlationResults = {};
-        let recommendedTherapies = [];
+        let selectedReportType = null;
+        let generatedPDF = null;
+        let reportData = null;
         
-        // Therapy database
-        const therapyDatabase = {
-            '101': {
-                name: 'Deep Sleep Renewal Therapy',
-                code: '101',
-                domain: 'sleep',
-                description: 'Bioelectronic therapy for restoring natural sleep patterns and improving sleep quality.',
-                duration: '45 minutes',
-                frequency: '2-3 times per week',
-                course: '8 weeks',
-                sessions: '16-24 sessions',
-                supplements: [
-                    { name: 'Magnesium Glycinate', dose: '400mg', benefit: 'Promotes muscle relaxation' },
-                    { name: 'L-Theanine', dose: '200mg', benefit: 'Natural relaxation' },
-                    { name: 'Melatonin', dose: '3mg', benefit: 'Sleep-wake cycle regulation' }
-                ]
-            },
-            '102': {
-                name: 'Stress Relief Therapy',
-                code: '102',
-                domain: 'stress',
-                description: 'Comprehensive stress management through bioelectronic modulation.',
-                duration: '35 minutes',
-                frequency: '1-2 times per week',
-                course: '8 weeks',
-                sessions: '8-16 sessions',
-                supplements: [
-                    { name: 'Vitamin B Complex', dose: 'As directed', benefit: 'Nervous system support' },
-                    { name: 'Omega-3', dose: '1000mg EPA/DHA', benefit: 'Mood support' },
-                    { name: 'Rhodiola', dose: '200mg', benefit: 'Stress resistance' }
-                ]
-            },
-            '201': {
-                name: 'Detoxification Protocol',
-                code: '201',
-                domain: 'detox',
-                description: 'Essential foundational therapy for cellular cleansing and toxin elimination.',
-                duration: '60 minutes',
-                frequency: '2 times per week',
-                course: '6 weeks',
-                sessions: '12 sessions',
-                supplements: [
-                    { name: 'NAC', dose: '600mg', benefit: 'Liver support' },
-                    { name: 'Milk Thistle', dose: '250mg', benefit: 'Detoxification support' },
-                    { name: 'Vitamin C', dose: '1000mg', benefit: 'Antioxidant protection' }
-                ]
-            },
-            '301': {
-                name: 'Cardiovascular Support',
-                code: '301',
-                domain: 'cardiovascular',
-                description: 'Heart health optimization through bioelectronic therapy.',
-                duration: '45 minutes',
-                frequency: '2 times per week',
-                course: '10 weeks',
-                sessions: '20 sessions',
-                supplements: [
-                    { name: 'CoQ10', dose: '100mg', benefit: 'Heart energy production' },
-                    { name: 'Omega-3', dose: '1500mg EPA/DHA', benefit: 'Cardiovascular protection' },
-                    { name: 'Hawthorn Berry', dose: '500mg', benefit: 'Heart tonic' }
-                ]
-            },
-            '401': {
-                name: 'Joint & Mobility Therapy',
-                code: '401',
-                domain: 'joint',
-                description: 'Targeted therapy for joint health and mobility enhancement.',
-                duration: '40 minutes',
-                frequency: '2-3 times per week',
-                course: '8 weeks',
-                sessions: '16-24 sessions',
-                supplements: [
-                    { name: 'Glucosamine', dose: '1500mg', benefit: 'Joint structure support' },
-                    { name: 'Turmeric', dose: '500mg', benefit: 'Anti-inflammatory' },
-                    { name: 'MSM', dose: '1000mg', benefit: 'Joint flexibility' }
-                ]
-            },
-            '501': {
-                name: 'Digestive Balance Therapy',
-                code: '501',
-                domain: 'digestive',
-                description: 'Comprehensive digestive system support and gut health optimization.',
-                duration: '40 minutes',
-                frequency: '2 times per week',
-                course: '8 weeks',
-                sessions: '16 sessions',
-                supplements: [
-                    { name: 'Probiotic Blend', dose: '50 billion CFU', benefit: 'Gut flora balance' },
-                    { name: 'Digestive Enzymes', dose: 'With meals', benefit: 'Improved digestion' },
-                    { name: 'L-Glutamine', dose: '5g', benefit: 'Gut lining repair' }
-                ]
-            }
-        };
-        
-        // Initialize
-        document.addEventListener('DOMContentLoaded', function() {
-            const patientId = sessionStorage.getItem('currentPatientId');
-            if (patientId) {
-                loadPatientForReport(patientId);
-            } else {
-                loadPatients();
-            }
+        // Load patients on page load
+        document.addEventListener('DOMContentLoaded', async function() {
+            await loadPatients();
         });
-        
-        async function loadPatientForReport(patientId) {
-            try {
-                const { data, error } = await supabase
-                    .from('patients')
-                    .select('*, clinics (clinic_name)')
-                    .eq('id', patientId)
-                    .single();
-                
-                if (data) {
-                    const patientSelect = document.getElementById('patientSelect');
-                    patientSelect.innerHTML = `<option value="${data.id}" selected>${data.first_name} ${data.last_name} (${data.patient_id})</option>`;
-                    patientSelect.disabled = true;
-                    
-                    // Auto-generate report
-                    selectedPatient = data;
-                    generateReport();
-                }
-            } catch (error) {
-                console.error('Error loading patient:', error);
-                loadPatients();
-            }
-        }
         
         async function loadPatients() {
             try {
+                const authData = JSON.parse(localStorage.getItem('celloxen_auth') || '{}');
+                const clinicId = authData.clinicId || sessionStorage.getItem('currentClinicId');
+                
+                if (!clinicId) return;
+                
                 const { data, error } = await supabase
                     .from('patients')
-                    .select('*, clinics (clinic_name)')
-                    .order('created_at', { ascending: false });
+                    .select('*')
+                    .eq('clinic_id', clinicId)
+                    .order('first_name');
                 
                 if (error) throw error;
                 
-                const patientSelect = document.getElementById('patientSelect');
-                patientSelect.innerHTML = '<option value="">Select a patient...</option>';
+                const select = document.getElementById('patientSelect');
+                select.innerHTML = '<option value="">-- Select Patient --</option>';
                 
-                if (data && data.length > 0) {
+                if (data) {
                     data.forEach(patient => {
-                        patientSelect.innerHTML += `<option value="${patient.id}">${patient.first_name} ${patient.last_name} (${patient.patient_id})</option>`;
+                        select.innerHTML += `
+                            <option value="${patient.id}">
+                                ${patient.first_name} ${patient.last_name} (${patient.patient_id})
+                            </option>
+                        `;
                     });
                 }
+                
+                // Add event listener for patient selection
+                select.addEventListener('change', function() {
+                    if (this.value) {
+                        selectedPatient = data.find(p => p.id === parseInt(this.value));
+                        updateButtonStates();
+                    }
+                });
+                
             } catch (error) {
                 console.error('Error loading patients:', error);
+                showAlert('Error loading patients', 'error');
+            }
+        }
+        
+        window.selectReportType = function(type) {
+            // Remove previous selection
+            document.querySelectorAll('.report-type-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            
+            // Add selection to clicked card
+            document.querySelector(`.report-type-card[data-type="${type}"]`).classList.add('selected');
+            selectedReportType = type;
+            
+            updateButtonStates();
+        };
+        
+        function updateButtonStates() {
+            const generateBtn = document.getElementById('generateBtn');
+            const previewBtn = document.getElementById('previewBtn');
+            
+            if (selectedPatient && selectedReportType) {
+                generateBtn.disabled = false;
+                previewBtn.disabled = false;
+            } else {
+                generateBtn.disabled = true;
+                previewBtn.disabled = true;
             }
         }
         
         window.generateReport = async function() {
-            const patientId = document.getElementById('patientSelect').value;
-            if (!patientId) {
-                alert('Please select a patient');
+            if (!selectedPatient || !selectedReportType) {
+                showAlert('Please select a patient and report type', 'info');
                 return;
             }
             
-            if (!selectedPatient) {
-                const { data } = await supabase
-                    .from('patients')
-                    .select('*, clinics (clinic_name)')
-                    .eq('id', patientId)
-                    .single();
-                selectedPatient = data;
-            }
+            showLoading(true);
+            document.getElementById('pdfActions').classList.remove('show');
             
-            document.getElementById('patientSelection').style.display = 'none';
-            document.getElementById('loadingSection').style.display = 'block';
-            
-            // Load both assessments
-            await loadAssessments(patientId);
-            
-            // Generate report
-            setTimeout(() => {
-                createComprehensiveReport();
-            }, 3000);
-        };
-        
-        async function loadAssessments(patientId) {
             try {
-                // Load health assessment
-                const { data: healthData } = await supabase
-                    .from('health_assessments')
-                    .select('*')
-                    .eq('patient_id', patientId)
-                    .order('created_at', { ascending: false })
-                    .limit(1)
-                    .single();
+                // Load report data based on type
+                reportData = await loadReportData();
                 
-                healthAssessmentData = healthData;
+                // Generate PDF based on report type
+                let pdf;
+                switch (selectedReportType) {
+                    case 'comprehensive':
+                        pdf = await pdfGenerator.generateComprehensiveReport(reportData, selectedPatient);
+                        break;
+                    case 'progress':
+                        const sessions = await loadSessionsData();
+                        const metrics = await loadMetricsData();
+                        pdf = await pdfGenerator.generateProgressReport(selectedPatient, sessions, metrics);
+                        break;
+                    case 'assessment':
+                        pdf = await pdfGenerator.generateComprehensiveReport(reportData, selectedPatient);
+                        break;
+                    case 'summary':
+                        pdf = await pdfGenerator.generateComprehensiveReport(reportData, selectedPatient);
+                        break;
+                }
                 
-                // Load iris assessment
-                const { data: irisData } = await supabase
-                    .from('iris_assessments')
-                    .select('*')
-                    .eq('patient_id', patientId)
-                    .order('created_at', { ascending: false })
-                    .limit(1)
-                    .single();
+                generatedPDF = pdf;
                 
-                irisAssessmentData = irisData;
+                showLoading(false);
+                showAlert('Report generated successfully!', 'success');
+                document.getElementById('pdfActions').classList.add('show');
+                
+                // Show preview
+                await previewReport();
                 
             } catch (error) {
-                console.error('Error loading assessments:', error);
-                // Use dummy data if assessments not found
-                healthAssessmentData = {
-                    assessment_data: {
-                        scores: {
-                            categories: {
-                                sleep: 65,
-                                stress: 70,
-                                cardiovascular: 45,
-                                joint: 55,
-                                digestive: 60,
-                                kidney: 30,
-                                energy: 75,
-                                metabolic: 40
-                            }
-                        }
-                    }
-                };
-                
-                irisAssessmentData = {
-                    iris_data: {
-                        constitutional_analysis: {
-                            constitutional_type: 'Lymphatic',
-                            patterns: [
-                                { area: 'Digestive System', severity: 'Moderate' },
-                                { area: 'Nervous System', severity: 'Mild' }
-                            ]
-                        }
-                    }
-                };
+                console.error('Error generating report:', error);
+                showAlert('Error generating report', 'error');
+                showLoading(false);
             }
-        }
+        };
         
-        function createComprehensiveReport() {
-            document.getElementById('loadingSection').style.display = 'none';
-            document.getElementById('reportSection').style.display = 'block';
-            
-            // Set report header
-            document.getElementById('reportDate').textContent = `Report Date: ${new Date().toLocaleDateString('en-GB')}`;
-            document.getElementById('patientInfo').textContent = `Patient: ${selectedPatient.first_name} ${selectedPatient.last_name} | ID: ${selectedPatient.patient_id}`;
-            
-            // Calculate overall score
-            const healthScores = healthAssessmentData?.assessment_data?.scores?.categories || {};
-            const avgScore = Math.round(
-                Object.values(healthScores).reduce((a, b) => a + b, 0) / Object.keys(healthScores).length
-            );
-            const wellness = 100 - avgScore;
-            
-            document.getElementById('overallScore').textContent = `${wellness}%`;
-            
-            // Determine confidence based on correlation
-            analyzeCorrelation();
-            
-            // Display health results
-            displayHealthResults(healthScores);
-            
-            // Display iris results
-            displayIrisResults();
-            
-            // Generate therapy recommendations
-            generateTherapyRecommendations();
-            
-            // Create treatment plan
-            createTreatmentPlan();
-        }
-        
-        function analyzeCorrelation() {
-            const healthScores = healthAssessmentData?.assessment_data?.scores?.categories || {};
-            const irisPatterns = irisAssessmentData?.iris_data?.constitutional_analysis?.patterns || [];
-            
-            let correlationScore = 0;
-            let correlations = [];
-            
-            // Check digestive correlation
-            if (healthScores.digestive > 50) {
-                const digestivePattern = irisPatterns.find(p => p.area.includes('Digestive'));
-                if (digestivePattern) {
-                    correlationScore += 30;
-                    correlations.push({ area: 'Digestive System', correlation: 'High' });
-                }
+        window.previewReport = async function() {
+            if (!reportData) {
+                reportData = await loadReportData();
             }
             
-            // Check stress correlation
-            if (healthScores.stress > 50) {
-                const stressPattern = irisPatterns.find(p => p.area.includes('Nervous'));
-                if (stressPattern) {
-                    correlationScore += 30;
-                    correlations.push({ area: 'Stress/Nervous System', correlation: 'High' });
-                }
-            }
+            const previewDiv = document.getElementById('reportPreview');
+            const previewContent = document.getElementById('previewContent');
             
-            const confidence = correlationScore > 50 ? 'High' : correlationScore > 30 ? 'Moderate' : 'Standard';
-            document.getElementById('confidenceLevel').textContent = confidence;
-            
-            // Display correlation analysis
-            const correlationHtml = correlations.map(c => `
-                <div class="score-item">
-                    <span class="score-label">${c.area}</span>
-                    <span class="correlation-badge correlation-${c.correlation.toLowerCase()}">${c.correlation} Correlation</span>
-                </div>
-            `).join('');
-            
-            document.getElementById('correlationAnalysis').innerHTML = correlationHtml || 
-                '<p style="color: #64748b;">Standard correlation between subjective and objective findings.</p>';
-            
-            correlationResults = { confidence, correlations };
-        }
-        
-        function displayHealthResults(scores) {
-            const healthHtml = Object.entries(scores).map(([domain, score]) => {
-                const wellness = 100 - score;
-                const status = wellness > 70 ? 'excellent' : wellness > 50 ? 'good' : 'concern';
-                return `
-                    <div class="score-item">
-                        <span class="score-label">${formatDomain(domain)}</span>
-                        <span class="score-value score-${status}">${wellness}% wellness</span>
-                    </div>
-                `;
-            }).join('');
-            
-            document.getElementById('healthResults').innerHTML = healthHtml;
-            
-            // Set priority areas
-            const priorityAreas = Object.entries(scores)
-                .filter(([domain, score]) => score > 50)
-                .map(([domain]) => formatDomain(domain))
-                .slice(0, 3)
-                .join(', ');
-            
-            document.getElementById('priorityAreas').textContent = priorityAreas || 'None identified';
-        }
-        
-        function displayIrisResults() {
-            const irisData = irisAssessmentData?.iris_data?.constitutional_analysis || {};
-            const patterns = irisData.patterns || [];
-            
-            const irisHtml = `
-                <div class="score-item">
-                    <span class="score-label">Constitutional Type</span>
-                    <span class="score-value">${irisData.constitutional_type || 'Unknown'}</span>
-                </div>
-                ${patterns.map(p => `
-                    <div class="score-item">
-                        <span class="score-label">${p.area}</span>
-                        <span class="score-value">${p.severity}</span>
-                    </div>
-                `).join('')}
-            `;
-            
-            document.getElementById('irisResults').innerHTML = irisHtml;
-        }
-        
-        function generateTherapyRecommendations() {
-            recommendedTherapies = [];
-            const healthScores = healthAssessmentData?.assessment_data?.scores?.categories || {};
-            
-            // Always add detoxification as mandatory
-            recommendedTherapies.push({
-                therapy: therapyDatabase['201'],
-                priority: 'MANDATORY',
-                score: 100
-            });
-            
-            // Add therapies based on scores
-            Object.entries(healthScores).forEach(([domain, score]) => {
-                if (score > 50) {
-                    const therapy = Object.values(therapyDatabase).find(t => t.domain === domain);
-                    if (therapy) {
-                        recommendedTherapies.push({
-                            therapy: therapy,
-                            priority: score > 70 ? 'PRIMARY' : score > 50 ? 'SECONDARY' : 'SUPPORTIVE',
-                            score: score
-                        });
-                    }
-                }
-            });
-            
-            // Sort by priority
-            recommendedTherapies.sort((a, b) => b.score - a.score);
-            
-            // Display recommendations
-            const therapyHtml = recommendedTherapies.slice(0, 4).map(rec => `
-                <div class="therapy-card">
-                    <div class="therapy-header">
-                        <div>
-                            <div class="therapy-title">${rec.therapy.name}</div>
-                            <span class="therapy-priority priority-${rec.priority.toLowerCase()}">${rec.priority}</span>
-                        </div>
-                        <span class="therapy-code">Code ${rec.therapy.code}</span>
-                    </div>
-                    <p class="therapy-details">${rec.therapy.description}</p>
-                    <div class="therapy-params">
-                        <div><strong>Duration:</strong> ${rec.therapy.duration}</div>
-                        <div><strong>Frequency:</strong> ${rec.therapy.frequency}</div>
-                        <div><strong>Course:</strong> ${rec.therapy.course}</div>
-                        <div><strong>Sessions:</strong> ${rec.therapy.sessions}</div>
-                    </div>
-                    ${rec.therapy.supplements ? `
-                        <div class="supplement-box">
-                            <div class="supplement-title">Recommended Supplements</div>
-                            ${rec.therapy.supplements.map(s => `
-                                <div class="supplement-item">
-                                    <strong>${s.name}</strong> (${s.dose}) - ${s.benefit}
-                                </div>
-                            `).join('')}
-                        </div>
-                    ` : ''}
-                </div>
-            `).join('');
-            
-            document.getElementById('therapyRecommendations').innerHTML = therapyHtml;
-        }
-        
-        function createTreatmentPlan() {
-            const planHtml = `
-                <div class="assessment-box">
-                    <h4>8-Week Integrated Treatment Program</h4>
-                    <p style="margin: 15px 0; color: #64748b;">
-                        Based on the comprehensive analysis of both subjective health assessment and objective iris findings,
-                        the following treatment plan is recommended:
-                    </p>
-                    <ol style="margin-left: 20px; color: #475569; line-height: 1.8;">
-                        <li><strong>Week 1-2:</strong> Detoxification protocol (mandatory foundation)</li>
-                        <li><strong>Week 2-4:</strong> Primary therapy introduction based on priority areas</li>
-                        <li><strong>Week 4-6:</strong> Secondary therapies added for comprehensive support</li>
-                        <li><strong>Week 6-8:</strong> Maintenance and optimization phase</li>
-                    </ol>
-                    <p style="margin-top: 15px; padding: 15px; background: #fef3c7; border-radius: 8px; color: #92400e;">
-                        <strong>Note:</strong> Treatment plan will be adjusted based on patient response and progress monitoring.
-                    </p>
+            // Generate HTML preview
+            let previewHTML = `
+                <div class="preview-header">
+                    <div class="preview-title">${getReportTitle()}</div>
+                    <div>Patient: ${selectedPatient.first_name} ${selectedPatient.last_name}</div>
+                    <div>Date: ${new Date().toLocaleDateString('en-GB')}</div>
                 </div>
             `;
             
-            document.getElementById('treatmentPlan').innerHTML = planHtml;
+            // Add sections based on report type
+            if (reportData.health_assessment) {
+                previewHTML += generateAssessmentPreview(reportData.health_assessment);
+            }
+            
+            if (reportData.recommendations) {
+                previewHTML += generateRecommendationsPreview(reportData.recommendations);
+            }
+            
+            previewContent.innerHTML = previewHTML;
+            previewDiv.classList.add('show');
+        };
+        
+        async function loadReportData() {
+            const data = {};
+            
+            // Load health assessment
+            const { data: healthData } = await supabase
+                .from('health_assessments')
+                .select('*')
+                .eq('patient_id', selectedPatient.id)
+                .order('created_at', { ascending: false })
+                .limit(1)
+                .single();
+            
+            if (healthData) {
+                data.health_assessment = healthData.assessment_data;
+            }
+            
+            // Load IRIS assessment
+            const { data: irisData } = await supabase
+                .from('iris_assessments')
+                .select('*')
+                .eq('patient_id', selectedPatient.id)
+                .order('created_at', { ascending: false })
+                .limit(1)
+                .single();
+            
+            if (irisData) {
+                data.iris_assessment = irisData.assessment_data;
+            }
+            
+            // Load recommendations
+            const { data: reportRecord } = await supabase
+                .from('medical_reports')
+                .select('*')
+                .eq('patient_id', selectedPatient.id)
+                .order('created_at', { ascending: false })
+                .limit(1)
+                .single();
+            
+            if (reportRecord) {
+                data.recommendations = reportRecord.recommendations;
+                data.therapy_recommendations = reportRecord.report_data?.therapy_recommendations;
+            }
+            
+            return data;
         }
         
-        function formatDomain(domain) {
-            const formats = {
-                sleep: 'Sleep Quality',
-                stress: 'Stress Management',
-                cardiovascular: 'Cardiovascular Health',
-                joint: 'Joint Health',
-                digestive: 'Digestive Wellness',
-                kidney: 'Kidney Function',
-                energy: 'Energy Levels',
-                metabolic: 'Metabolic Health'
+        async function loadSessionsData() {
+            const { data } = await supabase
+                .from('therapy_sessions')
+                .select('*')
+                .eq('patient_id', selectedPatient.id)
+                .order('session_date');
+            
+            return data || [];
+        }
+        
+        async function loadMetricsData() {
+            const { data } = await supabase
+                .from('wellness_metrics')
+                .select('*')
+                .eq('patient_id', selectedPatient.id)
+                .order('created_at');
+            
+            return data || [];
+        }
+        
+        function getReportTitle() {
+            const titles = {
+                comprehensive: 'Comprehensive Diagnostic Report',
+                progress: 'Treatment Progress Report',
+                assessment: 'Health Assessment Report',
+                summary: 'Treatment Summary Report'
             };
-            return formats[domain] || domain;
+            return titles[selectedReportType] || 'Medical Report';
         }
         
-        window.approveAndProceed = async function() {
-            // Update workflow to treatment planning stage
-            if (selectedPatient) {
-                await workflowManager.updateStage(selectedPatient.id, workflowStages.TREATMENT_PLANNING);
-                window.location.href = `treatment-planning.html?patient=${selectedPatient.id}`;
+        function generateAssessmentPreview(assessment) {
+            let html = '<div class="preview-section">';
+            html += '<div class="preview-section-title">Health Assessment Results</div>';
+            
+            if (assessment.scores) {
+                html += `<p><strong>Overall Wellness:</strong> ${assessment.scores.overall_wellness || 0}%</p>`;
+            }
+            
+            html += '</div>';
+            return html;
+        }
+        
+        function generateRecommendationsPreview(recommendations) {
+            let html = '<div class="preview-section">';
+            html += '<div class="preview-section-title">Recommendations</div>';
+            html += '<ul>';
+            
+            recommendations.forEach(rec => {
+                html += `<li>${rec}</li>`;
+            });
+            
+            html += '</ul></div>';
+            return html;
+        }
+        
+        window.downloadPDF = function() {
+            if (generatedPDF) {
+                const patientName = `${selectedPatient.first_name} ${selectedPatient.last_name}`;
+                pdfGenerator.savePDF(generatedPDF, patientName, selectedReportType);
             }
         };
         
-        window.saveReport = async function() {
-            try {
-                const reportData = {
-                    patient_info: {
-                        name: `${selectedPatient.first_name} ${selectedPatient.last_name}`,
-                        patient_id: selectedPatient.patient_id
-                    },
-                    health_assessment: healthAssessmentData?.assessment_data,
-                    iris_assessment: irisAssessmentData?.iris_data,
-                    correlation_analysis: correlationResults,
-                    therapy_recommendations: recommendedTherapies.map(r => ({
-                        name: r.therapy.name,
-                        code: r.therapy.code,
-                        priority: r.priority
-                    })),
-                    generated_at: new Date().toISOString()
-                };
-                
-                const { error } = await supabase
-                    .from('medical_reports')
-                    .insert([{
-                        patient_id: selectedPatient.id,
-                        clinic_id: selectedPatient.clinic_id,
-                        report_type: 'comprehensive_diagnostic',
-                        report_title: 'Comprehensive Wellness Diagnostic Report',
-                        report_data: reportData,
-                        recommendations: recommendedTherapies.map(r => `${r.therapy.name} (${r.priority})`),
-                        therapies_recommended: recommendedTherapies.map(r => r.therapy.name)
-                    }]);
-                
-                if (!error) {
-                    alert('Report saved successfully!');
+        window.emailPDF = async function() {
+            if (!selectedPatient.email) {
+                showAlert('Patient email not available', 'error');
+                return;
+            }
+            
+            // In production, this would send via email service
+            showAlert(`Email functionality will send to: ${selectedPatient.email}`, 'info');
+        };
+        
+        window.savePDFToDatabase = async function() {
+            if (generatedPDF) {
+                try {
+                    const base64 = pdfGenerator.getPDFBase64(generatedPDF);
+                    
+                    // Save to database
+                    const { error } = await supabase
+                        .from('medical_reports')
+                        .update({ 
+                            pdf_data: base64,
+                            pdf_generated_at: new Date().toISOString()
+                        })
+                        .eq('patient_id', selectedPatient.id)
+                        .order('created_at', { ascending: false })
+                        .limit(1);
+                    
+                    if (error) throw error;
+                    
+                    showAlert('PDF saved to patient records', 'success');
+                } catch (error) {
+                    console.error('Error saving PDF:', error);
+                    showAlert('Error saving PDF to database', 'error');
                 }
-            } catch (error) {
-                console.error('Error saving report:', error);
             }
         };
         
-        window.printReport = function() {
-            window.print();
+        window.printPDF = function() {
+            if (generatedPDF) {
+                window.open(generatedPDF.output('bloburl'), '_blank');
+            }
         };
+        
+        function showLoading(show) {
+            const loading = document.getElementById('loadingIndicator');
+            if (show) {
+                loading.classList.add('show');
+            } else {
+                loading.classList.remove('show');
+            }
+        }
+        
+        function showAlert(message, type) {
+            const alertDiv = document.getElementById('alertMessage');
+            alertDiv.textContent = message;
+            alertDiv.className = `alert alert-${type} show`;
+            
+            setTimeout(() => {
+                alertDiv.classList.remove('show');
+            }, 5000);
+        }
     </script>
 </body>
 </html>
