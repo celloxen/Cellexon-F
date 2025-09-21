@@ -289,4 +289,228 @@
                     frequency settings, and treatment protocols for various conditions...
                 </div>
                 <div class="article-meta">
-                    <span>📅 Update
+                    <span>📅 Updated: Last week</span>
+                    <span>⏱️ 10 min read</span>
+                    <span><span class="tag">Therapy</span><span class="tag">Protocol</span></span>
+                </div>
+            </div>
+            
+            <div class="article-item" onclick="viewArticle('iris-assessment')">
+                <div class="article-title">Understanding Iris Assessment</div>
+                <div class="article-excerpt">
+                    Learn how to interpret iris patterns, constitutional types, and organ reflexes. 
+                    This guide covers the fundamentals of iridology and its integration with health assessment...
+                </div>
+                <div class="article-meta">
+                    <span>📅 Updated: 3 days ago</span>
+                    <span>⏱️ 15 min read</span>
+                    <span><span class="tag">Assessment</span><span class="tag">Diagnostic</span></span>
+                </div>
+            </div>
+            
+            <div class="article-item" onclick="viewArticle('lily-ai')">
+                <div class="article-title">Lily AI Health Assessment Guide</div>
+                <div class="article-excerpt">
+                    How to effectively use Lily AI for comprehensive health assessments. Includes best practices, 
+                    question interpretation, and correlation with iris findings...
+                </div>
+                <div class="article-meta">
+                    <span>📅 Updated: Today</span>
+                    <span>⏱️ 8 min read</span>
+                    <span><span class="tag">AI</span><span class="tag">Assessment</span></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Article View -->
+        <div id="articleView" class="article-view">
+            <button class="back-btn" onclick="backToList()">← Back to Articles</button>
+            <div id="articleContent">
+                <!-- Dynamic article content -->
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { supabase } from './supabase-config.js';
+        
+        let knowledgeArticles = [];
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            loadArticles();
+            setupEventListeners();
+        });
+        
+        function loadArticles() {
+            // This would normally load from database
+            // For now, using static content as example
+            knowledgeArticles = [
+                {
+                    id: 'bafe-protocol',
+                    title: 'BAFE Protocol - Complete Guide',
+                    category: 'therapies',
+                    content: `
+                        <div class="article-header">
+                            <h1>BAFE Protocol - Complete Guide</h1>
+                            <div class="article-meta">
+                                <span>Category: Therapies</span>
+                                <span>Last Updated: ${new Date().toLocaleDateString()}</span>
+                            </div>
+                        </div>
+                        <div class="article-content">
+                            <h2>Overview</h2>
+                            <p>Bioacoustic Frequency Entrainment (BAFE) is a therapeutic modality that uses specific 
+                            frequencies to promote healing and balance in the body. This protocol has shown remarkable 
+                            results in treating various conditions.</p>
+                            
+                            <h2>Key Frequencies</h2>
+                            <ul>
+                                <li><strong>528 Hz:</strong> DNA repair and transformation</li>
+                                <li><strong>432 Hz:</strong> Natural healing frequency</li>
+                                <li><strong>396 Hz:</strong> Releasing fear and guilt</li>
+                                <li><strong>639 Hz:</strong> Harmonizing relationships</li>
+                                <li><strong>741 Hz:</strong> Awakening intuition</li>
+                                <li><strong>852 Hz:</strong> Returning to spiritual order</li>
+                            </ul>
+                            
+                            <h2>Probe Placement</h2>
+                            <h3>Standard Configuration</h3>
+                            <p>For general treatment, place probes as follows:</p>
+                            <ol>
+                                <li>Primary probe: 2 inches below the navel</li>
+                                <li>Secondary probe: Base of skull</li>
+                                <li>Ground probe: Left ankle</li>
+                            </ol>
+                            
+                            <h3>Condition-Specific Placements</h3>
+                            <p>Adjust probe placement based on the specific condition being treated:</p>
+                            <ul>
+                                <li><strong>Headaches:</strong> Temples and occipital region</li>
+                                <li><strong>Digestive issues:</strong> Epigastric and umbilical regions</li>
+                                <li><strong>Joint pain:</strong> Directly on affected joints</li>
+                            </ul>
+                            
+                            <h2>Treatment Protocol</h2>
+                            <h3>Session Duration</h3>
+                            <p>Standard sessions last 30-45 minutes, with the following phases:</p>
+                            <ol>
+                                <li>Initialization (5 minutes): Low frequency sweep</li>
+                                <li>Primary treatment (20-30 minutes): Target frequencies</li>
+                                <li>Integration (5-10 minutes): Harmonizing frequencies</li>
+                            </ol>
+                            
+                            <h3>Frequency Progression</h3>
+                            <p>Begin with lower frequencies and gradually increase based on patient response:</p>
+                            <ul>
+                                <li>Week 1-2: 396-528 Hz range</li>
+                                <li>Week 3-4: 528-741 Hz range</li>
+                                <li>Week 5+: Full spectrum as needed</li>
+                            </ul>
+                            
+                            <h2>Contraindications</h2>
+                            <ul>
+                                <li>Pregnancy (first trimester)</li>
+                                <li>Pacemaker or electronic implants</li>
+                                <li>Acute infections</li>
+                                <li>Severe cardiac arrhythmias</li>
+                            </ul>
+                            
+                            <h2>Patient Preparation</h2>
+                            <p>Ensure patients are properly prepared for optimal results:</p>
+                            <ol>
+                                <li>Hydration: Drink 500ml water before session</li>
+                                <li>Clothing: Loose, comfortable attire</li>
+                                <li>Electronics: Remove all electronic devices</li>
+                                <li>Mindset: Relaxed and receptive state</li>
+                            </ol>
+                            
+                            <h2>Expected Outcomes</h2>
+                            <p>Patients typically report:</p>
+                            <ul>
+                                <li>Immediate: Deep relaxation and stress relief</li>
+                                <li>24-48 hours: Improved sleep quality</li>
+                                <li>1 week: Reduced pain and inflammation</li>
+                                <li>2-4 weeks: Enhanced energy and wellbeing</li>
+                            </ul>
+                        </div>
+                    `
+                },
+                {
+                    id: 'iris-assessment',
+                    title: 'Understanding Iris Assessment',
+                    category: 'assessment',
+                    content: `
+                        <div class="article-header">
+                            <h1>Understanding Iris Assessment</h1>
+                        </div>
+                        <div class="article-content">
+                            <h2>Introduction to Iridology</h2>
+                            <p>Iridology is the study of patterns, colors, and other characteristics of the iris 
+                            to determine information about a patient's systemic health...</p>
+                        </div>
+                    `
+                },
+                {
+                    id: 'lily-ai',
+                    title: 'Lily AI Health Assessment Guide',
+                    category: 'assessment',
+                    content: `
+                        <div class="article-header">
+                            <h1>Lily AI Health Assessment Guide</h1>
+                        </div>
+                        <div class="article-content">
+                            <h2>Getting Started with Lily AI</h2>
+                            <p>Lily AI is your intelligent health assessment assistant...</p>
+                        </div>
+                    `
+                }
+            ];
+        }
+        
+        function setupEventListeners() {
+            document.getElementById('searchInput').addEventListener('input', (e) => {
+                searchArticles(e.target.value);
+            });
+        }
+        
+        function searchArticles(query) {
+            if (!query) {
+                displayArticles(knowledgeArticles);
+                return;
+            }
+            
+            const filtered = knowledgeArticles.filter(article => 
+                article.title.toLowerCase().includes(query.toLowerCase()) ||
+                article.content.toLowerCase().includes(query.toLowerCase())
+            );
+            
+            displayArticles(filtered);
+        }
+        
+        function displayArticles(articles) {
+            // Implementation for displaying filtered articles
+        }
+        
+        window.filterByCategory = function(category) {
+            const filtered = knowledgeArticles.filter(article => 
+                article.category === category
+            );
+            displayArticles(filtered);
+        };
+        
+        window.viewArticle = function(articleId) {
+            const article = knowledgeArticles.find(a => a.id === articleId);
+            if (article) {
+                document.getElementById('articlesList').style.display = 'none';
+                document.getElementById('articleView').classList.add('active');
+                document.getElementById('articleContent').innerHTML = article.content;
+            }
+        };
+        
+        window.backToList = function() {
+            document.getElementById('articleView').classList.remove('active');
+            document.getElementById('articlesList').style.display = 'block';
+        };
+    </script>
+</body>
+</html>
