@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Appointments - Celloxen Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 20px 0;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+        
+        /* Calendar View Toggle */
+        .view-controls {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        .view-tabs {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .view-tab {
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            background: #f3f4f6;
+            border: none;
+            transition: all 0.3s;
+        }
+        
+        .view-tab.active {
+            background: #10b981;
+            color: white;
+        }
+        
+        .date-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .date-nav {
+            padding: 8px 12px;
+            background: #f3f4f6;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        
+        .date-nav:hover {
+            background: #e5e7eb;
+        }
+        
+        .current-date {
+            font-weight: 600;
+            padding: 0 15px;
+        }
+        
+        /* Appointment Actions */
+        .appointment-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn-new {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        
+        .btn-new:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+        
+        /* Calendar Grid */
+        .calendar-container {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        .calendar-header {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .day-header {
+            text-align: center;
+            font-weight: 600;
+            color: #6b7280;
+            padding: 10px;
+            font-size: 14px;
+        }
+        
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+        }
+        
+        .calendar-day {
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            min-height: 100px;
+            padding: 8px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .calendar-day:hover {
+            background: #f9fafb;
+            border-color: #10b981;
+        }
+        
+        .day-number {
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 5px;
+        }
+        
+        .day-appointment {
+            font-size: 11px;
+            background: #dbeafe;
+            color: #1e40af;
+            padding: 2px 4px;
+            border-radius: 4px;
+            margin-bottom: 2px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        /* List View */
+        .appointments-list {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        .appointment-item {
+            padding: 15px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+        }
+        
+        .appointment-item:hover {
+            background: #f9fafb;
+            border-color: #10b981;
+        }
+        
+        .appointment-time {
+            background: #eff6ff;
+            color: #1e40af;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-weight: 600;
+            margin-right: 15px;
+        }
+        
+        .appointment-details {
+            flex: 1;
+        }
+        
+        .patient-name {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 5px;
+        }
+        
+        .appointment-type {
+            color: #6b7280;
+            font-size: 14px;
+        }
+        
+        .appointment-actions-btns {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .action-btn {
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: 1px solid #e5e7eb;
+            background: white;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+        
+        .action-btn:hover {
+            background: #f3f4f6;
+        }
+        
+        .btn-edit {
+            color: #f59e0b;
+            border-color: #f59e0b;
+        }
+        
+        .btn-cancel {
+            color: #ef4444;
+            border-color: #ef4444;
+        }
+        
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1f2937;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #6b7280;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #374151;
+            font-size: 14px;
+        }
+        
+        .form-input, .form-select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: #10b981;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+        }
+        
+        .btn-primary {
+            background: #10b981;
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #374151;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container" style="display: flex; justify-content: space-between; align-items: center;">
+            <h1 style="font-size: 20px;">Appointment Management</h1>
+            <a href="clinic-dashboard.html" style="color: white; text-decoration: none;">← Back to Dashboard</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- View Controls -->
+        <div class="view-controls">
+            <div class="view-tabs">
+                <button class="view-tab active" onclick="switchView('list')">List View</button>
+                <button class="view-tab" onclick="switchView('calendar')">Calendar View</button>
+                <button class="view-tab" onclick="switchView('day')">Day View</button>
+            </div>
+            
+            <div class="date-controls">
+                <button class="date-nav" onclick="navigateDate(-1)">←</button>
+                <span class="current-date" id="currentDate">Today</span>
+                <button class="date-nav" onclick="navigateDate(1)">→</button>
+            </div>
+            
+            <div class="appointment-actions">
+                <button class="btn-new" onclick="openNewAppointment()">+ New Appointment</button>
+            </div>
+        </div>
+
+        <!-- List View -->
+        <div id="listView" class="appointments-list">
+            <h3 style="margin-bottom: 20px;">Today's Appointments</h3>
+            <div id="appointmentsList">
+                <!-- Dynamic appointments -->
+            </div>
+        </div>
+
+        <!-- Calendar View -->
+        <div id="calendarView" class="calendar-container" style="display: none;">
+            <div class="calendar-header">
+                <div class="day-header">Sunday</div>
+                <div class="day-header">Monday</div>
+                <div class="day-header">Tuesday</div>
+                <div class="day-header">Wednesday</div>
+                <div class="day-header">Thursday</div>
+                <div class="day-header">Friday</div>
+                <div class="day-header">Saturday</div>
+            </div>
+            <div class="calendar-grid" id="calendarGrid">
+                <!-- Dynamic calendar -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Appointment Modal -->
+    <div id="appointmentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle">New Appointment</h2>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            
+            <form id="appointmentForm">
+                <input type="hidden" id="appointmentId">
+                
+                <div class="form-group">
+                    <label class="form-label">Patient</label>
+                    <select class="form-select" id="patientSelect" required>
+                        <option value="">Select Patient</option>
+                    </select>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Date</label>
+                        <input type="date" class="form-input" id="appointmentDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Time</label>
+                        <input type="time" class="form-input" id="appointmentTime" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Appointment Type</label>
+                    <select class="form-select" id="appointmentType" required>
+                        <option value="">Select Type</option>
+                        <option value="Consultation">Consultation</option>
+                        <option value="Treatment">Treatment</option>
+                        <option value="Assessment">Health Assessment</option>
+                        <option value="Iris">Iris Assessment</option>
+                        <option value="Follow-up">Follow-up</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Therapy Code (if treatment)</label>
+                    <input type="text" class="form-input" id="therapyCode" placeholder="e.g., BAFE-01">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Notes</label>
+                    <textarea class="form-input" id="appointmentNotes" rows="3"></textarea>
+                </div>
+                
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-primary">Save Appointment</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script type="module">
+        import { supabase } from './supabase-config.js';
+        
+        let currentClinicId = null;
+        let currentView = 'list';
+        let currentDate = new Date();
+        let appointments = [];
+        let patients = [];
+        
+        document.addEventListener('DOMContentLoaded', async function() {
+            await loadClinicId();
+            await loadPatients();
+            await loadAppointments();
+            setupEventListeners();
+            updateDateDisplay();
+        });
+        
+        async function loadClinicId() {
+            const authData = localStorage.getItem('celloxen_auth');
+            if (authData) {
+                const auth = JSON.parse(authData);
+                currentClinicId = auth.clinicId;
+            }
+        }
+        
+        async function loadPatients() {
+            if (!currentClinicId) return;
+            
+            try {
+                const { data, error } = await supabase
+                    .from('patients')
+                    .select('*')
+                    .eq('clinic_id', currentClinicId)
+                    .order('last_name');
+                
+                if (error) throw error;
+                
+                patients = data || [];
+                populatePatientSelect();
+                
+            } catch (error) {
+                console.error('Error loading patients:', error);
+            }
+        }
+        
+        function populatePatientSelect() {
+            const select = document.getElementById('patientSelect');
+            select.innerHTML = '<option value="">Select Patient</option>';
+            
+            patients.forEach(patient => {
+                const option = document.createElement('option');
+                option.value = patient.id;
+                option.textContent = `${patient.first_name} ${patient.last_name} - ${patient.patient_id}`;
+                select.appendChild(option);
+            });
+        }
+        
+        async function loadAppointments() {
+            if (!currentClinicId) return;
+            
+            try {
+                const startDate = new Date(currentDate);
+                startDate.setHours(0, 0, 0, 0);
+                
+                const endDate = new Date(currentDate);
+                endDate.setHours(23, 59, 59, 999);
+                
+                const { data, error } = await supabase
+                    .from('appointments')
+                    .select(`
+                        *,
+                        patients(first_name, last_name, patient_id)
+                    `)
+                    .eq('clinic_id', currentClinicId)
+                    .gte('appointment_date', startDate.toISOString().split('T')[0])
+                    .lte('appointment_date', endDate.toISOString().split('T')[0])
+                    .order('appointment_time');
+                
+                if (error) throw error;
+                
+                appointments = data || [];
+                displayAppointments();
+                
+            } catch (error) {
+                console.error('Error loading appointments:', error);
+            }
+        }
+        
+        function displayAppointments() {
+            if (currentView === 'list') {
+                displayListView();
+            } else if (currentView === 'calendar') {
+                displayCalendarView();
+            }
+        }
+        
+        function displayListView() {
+            const listDiv = document.getElementById('appointmentsList');
+            
+            if (appointments.length === 0) {
+                listDiv.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #9ca3af;">
+                        <div style="font-size: 48px;">📅</div>
+                        <p>No appointments scheduled</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            listDiv.innerHTML = appointments.map(apt => `
+                <div class="appointment-item">
+                    <div style="display: flex; align-items: center;">
+                        <span class="appointment-time">${apt.appointment_time.substring(0, 5)}</span>
+                        <div class="appointment-details">
+                            <div class="patient-name">
+                                ${apt.patients ? `${apt.patients.first_name} ${apt.patients.last_name}` : 'Unknown'}
+                            </div>
+                            <div class="appointment-type">
+                                ${apt.appointment_type} ${apt.therapy_code ? `- ${apt.therapy_code}` : ''}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="appointment-actions-btns">
+                        <button class="action-btn btn-edit" onclick="editAppointment(${apt.id})">Edit</button>
+                        <button class="action-btn btn-cancel" onclick="cancelAppointment(${apt.id})">Cancel</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function setupEventListeners() {
+            document.getElementById('appointmentForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await saveAppointment();
+            });
+        }
+        
+        async function saveAppointment() {
+            const appointmentData = {
+                clinic_id: currentClinicId,
+                patient_id: parseInt(document.getElementById('patientSelect').value),
+                appointment_date: document.getElementById('appointmentDate').value,
+                appointment_time: document.getElementById('appointmentTime').value,
+                appointment_type: document.getElementById('appointmentType').value,
+                therapy_code: document.getElementById('therapyCode').value || null,
+                notes: document.getElementById('appointmentNotes').value || null,
+                status: 'scheduled'
+            };
+            
+            const appointmentId = document.getElementById('appointmentId').value;
+            
+            try {
+                if (appointmentId) {
+                    // Update existing
+                    const { error } = await supabase
+                        .from('appointments')
+                        .update(appointmentData)
+                        .eq('id', appointmentId);
+                    
+                    if (error) throw error;
+                } else {
+                    // Create new
+                    const { error } = await supabase
+                        .from('appointments')
+                        .insert(appointmentData);
+                    
+                    if (error) throw error;
+                }
+                
+                closeModal();
+                await loadAppointments();
+                alert('Appointment saved successfully');
+                
+            } catch (error) {
+                console.error('Error saving appointment:', error);
+                alert('Error saving appointment');
+            }
+        }
+        
+        function updateDateDisplay() {
+            const dateElement = document.getElementById('currentDate');
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            dateElement.textContent = currentDate.toLocaleDateString('en-GB', options);
+        }
+        
+        // Global functions
+        window.switchView = function(view) {
+            currentView = view;
+            
+            // Update tabs
+            document.querySelectorAll('.view-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Show/hide views
+            document.getElementById('listView').style.display = view === 'list' ? 'block' : 'none';
+            document.getElementById('calendarView').style.display = view === 'calendar' ? 'block' : 'none';
+            
+            displayAppointments();
+        };
+        
+        window.navigateDate = async function(direction) {
+            currentDate.setDate(currentDate.getDate() + direction);
+            updateDateDisplay();
+            await loadAppointments();
+        };
+        
+        window.openNewAppointment = function() {
+            document.getElementById('modalTitle').textContent = 'New Appointment';
+            document.getElementById('appointmentForm').reset();
+            document.getElementById('appointmentId').value = '';
+            document.getElementById('appointmentDate').value = currentDate.toISOString().split('T')[0];
+            document.getElementById('appointmentModal').classList.add('active');
+        };
+        
+        window.editAppointment = function(id) {
+            const appointment = appointments.find(a => a.id === id);
+            if (!appointment) return;
+            
+            document.getElementById('modalTitle').textContent = 'Edit Appointment';
+            document.getElementById('appointmentId').value = appointment.id;
+            document.getElementById('patientSelect').value = appointment.patient_id;
+            document.getElementById('appointmentDate').value = appointment.appointment_date;
+            document.getElementById('appointmentTime').value = appointment.appointment_time;
+            document.getElementById('appointmentType').value = appointment.appointment_type;
+            document.getElementById('therapyCode').value = appointment.therapy_code || '';
+            document.getElementById('appointmentNotes').value = appointment.notes || '';
+            
+            document.getElementById('appointmentModal').classList.add('active');
+        };
+        
+        window.cancelAppointment = async function(id) {
+            if (!confirm('Are you sure you want to cancel this appointment?')) return;
+            
+            try {
+                const { error } = await supabase
+                    .from('appointments')
+                    .update({ status: 'cancelled' })
+                    .eq('id', id);
+                
+                if (error) throw error;
+                
+                await loadAppointments();
+                alert('Appointment cancelled');
+                
+            } catch (error) {
+                console.error('Error cancelling appointment:', error);
+                alert('Error cancelling appointment');
+            }
+        };
+        
+        window.closeModal = function() {
+            document.getElementById('appointmentModal').classList.remove('active');
+        };
+    </script>
+</body>
+</html>
