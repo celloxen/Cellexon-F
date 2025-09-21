@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supplement Tracking - Celloxen Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+            color: white;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        
+        .header-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+        }
+        
+        .header p {
+            color: #cbd5e1;
+            margin-top: 5px;
+            font-size: 14px;
+        }
+        
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        
+        /* Statistics Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: transform 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1e3a8a;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #64748b;
+            text-transform: uppercase;
+        }
+        
+        .stat-indicator {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        
+        .indicator-success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .indicator-warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        /* Quick Actions */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .action-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+        
+        .action-card:hover {
+            border-color: #1e3a8a;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .action-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            color: white;
+            margin: 0 auto 15px;
+        }
+        
+        .action-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 5px;
+        }
+        
+        .action-description {
+            font-size: 13px;
+            color: #64748b;
+        }
+        
+        /* Main Content Sections */
+        .content-section {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f1f5f9;
+        }
+        
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+        
+        .btn-secondary {
+            background: #f1f5f9;
+            color: #475569;
+        }
+        
+        .btn-secondary:hover {
+            background: #e2e8f0;
+        }
+        
+        /* Prescription Cards */
+        .prescriptions-grid {
+            display: grid;
+            gap: 20px;
+        }
+        
+        .prescription-card {
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+        
+        .prescription-card:hover {
+            border-color: #1e3a8a;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        
+        .prescription-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 15px;
+        }
+        
+        .patient-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .patient-avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #1e3a8a, #1e40af);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .patient-details {
+            flex: 1;
+        }
+        
+        .patient-name {
+            font-weight: 600;
+            color: #1e293b;
+            font-size: 16px;
+        }
+        
+        .patient-id {
+            font-size: 12px;
+            color: #64748b;
+        }
+        
+        .prescription-status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .status-active {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .status-completed {
+            background: #dbeafe;
+            color: #1e3a8a;
+        }
+        
+        /* Supplement List */
+        .supplements-list {
+            margin: 15px 0;
+        }
+        
+        .supplement-item {
+            background: #f8fafc;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .supplement-name {
+            font-weight: 600;
+            color: #1e293b;
+            font-size: 14px;
+        }
+        
+        .supplement-dosage {
+            font-size: 13px;
+            color: #64748b;
+            margin-top: 2px;
+        }
+        
+        .compliance-tracker {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .compliance-bar {
+            width: 100px;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .compliance-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #10b981, #059669);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+        
+        .compliance-percent {
+            font-size: 12px;
+            font-weight: 600;
+            color: #475569;
+        }
+        
+        /* Inventory Section */
+        .inventory-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .inventory-item {
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        
+        .inventory-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        
+        .inventory-icon {
+            width: 50px;
+            height: 50px;
+            background: white;
+            border-radius: 10px;
+            margin: 0 auto 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+        
+        .inventory-name {
+            font-weight: 600;
+            color: #1e293b;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        
+        .inventory-stock {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1e3a8a;
+            margin: 5px 0;
+        }
+        
+        .stock-status {
+            font-size: 11px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            display: inline-block;
+        }
+        
+        .stock-good {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .stock-low {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .stock-out {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .modal.show {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .modal-header {
+            padding: 25px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .close-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: none;
+            background: #f1f5f9;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        
+        .close-btn:hover {
+            background: #e2e8f0;
+        }
+        
+        .modal-body {
+            padding: 25px;
+            overflow-y: auto;
+            flex: 1;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            color: #64748b;
+            text-transform: uppercase;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #1e3a8a;
+            box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+        }
+        
+        .supplement-form-item {
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 10px;
+        }
+        
+        .add-supplement-btn {
+            background: #f0f9ff;
+            border: 2px dashed #1e3a8a;
+            color: #1e3a8a;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .add-supplement-btn:hover {
+            background: #e0f2fe;
+        }
+        
+        .modal-footer {
+            padding: 20px 25px;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+        
+        /* Compliance Chart */
+        .compliance-chart {
+            margin: 20px 0;
+        }
+        
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .chart-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .time-filter {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .filter-btn {
+            padding: 6px 12px;
+            border: 1px solid #e2e8f0;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+        
+        .filter-btn:hover {
+            background: #f8fafc;
+        }
+        
+        .filter-btn.active {
+            background: linear-gradient(135deg, #1e3a8a, #1e40af);
+            color: white;
+            border-color: #1e3a8a;
+        }
+        
+        .chart-bars {
+            display: grid;
+            gap: 10px;
+        }
+        
+        .chart-bar-item {
+            display: grid;
+            grid-template-columns: 100px 1fr 60px;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .chart-label {
+            font-size: 13px;
+            color: #64748b;
+            text-align: right;
+        }
+        
+        .chart-bar-container {
+            height: 24px;
+            background: #f1f5f9;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        
+        .chart-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #10b981, #059669);
+            border-radius: 12px;
+            transition: width 0.5s ease;
+        }
+        
+        .chart-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-container">
+            <div>
+                <h1>Supplement Tracking</h1>
+                <p>Manage prescriptions and monitor compliance</p>
+            </div>
+            <a href="clinic-dashboard.html" class="back-btn">← Back to Dashboard</a>
+        </div>
+    </div>
+    
+    <div class="container">
+        <!-- Statistics Overview -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="activePrescriptions">12</div>
+                <div class="stat-label">Active Prescriptions</div>
+                <span class="stat-indicator indicator-success">↑ 3 this week</span>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="avgCompliance">85%</div>
+                <div class="stat-label">Avg Compliance Rate</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalPatients">8</div>
+                <div class="stat-label">Patients on Supplements</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="lowStock">3</div>
+                <div class="stat-label">Low Stock Items</div>
+                <span class="stat-indicator indicator-warning">Reorder needed</span>
+            </div>
+        </div>
+        
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <div class="action-card" onclick="showNewPrescriptionModal()">
+                <div class="action-icon">➕</div>
+                <div class="action-title">New Prescription</div>
+                <div class="action-description">Create supplement prescription</div>
+            </div>
+            <div class="action-card" onclick="showComplianceCheck()">
+                <div class="action-icon">✓</div>
+                <div class="action-title">Record Compliance</div>
+                <div class="action-description">Update patient compliance</div>
+            </div>
+            <div class="action-card" onclick="showInventoryModal()">
+                <div class="action-icon">📦</div>
+                <div class="action-title">Manage Inventory</div>
+                <div class="action-description">Update stock levels</div>
+            </div>
+            <div class="action-card" onclick="generateComplianceReport()">
+                <div class="action-icon">📊</div>
+                <div class="action-title">Compliance Report</div>
+                <div class="action-description">View detailed analytics</div>
+            </div>
+        </div>
+        
+        <!-- Overall Compliance Chart -->
+        <div class="content-section">
+            <div class="compliance-chart">
+                <div class="chart-header">
+                    <div class="chart-title">Supplement Compliance by Category</div>
+                    <div class="time-filter">
+                        <button class="filter-btn active" onclick="filterCompliance('week')">Week</button>
+                        <button class="filter-btn" onclick="filterCompliance('month')">Month</button>
+                        <button class="filter-btn" onclick="filterCompliance('all')">All Time</button>
+                    </div>
+                </div>
+                <div class="chart-bars">
+                    <div class="chart-bar-item">
+                        <div class="chart-label">Vitamins</div>
+                        <div class="chart-bar-container">
+                            <div class="chart-bar-fill" style="width: 92%;"></div>
+                        </div>
+                        <div class="chart-value">92%</div>
+                    </div>
+                    <div class="chart-bar-item">
+                        <div class="chart-label">Minerals</div>
+                        <div class="chart-bar-container">
+                            <div class="chart-bar-fill" style="width: 85%;"></div>
+                        </div>
+                        <div class="chart-value">85%</div>
+                    </div>
+                    <div class="chart-bar-item">
+                        <div class="chart-label">Probiotics</div>
+                        <div class="chart-bar-container">
+                            <div class="chart-bar-fill" style="width: 78%;"></div>
+                        </div>
+                        <div class="chart-value">78%</div>
+                    </div>
+                    <div class="chart-bar-item">
+                        <div class="chart-label">Omega-3</div>
+                        <div class="chart-bar-container">
+                            <div class="chart-bar-fill" style="width: 88%;"></div>
+                        </div>
+                        <div class="chart-value">88%</div>
+                    </div>
+                    <div class="chart-bar-item">
+                        <div class="chart-label">Herbal</div>
+                        <div class="chart-bar-container">
+                            <div class="chart-bar-fill" style="width: 82%;"></div>
+                        </div>
+                        <div class="chart-value">82%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Active Prescriptions -->
+        <div class="content-section">
+            <div class="section-header">
+                <h2 class="section-title">Active Prescriptions</h2>
+                <button class="btn btn-primary" onclick="showNewPrescriptionModal()">
+                    New Prescription
+                </button>
+            </div>
+            
+            <div class="prescriptions-grid" id="prescriptionsList">
+                <!-- Sample prescription cards -->
+                <div class="prescription-card">
+                    <div class="prescription-header">
+                        <div class="patient-info">
+                            <div class="patient-avatar">JD</div>
+                            <div class="patient-details">
+                                <div class="patient-name">John Doe</div>
+                                <div class="patient-id">ID: PAT-001</div>
+                            </div>
+                        </div>
+                        <span class="prescription-status status-active">Active</span>
+                    </div>
+                    
+                    <div class="supplements-list">
+                        <div class="supplement-item">
+                            <div>
+                                <div class="supplement-name">Magnesium Glycinate</div>
+                                <div class="supplement-dosage">400mg - Once daily before bed</div>
+                            </div>
+                            <div class="compliance-tracker">
+                                <div class="compliance-bar">
+                                    <div class="compliance-fill" style="width: 85%;"></div>
+                                </div>
+                                <span class="compliance-percent">85%</span>
+                            </div>
+                        </div>
+                        <div class="supplement-item">
+                            <div>
+                                <div class="supplement-name">Vitamin B Complex</div>
+                                <div class="supplement-dosage">1 tablet - With breakfast</div>
+                            </div>
+                            <div class="compliance-tracker">
+                                <div class="compliance-bar">
+                                    <div class="compliance-fill" style="width: 92%;"></div>
+                                </div>
+                                <span class="compliance-percent">92%</span>
+                            </div>
+                        </div>
+                        <div class="supplement-item">
+                            <div>
+                                <div class="supplement-name">Omega-3</div>
+                                <div class="supplement-dosage">1000mg EPA/DHA - Twice daily</div>
+                            </div>
+                            <div class="compliance-tracker">
+                                <div class="compliance-bar">
+                                    <div class="compliance-fill" style="width: 78%;"></div>
+                                </div>
+                                <span class="compliance-percent">78%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="prescription-card">
+                    <div class="prescription-header">
+                        <div class="patient-info">
+                            <div class="patient-avatar">SW</div>
+                            <div class="patient-details">
+                                <div class="patient-name">Sarah Wilson</div>
+                                <div class="patient-id">ID: PAT-002</div>
+                            </div>
+                        </div>
+                        <span class="prescription-status status-active">Active</span>
+                    </div>
+                    
+                    <div class="supplements-list">
+                        <div class="supplement-item">
+                            <div>
+                                <div class="supplement-name">Probiotic Blend</div>
+                                <div class="supplement-dosage">50 billion CFU - With morning meal</div>
+                            </div>
+                            <div class="compliance-tracker">
+                                <div class="compliance-bar">
+                                    <div class="compliance-fill" style="width: 95%;"></div>
+                                </div>
+                                <span class="compliance-percent">95%</span>
+                            </div>
+                        </div>
+                        <div class="supplement-item">
+                            <div>
+                                <div class="supplement-name">Vitamin D3</div>
+                                <div class="supplement-dosage">5000 IU - Once daily</div>
+                            </div>
+                            <div class="compliance-tracker">
+                                <div class="compliance-bar">
+                                    <div class="compliance-fill" style="width: 88%;"></div>
+                                </div>
+                                <span class="compliance-percent">88%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Inventory Status -->
+        <div class="content-section">
+            <div class="section-header">
+                <h2 class="section-title">Inventory Status</h2>
+                <button class="btn btn-secondary" onclick="showInventoryModal()">
+                    Manage Stock
+                </button>
+            </div>
+            
+            <div class="inventory-grid">
+                <div class="inventory-item">
+                    <div class="inventory-icon">💊</div>
+                    <div class="inventory-name">Magnesium Glycinate</div>
+                    <div class="inventory-stock">245</div>
+                    <span class="stock-status stock-good">In Stock</span>
+                </div>
+                <div class="inventory-item">
+                    <div class="inventory-icon">💊</div>
+                    <div class="inventory-name">Vitamin B Complex</div>
+                    <div class="inventory-stock">156</div>
+                    <span class="stock-status stock-good">In Stock</span>
+                </div>
+                <div class="inventory-item">
+                    <div class="inventory-icon">💊</div>
+                    <div class="inventory-name">Omega-3</div>
+                    <div class="inventory-stock">42</div>
+                    <span class="stock-status stock-low">Low Stock</span>
+                </div>
+                <div class="inventory-item">
+                    <div class="inventory-icon">💊</div>
+                    <div class="inventory-name">Probiotic Blend</div>
+                    <div class="inventory-stock">89</div>
+                    <span class="stock-status stock-good">In Stock</span>
+                </div>
+                <div class="inventory-item">
+                    <div class="inventory-icon">💊</div>
+                    <div class="inventory-name">Vitamin D3</div>
+                    <div class="inventory-stock">18</div>
+                    <span class="stock-status stock-low">Low Stock</span>
+                </div>
+                <div class="inventory-item">
+                    <div class="inventory-icon">💊</div>
+                    <div class="inventory-name">CoQ10</div>
+                    <div class="inventory-stock">0</div>
+                    <span class="stock-status stock-out">Out of Stock</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- New Prescription Modal -->
+    <div class="modal" id="prescriptionModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">New Supplement Prescription</h2>
+                <button class="close-btn" onclick="closeModal('prescriptionModal')">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Patient</label>
+                    <select id="patientSelect">
+                        <option value="">Select Patient</option>
+                        <option value="1">John Doe (PAT-001)</option>
+                        <option value="2">Sarah Wilson (PAT-002)</option>
+                        <option value="3">Michael Brown (PAT-003)</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Related to Therapy</label>
+                    <select id="therapySelect">
+                        <option value="">Select Therapy (Optional)</option>
+                        <option value="201">Detoxification Protocol</option>
+                        <option value="102">Stress Relief Therapy</option>
+                        <option value="101">Deep Sleep Renewal</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Supplements</label>
+                    <div id="supplementsList">
+                        <div class="supplement-form-item">
+                            <div class="form-row">
+                                <select>
+                                    <option>Select Supplement</option>
+                                    <option>Magnesium Glycinate</option>
+                                    <option>Vitamin B Complex</option>
+                                    <option>Omega-3</option>
+                                    <option>Probiotic Blend</option>
+                                    <option>Vitamin D3</option>
+                                    <option>CoQ10</option>
+                                </select>
+                                <input type="text" placeholder="Dosage" value="400mg">
+                                <select>
+                                    <option>Once daily</option>
+                                    <option>Twice daily</option>
+                                    <option>Three times daily</option>
+                                    <option>As needed</option>
+                                </select>
+                            </div>
+                            <input type="text" placeholder="Instructions" style="margin-top: 10px;" 
+                                   value="Take before bedtime with water">
+                        </div>
+                    </div>
+                    <div class="add-supplement-btn" onclick="addSupplementField()">
+                        + Add Another Supplement
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Duration</label>
+                    <select>
+                        <option>4 weeks</option>
+                        <option selected>8 weeks</option>
+                        <option>12 weeks</option>
+                        <option>Ongoing</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Notes</label>
+                    <textarea rows="3" placeholder="Additional instructions or notes..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="savePrescription()">Save Prescription</button>
+                <button class="btn btn-secondary" onclick="closeModal('prescriptionModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Inventory Modal -->
+    <div class="modal" id="inventoryModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Update Inventory</h2>
+                <button class="close-btn" onclick="closeModal('inventoryModal')">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Supplement</label>
+                    <select id="inventorySupplementSelect">
+                        <option>Magnesium Glycinate</option>
+                        <option>Vitamin B Complex</option>
+                        <option>Omega-3</option>
+                        <option>Probiotic Blend</option>
+                        <option>Vitamin D3</option>
+                        <option>CoQ10</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Current Stock</label>
+                    <input type="number" value="245" readonly style="background: #f8fafc;">
+                </div>
+                
+                <div class="form-group">
+                    <label>Action</label>
+                    <select id="inventoryAction" onchange="updateInventoryFields()">
+                        <option value="add">Add Stock</option>
+                        <option value="remove">Remove Stock</option>
+                        <option value="adjust">Adjust Count</option>
+                    </select>
+                </div>
+                
+                <div class="form-group" id="quantityField">
+                    <label>Quantity</label>
+                    <input type="number" id="inventoryQuantity" placeholder="Enter quantity">
+                </div>
+                
+                <div class="form-group">
+                    <label>Reason/Notes</label>
+                    <textarea rows="2" placeholder="Enter reason for inventory change..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>Reorder Level</label>
+                    <input type="number" value="50" placeholder="Minimum stock level">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="updateInventory()">Update Stock</button>
+                <button class="btn btn-secondary" onclick="closeModal('inventoryModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Modal functions
+        function showNewPrescriptionModal() {
+            document.getElementById('prescriptionModal').classList.add('show');
+        }
+        
+        function showInventoryModal() {
+            document.getElementById('inventoryModal').classList.add('show');
+        }
+        
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('show');
+        }
+        
+        // Add supplement field in prescription form
+        function addSupplementField() {
+            const supplementsList = document.getElementById('supplementsList');
+            const newField = document.createElement('div');
+            newField.className = 'supplement-form-item';
+            newField.innerHTML = `
+                <div class="form-row">
+                    <select>
+                        <option>Select Supplement</option>
+                        <option>Magnesium Glycinate</option>
+                        <option>Vitamin B Complex</option>
+                        <option>Omega-3</option>
+                        <option>Probiotic Blend</option>
+                        <option>Vitamin D3</option>
+                        <option>CoQ10</option>
+                    </select>
+                    <input type="text" placeholder="Dosage">
+                    <select>
+                        <option>Once daily</option>
+                        <option>Twice daily</option>
+                        <option>Three times daily</option>
+                        <option>As needed</option>
+                    </select>
+                </div>
+                <input type="text" placeholder="Instructions" style="margin-top: 10px;">
+            `;
+            supplementsList.appendChild(newField);
+        }
+        
+        // Save prescription
+        function savePrescription() {
+            alert('Prescription saved successfully!');
+            closeModal('prescriptionModal');
+            location.reload();
+        }
+        
+        // Update inventory
+        function updateInventory() {
+            alert('Inventory updated successfully!');
+            closeModal('inventoryModal');
+        }
+        
+        // Update inventory fields based on action
+        function updateInventoryFields() {
+            const action = document.getElementById('inventoryAction').value;
+            const quantityField = document.getElementById('quantityField');
+            const label = quantityField.querySelector('label');
+            
+            if (action === 'add') {
+                label.textContent = 'Quantity to Add';
+            } else if (action === 'remove') {
+                label.textContent = 'Quantity to Remove';
+            } else {
+                label.textContent = 'New Total Quantity';
+            }
+        }
+        
+        // Compliance check
+        function showComplianceCheck() {
+            alert('Compliance check feature - Would open compliance recording interface');
+        }
+        
+        // Generate compliance report
+        function generateComplianceReport() {
+            alert('Generating compliance report - Would create detailed PDF report');
+        }
+        
+        // Filter compliance chart
+        function filterCompliance(period) {
+            // Update active button
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Would update chart data based on period
+            console.log('Filtering compliance data for:', period);
+        }
+        
+        // Close modals on outside click
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.classList.remove('show');
+            }
+        };
+    </script>
+</body>
+</html>
