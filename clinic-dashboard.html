@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clinic Dashboard - Celloxen Health Platform</title>
+    <title>Clinic Dashboard - Celloxen Wellness Platform</title>
     <style>
         * {
             margin: 0;
@@ -13,12 +13,11 @@
         
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f8fafc;
-            color: #1f2937;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
             min-height: 100vh;
         }
         
-        /* Header Styles */
+        /* Header */
         .header {
             background: linear-gradient(135deg, #10b981 0%, #059669 100%);
             color: white;
@@ -63,16 +62,6 @@
             gap: 20px;
         }
         
-        .user-badge {
-            background: rgba(255,255,255,0.2);
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
         .logout-btn {
             background: rgba(255,255,255,0.2);
             border: 1px solid rgba(255,255,255,0.3);
@@ -88,47 +77,17 @@
             background: rgba(255,255,255,0.3);
         }
         
-        /* Main Container */
+        /* Container */
         .container {
             max-width: 1400px;
             margin: 0 auto;
             padding: 30px 20px;
         }
         
-        /* Clinic Info Banner */
-        .clinic-info-banner {
-            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
-            border: 1px solid #10b981;
-            border-radius: 12px;
-            padding: 25px;
-            margin-bottom: 30px;
+        /* Quick Stats */
+        .stats-bar {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 20px;
-        }
-        
-        .clinic-info-item {
-            text-align: center;
-        }
-        
-        .clinic-info-label {
-            color: #6b7280;
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 8px;
-        }
-        
-        .clinic-info-value {
-            color: #1f2937;
-            font-size: 20px;
-            font-weight: 700;
-        }
-        
-        /* Statistics Cards */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 20px;
             margin-bottom: 30px;
         }
@@ -139,250 +98,260 @@
             padding: 20px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.08);
             border-left: 4px solid #3b82f6;
-            transition: transform 0.3s, box-shadow 0.3s;
+            transition: transform 0.3s;
         }
         
         .stat-card:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
         }
         
-        .stat-number {
-            font-size: 32px;
+        .stat-value {
+            font-size: 28px;
             font-weight: 700;
-            color: #3b82f6;
+            color: #1f2937;
             margin-bottom: 5px;
         }
         
         .stat-label {
             color: #6b7280;
-            font-size: 11px;
+            font-size: 12px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            font-weight: 600;
         }
         
-        .stat-subtitle {
-            margin-top: 8px;
-            font-size: 12px;
-            color: #9ca3af;
-        }
-        
-        /* Quick Actions */
-        .quick-actions {
-            margin-bottom: 30px;
-        }
-        
-        .section-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: #1f2937;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #e5e7eb;
-        }
-        
-        .actions-grid {
+        /* Workflow Actions */
+        .workflow-actions {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 15px;
-        }
-        
-        .action-btn {
-            background: #3b82f6;
-            color: white;
-            border: none;
-            padding: 12px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 500;
-            font-size: 13px;
-            transition: all 0.3s;
-            text-align: center;
-        }
-        
-        .action-btn:hover {
-            background: #2563eb;
-            transform: translateY(-1px);
-        }
-        
-        .action-btn.secondary {
-            background: #6b7280;
-        }
-        
-        .action-btn.secondary:hover {
-            background: #4b5563;
-        }
-        
-        /* Module Grid */
-        .modules-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 20px;
             margin-bottom: 30px;
         }
         
-        .module-card {
+        .workflow-btn {
             background: white;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 25px 20px;
             cursor: pointer;
             transition: all 0.3s;
-            border: 2px solid transparent;
-            position: relative;
+            text-align: center;
+            text-decoration: none;
+            display: block;
         }
         
-        .module-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+        .workflow-btn:hover {
             border-color: #10b981;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
         
-        .module-icon {
-            width: 48px;
-            height: 48px;
-            background: #f0fdf4;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 15px;
-            font-size: 24px;
+        .workflow-btn.primary {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border: none;
         }
         
-        .module-title {
-            font-size: 15px;
+        .workflow-btn.primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+        
+        .workflow-btn .icon {
+            font-size: 32px;
+            margin-bottom: 10px;
+            display: block;
+        }
+        
+        .workflow-btn .title {
+            font-size: 16px;
             font-weight: 600;
             color: #1f2937;
-            margin-bottom: 8px;
+            margin-bottom: 5px;
+            display: block;
         }
         
-        .module-description {
-            color: #6b7280;
-            font-size: 12px;
-            line-height: 1.5;
-        }
-        
-        .module-badge {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: #10b981;
+        .workflow-btn.primary .title {
             color: white;
-            padding: 3px 8px;
-            border-radius: 4px;
-            font-size: 10px;
-            font-weight: 600;
-            text-transform: uppercase;
         }
         
-        .module-badge.new {
-            background: #f59e0b;
+        .workflow-btn .subtitle {
+            font-size: 12px;
+            color: #6b7280;
+            display: block;
         }
         
-        /* Schedule & Patients Sections */
-        .schedule-section, .recent-patients {
+        .workflow-btn.primary .subtitle {
+            color: rgba(255,255,255,0.9);
+        }
+        
+        /* Workflow Pipeline */
+        .workflow-pipeline {
             background: white;
             border-radius: 12px;
             padding: 25px;
+            margin-bottom: 30px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            overflow-x: auto;
+        }
+        
+        .pipeline-stage {
+            text-align: center;
+            flex: 1;
+            min-width: 100px;
+        }
+        
+        .stage-count {
+            width: 60px;
+            height: 60px;
+            background: #f3f4f6;
+            border: 3px solid #e5e7eb;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 10px;
+            font-size: 20px;
+            font-weight: 700;
+            color: #1f2937;
+            transition: all 0.3s;
+        }
+        
+        .pipeline-stage.active .stage-count {
+            background: #10b981;
+            color: white;
+            border-color: #10b981;
+        }
+        
+        .stage-label {
+            font-size: 12px;
+            color: #6b7280;
+            font-weight: 500;
+        }
+        
+        .pipeline-arrow {
+            color: #d1d5db;
+            font-size: 20px;
+            margin: 0 10px;
+        }
+        
+        /* Agenda Section */
+        .agenda-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
             margin-bottom: 30px;
         }
         
-        .schedule-list, .patient-list {
-            margin-top: 20px;
+        .agenda-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         }
         
-        .schedule-item, .patient-item {
-            padding: 15px;
-            border-bottom: 1px solid #e5e7eb;
+        .agenda-card h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .schedule-item, .incomplete-item {
+            padding: 12px 0;
+            border-bottom: 1px solid #f3f4f6;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
         
-        .schedule-item:last-child, .patient-item:last-child {
+        .schedule-item:last-child, .incomplete-item:last-child {
             border-bottom: none;
+        }
+        
+        .time-badge {
+            background: #eff6ff;
+            color: #3b82f6;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 12px;
         }
         
         .patient-info {
             flex: 1;
+            margin-left: 12px;
         }
         
         .patient-name {
-            color: #1f2937;
             font-weight: 600;
-            margin-bottom: 5px;
+            color: #1f2937;
+            font-size: 14px;
         }
         
-        .patient-id {
+        .patient-details {
+            font-size: 12px;
             color: #6b7280;
-            font-size: 13px;
+            margin-top: 2px;
         }
         
-        .view-btn {
-            background: #f3f4f6;
-            padding: 6px 16px;
-            border-radius: 6px;
-            color: #374151;
-            text-decoration: none;
-            font-size: 13px;
-            transition: background 0.3s;
-            cursor: pointer;
+        .continue-btn {
+            background: #10b981;
+            color: white;
             border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
         }
         
-        .view-btn:hover {
-            background: #e5e7eb;
+        .continue-btn:hover {
+            background: #059669;
         }
         
-        /* Loading Overlay */
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.9);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            display: none;
+        .stage-badge {
+            background: #fef3c7;
+            color: #92400e;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
         }
         
-        .loading-spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid #e5e7eb;
-            border-top: 4px solid #10b981;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #9ca3af;
         }
         
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+        
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #6b7280;
         }
     </style>
 </head>
 <body>
-    <!-- Loading Overlay -->
-    <div class="loading-overlay" id="loadingOverlay">
-        <div class="loading-spinner"></div>
-    </div>
-
     <!-- Header -->
     <div class="header">
         <div class="header-container">
             <div class="logo-section">
                 <div class="logo">CELLOXEN</div>
-                <div class="clinic-name" id="clinicNameHeader">Clinic Portal</div>
+                <div class="clinic-name" id="clinicName">Clinic Portal</div>
             </div>
             <div class="user-info">
                 <span>Welcome, <strong id="userName">Clinic Administrator</strong></span>
-                <span class="user-badge">CLINIC ADMIN</span>
                 <button class="logout-btn" onclick="logout()">Logout</button>
             </div>
         </div>
@@ -390,243 +359,115 @@
 
     <!-- Main Container -->
     <div class="container">
-        <!-- Clinic Info Banner -->
-        <div class="clinic-info-banner">
-            <div class="clinic-info-item">
-                <div class="clinic-info-label">Clinic Code</div>
-                <div class="clinic-info-value" id="clinicCode">-</div>
-            </div>
-            <div class="clinic-info-item">
-                <div class="clinic-info-label">Total Patients</div>
-                <div class="clinic-info-value" id="totalPatients">0</div>
-            </div>
-            <div class="clinic-info-item">
-                <div class="clinic-info-label">Active Sessions</div>
-                <div class="clinic-info-value" id="activeSessions">0</div>
-            </div>
-            <div class="clinic-info-item">
-                <div class="clinic-info-label">This Month</div>
-                <div class="clinic-info-value" id="monthlyRevenue">£0</div>
-            </div>
-            <div class="clinic-info-item">
-                <div class="clinic-info-label">Outstanding</div>
-                <div class="clinic-info-value" id="outstandingAmount">£0</div>
-            </div>
-        </div>
-
-        <!-- Statistics Cards -->
-        <div class="stats-grid">
+        <!-- Quick Stats -->
+        <div class="stats-bar">
             <div class="stat-card">
-                <div class="stat-number" id="todayAppointments">0</div>
+                <div class="stat-value" id="todayAppointments">0</div>
                 <div class="stat-label">Today's Appointments</div>
-                <div class="stat-subtitle">Scheduled treatments</div>
             </div>
             <div class="stat-card">
-                <div class="stat-number" id="activePatients">0</div>
+                <div class="stat-value" id="activePatients">0</div>
                 <div class="stat-label">Active Patients</div>
-                <div class="stat-subtitle">In treatment programs</div>
             </div>
             <div class="stat-card">
-                <div class="stat-number" id="completedSessions">0</div>
-                <div class="stat-label">Sessions This Week</div>
-                <div class="stat-subtitle">Completed treatments</div>
+                <div class="stat-value" id="pendingAssessments">0</div>
+                <div class="stat-label">Pending Assessments</div>
             </div>
             <div class="stat-card">
-                <div class="stat-number" id="pendingInvoices">0</div>
-                <div class="stat-label">Pending Invoices</div>
-                <div class="stat-subtitle">Awaiting payment</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="pendingReports">0</div>
-                <div class="stat-label">Pending Reports</div>
-                <div class="stat-subtitle">Awaiting review</div>
+                <div class="stat-value" id="completedToday">0</div>
+                <div class="stat-label">Completed Today</div>
             </div>
         </div>
 
-        <!-- Quick Actions -->
-        <div class="quick-actions">
-            <h2 class="section-title">Quick Actions</h2>
-            <div class="actions-grid">
-                <button class="action-btn" onclick="registerNewPatient()">Register Patient</button>
-                <button class="action-btn" onclick="startHealthAssessment()">Start Assessment</button>
-                <button class="action-btn" onclick="scheduleAppointment()">Schedule Appointment</button>
-                <button class="action-btn" onclick="createInvoice()">Create Invoice</button>
-                <button class="action-btn secondary" onclick="viewSchedule()">Today's Schedule</button>
-                <button class="action-btn secondary" onclick="generateReport()">Generate Report</button>
+        <!-- Main Workflow Actions -->
+        <div class="workflow-actions">
+            <button class="workflow-btn primary" onclick="startNewJourney()">
+                <span class="icon">➕</span>
+                <span class="title">Start New Patient Journey</span>
+                <span class="subtitle">Register → Assess → Plan → Treat</span>
+            </button>
+            
+            <button class="workflow-btn" onclick="continueAssessments()">
+                <span class="icon">⏩</span>
+                <span class="title">Continue Assessments</span>
+                <span class="subtitle" id="pendingCount">0 incomplete</span>
+            </button>
+            
+            <button class="workflow-btn" onclick="deliverTreatments()">
+                <span class="icon">⚡</span>
+                <span class="title">Deliver Treatments</span>
+                <span class="subtitle" id="treatmentCount">0 scheduled today</span>
+            </button>
+            
+            <button class="workflow-btn" onclick="viewAllReports()">
+                <span class="icon">📊</span>
+                <span class="title">View Reports</span>
+                <span class="subtitle">All patient reports</span>
+            </button>
+        </div>
+
+        <!-- Workflow Pipeline Visual -->
+        <div class="workflow-pipeline">
+            <div class="pipeline-stage" data-stage="health_assessment">
+                <div class="stage-count" id="healthCount">0</div>
+                <div class="stage-label">Health Assessment</div>
+            </div>
+            <div class="pipeline-arrow">→</div>
+            <div class="pipeline-stage" data-stage="iris_assessment">
+                <div class="stage-count" id="irisCount">0</div>
+                <div class="stage-label">Iris Assessment</div>
+            </div>
+            <div class="pipeline-arrow">→</div>
+            <div class="pipeline-stage" data-stage="report_generation">
+                <div class="stage-count" id="reportCount">0</div>
+                <div class="stage-label">Report Generation</div>
+            </div>
+            <div class="pipeline-arrow">→</div>
+            <div class="pipeline-stage" data-stage="treatment_planning">
+                <div class="stage-count" id="planningCount">0</div>
+                <div class="stage-label">Treatment Planning</div>
+            </div>
+            <div class="pipeline-arrow">→</div>
+            <div class="pipeline-stage" data-stage="in_treatment">
+                <div class="stage-count" id="treatmentStageCount">0</div>
+                <div class="stage-label">In Treatment</div>
             </div>
         </div>
 
-        <!-- Clinical Modules -->
-        <div class="modules-section">
-            <h2 class="section-title">Clinical Modules</h2>
-            <div class="modules-grid">
-                <div class="module-card" onclick="navigateTo('patient-management.html')">
-                    <div class="module-icon">📋</div>
-                    <div class="module-title">Patient Management</div>
-                    <div class="module-description">Register and manage patient records, view patient history</div>
-                </div>
-                
-                <div class="module-card" onclick="navigateTo('appointments.html')">
-                    <span class="module-badge new">NEW</span>
-                    <div class="module-icon">📅</div>
-                    <div class="module-title">Appointments</div>
-                    <div class="module-description">Schedule and manage patient appointments</div>
-                </div>
-                
-                <!-- UPDATED: Health Assessment now points directly to Lily AI Agent -->
-                <div class="module-card" onclick="navigateTo('health-assessment/lily-ai-agent.html')">
-                    <div class="module-icon">🏥</div>
-                    <div class="module-title">Health Assessment</div>
-                    <div class="module-description">5-category health questionnaire with AI recommendations</div>
-                </div>
-                
-                <div class="module-card" onclick="navigateTo('iris-analysis.html')">
-                    <div class="module-icon">👁️</div>
-                    <div class="module-title">IRIS Analysis</div>
-                    <div class="module-description">Capture and analyse iris images for assessment</div>
-                </div>
-                
-                <div class="module-card" onclick="navigateTo('treatment-interface.html')">
-                    <div class="module-icon">⚡</div>
-                    <div class="module-title">Treatment Interface</div>
-                    <div class="module-description">Deliver electromagnetic therapy protocols</div>
-                </div>
-                
-                <div class="module-card" onclick="navigateTo('session-tracking.html')">
-                    <span class="module-badge new">NEW</span>
-                    <div class="module-icon">📊</div>
-                    <div class="module-title">Session Tracking</div>
-                    <div class="module-description">Track therapy sessions and patient progress</div>
-                </div>
-                
-                <div class="module-card" onclick="navigateTo('vital-signs.html')">
-                    <div class="module-icon">💓</div>
-                    <div class="module-title">Vital Signs Monitor</div>
-                    <div class="module-description">Monitor patient vital signs during treatment</div>
-                </div>
-                
-                <div class="module-card" onclick="navigateTo('medical-records.html')">
-                    <span class="module-badge new">NEW</span>
-                    <div class="module-icon">🗂️</div>
-                    <div class="module-title">Medical Records</div>
-                    <div class="module-description">Store and manage patient medical documents</div>
+        <!-- Today's Agenda -->
+        <div class="agenda-section">
+            <!-- Today's Schedule -->
+            <div class="agenda-card">
+                <h3>Today's Schedule</h3>
+                <div id="todaySchedule">
+                    <div class="loading">Loading schedule...</div>
                 </div>
             </div>
-        </div>
-
-        <!-- Knowledge & Resources -->
-        <div class="modules-section">
-            <h2 class="section-title">Knowledge & Resources</h2>
-            <div class="modules-grid">
-                <div class="module-card" onclick="navigateTo('therapy-reference.html')">
-                    <div class="module-icon">📚</div>
-                    <div class="module-title">Therapy Reference</div>
-                    <div class="module-description">Complete guide to all 33 therapy protocols</div>
-                </div>
-                
-                <div class="module-card" onclick="navigateTo('knowledge-hub.html')">
-                    <span class="module-badge new">NEW</span>
-                    <div class="module-icon">🎓</div>
-                    <div class="module-title">Knowledge Hub</div>
-                    <div class="module-description">Educational resources and treatment information</div>
-                </div>
-                
-                <div class="module-card" onclick="navigateTo('supplements-management.html')">
-                    <span class="module-badge new">NEW</span>
-                    <div class="module-icon">💊</div>
-                    <div class="module-title">Supplements Management</div>
-                    <div class="module-description">Recommend and track patient supplements</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Financial Management -->
-        <div class="modules-section">
-            <h2 class="section-title">Financial Management</h2>
-            <div class="modules-grid">
-                <div class="module-card" onclick="navigateTo('invoicing.html')">
-                    <span class="module-badge new">NEW</span>
-                    <div class="module-icon">💰</div>
-                    <div class="module-title">Invoicing & Billing</div>
-                    <div class="module-description">Create invoices and track payments</div>
-                </div>
-                
-                <div class="module-card" onclick="navigateTo('therapy-packages.html')">
-                    <span class="module-badge new">NEW</span>
-                    <div class="module-icon">📦</div>
-                    <div class="module-title">Therapy Packages</div>
-                    <div class="module-description">Manage therapy sessions packages (6/8 weeks)</div>
-                </div>
-                
-                <div class="module-card" onclick="navigateTo('accounting.html')">
-                    <span class="module-badge new">NEW</span>
-                    <div class="module-icon">📈</div>
-                    <div class="module-title">Accounting</div>
-                    <div class="module-description">Track revenue, expenses and financial reports</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Reports & Analytics -->
-        <div class="modules-section">
-            <h2 class="section-title">Reports & Analytics</h2>
-            <div class="modules-grid">
-                <div class="module-card" onclick="viewReports()">
-                    <div class="module-icon">📊</div>
-                    <div class="module-title">Clinical Reports</div>
-                    <div class="module-description">Generate treatment and progress reports</div>
-                </div>
-                
-                <div class="module-card" onclick="viewAnalytics()">
-                    <div class="module-icon">📉</div>
-                    <div class="module-title">Analytics Dashboard</div>
-                    <div class="module-description">View clinic performance metrics</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Today's Schedule -->
-        <div class="schedule-section">
-            <h2 class="section-title">Today's Schedule</h2>
-            <div class="schedule-list" id="scheduleList">
-                <div class="schedule-item">
-                    <span style="color: #9ca3af;">Loading appointments...</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Recent Patients -->
-        <div class="recent-patients">
-            <h2 class="section-title">Recent Patients</h2>
-            <div class="patient-list" id="recentPatientsList">
-                <div class="patient-item">
-                    <div class="patient-info">
-                        <div class="patient-name">No patients registered yet</div>
-                        <div class="patient-id">Start by registering your first patient</div>
-                    </div>
+            
+            <!-- Incomplete Assessments -->
+            <div class="agenda-card">
+                <h3>Incomplete Assessments</h3>
+                <div id="incompleteList">
+                    <div class="loading">Loading assessments...</div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Include auth guard -->
-    <script src="auth-guard.js"></script>
-    
     <script type="module">
         import { supabase } from './supabase-config.js';
+        import { workflowManager } from './workflow-manager.js';
         
-        let currentClinicId = null;
-        let currentClinicData = null;
-        
-        // Check authentication on page load
+        // Initialize dashboard
         document.addEventListener('DOMContentLoaded', async function() {
             await checkAuthentication();
-            if (currentClinicId) {
-                await loadDashboardData();
-            }
+            await loadDashboardData();
+            await loadWorkflowStats();
+            await loadIncompleteAssessments();
+            await loadTodaySchedule();
         });
         
-        // Check if user is authenticated and is clinic admin
+        // Check authentication
         async function checkAuthentication() {
             const authData = localStorage.getItem('celloxen_auth');
             if (!authData) {
@@ -636,296 +477,219 @@
             
             const auth = JSON.parse(authData);
             
-            // Accept 'clinic', 'clinic_admin', or 'super_admin' as valid user types
-            const validUserTypes = ['clinic', 'clinic_admin', 'super_admin'];
-            if (!validUserTypes.includes(auth.userType)) {
-                alert('Access denied. Clinic administrator privileges required.');
+            // Check if clinic user
+            if (!['clinic', 'clinic_admin'].includes(auth.userType)) {
+                alert('Access denied. Clinic privileges required.');
                 window.location.href = 'unified-login.html';
                 return;
             }
             
-            // Handle both 'clinic' and 'clinic_admin' user types
-            if (auth.userType === 'clinic' || auth.userType === 'clinic_admin') {
-                currentClinicId = auth.clinicId;
-                
-                // Load clinic data
-                await loadClinicInfo(currentClinicId);
-                
-                // Update UI with user info
-                document.getElementById('userName').textContent = auth.username || 'Clinic Administrator';
-            } else if (auth.userType === 'super_admin') {
-                // Super admin logic
-                document.getElementById('userName').textContent = auth.username || 'Super Administrator';
-            }
-        }
-        
-        // Load clinic information
-        async function loadClinicInfo(clinicId) {
-            try {
-                const { data, error } = await supabase
+            // Set clinic info
+            document.getElementById('userName').textContent = auth.username || 'Clinic Administrator';
+            
+            // Load clinic details
+            if (auth.clinicId) {
+                const { data: clinic } = await supabase
                     .from('clinics')
-                    .select('*')
-                    .eq('id', clinicId)
+                    .select('clinic_name')
+                    .eq('id', auth.clinicId)
                     .single();
-                
-                if (error) throw error;
-                
-                if (data) {
-                    currentClinicData = data;
-                    document.getElementById('clinicNameHeader').textContent = data.clinic_name || 'Clinic Portal';
-                    document.getElementById('clinicCode').textContent = data.clinic_code || '-';
+                    
+                if (clinic) {
+                    document.getElementById('clinicName').textContent = clinic.clinic_name;
                 }
-            } catch (error) {
-                console.error('Error loading clinic info:', error);
             }
         }
         
         // Load dashboard statistics
         async function loadDashboardData() {
+            const authData = JSON.parse(localStorage.getItem('celloxen_auth'));
+            const clinicId = authData.clinicId;
+            
+            if (!clinicId) return;
+            
             try {
-                showLoading(true);
-                
-                // Load total patients for this clinic
-                const { count: patientsCount } = await supabase
-                    .from('patients')
+                // Today's appointments
+                const today = new Date().toISOString().split('T')[0];
+                const { count: appointmentsCount } = await supabase
+                    .from('appointments')
                     .select('*', { count: 'exact', head: true })
-                    .eq('clinic_id', currentClinicId);
-                document.getElementById('totalPatients').textContent = patientsCount || 0;
+                    .eq('clinic_id', clinicId)
+                    .eq('appointment_date', today);
+                    
+                document.getElementById('todayAppointments').textContent = appointmentsCount || 0;
+                document.getElementById('treatmentCount').textContent = `${appointmentsCount || 0} scheduled today`;
                 
-                // Load appointment statistics
-                await loadAppointmentStatistics();
+                // Active patients (in treatment)
+                const { count: activeCount } = await supabase
+                    .from('patient_workflow_status')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('clinic_id', clinicId)
+                    .eq('current_stage', 'in_treatment');
+                    
+                document.getElementById('activePatients').textContent = activeCount || 0;
                 
-                // Load today's schedule
-                await loadTodaysSchedule();
+                // Pending assessments
+                const { count: pendingCount } = await supabase
+                    .from('patient_workflow_status')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('clinic_id', clinicId)
+                    .in('current_stage', ['health_assessment', 'iris_assessment']);
+                    
+                document.getElementById('pendingAssessments').textContent = pendingCount || 0;
+                document.getElementById('pendingCount').textContent = `${pendingCount || 0} incomplete`;
                 
-                // Load recent patients
-                await loadRecentPatients();
+                // Completed today
+                const { count: completedCount } = await supabase
+                    .from('health_assessments')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('clinic_id', clinicId)
+                    .eq('status', 'completed')
+                    .gte('created_at', today);
+                    
+                document.getElementById('completedToday').textContent = completedCount || 0;
                 
             } catch (error) {
                 console.error('Error loading dashboard data:', error);
-            } finally {
-                showLoading(false);
             }
         }
         
-        // Load appointment statistics
-        async function loadAppointmentStatistics() {
-            try {
-                const today = new Date().toISOString().split('T')[0];
-                const startOfWeek = getStartOfWeek();
-                const endOfWeek = getEndOfWeek();
-                
-                // Get all appointments for this clinic
-                const { data: appointments, error } = await supabase
-                    .from('appointments')
-                    .select('*')
-                    .eq('clinic_id', currentClinicId);
-                
-                if (error) throw error;
-                
-                // Calculate today's appointments
-                const todayAppointments = appointments.filter(a => 
-                    a.appointment_date === today && 
-                    a.status === 'scheduled'
-                ).length;
-                
-                // Calculate this week's completed sessions
-                const completedThisWeek = appointments.filter(a => 
-                    a.appointment_date >= startOfWeek && 
-                    a.appointment_date <= endOfWeek && 
-                    a.status === 'completed'
-                ).length;
-                
-                // Get active patients (those with scheduled appointments)
-                const activePatientIds = [...new Set(
-                    appointments
-                        .filter(a => a.status === 'scheduled')
-                        .map(a => a.patient_id)
-                )];
-                
-                // Update the statistics cards
-                document.getElementById('todayAppointments').textContent = todayAppointments;
-                document.getElementById('completedSessions').textContent = completedThisWeek;
-                document.getElementById('activePatients').textContent = activePatientIds.length;
-                
-                // For active sessions - count ongoing therapy programs
-                document.getElementById('activeSessions').textContent = activePatientIds.length;
-                
-            } catch (error) {
-                console.error('Error loading appointment statistics:', error);
-                // Keep default values if error occurs
-            }
+        // Load workflow statistics
+        async function loadWorkflowStats() {
+            const stats = await workflowManager.getWorkflowStats();
+            
+            document.getElementById('healthCount').textContent = stats.health_assessment || 0;
+            document.getElementById('irisCount').textContent = stats.iris_assessment || 0;
+            document.getElementById('reportCount').textContent = stats.report_generation || 0;
+            document.getElementById('planningCount').textContent = stats.treatment_planning || 0;
+            document.getElementById('treatmentStageCount').textContent = stats.in_treatment || 0;
+            
+            // Highlight stages with patients
+            Object.keys(stats).forEach(stage => {
+                if (stats[stage] > 0) {
+                    const element = document.querySelector(`[data-stage="${stage}"]`);
+                    if (element) {
+                        element.classList.add('active');
+                    }
+                }
+            });
         }
         
-        // Load today's schedule with real data
-        async function loadTodaysSchedule() {
+        // Load incomplete assessments
+        async function loadIncompleteAssessments() {
+            const incompleteList = document.getElementById('incompleteList');
+            const assessments = await workflowManager.getIncompleteAssessments();
+            
+            if (assessments.length === 0) {
+                incompleteList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">✓</div>
+                        <p>No incomplete assessments</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            incompleteList.innerHTML = assessments.map(assessment => `
+                <div class="incomplete-item">
+                    <div class="patient-info">
+                        <div class="patient-name">
+                            ${assessment.patients.first_name} ${assessment.patients.last_name}
+                        </div>
+                        <div class="patient-details">
+                            Stage: <span class="stage-badge">${formatStage(assessment.current_stage)}</span>
+                        </div>
+                    </div>
+                    <button class="continue-btn" onclick="continuePatientAssessment(${assessment.patient_id})">
+                        Continue
+                    </button>
+                </div>
+            `).join('');
+        }
+        
+        // Load today's schedule
+        async function loadTodaySchedule() {
+            const authData = JSON.parse(localStorage.getItem('celloxen_auth'));
+            const clinicId = authData.clinicId;
+            
+            if (!clinicId) return;
+            
+            const scheduleDiv = document.getElementById('todaySchedule');
+            const today = new Date().toISOString().split('T')[0];
+            
             try {
-                const today = new Date().toISOString().split('T')[0];
-                
-                const { data: todaysAppointments, error } = await supabase
+                const { data: appointments } = await supabase
                     .from('appointments')
                     .select(`
                         *,
-                        patients!appointments_patient_id_fkey (
-                            first_name,
-                            last_name,
-                            patient_id
-                        )
+                        patients(first_name, last_name)
                     `)
-                    .eq('clinic_id', currentClinicId)
+                    .eq('clinic_id', clinicId)
                     .eq('appointment_date', today)
-                    .eq('status', 'scheduled')
                     .order('appointment_time');
-                
-                if (error) throw error;
-                
-                const scheduleList = document.getElementById('scheduleList');
-                
-                if (todaysAppointments && todaysAppointments.length > 0) {
-                    scheduleList.innerHTML = todaysAppointments.map(appointment => {
-                        const patient = appointment.patients;
-                        const time = appointment.appointment_time.substring(0, 5); // Format time HH:MM
-                        
-                        // Determine appointment type label
-                        let typeLabel = appointment.appointment_type;
-                        if (appointment.appointment_type === 'therapy' && appointment.therapy_code) {
-                            typeLabel = `Therapy - ${appointment.therapy_code}`;
-                        }
-                        
-                        return `
-                            <div class="schedule-item">
-                                <div style="display: flex; align-items: center; gap: 15px;">
-                                    <span style="background: #eff6ff; color: #3b82f6; padding: 4px 8px; border-radius: 4px; font-weight: 600; font-size: 13px;">
-                                        ${time}
-                                    </span>
-                                    <div style="flex: 1;">
-                                        <strong>${patient ? `${patient.first_name} ${patient.last_name}` : 'Unknown Patient'}</strong>
-                                        <br>
-                                        <span style="font-size: 12px; color: #6b7280;">
-                                            ${typeLabel} • ${appointment.practitioner || 'No practitioner assigned'}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-                    }).join('');
-                } else {
-                    scheduleList.innerHTML = `
-                        <div class="schedule-item">
-                            <span style="color: #9ca3af;">No appointments scheduled for today</span>
+                    
+                if (!appointments || appointments.length === 0) {
+                    scheduleDiv.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📅</div>
+                            <p>No appointments scheduled today</p>
                         </div>
                     `;
+                    return;
                 }
                 
-            } catch (error) {
-                console.error('Error loading today\'s schedule:', error);
-                scheduleList.innerHTML = `
+                scheduleDiv.innerHTML = appointments.map(apt => `
                     <div class="schedule-item">
-                        <span style="color: #9ca3af;">No appointments scheduled for today</span>
+                        <span class="time-badge">${apt.appointment_time.substring(0, 5)}</span>
+                        <div class="patient-info">
+                            <div class="patient-name">
+                                ${apt.patients ? `${apt.patients.first_name} ${apt.patients.last_name}` : 'Unknown Patient'}
+                            </div>
+                            <div class="patient-details">
+                                ${apt.appointment_type} ${apt.therapy_code ? `- ${apt.therapy_code}` : ''}
+                            </div>
+                        </div>
                     </div>
-                `;
-            }
-        }
-        
-        // Helper functions for date calculations
-        function getStartOfWeek() {
-            const date = new Date();
-            const day = date.getDay();
-            const diff = date.getDate() - day + (day === 0 ? -6 : 1);
-            return new Date(date.setDate(diff)).toISOString().split('T')[0];
-        }
-        
-        function getEndOfWeek() {
-            const date = new Date();
-            const day = date.getDay();
-            const diff = date.getDate() - day + 7;
-            return new Date(date.setDate(diff)).toISOString().split('T')[0];
-        }
-        
-        // Load recent patients
-        async function loadRecentPatients() {
-            try {
-                const { data: recentPatients } = await supabase
-                    .from('patients')
-                    .select('*')
-                    .eq('clinic_id', currentClinicId)
-                    .order('created_at', { ascending: false })
-                    .limit(5);
-                
-                const patientsList = document.getElementById('recentPatientsList');
-                
-                if (recentPatients && recentPatients.length > 0) {
-                    patientsList.innerHTML = recentPatients.map(patient => `
-                        <div class="patient-item">
-                            <div class="patient-info">
-                                <div class="patient-name">${patient.first_name} ${patient.last_name}</div>
-                                <div class="patient-id">ID: ${patient.patient_id}</div>
-                            </div>
-                            <button class="view-btn" onclick="viewPatient('${patient.patient_id}')">View</button>
-                        </div>
-                    `).join('');
-                } else {
-                    patientsList.innerHTML = `
-                        <div class="patient-item">
-                            <div class="patient-info">
-                                <div class="patient-name">No patients registered yet</div>
-                                <div class="patient-id">Start by registering your first patient</div>
-                            </div>
-                        </div>
-                    `;
-                }
+                `).join('');
                 
             } catch (error) {
-                console.error('Error loading recent patients:', error);
+                console.error('Error loading schedule:', error);
+                scheduleDiv.innerHTML = '<p>Error loading schedule</p>';
             }
+        }
+        
+        // Format stage name
+        function formatStage(stage) {
+            return stage.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
         }
         
         // Navigation functions
-        window.navigateTo = function(page) {
-            sessionStorage.setItem('currentClinicId', currentClinicId);
-            sessionStorage.setItem('viewMode', 'clinic_admin');
-            window.location.href = page;
+        window.startNewJourney = function() {
+            window.location.href = 'patient-management.html?action=new';
         };
         
-        window.registerNewPatient = function() {
-            navigateTo('patient-management.html');
+        window.continueAssessments = function() {
+            // Could create a dedicated page or show modal
+            const firstIncomplete = document.querySelector('.incomplete-item .continue-btn');
+            if (firstIncomplete) {
+                firstIncomplete.click();
+            } else {
+                alert('No incomplete assessments found');
+            }
         };
         
-        // UPDATED: Start Health Assessment now goes directly to Lily AI Agent
-        window.startHealthAssessment = function() {
-            navigateTo('health-assessment/lily-ai-agent.html');
+        window.continuePatientAssessment = async function(patientId) {
+            await workflowManager.continueAssessment(patientId);
         };
         
-        window.scheduleAppointment = function() {
-            navigateTo('appointments.html');
+        window.deliverTreatments = function() {
+            window.location.href = 'treatment-interface.html';
         };
         
-        window.createInvoice = function() {
-            navigateTo('invoicing.html');
+        window.viewAllReports = function() {
+            window.location.href = 'reports.html';
         };
         
-        window.viewSchedule = function() {
-            navigateTo('appointments.html');
-        };
-        
-        window.generateReport = function() {
-            alert('Report generation module coming soon!');
-        };
-        
-        window.viewReports = function() {
-            alert('Clinical Reports module coming soon!');
-        };
-        
-        window.viewAnalytics = function() {
-            alert('Analytics Dashboard coming soon!');
-        };
-        
-        window.viewPatient = function(patientId) {
-            sessionStorage.setItem('selectedPatientId', patientId);
-            navigateTo('patient-management.html');
-        };
-        
-        // Logout function
         window.logout = function() {
             if (confirm('Are you sure you want to logout?')) {
                 localStorage.removeItem('celloxen_auth');
@@ -934,16 +698,12 @@
             }
         };
         
-        // Show/hide loading overlay
-        function showLoading(show) {
-            document.getElementById('loadingOverlay').style.display = show ? 'flex' : 'none';
-        }
-        
-        // Auto-refresh dashboard every 5 minutes
-        setInterval(() => {
-            loadAppointmentStatistics();
-            loadTodaysSchedule();
-        }, 300000);
+        // Auto-refresh every 2 minutes
+        setInterval(async () => {
+            await loadDashboardData();
+            await loadWorkflowStats();
+            await loadIncompleteAssessments();
+        }, 120000);
     </script>
 </body>
 </html>
