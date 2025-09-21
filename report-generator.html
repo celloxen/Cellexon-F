@@ -454,6 +454,9 @@
     <!-- Include jsPDF library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     
+    <!-- Include email sender -->
+    <script src="email-sender.js"></script>
+    
     <!-- Include Supabase -->
     <script type="module">
         import { supabase } from './supabase-config.js';
@@ -723,8 +726,28 @@
                 return;
             }
             
-            // In production, this would send via email service
-            showAlert(`Email functionality will send to: ${selectedPatient.email}`, 'info');
+            if (!generatedPDF) {
+                showAlert('Please generate a report first', 'error');
+                return;
+            }
+            
+            // Show loading
+            showAlert('Sending email...', 'info');
+            
+            try {
+                // Get PDF as blob
+                const pdfBlob = pdfGenerator.getPDFBlob(generatedPDF);
+                
+                // Send email
+                const sent = await sendReportEmail(selectedPatient, pdfBlob, selectedReportType);
+                
+                if (sent) {
+                    showAlert(`Report sent successfully to ${selectedPatient.email}`, 'success');
+                }
+            } catch (error) {
+                console.error('Error sending email:', error);
+                showAlert('Failed to send email', 'error');
+            }
         };
         
         window.savePDFToDatabase = async function() {
