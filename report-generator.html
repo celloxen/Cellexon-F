@@ -232,52 +232,6 @@
             cursor: not-allowed;
         }
         
-        /* Report Preview */
-        .report-preview {
-            background: #f9fafb;
-            border-radius: 10px;
-            padding: 20px;
-            margin-top: 20px;
-            min-height: 400px;
-            max-height: 600px;
-            overflow-y: auto;
-            display: none;
-        }
-        
-        .report-preview.show {
-            display: block;
-        }
-        
-        .preview-header {
-            background: linear-gradient(135deg, #1e3a8a, #3b82f6);
-            color: white;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
-        
-        .preview-title {
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-        
-        .preview-section {
-            background: white;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 15px;
-        }
-        
-        .preview-section-title {
-            font-size: 16px;
-            font-weight: 600;
-            color: #1e293b;
-            margin-bottom: 10px;
-            padding-bottom: 5px;
-            border-bottom: 1px solid #e5e7eb;
-        }
-        
         /* Loading Spinner */
         .loading {
             display: none;
@@ -326,6 +280,12 @@
             background: #dbeafe;
             color: #1e3a8a;
             border: 1px solid #bfdbfe;
+        }
+        
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
         }
         
         /* PDF Actions */
@@ -582,36 +542,6 @@
             }
         };
         
-        window.previewReport = async function() {
-            if (!reportData) {
-                reportData = await loadReportData();
-            }
-            
-            const previewDiv = document.getElementById('reportPreview');
-            const previewContent = document.getElementById('previewContent');
-            
-            // Generate HTML preview
-            let previewHTML = `
-                <div class="preview-header">
-                    <div class="preview-title">${getReportTitle()}</div>
-                    <div>Patient: ${selectedPatient.first_name} ${selectedPatient.last_name}</div>
-                    <div>Date: ${new Date().toLocaleDateString('en-GB')}</div>
-                </div>
-            `;
-            
-            // Add sections based on report type
-            if (reportData.health_assessment) {
-                previewHTML += generateAssessmentPreview(reportData.health_assessment);
-            }
-            
-            if (reportData.recommendations) {
-                previewHTML += generateRecommendationsPreview(reportData.recommendations);
-            }
-            
-            previewContent.innerHTML = previewHTML;
-            previewDiv.classList.add('show');
-        };
-        
         async function loadReportData() {
             const data = {};
             
@@ -686,31 +616,6 @@
                 summary: 'Treatment Summary Report'
             };
             return titles[selectedReportType] || 'Medical Report';
-        }
-        
-        function generateAssessmentPreview(assessment) {
-            let html = '<div class="preview-section">';
-            html += '<div class="preview-section-title">Health Assessment Results</div>';
-            
-            if (assessment.scores) {
-                html += `<p><strong>Overall Wellness:</strong> ${assessment.scores.overall_wellness || 0}%</p>`;
-            }
-            
-            html += '</div>';
-            return html;
-        }
-        
-        function generateRecommendationsPreview(recommendations) {
-            let html = '<div class="preview-section">';
-            html += '<div class="preview-section-title">Recommendations</div>';
-            html += '<ul>';
-            
-            recommendations.forEach(rec => {
-                html += `<li>${rec}</li>`;
-            });
-            
-            html += '</ul></div>';
-            return html;
         }
         
         window.downloadPDF = function() {
