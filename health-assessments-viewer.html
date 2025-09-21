@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Health Assessments - Celloxen Platform</title>
+    <style>
+        /* Similar base styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 15px 0;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+        
+        .assessments-grid {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 20px;
+        }
+        
+        .patients-list {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .list-header {
+            font-weight: 600;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .search-box {
+            width: 100%;
+            padding: 8px;
+            border: 2px solid #e5e7eb;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+        
+        .patient-item {
+            padding: 12px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .patient-item:hover {
+            background: #f9fafb;
+            border-color: #10b981;
+        }
+        
+        .patient-item.selected {
+            background: #d1fae5;
+            border-color: #10b981;
+        }
+        
+        .assessment-viewer {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        .assessment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .assessment-card {
+            background: #f9fafb;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .assessment-date {
+            font-size: 12px;
+            color: #6b7280;
+            margin-bottom: 10px;
+        }
+        
+        .assessment-status {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .domain-scores {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .score-item {
+            background: white;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .score-label {
+            font-size: 12px;
+            color: #6b7280;
+        }
+        
+        .score-value {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1f2937;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #9ca3af;
+        }
+        
+        .btn-view-report {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .btn-view-report:hover {
+            background: #2563eb;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container" style="display: flex; justify-content: space-between; align-items: center;">
+            <h1 style="font-size: 20px;">Health Assessments Viewer</h1>
+            <a href="clinic-dashboard.html" style="color: white; text-decoration: none;">← Back to Dashboard</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="assessments-grid">
+            <!-- Patients List -->
+            <div class="patients-list">
+                <h3 class="list-header">Select Patient</h3>
+                <input type="text" class="search-box" id="patientSearch" placeholder="Search patients...">
+                <div id="patientsList">
+                    <!-- Dynamic patient list -->
+                </div>
+            </div>
+            
+            <!-- Assessment Viewer -->
+            <div class="assessment-viewer">
+                <div id="assessmentContent">
+                    <div class="empty-state">
+                        <div style="font-size: 48px;">📋</div>
+                        <h3>Select a Patient</h3>
+                        <p>Choose a patient from the list to view their health assessments</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { supabase } from './supabase-config.js';
+        
+        let currentClinicId = null;
+        let allPatients = [];
+        let selectedPatientId = null;
+        
+        document.addEventListener('DOMContentLoaded', async function() {
+            await loadClinicId();
+            await loadPatients();
+            setupEventListeners();
+        });
+        
+        async function loadClinicId() {
+            const authData = localStorage.getItem('celloxen_auth');
+            if (authData) {
+                const auth = JSON.parse(authData);
+                currentClinicId = auth.clinicId;
+            }
+        }
+        
+        async function loadPatients() {
+            if (!currentClinicId) return;
+            
+            try {
+                const { data: patients, error } = await supabase
+                    .from('patients')
+                    .select('*')
+                    .eq('clinic_id', currentClinicId)
+                    .order('last_name');
+                
+                if (error) throw error;
+                
+                allPatients = patients || [];
+                displayPatients(allPatients);
+                
+            } catch (error) {
+                console.error('Error loading patients:', error);
+            }
+        }
+        
+        function displayPatients(patients) {
+            const listDiv = document.getElementById('patientsList');
+            
+            if (patients.length === 0) {
+                listDiv.innerHTML = '<p style="text-align: center; color: #9ca3af;">No patients found</p>';
+                return;
+            }
+            
+            listDiv.innerHTML = patients.map(patient => `
+                <div class="patient-item" onclick="selectPatient(${patient.id})" id="patient-${patient.id}">
+                    <strong>${patient.first_name} ${patient.last_name}</strong><br>
+                    <small>ID: ${patient.patient_id}</small><br>
+                    <small>${patient.phone || 'No phone'}</small>
+                </div>
+            `).join('');
+        }
+        
+        function setupEventListeners() {
+            document.getElementById('patientSearch').addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                const filtered = allPatients.filter(patient => 
+                    patient.first_name.toLowerCase().includes(searchTerm) ||
+                    patient.last_name.toLowerCase().includes(searchTerm) ||
+                    patient.patient_id.toLowerCase().includes(searchTerm)
+                );
+                displayPatients(filtered);
+            });
+        }
+        
+        window.selectPatient = async function(patientId) {
+            // Update selection UI
+            document.querySelectorAll('.patient-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            document.getElementById(`patient-${patientId}`).classList.add('selected');
+            
+            selectedPatientId = patientId;
+            await loadPatientAssessments(patientId);
+        };
+        
+        async function loadPatientAssessments(patientId) {
+            const contentDiv = document.getElementById('assessmentContent');
+            
+            try {
+                // Get patient info
+                const patient = allPatients.find(p => p.id === patientId);
+                
+                // Get health assessments
+                const { data: assessments, error } = await supabase
+                    .from('health_assessments')
+                    .select('*')
+                    .eq('patient_id', patientId)
+                    .order('created_at', { ascending: false });
+                
+                if (error) throw error;
+                
+                // Get iris assessments
+                const { data: irisAssessments } = await supabase
+                    .from('iris_assessments')
+                    .select('*')
+                    .eq('patient_id', patientId);
+                
+                // Get comprehensive reports
+                const { data: reports } = await supabase
+                    .from('comprehensive_reports')
+                    .select('*')
+                    .eq('patient_id', patientId);
+                
+                // Display assessments
+                contentDiv.innerHTML = `
+                    <div class="assessment-header">
+                        <div>
+                            <h2>${patient.first_name} ${patient.last_name}</h2>
+                            <small>Patient ID: ${patient.patient_id}</small>
+                        </div>
+                    </div>
+                    
+                    ${assessments && assessments.length > 0 ? assessments.map(assessment => `
+                        <div class="assessment-card">
+                            <div class="assessment-date">
+                                ${new Date(assessment.created_at).toLocaleDateString()} 
+                                ${new Date(assessment.created_at).toLocaleTimeString()}
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <h4>Health Assessment</h4>
+                                    <span class="assessment-status">${assessment.status}</span>
+                                </div>
+                                <button class="btn-view-report" onclick="viewFullReport('${assessment.id}')">
+                                    View Full Report
+                                </button>
+                            </div>
+                            
+                            ${assessment.domain_scores ? `
+                                <div class="domain-scores">
+                                    ${Object.entries(assessment.domain_scores).map(([domain, score]) => `
+                                        <div class="score-item">
+                                            <div class="score-label">${formatDomain(domain)}</div>
+                                            <div class="score-value">${score || 0}</div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            ` : '<p>No scores available</p>'}
+                        </div>
+                    `).join('') : '<p>No health assessments found</p>'}
+                    
+                    ${irisAssessments && irisAssessments.length > 0 ? `
+                        <h3 style="margin-top: 20px;">Iris Assessments</h3>
+                        ${irisAssessments.map(iris => `
+                            <div class="assessment-card">
+                                <div class="assessment-date">
+                                    ${new Date(iris.created_at).toLocaleDateString()}
+                                </div>
+                                <h4>Iris Assessment</h4>
+                                <span class="assessment-status">${iris.status}</span>
+                                ${iris.constitutional_type ? `
+                                    <p style="margin-top: 10px;">Constitutional Type: ${iris.constitutional_type}</p>
+                                ` : ''}
+                            </div>
+                        `).join('')}
+                    ` : ''}
+                    
+                    ${reports && reports.length > 0 ? `
+                        <h3 style="margin-top: 20px;">Comprehensive Reports</h3>
+                        ${reports.map(report => `
+                            <div class="assessment-card">
+                                <div class="assessment-date">
+                                    ${new Date(report.created_at).toLocaleDateString()}
+                                </div>
+                                <h4>Comprehensive Report</h4>
+                                <span class="assessment-status">${report.status}</span>
+                                ${report.confidence_score ? `
+                                    <p style="margin-top: 10px;">
+                                        Confidence: ${report.confidence_score}% | 
+                                        Correlation: ${report.correlation_percentage}%
+                                    </p>
+                                ` : ''}
+                            </div>
+                        `).join('')}
+                    ` : ''}
+                `;
+                
+            } catch (error) {
+                console.error('Error loading assessments:', error);
+                contentDiv.innerHTML = '<p>Error loading assessments</p>';
+            }
+        }
+        
+        function formatDomain(domain) {
+            return domain.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        }
+        
+        window.viewFullReport = function(assessmentId) {
+            // Navigate to detailed report viewer
+            sessionStorage.setItem('viewAssessmentId', assessmentId);
+            window.location.href = 'assessment-report.html';
+        };
+    </script>
+</body>
+</html>
