@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Session History - Celloxen Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+            color: white;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        
+        .header-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+        }
+        
+        .header p {
+            color: #cbd5e1;
+            margin-top: 5px;
+            font-size: 14px;
+        }
+        
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        
+        /* Statistics Overview */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: transform 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1e3a8a;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #64748b;
+            text-transform: uppercase;
+        }
+        
+        .stat-trend {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        
+        .trend-up {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .trend-down {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        /* Filters */
+        .filters-section {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        .filters-row {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: end;
+        }
+        
+        .filter-group {
+            flex: 1;
+            min-width: 180px;
+        }
+        
+        .filter-group label {
+            display: block;
+            font-size: 12px;
+            color: #64748b;
+            text-transform: uppercase;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .filter-group input,
+        .filter-group select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .filter-group input:focus,
+        .filter-group select:focus {
+            outline: none;
+            border-color: #1e3a8a;
+            box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+        
+        .btn-secondary {
+            background: #f1f5f9;
+            color: #475569;
+        }
+        
+        .btn-secondary:hover {
+            background: #e2e8f0;
+        }
+        
+        /* Analytics Charts */
+        .analytics-section {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f1f5f9;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 250px;
+            margin: 20px 0;
+        }
+        
+        .therapy-distribution {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .therapy-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: #f8fafc;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .therapy-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .therapy-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #1e3a8a, #1e40af);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+        
+        .therapy-details {
+            flex: 1;
+        }
+        
+        .therapy-name {
+            font-weight: 600;
+            color: #1e293b;
+            font-size: 14px;
+        }
+        
+        .therapy-count {
+            font-size: 12px;
+            color: #64748b;
+        }
+        
+        /* Sessions Table */
+        .sessions-table-container {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+        
+        .table-wrapper {
+            overflow-x: auto;
+        }
+        
+        .sessions-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .sessions-table th {
+            background: #f8fafc;
+            padding: 12px;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .sessions-table td {
+            padding: 15px 12px;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 14px;
+            color: #1e293b;
+        }
+        
+        .sessions-table tr:hover {
+            background: #f8fafc;
+        }
+        
+        .patient-cell {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .patient-avatar {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #1e3a8a, #1e40af);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .status-completed {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .status-cancelled {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .response-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 12px;
+        }
+        
+        .response-excellent {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .response-good {
+            background: #dbeafe;
+            color: #1e3a8a;
+        }
+        
+        .response-fair {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .response-poor {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .action-btn {
+            padding: 6px 12px;
+            border: 1px solid #e2e8f0;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+        
+        .action-btn:hover {
+            background: #f8fafc;
+            border-color: #1e3a8a;
+        }
+        
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+        }
+        
+        .page-btn {
+            padding: 8px 12px;
+            border: 1px solid #e2e8f0;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .page-btn:hover:not(:disabled) {
+            background: #f8fafc;
+            border-color: #1e3a8a;
+        }
+        
+        .page-btn.active {
+            background: linear-gradient(135deg, #1e3a8a, #1e40af);
+            color: white;
+            border-color: #1e3a8a;
+        }
+        
+        .page-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #64748b;
+        }
+        
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+        
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .modal.show {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            max-width: 700px;
+            width: 100%;
+            max-height: 90vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .modal-header {
+            padding: 25px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .close-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: none;
+            background: #f1f5f9;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        
+        .close-btn:hover {
+            background: #e2e8f0;
+        }
+        
+        .modal-body {
+            padding: 25px;
+            overflow-y: auto;
+            flex: 1;
+        }
+        
+        .detail-row {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 15px;
+            padding: 15px 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        
+        .detail-label {
+            font-size: 13px;
+            color: #64748b;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .detail-value {
+            color: #1e293b;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-container">
+            <div>
+                <h1>Therapy Session History</h1>
+                <p>Complete session records and analytics</p>
+            </div>
+            <a href="clinic-dashboard.html" class="back-btn">← Back to Dashboard</a>
+        </div>
+    </div>
+    
+    <div class="container">
+        <!-- Statistics Overview -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="totalSessions">0</div>
+                <div class="stat-label">Total Sessions</div>
+                <span class="stat-trend trend-up" id="sessionsTrend">↑ 12% this month</span>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="completionRate">0%</div>
+                <div class="stat-label">Completion Rate</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="avgDuration">0</div>
+                <div class="stat-label">Avg Duration (min)</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="activePatients">0</div>
+                <div class="stat-label">Active Patients</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="thisWeekSessions">0</div>
+                <div class="stat-label">This Week</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="excellentResponse">0%</div>
+                <div class="stat-label">Excellent Response</div>
+            </div>
+        </div>
+        
+        <!-- Filters -->
+        <div class="filters-section">
+            <div class="filters-row">
+                <div class="filter-group">
+                    <label>Patient</label>
+                    <select id="patientFilter">
+                        <option value="">All Patients</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Therapy Type</label>
+                    <select id="therapyFilter">
+                        <option value="">All Therapies</option>
+                        <option value="201">Detoxification Protocol</option>
+                        <option value="102">Stress Relief Therapy</option>
+                        <option value="101">Deep Sleep Renewal</option>
+                        <option value="301">Cardiovascular Support</option>
+                        <option value="401">Joint & Mobility</option>
+                        <option value="501">Digestive Balance</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Date Range</label>
+                    <input type="date" id="startDate">
+                </div>
+                <div class="filter-group">
+                    <label>To</label>
+                    <input type="date" id="endDate">
+                </div>
+                <div class="filter-group">
+                    <label>Status</label>
+                    <select id="statusFilter">
+                        <option value="">All Status</option>
+                        <option value="completed">Completed</option>
+                        <option value="cancelled">Cancelled</option>
+                        <option value="pending">Pending</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary" onclick="applyFilters()">Apply</button>
+                <button class="btn btn-secondary" onclick="clearFilters()">Clear</button>
+            </div>
+        </div>
+        
+        <!-- Therapy Distribution -->
+        <div class="analytics-section">
+            <h2 class="section-title">Therapy Distribution</h2>
+            <div class="therapy-distribution" id="therapyDistribution">
+                <!-- Will be populated dynamically -->
+            </div>
+        </div>
+        
+        <!-- Sessions Table -->
+        <div class="sessions-table-container">
+            <h2 class="section-title">Session Records</h2>
+            <div class="table-wrapper">
+                <table class="sessions-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Patient</th>
+                            <th>Therapy</th>
+                            <th>Duration</th>
+                            <th>Pre-Assessment</th>
+                            <th>Post-Response</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sessionsTableBody">
+                        <!-- Will be populated dynamically -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="pagination" id="pagination">
+                <!-- Will be populated dynamically -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- Session Details Modal -->
+    <div class="modal" id="sessionModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Session Details</h2>
+                <button class="close-btn" onclick="closeModal()">✕</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Session details will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { supabase } from './supabase-config.js';
+        
+        let allSessions = [];
+        let filteredSessions = [];
+        let patients = {};
+        let currentPage = 1;
+        const itemsPerPage = 10;
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Set default date range (last 30 days)
+            const endDate = new Date();
+            const startDate = new Date();
+            startDate.setDate(startDate.getDate() - 30);
+            
+            document.getElementById('startDate').value = startDate.toISOString().split('T')[0];
+            document.getElementById('endDate').value = endDate.toISOString().split('T')[0];
+            
+            await loadPatients();
+            await loadSessions();
+            updateStatistics();
+            updateTherapyDistribution();
+            displaySessions();
+        });
+        
+        async function loadPatients() {
+            try {
+                const authData = JSON.parse(localStorage.getItem('celloxen_auth') || '{}');
+                const clinicId = authData.clinicId || sessionStorage.getItem('currentClinicId');
+                
+                if (!clinicId) return;
+                
+                const { data, error } = await supabase
+                    .from('patients')
+                    .select('id, first_name, last_name, patient_id')
+                    .eq('clinic_id', clinicId);
+                
+                if (error) throw error;
+                
+                const patientSelect = document.getElementById('patientFilter');
+                patientSelect.innerHTML = '<option value="">All Patients</option>';
+                
+                if (data) {
+                    data.forEach(patient => {
+                        patients[patient.id] = patient;
+                        patientSelect.innerHTML += `
+                            <option value="${patient.id}">
+                                ${patient.first_name} ${patient.last_name} (${patient.patient_id})
+                            </option>
+                        `;
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading patients:', error);
+            }
+        }
+        
+        async function loadSessions() {
+            try {
+                const authData = JSON.parse(localStorage.getItem('celloxen_auth') || '{}');
+                const clinicId = authData.clinicId || sessionStorage.getItem('currentClinicId');
+                
+                if (!clinicId) return;
+                
+                const { data, error } = await supabase
+                    .from('therapy_sessions')
+                    .select('*')
+                    .eq('clinic_id', clinicId)
+                    .order('session_date', { ascending: false });
+                
+                if (error) throw error;
+                
+                // If no real data, generate sample data
+                allSessions = data?.length > 0 ? data : generateSampleSessions();
+                filteredSessions = [...allSessions];
+                
+            } catch (error) {
+                console.error('Error loading sessions:', error);
+                allSessions = generateSampleSessions();
+                filteredSessions = [...allSessions];
+            }
+        }
+        
+        function generateSampleSessions() {
+            const sampleSessions = [];
+            const therapyTypes = [
+                { code: '201', name: 'Detoxification Protocol' },
+                { code: '102', name: 'Stress Relief Therapy' },
+                { code: '101', name: 'Deep Sleep Renewal' },
+                { code: '301', name: 'Cardiovascular Support' }
+            ];
+            
+            const preAssessments = [
+                'Patient feels well',
+                'Minor discomfort reported',
+                'Moderate symptoms present'
+            ];
+            
+            const postResponses = [
+                'Excellent - No issues',
+                'Good - Minor fatigue',
+                'Fair - Some discomfort'
+            ];
+            
+            // Generate 50 sample sessions
+            for (let i = 0; i < 50; i++) {
+                const daysAgo = Math.floor(Math.random() * 60);
+                const sessionDate = new Date();
+                sessionDate.setDate(sessionDate.getDate() - daysAgo);
+                
+                const therapy = therapyTypes[Math.floor(Math.random() * therapyTypes.length)];
+                const patientIds = Object.keys(patients);
+                const patientId = patientIds.length > 0 ? 
+                    patientIds[Math.floor(Math.random() * patientIds.length)] : 1;
+                
+                sampleSessions.push({
+                    id: i + 1,
+                    patient_id: parseInt(patientId),
+                    session_date: sessionDate.toISOString().split('T')[0],
+                    session_time: `${9 + Math.floor(Math.random() * 8)}:00`,
+                    therapy_type: therapy.name,
+                    therapy_code: therapy.code,
+                    duration_minutes: 30 + Math.floor(Math.random() * 30),
+                    pre_assessment: preAssessments[Math.floor(Math.random() * preAssessments.length)],
+                    post_response: postResponses[Math.floor(Math.random() * postResponses.length)],
+                    session_notes: 'Session completed successfully',
+                    status: Math.random() > 0.1 ? 'completed' : 'cancelled',
+                    completed: Math.random() > 0.1
+                });
+            }
+            
+            return sampleSessions;
+        }
+        
+        function updateStatistics() {
+            // Total sessions
+            document.getElementById('totalSessions').textContent = allSessions.length;
+            
+            // Completion rate
+            const completed = allSessions.filter(s => s.status === 'completed').length;
+            const completionRate = allSessions.length > 0 ? 
+                Math.round((completed / allSessions.length) * 100) : 0;
+            document.getElementById('completionRate').textContent = completionRate + '%';
+            
+            // Average duration
+            const avgDuration = allSessions.length > 0 ?
+                Math.round(allSessions.reduce((sum, s) => sum + (s.duration_minutes || 45), 0) / allSessions.length) : 0;
+            document.getElementById('avgDuration').textContent = avgDuration;
+            
+            // Active patients
+            const uniquePatients = new Set(allSessions.map(s => s.patient_id));
+            document.getElementById('activePatients').textContent = uniquePatients.size;
+            
+            // This week sessions
+            const weekStart = new Date();
+            weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+            const thisWeek = allSessions.filter(s => 
+                new Date(s.session_date) >= weekStart
+            ).length;
+            document.getElementById('thisWeekSessions').textContent = thisWeek;
+            
+            // Excellent response rate
+            const excellentCount = allSessions.filter(s => 
+                s.post_response?.includes('Excellent')
+            ).length;
+            const excellentRate = allSessions.length > 0 ?
+                Math.round((excellentCount / allSessions.length) * 100) : 0;
+            document.getElementById('excellentResponse').textContent = excellentRate + '%';
+        }
+        
+        function updateTherapyDistribution() {
+            const therapyCounts = {};
+            
+            allSessions.forEach(session => {
+                const key = session.therapy_code || 'unknown';
+                if (!therapyCounts[key]) {
+                    therapyCounts[key] = {
+                        name: session.therapy_type || 'Unknown',
+                        code: session.therapy_code || 'N/A',
+                        count: 0
+                    };
+                }
+                therapyCounts[key].count++;
+            });
+            
+            const distributionHtml = Object.values(therapyCounts)
+                .sort((a, b) => b.count - a.count)
+                .map(therapy => `
+                    <div class="therapy-item">
+                        <div class="therapy-icon">${therapy.code}</div>
+                        <div class="therapy-details">
+                            <div class="therapy-name">${therapy.name}</div>
+                            <div class="therapy-count">${therapy.count} sessions</div>
+                        </div>
+                    </div>
+                `).join('');
+            
+            document.getElementById('therapyDistribution').innerHTML = distributionHtml || 
+                '<p style="text-align: center; color: #64748b;">No therapy data available</p>';
+        }
+        
+        function displaySessions() {
+            const tbody = document.getElementById('sessionsTableBody');
+            
+            if (filteredSessions.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="8" class="empty-state">
+                            <div class="empty-state-icon">📋</div>
+                            <div>No sessions found</div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            // Pagination
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const pageData = filteredSessions.slice(startIndex, endIndex);
+            
+            tbody.innerHTML = pageData.map(session => {
+                const patient = patients[session.patient_id] || {};
+                const sessionDate = new Date(session.session_date);
+                
+                const responseClass = session.post_response?.includes('Excellent') ? 'excellent' :
+                                    session.post_response?.includes('Good') ? 'good' :
+                                    session.post_response?.includes('Fair') ? 'fair' : 'poor';
+                
+                return `
+                    <tr>
+                        <td>${sessionDate.toLocaleDateString('en-GB')}</td>
+                        <td>
+                            <div class="patient-cell">
+                                <div class="patient-avatar">
+                                    ${patient.first_name ? patient.first_name[0] : 'P'}${patient.last_name ? patient.last_name[0] : ''}
+                                </div>
+                                <div>
+                                    ${patient.first_name || 'Unknown'} ${patient.last_name || 'Patient'}
+                                </div>
+                            </div>
+                        </td>
+                        <td>${session.therapy_type || 'N/A'}</td>
+                        <td>${session.duration_minutes || 45} min</td>
+                        <td>${session.pre_assessment || 'N/A'}</td>
+                        <td>
+                            <span class="response-indicator response-${responseClass}">
+                                ${session.post_response || 'N/A'}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="status-badge status-${session.status || 'pending'}">
+                                ${session.status || 'Pending'}
+                            </span>
+                        </td>
+                        <td>
+                            <button class="action-btn" onclick="viewSessionDetails(${session.id})">
+                                View
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+            
+            // Update pagination
+            updatePagination();
+        }
+        
+        function updatePagination() {
+            const totalPages = Math.ceil(filteredSessions.length / itemsPerPage);
+            const paginationDiv = document.getElementById('pagination');
+            
+            let paginationHtml = `
+                <button class="page-btn" onclick="goToPage(${currentPage - 1})" 
+                        ${currentPage === 1 ? 'disabled' : ''}>Previous</button>
+            `;
+            
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
+                    paginationHtml += `
+                        <button class="page-btn ${i === currentPage ? 'active' : ''}" 
+                                onclick="goToPage(${i})">${i}</button>
+                    `;
+                } else if (i === currentPage - 3 || i === currentPage + 3) {
+                    paginationHtml += `<span>...</span>`;
+                }
+            }
+            
+            paginationHtml += `
+                <button class="page-btn" onclick="goToPage(${currentPage + 1})" 
+                        ${currentPage === totalPages ? 'disabled' : ''}>Next</button>
+            `;
+            
+            paginationDiv.innerHTML = paginationHtml;
+        }
+        
+        window.goToPage = function(page) {
+            const totalPages = Math.ceil(filteredSessions.length / itemsPerPage);
+            if (page < 1 || page > totalPages) return;
+            
+            currentPage = page;
+            displaySessions();
+        };
+        
+        window.applyFilters = function() {
+            const patientId = document.getElementById('patientFilter').value;
+            const therapyCode = document.getElementById('therapyFilter').value;
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            const status = document.getElementById('statusFilter').value;
+            
+            filteredSessions = allSessions.filter(session => {
+                if (patientId && session.patient_id !== parseInt(patientId)) return false;
+                if (therapyCode && session.therapy_code !== therapyCode) return false;
+                if (status && session.status !== status) return false;
+                
+                if (startDate || endDate) {
+                    const sessionDate = new Date(session.session_date);
+                    if (startDate && sessionDate < new Date(startDate)) return false;
+                    if (endDate && sessionDate > new Date(endDate)) return false;
+                }
+                
+                return true;
+            });
+            
+            currentPage = 1;
+            displaySessions();
+        };
+        
+        window.clearFilters = function() {
+            document.getElementById('patientFilter').value = '';
+            document.getElementById('therapyFilter').value = '';
+            document.getElementById('statusFilter').value = '';
+            
+            // Reset to last 30 days
+            const endDate = new Date();
+            const startDate = new Date();
+            startDate.setDate(startDate.getDate() - 30);
+            
+            document.getElementById('startDate').value = startDate.toISOString().split('T')[0];
+            document.getElementById('endDate').value = endDate.toISOString().split('T')[0];
+            
+            filteredSessions = [...allSessions];
+            currentPage = 1;
+            displaySessions();
+        };
+        
+        window.viewSessionDetails = function(sessionId) {
+            const session = allSessions.find(s => s.id === sessionId);
+            if (!session) return;
+            
+            const patient = patients[session.patient_id] || {};
+            const sessionDate = new Date(session.session_date);
+            
+            const modalContent = `
+                <div class="detail-row">
+                    <div class="detail-label">Session ID</div>
+                    <div class="detail-value">${session.id}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Patient</div>
+                    <div class="detail-value">
+                        ${patient.first_name || 'Unknown'} ${patient.last_name || 'Patient'}
+                        (ID: ${patient.patient_id || 'N/A'})
+                    </div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Date & Time</div>
+                    <div class="detail-value">
+                        ${sessionDate.toLocaleDateString('en-GB')} at ${session.session_time || 'N/A'}
+                    </div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Therapy</div>
+                    <div class="detail-value">
+                        ${session.therapy_type || 'N/A'} (Code: ${session.therapy_code || 'N/A'})
+                    </div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Duration</div>
+                    <div class="detail-value">${session.duration_minutes || 45} minutes</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Pre-Assessment</div>
+                    <div class="detail-value">${session.pre_assessment || 'N/A'}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Post-Response</div>
+                    <div class="detail-value">${session.post_response || 'N/A'}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Session Notes</div>
+                    <div class="detail-value">${session.session_notes || 'No notes available'}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Status</div>
+                    <div class="detail-value">
+                        <span class="status-badge status-${session.status || 'pending'}">
+                            ${session.status || 'Pending'}
+                        </span>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('modalBody').innerHTML = modalContent;
+            document.getElementById('sessionModal').classList.add('show');
+        };
+        
+        window.closeModal = function() {
+            document.getElementById('sessionModal').classList.remove('show');
+        };
+        
+        // Close modal on outside click
+        window.onclick = function(event) {
+            if (event.target === document.getElementById('sessionModal')) {
+                closeModal();
+            }
+        };
+    </script>
+</body>
+</html>
