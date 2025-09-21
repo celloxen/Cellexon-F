@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Treatment Planning - Celloxen Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+            color: white;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        
+        .header-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+        }
+        
+        .header p {
+            color: #cbd5e1;
+            margin-top: 5px;
+            font-size: 14px;
+        }
+        
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+            margin-bottom: 25px;
+        }
+        
+        .card h2 {
+            font-size: 24px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f1f5f9;
+        }
+        
+        .patient-header {
+            background: linear-gradient(135deg, #1e3a8a, #1e40af);
+            color: white;
+            padding: 25px;
+            border-radius: 16px;
+            margin-bottom: 25px;
+        }
+        
+        .patient-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 15px;
+        }
+        
+        .info-item {
+            background: rgba(255,255,255,0.1);
+            padding: 10px;
+            border-radius: 8px;
+        }
+        
+        .info-label {
+            font-size: 12px;
+            opacity: 0.9;
+            text-transform: uppercase;
+        }
+        
+        .info-value {
+            font-size: 18px;
+            font-weight: 600;
+            margin-top: 5px;
+        }
+        
+        .therapy-item {
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            border-left: 4px solid #10b981;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+        }
+        
+        .therapy-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .therapy-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .therapy-code {
+            background: #1e3a8a;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        .therapy-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .detail-box {
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+        }
+        
+        .detail-label {
+            font-size: 12px;
+            color: #64748b;
+            text-transform: uppercase;
+        }
+        
+        .detail-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-top: 5px;
+        }
+        
+        .calendar-container {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+        }
+        
+        .calendar-day {
+            aspect-ratio: 1;
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 8px;
+            text-align: center;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .calendar-day:hover {
+            border-color: #1e3a8a;
+            transform: translateY(-2px);
+        }
+        
+        .calendar-day.selected {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border-color: #10b981;
+        }
+        
+        .calendar-day.disabled {
+            background: #f1f5f9;
+            color: #94a3b8;
+            cursor: not-allowed;
+        }
+        
+        .session-slot {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 15px;
+            margin: 10px 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .session-slot:hover {
+            border-color: #1e3a8a;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        
+        .session-slot.selected {
+            border-color: #10b981;
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+        }
+        
+        .time-slot {
+            display: inline-block;
+            padding: 8px 16px;
+            background: #f1f5f9;
+            border-radius: 8px;
+            margin: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .time-slot:hover {
+            background: #e2e8f0;
+        }
+        
+        .time-slot.selected {
+            background: linear-gradient(135deg, #1e3a8a, #1e40af);
+            color: white;
+        }
+        
+        .summary-box {
+            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+            border: 1px solid #1e3a8a;
+            border-radius: 16px;
+            padding: 25px;
+            margin: 20px 0;
+        }
+        
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .summary-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .summary-number {
+            font-size: 32px;
+            font-weight: bold;
+            color: #1e3a8a;
+        }
+        
+        .summary-label {
+            font-size: 14px;
+            color: #64748b;
+            margin-top: 5px;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #f1f5f9;
+            color: #475569;
+        }
+        
+        .btn-secondary:hover {
+            background: #e2e8f0;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+        
+        .alert {
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin: 15px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .alert-success {
+            background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+            color: #065f46;
+            border-left: 4px solid #10b981;
+        }
+        
+        .alert-info {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            color: #92400e;
+            border-left: 4px solid #f59e0b;
+        }
+        
+        input[type="date"], input[type="time"], select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #1e3a8a;
+            box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #475569;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-container">
+            <div>
+                <h1>Treatment Planning</h1>
+                <p>Schedule and organize therapy sessions</p>
+            </div>
+            <a href="clinic-dashboard.html" class="back-btn">← Back to Dashboard</a>
+        </div>
+    </div>
+    
+    <div class="container">
+        <!-- Patient Information -->
+        <div class="patient-header">
+            <h2 style="margin: 0;">Treatment Plan Setup</h2>
+            <div class="patient-info-grid">
+                <div class="info-item">
+                    <div class="info-label">Patient</div>
+                    <div class="info-value" id="patientName">Loading...</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Patient ID</div>
+                    <div class="info-value" id="patientId">--</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Plan Duration</div>
+                    <div class="info-value">8 Weeks</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Start Date</div>
+                    <div class="info-value" id="startDate">--</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Recommended Therapies -->
+        <div class="card">
+            <h2>Recommended Therapies</h2>
+            <div class="alert alert-info">
+                These therapies have been recommended based on the comprehensive diagnostic report.
+            </div>
+            <div id="therapiesList">
+                <!-- Therapies will be populated here -->
+            </div>
+        </div>
+        
+        <!-- Schedule Configuration -->
+        <div class="card">
+            <h2>Schedule Configuration</h2>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 25px;">
+                <div>
+                    <label>Treatment Start Date</label>
+                    <input type="date" id="treatmentStartDate" min="">
+                </div>
+                <div>
+                    <label>Preferred Session Days</label>
+                    <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px;">
+                        <label class="time-slot" style="cursor: pointer;">
+                            <input type="checkbox" value="Monday" style="margin-right: 5px;"> Monday
+                        </label>
+                        <label class="time-slot" style="cursor: pointer;">
+                            <input type="checkbox" value="Tuesday" style="margin-right: 5px;"> Tuesday
+                        </label>
+                        <label class="time-slot" style="cursor: pointer;">
+                            <input type="checkbox" value="Wednesday" style="margin-right: 5px;"> Wednesday
+                        </label>
+                        <label class="time-slot" style="cursor: pointer;">
+                            <input type="checkbox" value="Thursday" style="margin-right: 5px;"> Thursday
+                        </label>
+                        <label class="time-slot" style="cursor: pointer;">
+                            <input type="checkbox" value="Friday" style="margin-right: 5px;"> Friday
+                        </label>
+                        <label class="time-slot" style="cursor: pointer;">
+                            <input type="checkbox" value="Saturday" style="margin-right: 5px;"> Saturday
+                        </label>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="margin-top: 25px;">
+                <label>Preferred Session Times</label>
+                <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px;">
+                    <div class="time-slot" onclick="selectTime(this, '09:00')">9:00 AM</div>
+                    <div class="time-slot" onclick="selectTime(this, '10:00')">10:00 AM</div>
+                    <div class="time-slot" onclick="selectTime(this, '11:00')">11:00 AM</div>
+                    <div class="time-slot" onclick="selectTime(this, '14:00')">2:00 PM</div>
+                    <div class="time-slot" onclick="selectTime(this, '15:00')">3:00 PM</div>
+                    <div class="time-slot" onclick="selectTime(this, '16:00')">4:00 PM</div>
+                    <div class="time-slot" onclick="selectTime(this, '17:00')">5:00 PM</div>
+                </div>
+            </div>
+            
+            <div style="margin-top: 25px; text-align: center;">
+                <button class="btn btn-primary" onclick="generateSchedule()">
+                    Generate Treatment Schedule
+                </button>
+            </div>
+        </div>
+        
+        <!-- Treatment Summary -->
+        <div class="card" id="summarySection" style="display: none;">
+            <h2>Treatment Plan Summary</h2>
+            <div class="summary-box">
+                <h3 style="color: #1e293b; margin-bottom: 20px;">8-Week Treatment Program</h3>
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <div class="summary-number" id="totalSessions">0</div>
+                        <div class="summary-label">Total Sessions</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-number" id="weeklyFrequency">0</div>
+                        <div class="summary-label">Sessions/Week</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-number" id="totalTherapies">0</div>
+                        <div class="summary-label">Therapy Types</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-number">8</div>
+                        <div class="summary-label">Weeks Duration</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="alert alert-success" style="margin-top: 20px;">
+                <strong>Schedule Generated!</strong> Review the treatment plan and confirm to proceed.
+            </div>
+            
+            <div id="schedulePreview" style="margin-top: 20px;">
+                <!-- Schedule preview will be shown here -->
+            </div>
+            
+            <div class="action-buttons">
+                <button class="btn btn-primary" onclick="confirmAndSave()">
+                    Confirm & Start Treatment
+                </button>
+                <button class="btn btn-secondary" onclick="adjustSchedule()">
+                    Adjust Schedule
+                </button>
+                <button class="btn btn-secondary" onclick="printSchedule()">
+                    Print Schedule
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { supabase } from './supabase-config.js';
+        import { workflowManager, workflowStages } from './workflow-manager.js';
+        
+        let selectedPatient = null;
+        let recommendedTherapies = [];
+        let selectedDays = [];
+        let selectedTimes = [];
+        let generatedSchedule = [];
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Set minimum date to today
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('treatmentStartDate').min = today;
+            document.getElementById('treatmentStartDate').value = today;
+            document.getElementById('startDate').textContent = new Date().toLocaleDateString('en-GB');
+            
+            // Get patient ID from URL or session
+            const urlParams = new URLSearchParams(window.location.search);
+            const patientId = urlParams.get('patient') || sessionStorage.getItem('currentPatientId');
+            
+            if (patientId) {
+                await loadPatientData(patientId);
+                await loadRecommendations(patientId);
+            } else {
+                alert('No patient selected. Please select a patient first.');
+                window.location.href = 'patient-management.html';
+            }
+        });
+        
+        async function loadPatientData(patientId) {
+            try {
+                const { data, error } = await supabase
+                    .from('patients')
+                    .select('*')
+                    .eq('id', patientId)
+                    .single();
+                
+                if (error) throw error;
+                
+                selectedPatient = data;
+                document.getElementById('patientName').textContent = `${data.first_name} ${data.last_name}`;
+                document.getElementById('patientId').textContent = data.patient_id;
+                
+            } catch (error) {
+                console.error('Error loading patient:', error);
+            }
+        }
+        
+        async function loadRecommendations(patientId) {
+            try {
+                // Load the latest comprehensive report
+                const { data, error } = await supabase
+                    .from('medical_reports')
+                    .select('*')
+                    .eq('patient_id', patientId)
+                    .eq('report_type', 'comprehensive_diagnostic')
+                    .order('created_at', { ascending: false })
+                    .limit(1)
+                    .single();
+                
+                if (data && data.report_data?.therapy_recommendations) {
+                    recommendedTherapies = data.report_data.therapy_recommendations;
+                } else {
+                    // Default therapies if no report found
+                    recommendedTherapies = [
+                        {
+                            name: 'Detoxification Protocol',
+                            code: '201',
+                            priority: 'MANDATORY',
+                            duration: '60 minutes',
+                            frequency: '2 times per week',
+                            sessions: 12
+                        },
+                        {
+                            name: 'Stress Relief Therapy',
+                            code: '102',
+                            priority: 'PRIMARY',
+                            duration: '35 minutes',
+                            frequency: '2 times per week',
+                            sessions: 16
+                        }
+                    ];
+                }
+                
+                displayTherapies();
+                
+            } catch (error) {
+                console.error('Error loading recommendations:', error);
+                // Use default therapies
+                recommendedTherapies = [
+                    {
+                        name: 'Detoxification Protocol',
+                        code: '201',
+                        priority: 'MANDATORY',
+                        duration: '60 minutes',
+                        frequency: '2 times per week',
+                        sessions: 12
+                    }
+                ];
+                displayTherapies();
+            }
+        }
+        
+        function displayTherapies() {
+            const html = recommendedTherapies.map(therapy => `
+                <div class="therapy-item">
+                    <div class="therapy-header">
+                        <div class="therapy-title">${therapy.name}</div>
+                        <div class="therapy-code">Code ${therapy.code}</div>
+                    </div>
+                    <div class="therapy-details">
+                        <div class="detail-box">
+                            <div class="detail-label">Priority</div>
+                            <div class="detail-value">${therapy.priority}</div>
+                        </div>
+                        <div class="detail-box">
+                            <div class="detail-label">Duration</div>
+                            <div class="detail-value">${therapy.duration || '45 min'}</div>
+                        </div>
+                        <div class="detail-box">
+                            <div class="detail-label">Frequency</div>
+                            <div class="detail-value">${therapy.frequency || '2x/week'}</div>
+                        </div>
+                        <div class="detail-box">
+                            <div class="detail-label">Sessions</div>
+                            <div class="detail-value">${therapy.sessions || 16}</div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            
+            document.getElementById('therapiesList').innerHTML = html;
+        }
+        
+        window.selectTime = function(element, time) {
+            element.classList.toggle('selected');
+            if (element.classList.contains('selected')) {
+                selectedTimes.push(time);
+            } else {
+                selectedTimes = selectedTimes.filter(t => t !== time);
+            }
+        };
+        
+        window.generateSchedule = function() {
+            // Get selected days
+            selectedDays = [];
+            document.querySelectorAll('input[type="checkbox"]:checked').forEach(cb => {
+                selectedDays.push(cb.value);
+            });
+            
+            if (selectedDays.length === 0) {
+                alert('Please select at least one day for sessions.');
+                return;
+            }
+            
+            if (selectedTimes.length === 0) {
+                alert('Please select at least one preferred time.');
+                return;
+            }
+            
+            const startDate = new Date(document.getElementById('treatmentStartDate').value);
+            generatedSchedule = [];
+            
+            // Generate 8 weeks of sessions
+            let currentDate = new Date(startDate);
+            const endDate = new Date(startDate);
+            endDate.setDate(endDate.getDate() + 56); // 8 weeks
+            
+            let sessionCount = 0;
+            const targetSessions = recommendedTherapies.reduce((sum, t) => sum + (t.sessions || 16), 0);
+            
+            while (currentDate <= endDate && sessionCount < targetSessions) {
+                const dayName = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][currentDate.getDay()];
+                
+                if (selectedDays.includes(dayName)) {
+                    const time = selectedTimes[sessionCount % selectedTimes.length];
+                    const therapy = recommendedTherapies[sessionCount % recommendedTherapies.length];
+                    
+                    generatedSchedule.push({
+                        date: new Date(currentDate),
+                        time: time,
+                        therapy: therapy.name,
+                        therapyCode: therapy.code,
+                        duration: therapy.duration || '45 minutes'
+                    });
+                    
+                    sessionCount++;
+                }
+                
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+            
+            // Display summary
+            document.getElementById('summarySection').style.display = 'block';
+            document.getElementById('totalSessions').textContent = generatedSchedule.length;
+            document.getElementById('weeklyFrequency').textContent = Math.round(generatedSchedule.length / 8);
+            document.getElementById('totalTherapies').textContent = recommendedTherapies.length;
+            
+            // Display schedule preview (first 2 weeks)
+            const previewHtml = `
+                <h3 style="margin-bottom: 15px;">First 2 Weeks Preview</h3>
+                <div style="max-height: 300px; overflow-y: auto;">
+                    ${generatedSchedule.slice(0, 8).map(session => `
+                        <div class="session-slot">
+                            <strong>${session.date.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' })}</strong>
+                            at ${formatTime(session.time)}<br>
+                            <span style="color: #64748b;">${session.therapy} (${session.duration})</span>
+                        </div>
+                    `).join('')}
+                </div>
+                <p style="margin-top: 15px; color: #64748b; text-align: center;">
+                    + ${Math.max(0, generatedSchedule.length - 8)} more sessions...
+                </p>
+            `;
+            
+            document.getElementById('schedulePreview').innerHTML = previewHtml;
+            
+            // Scroll to summary
+            document.getElementById('summarySection').scrollIntoView({ behavior: 'smooth' });
+        };
+        
+        function formatTime(time) {
+            const [hours, minutes] = time.split(':');
+            const hour = parseInt(hours);
+            const ampm = hour >= 12 ? 'PM' : 'AM';
+            const displayHour = hour > 12 ? hour - 12 : hour;
+            return `${displayHour}:${minutes} ${ampm}`;
+        }
+        
+        window.confirmAndSave = async function() {
+            if (!selectedPatient || generatedSchedule.length === 0) {
+                alert('Please generate a schedule first.');
+                return;
+            }
+            
+            try {
+                // Save treatment plan
+                const treatmentPlan = {
+                    patient_id: selectedPatient.id,
+                    clinic_id: selectedPatient.clinic_id,
+                    plan_type: 'comprehensive',
+                    duration_weeks: 8,
+                    total_sessions: generatedSchedule.length,
+                    therapies: recommendedTherapies,
+                    schedule: generatedSchedule,
+                    start_date: document.getElementById('treatmentStartDate').value,
+                    created_at: new Date().toISOString(),
+                    status: 'active'
+                };
+                
+                const { error } = await supabase
+                    .from('treatment_plans')
+                    .insert([treatmentPlan]);
+                
+                if (!error) {
+                    // Update workflow status
+                    await workflowManager.updateStage(selectedPatient.id, workflowStages.IN_TREATMENT);
+                    
+                    alert('Treatment plan created successfully!');
+                    window.location.href = `treatment-progress.html?patient=${selectedPatient.id}`;
+                }
+            } catch (error) {
+                console.error('Error saving treatment plan:', error);
+                alert('Error saving treatment plan. Please try again.');
+            }
+        };
+        
+        window.adjustSchedule = function() {
+            document.getElementById('summarySection').style.display = 'none';
+            document.querySelector('.card:nth-child(3)').scrollIntoView({ behavior: 'smooth' });
+        };
+        
+        window.printSchedule = function() {
+            window.print();
+        };
+    </script>
+</body>
+</html>
