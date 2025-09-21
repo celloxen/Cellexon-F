@@ -624,7 +624,7 @@
                                 ${formatStage(stage)}
                             </span>
                         </td>
-                        <td>${new Date(lastUpdated).toLocaleDateString()}</td>
+                        <td>${new Date(lastUpdated).toLocaleDateString('en-GB')}</td>
                         <td>
                             <div class="action-buttons">
                                 <button class="btn-action btn-view" onclick="viewPatient(${patient.id})">View</button>
@@ -710,7 +710,7 @@
                 </div>
                 <div class="info-row">
                     <div class="info-label">Date of Birth:</div>
-                    <div class="info-value">${patient.date_of_birth ? new Date(patient.date_of_birth).toLocaleDateString() : 'N/A'}</div>
+                    <div class="info-value">${patient.date_of_birth ? new Date(patient.date_of_birth).toLocaleDateString('en-GB') : 'N/A'}</div>
                 </div>
                 <div class="info-row">
                     <div class="info-label">Gender:</div>
