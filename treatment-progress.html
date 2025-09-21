@@ -314,6 +314,12 @@
             border-left: 4px solid #f59e0b;
         }
         
+        .alert-error {
+            background: linear-gradient(135deg, #fee2e2, #fecaca);
+            color: #991b1b;
+            border-left: 4px solid #ef4444;
+        }
+        
         .notes-section {
             background: #f8fafc;
             padding: 20px;
@@ -325,6 +331,27 @@
             color: #1e293b;
             margin-bottom: 15px;
             font-size: 18px;
+        }
+        
+        .note-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 3px solid #1e3a8a;
+        }
+        
+        .note-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 12px;
+            color: #64748b;
+        }
+        
+        .note-text {
+            color: #1e293b;
+            line-height: 1.6;
         }
         
         textarea {
@@ -410,6 +437,22 @@
             border-color: #1e3a8a;
             box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
         }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #1e3a8a;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -456,6 +499,9 @@
             </p>
         </div>
         
+        <!-- Alert Container -->
+        <div id="alertContainer"></div>
+        
         <!-- Today's Session -->
         <div class="card" id="todaySessionCard" style="display: none;">
             <h2>Today's Session</h2>
@@ -474,31 +520,36 @@
                 <div class="chart-bar">
                     <div class="chart-label">Sleep Quality</div>
                     <div class="chart-progress">
-                        <div class="chart-fill" style="width: 65%; background: linear-gradient(90deg, #10b981, #059669);" id="sleepProgress"></div>
+                        <div class="chart-fill" style="width: 0%; background: linear-gradient(90deg, #10b981, #059669);" id="sleepProgress"></div>
                     </div>
-                    <div class="chart-value">65%</div>
+                    <div class="chart-value" id="sleepValue">0%</div>
                 </div>
                 <div class="chart-bar">
                     <div class="chart-label">Stress Levels</div>
                     <div class="chart-progress">
-                        <div class="chart-fill" style="width: 45%; background: linear-gradient(90deg, #f59e0b, #d97706);" id="stressProgress"></div>
+                        <div class="chart-fill" style="width: 0%; background: linear-gradient(90deg, #f59e0b, #d97706);" id="stressProgress"></div>
                     </div>
-                    <div class="chart-value">45%</div>
+                    <div class="chart-value" id="stressValue">0%</div>
                 </div>
                 <div class="chart-bar">
                     <div class="chart-label">Energy Levels</div>
                     <div class="chart-progress">
-                        <div class="chart-fill" style="width: 70%; background: linear-gradient(90deg, #10b981, #059669);" id="energyProgress"></div>
+                        <div class="chart-fill" style="width: 0%; background: linear-gradient(90deg, #10b981, #059669);" id="energyProgress"></div>
                     </div>
-                    <div class="chart-value">70%</div>
+                    <div class="chart-value" id="energyValue">0%</div>
                 </div>
                 <div class="chart-bar">
                     <div class="chart-label">Overall Wellness</div>
                     <div class="chart-progress">
-                        <div class="chart-fill" style="width: 60%; background: linear-gradient(90deg, #1e3a8a, #1e40af);" id="wellnessProgress"></div>
+                        <div class="chart-fill" style="width: 0%; background: linear-gradient(90deg, #1e3a8a, #1e40af);" id="wellnessProgress"></div>
                     </div>
-                    <div class="chart-value">60%</div>
+                    <div class="chart-value" id="wellnessValue">0%</div>
                 </div>
+            </div>
+            <div style="text-align: center; margin-top: 20px;">
+                <button class="btn btn-secondary" onclick="updateWellnessMetrics()">
+                    Update Wellness Metrics
+                </button>
             </div>
         </div>
         
@@ -512,6 +563,9 @@
                 <button class="btn btn-secondary" onclick="viewFullSchedule()">
                     View Full Schedule
                 </button>
+                <button class="btn btn-secondary" onclick="loadSessions()">
+                    Refresh Sessions
+                </button>
             </div>
             <div id="sessionsList">
                 <!-- Sessions will be populated here -->
@@ -522,9 +576,9 @@
         <div class="card">
             <h2>Clinical Notes</h2>
             <div class="notes-section">
-                <h3>Latest Progress Note</h3>
-                <div id="latestNote" style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-                    <p style="color: #64748b;">No notes yet. Add a note after completing a session.</p>
+                <h3>Recent Notes</h3>
+                <div id="notesList">
+                    <p style="color: #64748b;">Loading notes...</p>
                 </div>
                 <h3>Add New Note</h3>
                 <textarea id="newNote" placeholder="Enter clinical observations, patient response, or progress notes..."></textarea>
@@ -551,11 +605,23 @@
             <div class="form-group">
                 <label>Therapy Type</label>
                 <select id="therapyType">
-                    <option>Detoxification Protocol</option>
-                    <option>Stress Relief Therapy</option>
-                    <option>Sleep Enhancement</option>
-                    <option>Cardiovascular Support</option>
+                    <option value="Detoxification Protocol">Detoxification Protocol</option>
+                    <option value="Stress Relief Therapy">Stress Relief Therapy</option>
+                    <option value="Sleep Enhancement">Sleep Enhancement</option>
+                    <option value="Cardiovascular Support">Cardiovascular Support</option>
+                    <option value="Joint & Mobility Therapy">Joint & Mobility Therapy</option>
+                    <option value="Digestive Balance Therapy">Digestive Balance Therapy</option>
                 </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Therapy Code</label>
+                <input type="text" id="therapyCode" placeholder="e.g., 101, 201">
+            </div>
+            
+            <div class="form-group">
+                <label>Session Time</label>
+                <input type="time" id="sessionTime" value="10:00">
             </div>
             
             <div class="form-group">
@@ -590,7 +656,8 @@
             
             <div class="action-buttons">
                 <button class="btn btn-primary" onclick="completeCheckIn()">
-                    Complete Session
+                    <span id="checkInButtonText">Complete Session</span>
+                    <span id="checkInLoader" style="display: none;" class="loading-spinner"></span>
                 </button>
                 <button class="btn btn-secondary" onclick="closeModal()">
                     Cancel
@@ -606,7 +673,8 @@
         let selectedPatient = null;
         let treatmentPlan = null;
         let sessions = [];
-        let completedCount = 0;
+        let completedSessionIds = [];
+        let clinicalNotes = [];
         
         // Initialize
         document.addEventListener('DOMContentLoaded', async function() {
@@ -620,14 +688,28 @@
             if (patientId) {
                 await loadPatientData(patientId);
                 await loadTreatmentPlan(patientId);
+                await loadCompletedSessions(patientId);
+                await loadClinicalNotes(patientId);
+                await loadWellnessMetrics(patientId);
                 displaySessions();
                 checkTodaySession();
                 updateProgressMetrics();
             } else {
-                alert('No patient selected. Please select a patient first.');
-                window.location.href = 'patient-management.html';
+                showAlert('No patient selected. Redirecting to patient management...', 'error');
+                setTimeout(() => {
+                    window.location.href = 'patient-management.html';
+                }, 2000);
             }
         });
+        
+        // Show alert messages
+        function showAlert(message, type = 'success') {
+            const alertContainer = document.getElementById('alertContainer');
+            alertContainer.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+            setTimeout(() => {
+                alertContainer.innerHTML = '';
+            }, 5000);
+        }
         
         async function loadPatientData(patientId) {
             try {
@@ -645,6 +727,7 @@
                 
             } catch (error) {
                 console.error('Error loading patient:', error);
+                showAlert('Error loading patient data', 'error');
             }
         }
         
@@ -674,6 +757,115 @@
             }
         }
         
+        async function loadCompletedSessions(patientId) {
+            try {
+                const { data, error } = await supabase
+                    .from('therapy_sessions')
+                    .select('*')
+                    .eq('patient_id', patientId)
+                    .eq('completed', true)
+                    .order('session_date', { ascending: false });
+                
+                if (data) {
+                    completedSessionIds = data.map(s => `${s.session_date}_${s.therapy_code}`);
+                }
+            } catch (error) {
+                console.error('Error loading completed sessions:', error);
+            }
+        }
+        
+        async function loadClinicalNotes(patientId) {
+            try {
+                const { data, error } = await supabase
+                    .from('clinical_notes')
+                    .select('*')
+                    .eq('patient_id', patientId)
+                    .order('created_at', { ascending: false })
+                    .limit(5);
+                
+                if (data && data.length > 0) {
+                    clinicalNotes = data;
+                    displayNotes();
+                }
+            } catch (error) {
+                console.error('Error loading notes:', error);
+            }
+        }
+        
+        async function loadWellnessMetrics(patientId) {
+            try {
+                const { data, error } = await supabase
+                    .from('wellness_metrics')
+                    .select('*')
+                    .eq('patient_id', patientId)
+                    .order('metric_date', { ascending: false })
+                    .limit(1)
+                    .single();
+                
+                if (data) {
+                    // Update wellness chart
+                    updateWellnessChart(data);
+                } else {
+                    // Set initial baseline metrics
+                    setBaselineMetrics();
+                }
+            } catch (error) {
+                console.error('Error loading wellness metrics:', error);
+                setBaselineMetrics();
+            }
+        }
+        
+        function updateWellnessChart(metrics) {
+            // Sleep (higher is better)
+            const sleepScore = metrics.sleep_quality || 50;
+            document.getElementById('sleepProgress').style.width = sleepScore + '%';
+            document.getElementById('sleepValue').textContent = sleepScore + '%';
+            
+            // Stress (lower is better, so invert for display)
+            const stressScore = 100 - (metrics.stress_level || 50);
+            document.getElementById('stressProgress').style.width = stressScore + '%';
+            document.getElementById('stressValue').textContent = stressScore + '%';
+            
+            // Energy (higher is better)
+            const energyScore = metrics.energy_level || 50;
+            document.getElementById('energyProgress').style.width = energyScore + '%';
+            document.getElementById('energyValue').textContent = energyScore + '%';
+            
+            // Overall wellness
+            const wellnessScore = metrics.overall_wellness || 50;
+            document.getElementById('wellnessProgress').style.width = wellnessScore + '%';
+            document.getElementById('wellnessValue').textContent = wellnessScore + '%';
+        }
+        
+        function setBaselineMetrics() {
+            // Set baseline metrics at 50%
+            ['sleep', 'stress', 'energy', 'wellness'].forEach(metric => {
+                const value = metric === 'stress' ? 50 : 50; // Stress shows inverse
+                document.getElementById(`${metric}Progress`).style.width = value + '%';
+                document.getElementById(`${metric}Value`).textContent = value + '%';
+            });
+        }
+        
+        function displayNotes() {
+            if (clinicalNotes.length === 0) {
+                document.getElementById('notesList').innerHTML = 
+                    '<p style="color: #64748b;">No notes yet. Add a note after completing a session.</p>';
+                return;
+            }
+            
+            const notesHtml = clinicalNotes.map(note => `
+                <div class="note-item">
+                    <div class="note-header">
+                        <span>${new Date(note.created_at).toLocaleDateString('en-GB')}</span>
+                        <span>${note.note_type || 'Progress Note'}</span>
+                    </div>
+                    <div class="note-text">${note.note_text}</div>
+                </div>
+            `).join('');
+            
+            document.getElementById('notesList').innerHTML = notesHtml;
+        }
+        
         function generateSampleSessions() {
             const sampleSessions = [];
             const today = new Date();
@@ -687,6 +879,7 @@
                         date: sessionDate.toISOString(),
                         time: '10:00',
                         therapy: i % 2 === 0 ? 'Detoxification Protocol' : 'Stress Relief Therapy',
+                        therapyCode: i % 2 === 0 ? '201' : '102',
                         duration: '45 minutes',
                         status: i < 0 ? 'completed' : i === 0 ? 'today' : 'scheduled',
                         completed: i < 0
@@ -704,15 +897,14 @@
             // Sort sessions by date
             sessions.sort((a, b) => new Date(a.date) - new Date(b.date));
             
-            // Display next 5 sessions
+            // Display next 8 sessions
             const upcomingSessions = sessions.slice(0, 8);
             
             const html = upcomingSessions.map(session => {
                 const sessionDate = new Date(session.date);
                 const isToday = sessionDate.toDateString() === today;
-                const isCompleted = session.completed || sessionDate < new Date(today);
-                
-                if (isCompleted) completedCount++;
+                const sessionKey = `${session.date.split('T')[0]}_${session.therapyCode}`;
+                const isCompleted = session.completed || completedSessionIds.includes(sessionKey) || sessionDate < new Date(today);
                 
                 return `
                     <div class="session-card ${isCompleted ? 'completed' : ''} ${isToday ? 'today' : ''}">
@@ -732,6 +924,10 @@
                             <div class="detail-item">
                                 <div class="detail-label">Therapy</div>
                                 <div class="detail-value">${session.therapy}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Code</div>
+                                <div class="detail-value">${session.therapyCode || 'N/A'}</div>
                             </div>
                             <div class="detail-item">
                                 <div class="detail-label">Time</div>
@@ -767,6 +963,11 @@
                 document.getElementById('todaySessionInfo').textContent = 
                     `${todaySession.therapy} at ${formatTime(todaySession.time)}`;
                 
+                // Pre-fill check-in form with today's session details
+                document.getElementById('therapyType').value = todaySession.therapy;
+                document.getElementById('therapyCode').value = todaySession.therapyCode || '';
+                document.getElementById('sessionTime').value = todaySession.time || '10:00';
+                
                 document.getElementById('todaySessionDetails').innerHTML = `
                     <div style="background: white; padding: 20px; border-radius: 12px; margin-top: 15px;">
                         <h3 style="margin-bottom: 15px;">${todaySession.therapy}</h3>
@@ -794,16 +995,19 @@
         
         function updateProgressMetrics() {
             const total = sessions.length;
-            const completed = sessions.filter(s => s.completed || new Date(s.date) < new Date()).length;
-            const remaining = total - completed;
-            const percentage = Math.round((completed / total) * 100);
+            const completedCount = sessions.filter(s => {
+                const sessionKey = `${s.date.split('T')[0]}_${s.therapyCode}`;
+                return s.completed || completedSessionIds.includes(sessionKey) || new Date(s.date) < new Date();
+            }).length;
+            const remaining = total - completedCount;
+            const percentage = total > 0 ? Math.round((completedCount / total) * 100) : 0;
             
             // Calculate current week
             const startDate = sessions[0] ? new Date(sessions[0].date) : new Date();
             const today = new Date();
             const weekNumber = Math.ceil((today - startDate) / (7 * 24 * 60 * 60 * 1000));
             
-            document.getElementById('completedSessions').textContent = completed;
+            document.getElementById('completedSessions').textContent = completedCount;
             document.getElementById('remainingSessions').textContent = remaining;
             document.getElementById('totalSessions').textContent = total;
             document.getElementById('weekNumber').textContent = Math.min(weekNumber, 8);
@@ -820,6 +1024,7 @@
             return `${displayHour}:${minutes || '00'} ${ampm}`;
         }
         
+        // Modal functions
         window.showCheckInModal = function() {
             document.getElementById('checkInModal').classList.add('show');
         };
@@ -828,64 +1033,204 @@
             document.getElementById('checkInModal').classList.remove('show');
         };
         
+        // Complete check-in with database save
         window.completeCheckIn = async function() {
+            // Show loading state
+            document.getElementById('checkInButtonText').style.display = 'none';
+            document.getElementById('checkInLoader').style.display = 'inline-block';
+            
+            const authData = JSON.parse(localStorage.getItem('celloxen_auth') || '{}');
+            const clinicId = authData.clinicId || selectedPatient.clinic_id;
+            
             const sessionData = {
                 patient_id: selectedPatient.id,
-                date: document.getElementById('sessionDate').value,
+                clinic_id: clinicId,
+                treatment_plan_id: treatmentPlan?.id || null,
+                session_date: document.getElementById('sessionDate').value,
+                session_time: document.getElementById('sessionTime').value,
                 therapy_type: document.getElementById('therapyType').value,
-                duration: document.getElementById('sessionDuration').value,
+                therapy_code: document.getElementById('therapyCode').value,
+                duration_minutes: parseInt(document.getElementById('sessionDuration').value),
                 pre_assessment: document.getElementById('preAssessment').value,
                 post_response: document.getElementById('postResponse').value,
-                notes: document.getElementById('sessionNotes').value,
+                session_notes: document.getElementById('sessionNotes').value,
                 completed: true,
-                completed_at: new Date().toISOString()
+                completed_at: new Date().toISOString(),
+                status: 'completed'
             };
             
-            // Save session data (you'll need to create a sessions table)
-            console.log('Session completed:', sessionData);
-            
-            alert('Session completed successfully!');
-            closeModal();
-            
-            // Reload sessions
-            location.reload();
+            try {
+                // Save session to database
+                const { data, error } = await supabase
+                    .from('therapy_sessions')
+                    .insert([sessionData])
+                    .select();
+                
+                if (error) throw error;
+                
+                showAlert('Session completed and saved successfully!', 'success');
+                
+                // Update workflow if this was a milestone session
+                const completedCount = completedSessionIds.length + 1;
+                if (completedCount % 4 === 0) { // Every 4 sessions
+                    await workflowManager.recordTransition(
+                        selectedPatient.id,
+                        workflowStages.IN_TREATMENT,
+                        workflowStages.IN_TREATMENT,
+                        `Completed ${completedCount} sessions`
+                    );
+                }
+                
+                // Auto-save a clinical note if session notes were provided
+                if (sessionData.session_notes) {
+                    await saveSessionNote(sessionData.session_notes, data[0].id);
+                }
+                
+                closeModal();
+                
+                // Reload data
+                await loadCompletedSessions(selectedPatient.id);
+                await loadClinicalNotes(selectedPatient.id);
+                displaySessions();
+                updateProgressMetrics();
+                
+            } catch (error) {
+                console.error('Error saving session:', error);
+                showAlert('Error saving session: ' + error.message, 'error');
+            } finally {
+                // Reset button state
+                document.getElementById('checkInButtonText').style.display = 'inline';
+                document.getElementById('checkInLoader').style.display = 'none';
+            }
         };
         
+        // Save clinical note
         window.saveNote = async function() {
             const noteText = document.getElementById('newNote').value;
             if (!noteText.trim()) {
-                alert('Please enter a note before saving.');
+                showAlert('Please enter a note before saving.', 'error');
                 return;
             }
             
-            // Save clinical note (you'll need a notes table)
+            const authData = JSON.parse(localStorage.getItem('celloxen_auth') || '{}');
+            const clinicId = authData.clinicId || selectedPatient.clinic_id;
+            const userId = authData.userId;
+            
             const noteData = {
                 patient_id: selectedPatient.id,
+                clinic_id: clinicId,
+                note_type: 'progress',
                 note_text: noteText,
-                created_by: 'Current Practitioner',
-                created_at: new Date().toISOString()
+                created_by: userId || null
             };
             
-            console.log('Note saved:', noteData);
-            
-            // Display the note
-            document.getElementById('latestNote').innerHTML = `
-                <div style="margin-bottom: 10px;">
-                    <strong>Date:</strong> ${new Date().toLocaleDateString('en-GB')}
-                </div>
-                <p>${noteText}</p>
-                <div style="margin-top: 10px; font-size: 12px; color: #64748b;">
-                    By: Current Practitioner
-                </div>
-            `;
-            
-            document.getElementById('newNote').value = '';
-            alert('Note saved successfully!');
+            try {
+                const { error } = await supabase
+                    .from('clinical_notes')
+                    .insert([noteData]);
+                
+                if (error) throw error;
+                
+                document.getElementById('newNote').value = '';
+                showAlert('Note saved successfully!', 'success');
+                
+                // Reload notes
+                await loadClinicalNotes(selectedPatient.id);
+                
+            } catch (error) {
+                console.error('Error saving note:', error);
+                showAlert('Error saving note: ' + error.message, 'error');
+            }
         };
         
+        // Save note related to a session
+        async function saveSessionNote(noteText, sessionId) {
+            const authData = JSON.parse(localStorage.getItem('celloxen_auth') || '{}');
+            const clinicId = authData.clinicId || selectedPatient.clinic_id;
+            const userId = authData.userId;
+            
+            const noteData = {
+                patient_id: selectedPatient.id,
+                clinic_id: clinicId,
+                note_type: 'session',
+                note_text: noteText,
+                session_id: sessionId,
+                created_by: userId || null
+            };
+            
+            try {
+                await supabase
+                    .from('clinical_notes')
+                    .insert([noteData]);
+            } catch (error) {
+                console.error('Error saving session note:', error);
+            }
+        }
+        
+        // Update wellness metrics
+        window.updateWellnessMetrics = async function() {
+            // In a real implementation, this would open a form to input new metrics
+            const sleepQuality = prompt('Rate sleep quality (0-100):');
+            const stressLevel = prompt('Rate stress level (0-100, lower is better):');
+            const energyLevel = prompt('Rate energy level (0-100):');
+            
+            if (!sleepQuality || !stressLevel || !energyLevel) {
+                showAlert('Metrics update cancelled', 'info');
+                return;
+            }
+            
+            const overallWellness = Math.round(
+                (parseInt(sleepQuality) + (100 - parseInt(stressLevel)) + parseInt(energyLevel)) / 3
+            );
+            
+            const metricsData = {
+                patient_id: selectedPatient.id,
+                metric_date: new Date().toISOString().split('T')[0],
+                sleep_quality: parseInt(sleepQuality),
+                stress_level: parseInt(stressLevel),
+                energy_level: parseInt(energyLevel),
+                overall_wellness: overallWellness
+            };
+            
+            try {
+                const { error } = await supabase
+                    .from('wellness_metrics')
+                    .insert([metricsData]);
+                
+                if (error) throw error;
+                
+                updateWellnessChart(metricsData);
+                showAlert('Wellness metrics updated successfully!', 'success');
+                
+            } catch (error) {
+                console.error('Error saving metrics:', error);
+                showAlert('Error saving metrics: ' + error.message, 'error');
+            }
+        };
+        
+        // Load sessions (refresh)
+        window.loadSessions = async function() {
+            showAlert('Refreshing sessions...', 'info');
+            await loadTreatmentPlan(selectedPatient.id);
+            await loadCompletedSessions(selectedPatient.id);
+            displaySessions();
+            updateProgressMetrics();
+            showAlert('Sessions refreshed!', 'success');
+        };
+        
+        // View full schedule
         window.viewFullSchedule = function() {
             window.location.href = `treatment-schedule.html?patient=${selectedPatient.id}`;
         };
+        
+        // Make functions globally available
+        window.showCheckInModal = showCheckInModal;
+        window.closeModal = closeModal;
+        window.completeCheckIn = completeCheckIn;
+        window.saveNote = saveNote;
+        window.updateWellnessMetrics = updateWellnessMetrics;
+        window.loadSessions = loadSessions;
+        window.viewFullSchedule = viewFullSchedule;
     </script>
 </body>
 </html>
