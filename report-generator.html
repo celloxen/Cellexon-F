@@ -422,9 +422,6 @@
                 <button class="btn btn-primary" onclick="generateReport()" disabled id="generateBtn">
                     <span>🔄</span> Generate Report
                 </button>
-                <button class="btn btn-outline" onclick="previewReport()" disabled id="previewBtn">
-                    <span>👁️</span> Preview
-                </button>
             </div>
         </div>
 
@@ -432,14 +429,6 @@
         <div class="loading" id="loadingIndicator">
             <div class="spinner"></div>
             <p>Generating report...</p>
-        </div>
-
-        <!-- Report Preview -->
-        <div class="content-card report-preview" id="reportPreview">
-            <h2 class="section-title">Report Preview</h2>
-            <div id="previewContent">
-                <!-- Preview content will be loaded here -->
-            </div>
         </div>
 
         <!-- PDF Actions -->
@@ -537,14 +526,11 @@
         
         function updateButtonStates() {
             const generateBtn = document.getElementById('generateBtn');
-            const previewBtn = document.getElementById('previewBtn');
             
             if (selectedPatient && selectedReportType) {
                 generateBtn.disabled = false;
-                previewBtn.disabled = false;
             } else {
                 generateBtn.disabled = true;
-                previewBtn.disabled = true;
             }
         }
         
@@ -585,9 +571,6 @@
                 showLoading(false);
                 showAlert('Report generated successfully!', 'success');
                 document.getElementById('pdfActions').classList.add('show');
-                
-                // Show preview
-                await previewReport();
                 
             } catch (error) {
                 console.error('Error generating report:', error);
