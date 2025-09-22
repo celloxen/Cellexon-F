@@ -117,7 +117,7 @@
             display: flex;
             align-items: flex-end;
             gap: 10px;
-            animation: slideIn 0.4s ease;
+            animation: slideIn 0.6s ease;
         }
         
         .message-wrapper.lily-wrapper {
@@ -130,7 +130,7 @@
         }
         
         .message {
-            max-width: 70%;
+            max-width: 85%;
             padding: 14px 18px;
             border-radius: 18px;
             line-height: 1.5;
@@ -229,7 +229,7 @@
             background: linear-gradient(90deg, #10b981, #059669);
             height: 100%;
             border-radius: 2px;
-            transition: width 0.5s ease;
+            transition: width 0.8s ease;
         }
         
         .report-section {
@@ -674,7 +674,7 @@
                 let greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
                 
                 await this.addMessage(`${greeting}! I am Lily, your Celloxen Health Consultant. I'm here to conduct a preliminary health assessment to understand your wellness needs.`, 'lily');
-                await this.delay(3000);
+                await this.delay(4000);
                 
                 if (this.patientData) {
                     // If patient data is available, use it
@@ -746,7 +746,7 @@
                 this.disableInput();
                 
                 const processingMsg = await this.addMessage('', 'processing');
-                await this.delay(2000);
+                await this.delay(3000);
                 processingMsg.remove();
                 
                 switch(this.currentStep) {
@@ -851,9 +851,9 @@ Shall we proceed with the preliminary health assessment?`, 'lily', ['Yes, procee
             
             async startAssessment() {
                 await this.addMessage(`Excellent! I'll now conduct a preliminary health assessment for ${this.sessionData.patientName}.`, 'lily');
-                await this.delay(2500);
+                await this.delay(3500);
                 await this.addMessage("I'll ask 15 initial screening questions to understand the primary health concerns. Please answer based on the patient's current condition.", 'lily');
-                await this.delay(2500);
+                await this.delay(3500);
                 
                 this.currentQuestionIndex = 0;
                 this.currentStep = 'assessment';
@@ -861,7 +861,7 @@ Shall we proceed with the preliminary health assessment?`, 'lily', ['Yes, procee
             }
             
             async askNextQuestion() {
-                await this.delay(800); // Delay between questions
+                await this.delay(1500); // Increased delay between questions
                 const questions = this.initialQuestions;
                 if (this.currentQuestionIndex < questions.length) {
                     const question = questions[this.currentQuestionIndex];
@@ -923,7 +923,7 @@ Shall we proceed with the preliminary health assessment?`, 'lily', ['Yes, procee
                 await this.addMessage("Initial assessment complete! Let me analyse these responses...", 'lily');
                 
                 const processingMsg = await this.addMessage('', 'processing');
-                await this.delay(4000);
+                await this.delay(5000);
                 processingMsg.remove();
                 
                 // Calculate final domain scores
@@ -951,11 +951,11 @@ Shall we proceed with the preliminary health assessment?`, 'lily', ['Yes, procee
                 }
                 
                 await this.addMessage(findingsMessage, 'lily');
-                await this.delay(2000);
+                await this.delay(3000);
                 
                 if (this.targetedQuestions.length > 0) {
                     await this.addMessage(`Based on these findings, I need to ask ${this.targetedQuestions.length} targeted questions to complete the assessment.`, 'lily');
-                    await this.delay(1500);
+                    await this.delay(2500);
                     
                     this.currentQuestionIndex = 0;
                     this.currentStep = 'targeted';
@@ -1056,7 +1056,7 @@ Shall we proceed with the preliminary health assessment?`, 'lily', ['Yes, procee
                 await this.addMessage("Assessment complete! Generating your preliminary health report...", 'lily');
                 
                 const processingMsg = await this.addMessage('', 'processing');
-                await this.delay(3000);
+                await this.delay(4000);
                 processingMsg.remove();
                 
                 // Recalculate final scores
