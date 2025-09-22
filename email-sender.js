@@ -28,8 +28,8 @@ window.sendReportEmail = async function(pdfBlob, patientEmail, patientName) {
         // Prepare email content with updated sender
         const emailData = {
             to: patientEmail,
-            from: 'health@celloxen.com', // Updated sender
-            replyTo: 'health@celloxen.com', // Updated reply-to
+            from: 'Celloxen Health <health@celloxen.com>', // Updated sender with display name
+            replyTo: 'Celloxen Health <health@celloxen.com>', // Updated reply-to
             subject: `Health Assessment Report - ${patientName}`,
             html: `
                 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -127,8 +127,8 @@ window.sendAppointmentReminder = async function(patientEmail, patientName, appoi
 
         const emailData = {
             to: patientEmail,
-            from: 'health@celloxen.com', // Updated sender
-            replyTo: 'health@celloxen.com', // Updated reply-to
+            from: 'Celloxen Health <health@celloxen.com>', // Updated sender with display name
+            replyTo: 'Celloxen Health <health@celloxen.com>', // Updated reply-to
             subject: `Appointment Reminder - ${appointmentDate}`,
             html: `
                 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -190,8 +190,8 @@ window.testEmailConfiguration = async function(testEmail = 'health@celloxen.com'
             },
             body: JSON.stringify({
                 to: testEmail,
-                from: 'health@celloxen.com', // Updated sender
-                replyTo: 'health@celloxen.com', // Updated reply-to
+                from: 'Celloxen Health <health@celloxen.com>', // Updated sender with display name
+                replyTo: 'Celloxen Health <health@celloxen.com>', // Updated reply-to
                 subject: 'Test Email - Celloxen Platform',
                 html: `
                     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -243,8 +243,8 @@ window.sendWelcomeEmail = async function(patientEmail, patientName) {
 
         const emailData = {
             to: patientEmail,
-            from: 'health@celloxen.com',
-            replyTo: 'health@celloxen.com',
+            from: 'Celloxen Health <health@celloxen.com>',
+            replyTo: 'Celloxen Health <health@celloxen.com>',
             subject: `Welcome to Celloxen Wellness Platform - ${patientName}`,
             html: `
                 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
