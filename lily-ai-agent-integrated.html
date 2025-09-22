@@ -384,7 +384,7 @@
         </div>
         
         <div class="chat-card">
-            <div class="chat-header" style="padding: 20px 25px; border-bottom: 1px solid #e2e8f0;">
+            <div class="chat-header" style="padding: 20px 25px; border-bottom: 1px solid #e2e8f0; display: flex; gap: 15px; align-items: center;">
                 <div class="lily-avatar" style="width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, #1e3a8a, #1e40af); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">L</div>
                 <div>
                     <div style="font-weight: 600; color: #1f2937;">Lily Health Consultant</div>
@@ -674,7 +674,7 @@
                 let greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
                 
                 await this.addMessage(`${greeting}! I am Lily, your Celloxen Health Consultant. I'm here to conduct a preliminary health assessment to understand your wellness needs.`, 'lily');
-                await this.delay(2000);
+                await this.delay(3000);
                 
                 if (this.patientData) {
                     // If patient data is available, use it
@@ -746,7 +746,7 @@
                 this.disableInput();
                 
                 const processingMsg = await this.addMessage('', 'processing');
-                await this.delay(1500);
+                await this.delay(2000);
                 processingMsg.remove();
                 
                 switch(this.currentStep) {
@@ -851,9 +851,9 @@ Shall we proceed with the preliminary health assessment?`, 'lily', ['Yes, procee
             
             async startAssessment() {
                 await this.addMessage(`Excellent! I'll now conduct a preliminary health assessment for ${this.sessionData.patientName}.`, 'lily');
-                await this.delay(1500);
+                await this.delay(2500);
                 await this.addMessage("I'll ask 15 initial screening questions to understand the primary health concerns. Please answer based on the patient's current condition.", 'lily');
-                await this.delay(1500);
+                await this.delay(2500);
                 
                 this.currentQuestionIndex = 0;
                 this.currentStep = 'assessment';
@@ -861,6 +861,7 @@ Shall we proceed with the preliminary health assessment?`, 'lily', ['Yes, procee
             }
             
             async askNextQuestion() {
+                await this.delay(800); // Delay between questions
                 const questions = this.initialQuestions;
                 if (this.currentQuestionIndex < questions.length) {
                     const question = questions[this.currentQuestionIndex];
@@ -911,6 +912,9 @@ Shall we proceed with the preliminary health assessment?`, 'lily', ['Yes, procee
                 this.domainScores[question.domain].totalWeight += question.weight;
                 this.domainScores[question.domain].responses++;
                 
+                // Add user's selected response to chat
+                await this.addMessage(selectedOption.text, 'user');
+                
                 this.currentQuestionIndex++;
                 await this.askNextQuestion();
             }
@@ -919,7 +923,7 @@ Shall we proceed with the preliminary health assessment?`, 'lily', ['Yes, procee
                 await this.addMessage("Initial assessment complete! Let me analyse these responses...", 'lily');
                 
                 const processingMsg = await this.addMessage('', 'processing');
-                await this.delay(3000);
+                await this.delay(4000);
                 processingMsg.remove();
                 
                 // Calculate final domain scores
@@ -1041,6 +1045,9 @@ Shall we proceed with the preliminary health assessment?`, 'lily', ['Yes, procee
                 this.domainScores[question.domain].totalScore += selectedOption.score * question.weight;
                 this.domainScores[question.domain].totalWeight += question.weight;
                 
+                // Add user's selected response to chat
+                await this.addMessage(selectedOption.text, 'user');
+                
                 this.currentQuestionIndex++;
                 await this.askTargetedQuestion();
             }
@@ -1136,26 +1143,38 @@ Shall we proceed with the preliminary health assessment?`, 'lily', ['Yes, procee
                 const authData = JSON.parse(localStorage.getItem('celloxen_auth') || '{}');
                 const clinicId = authData.clinicId || sessionStorage.getItem('currentClinicId');
                 
-                const assessmentData = {
-                    clinic_id: clinicId,
-                    questions: this.initialQuestions,
-                    answers: this.responses,
-                    scores: {
-                        overall: Math.round(Object.values(scores).reduce((a, b) => a + b, 0) / Object.keys(scores).length),
-                        categories: scores
-                    },
-                    primary_concerns: primaryConcerns,
-                    secondary_concerns: secondaryConcerns,
-                    assessment_type: 'initial',
-                    practitioner: this.sessionData.practitionerName
-                };
-                
                 try {
-                    // Save using workflow manager
-                    await workflowManager.completeHealthAssessment(this.patientId, assessmentData);
+                    // Save assessment data directly to health_assessments table
+                    const { data, error } = await supabase
+                        .from('health_assessments')
+                        .insert({
+                            patient_id: this.patientId,
+                            clinic_id: clinicId,
+                            assessment_type: 'initial',
+                            questions: this.initialQuestions,
+                            answers: this.responses,
+                            scores: scores,
+                            overall_score: Math.round(Object.values(scores).reduce((a, b) => a + b, 0) / Object.keys(scores).length),
+                            primary_concerns: primaryConcerns,
+                            secondary_concerns: secondaryConcerns,
+                            practitioner_name: this.sessionData.practitionerName,
+                            created_at: new Date().toISOString()
+                        })
+                        .select()
+                        .single();
+                    
+                    if (error) throw error;
+                    
+                    // Update workflow status
+                    await workflowManager.completeHealthAssessment(this.patientId, {
+                        assessment_type: 'initial',
+                        clinic_id: clinicId
+                    });
+                    
                     console.log('Assessment saved successfully');
                 } catch (error) {
                     console.error('Error saving assessment:', error);
+                    alert('Error saving assessment. Please try again.');
                 }
             }
             
@@ -1163,9 +1182,10 @@ Shall we proceed with the preliminary health assessment?`, 'lily', ['Yes, procee
                 switch(option) {
                     case 'Continue to Iris Assessment':
                         if (this.patientId) {
+                            // This will automatically update workflow and redirect
                             await workflowManager.startIrisAssessment(this.patientId);
                         } else {
-                            window.location.href = 'iris-analysis.html';
+                            window.location.href = 'iris-assessment-integrated.html';
                         }
                         break;
                     case 'View Preliminary Report':
