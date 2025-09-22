@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Health Assessments - Celloxen Platform</title>
     <style>
-        /* Similar base styles */
         * {
             margin: 0;
             padding: 0;
@@ -19,9 +18,34 @@
         }
         
         .header {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
             color: white;
             padding: 15px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
         }
         
         .container {
@@ -36,6 +60,12 @@
             gap: 20px;
         }
         
+        @media (max-width: 968px) {
+            .assessments-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
         .patients-list {
             background: white;
             border-radius: 12px;
@@ -46,7 +76,9 @@
         }
         
         .list-header {
+            font-size: 18px;
             font-weight: 600;
+            color: #1f2937;
             margin-bottom: 15px;
             padding-bottom: 10px;
             border-bottom: 2px solid #e5e7eb;
@@ -54,10 +86,16 @@
         
         .search-box {
             width: 100%;
-            padding: 8px;
+            padding: 10px;
             border: 2px solid #e5e7eb;
-            border-radius: 6px;
+            border-radius: 8px;
             margin-bottom: 15px;
+            font-size: 14px;
+        }
+        
+        .search-box:focus {
+            outline: none;
+            border-color: #3b82f6;
         }
         
         .patient-item {
@@ -70,105 +108,259 @@
         }
         
         .patient-item:hover {
-            background: #f9fafb;
-            border-color: #10b981;
+            background: #f0f9ff;
+            border-color: #3b82f6;
+            transform: translateX(2px);
         }
         
         .patient-item.selected {
-            background: #d1fae5;
-            border-color: #10b981;
+            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+            border-color: #1e40af;
+            box-shadow: 0 2px 8px rgba(30, 64, 175, 0.15);
+        }
+        
+        .patient-name {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 4px;
+        }
+        
+        .patient-info {
+            font-size: 12px;
+            color: #6b7280;
         }
         
         .assessment-viewer {
             background: white;
             border-radius: 12px;
-            padding: 20px;
+            padding: 25px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            min-height: 600px;
         }
         
         .assessment-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             padding-bottom: 15px;
             border-bottom: 2px solid #e5e7eb;
         }
         
+        .patient-header-info h2 {
+            font-size: 24px;
+            color: #1f2937;
+            margin-bottom: 5px;
+        }
+        
+        .patient-header-info small {
+            color: #6b7280;
+            font-size: 14px;
+        }
+        
         .assessment-card {
-            background: #f9fafb;
-            border-radius: 8px;
-            padding: 15px;
+            background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border: 1px solid #e5e7eb;
+            transition: all 0.3s;
+        }
+        
+        .assessment-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            transform: translateY(-2px);
+        }
+        
+        .assessment-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 15px;
         }
         
         .assessment-date {
-            font-size: 12px;
+            font-size: 13px;
             color: #6b7280;
-            margin-bottom: 10px;
         }
         
-        .assessment-status {
+        .assessment-type {
             display: inline-block;
-            padding: 4px 10px;
+            padding: 4px 12px;
             border-radius: 20px;
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 600;
-            background: #d1fae5;
+            background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+            color: #1e40af;
+        }
+        
+        .assessment-type.initial {
+            background: linear-gradient(135deg, #d1fae5, #a7f3d0);
             color: #065f46;
+        }
+        
+        .assessment-type.follow-up {
+            background: linear-gradient(135deg, #fed7aa, #fbbf24);
+            color: #92400e;
+        }
+        
+        .assessment-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 10px;
         }
         
         .domain-scores {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 10px;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
             margin-top: 15px;
         }
         
         .score-item {
             background: white;
-            padding: 10px;
-            border-radius: 6px;
+            padding: 12px;
+            border-radius: 8px;
             border: 1px solid #e5e7eb;
+            text-align: center;
         }
         
         .score-label {
-            font-size: 12px;
+            font-size: 11px;
             color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 5px;
         }
         
         .score-value {
-            font-size: 20px;
+            font-size: 24px;
+            font-weight: 700;
+        }
+        
+        .score-value.good {
+            color: #10b981;
+        }
+        
+        .score-value.moderate {
+            color: #f59e0b;
+        }
+        
+        .score-value.poor {
+            color: #ef4444;
+        }
+        
+        .concerns-section {
+            margin-top: 15px;
+            padding: 12px;
+            background: #f9fafb;
+            border-radius: 6px;
+        }
+        
+        .concerns-title {
+            font-size: 14px;
             font-weight: 600;
-            color: #1f2937;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+        
+        .concern-tag {
+            display: inline-block;
+            padding: 4px 10px;
+            margin: 4px;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 15px;
+            font-size: 12px;
+            color: #4b5563;
         }
         
         .empty-state {
             text-align: center;
-            padding: 60px 20px;
+            padding: 80px 20px;
+            color: #9ca3af;
+        }
+        
+        .empty-icon {
+            font-size: 64px;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+        
+        .empty-state h3 {
+            font-size: 20px;
+            margin-bottom: 10px;
+            color: #6b7280;
+        }
+        
+        .empty-state p {
+            font-size: 14px;
             color: #9ca3af;
         }
         
         .btn-view-report {
-            background: #3b82f6;
+            background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
             color: white;
             border: none;
-            padding: 8px 16px;
-            border-radius: 6px;
+            padding: 10px 20px;
+            border-radius: 8px;
             cursor: pointer;
             font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s;
         }
         
         .btn-view-report:hover {
-            background: #2563eb;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+        
+        .btn-export {
+            background: #e5e7eb;
+            color: #374151;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            margin-left: 10px;
+        }
+        
+        .btn-export:hover {
+            background: #d1d5db;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6b7280;
+        }
+        
+        .loading-spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
     <div class="header">
-        <div class="container" style="display: flex; justify-content: space-between; align-items: center;">
-            <h1 style="font-size: 20px;">Health Assessments Viewer</h1>
-            <a href="clinic-dashboard.html" style="color: white; text-decoration: none;">← Back to Dashboard</a>
+        <div class="header-container">
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <h1 style="font-size: 20px;">Health Assessments Viewer</h1>
+            </div>
+            <a href="clinic-dashboard.html" class="back-btn">← Back to Dashboard</a>
         </div>
     </div>
 
@@ -177,9 +369,12 @@
             <!-- Patients List -->
             <div class="patients-list">
                 <h3 class="list-header">Select Patient</h3>
-                <input type="text" class="search-box" id="patientSearch" placeholder="Search patients...">
+                <input type="text" class="search-box" id="patientSearch" placeholder="Search by name or patient ID...">
                 <div id="patientsList">
-                    <!-- Dynamic patient list -->
+                    <div class="loading">
+                        <div class="loading-spinner"></div>
+                        <p>Loading patients...</p>
+                    </div>
                 </div>
             </div>
             
@@ -187,7 +382,7 @@
             <div class="assessment-viewer">
                 <div id="assessmentContent">
                     <div class="empty-state">
-                        <div style="font-size: 48px;">📋</div>
+                        <div class="empty-icon">📋</div>
                         <h3>Select a Patient</h3>
                         <p>Choose a patient from the list to view their health assessments</p>
                     </div>
@@ -203,17 +398,25 @@
         let allPatients = [];
         let selectedPatientId = null;
         
+        // Initialize on page load
         document.addEventListener('DOMContentLoaded', async function() {
             await loadClinicId();
             await loadPatients();
             setupEventListeners();
+            
+            // Check if coming from patient management with a specific patient
+            const viewPatientId = sessionStorage.getItem('viewPatientId');
+            if (viewPatientId) {
+                sessionStorage.removeItem('viewPatientId');
+                window.selectPatient(parseInt(viewPatientId));
+            }
         });
         
         async function loadClinicId() {
             const authData = localStorage.getItem('celloxen_auth');
             if (authData) {
                 const auth = JSON.parse(authData);
-                currentClinicId = auth.clinicId;
+                currentClinicId = auth.clinicId || sessionStorage.getItem('currentClinicId');
             }
         }
         
@@ -225,7 +428,7 @@
                     .from('patients')
                     .select('*')
                     .eq('clinic_id', currentClinicId)
-                    .order('last_name');
+                    .order('last_name, first_name');
                 
                 if (error) throw error;
                 
@@ -234,6 +437,7 @@
                 
             } catch (error) {
                 console.error('Error loading patients:', error);
+                document.getElementById('patientsList').innerHTML = '<p style="text-align: center; color: #ef4444;">Error loading patients</p>';
             }
         }
         
@@ -241,15 +445,17 @@
             const listDiv = document.getElementById('patientsList');
             
             if (patients.length === 0) {
-                listDiv.innerHTML = '<p style="text-align: center; color: #9ca3af;">No patients found</p>';
+                listDiv.innerHTML = '<p style="text-align: center; color: #9ca3af; padding: 20px;">No patients found</p>';
                 return;
             }
             
             listDiv.innerHTML = patients.map(patient => `
                 <div class="patient-item" onclick="selectPatient(${patient.id})" id="patient-${patient.id}">
-                    <strong>${patient.first_name} ${patient.last_name}</strong><br>
-                    <small>ID: ${patient.patient_id}</small><br>
-                    <small>${patient.phone || 'No phone'}</small>
+                    <div class="patient-name">${patient.first_name} ${patient.last_name}</div>
+                    <div class="patient-info">
+                        ID: ${patient.patient_id || 'N/A'}<br>
+                        ${patient.phone || 'No phone'}
+                    </div>
                 </div>
             `).join('');
         }
@@ -258,9 +464,9 @@
             document.getElementById('patientSearch').addEventListener('input', (e) => {
                 const searchTerm = e.target.value.toLowerCase();
                 const filtered = allPatients.filter(patient => 
-                    patient.first_name.toLowerCase().includes(searchTerm) ||
-                    patient.last_name.toLowerCase().includes(searchTerm) ||
-                    patient.patient_id.toLowerCase().includes(searchTerm)
+                    (patient.first_name && patient.first_name.toLowerCase().includes(searchTerm)) ||
+                    (patient.last_name && patient.last_name.toLowerCase().includes(searchTerm)) ||
+                    (patient.patient_id && patient.patient_id.toLowerCase().includes(searchTerm))
                 );
                 displayPatients(filtered);
             });
@@ -271,7 +477,10 @@
             document.querySelectorAll('.patient-item').forEach(item => {
                 item.classList.remove('selected');
             });
-            document.getElementById(`patient-${patientId}`).classList.add('selected');
+            const selectedElement = document.getElementById(`patient-${patientId}`);
+            if (selectedElement) {
+                selectedElement.classList.add('selected');
+            }
             
             selectedPatientId = patientId;
             await loadPatientAssessments(patientId);
@@ -280,9 +489,21 @@
         async function loadPatientAssessments(patientId) {
             const contentDiv = document.getElementById('assessmentContent');
             
+            // Show loading state
+            contentDiv.innerHTML = `
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <p>Loading assessments...</p>
+                </div>
+            `;
+            
             try {
                 // Get patient info
                 const patient = allPatients.find(p => p.id === patientId);
+                if (!patient) {
+                    contentDiv.innerHTML = '<p style="color: #ef4444; text-align: center;">Patient not found</p>';
+                    return;
+                }
                 
                 // Get health assessments
                 const { data: assessments, error } = await supabase
@@ -297,83 +518,121 @@
                 const { data: irisAssessments } = await supabase
                     .from('iris_assessments')
                     .select('*')
-                    .eq('patient_id', patientId);
-                
-                // Get comprehensive reports
-                const { data: reports } = await supabase
-                    .from('comprehensive_reports')
-                    .select('*')
-                    .eq('patient_id', patientId);
+                    .eq('patient_id', patientId)
+                    .order('created_at', { ascending: false });
                 
                 // Display assessments
                 contentDiv.innerHTML = `
                     <div class="assessment-header">
-                        <div>
+                        <div class="patient-header-info">
                             <h2>${patient.first_name} ${patient.last_name}</h2>
-                            <small>Patient ID: ${patient.patient_id}</small>
+                            <small>Patient ID: ${patient.patient_id || 'N/A'}</small>
+                        </div>
+                        <div>
+                            <button class="btn-export" onclick="exportPatientData(${patientId})">Export Data</button>
                         </div>
                     </div>
                     
-                    ${assessments && assessments.length > 0 ? assessments.map(assessment => `
-                        <div class="assessment-card">
-                            <div class="assessment-date">
-                                ${new Date(assessment.created_at).toLocaleDateString()} 
-                                ${new Date(assessment.created_at).toLocaleTimeString()}
-                            </div>
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <div>
-                                    <h4>Health Assessment</h4>
-                                    <span class="assessment-status">${assessment.status}</span>
-                                </div>
-                                <button class="btn-view-report" onclick="viewFullReport('${assessment.id}')">
-                                    View Full Report
-                                </button>
-                            </div>
+                    ${assessments && assessments.length > 0 ? `
+                        <h3 style="margin-bottom: 15px; color: #1f2937;">Health Assessments</h3>
+                        ${assessments.map(assessment => {
+                            const scores = assessment.scores || assessment.domain_scores || {};
+                            const overallScore = assessment.overall_score || 0;
                             
-                            ${assessment.domain_scores ? `
-                                <div class="domain-scores">
-                                    ${Object.entries(assessment.domain_scores).map(([domain, score]) => `
-                                        <div class="score-item">
-                                            <div class="score-label">${formatDomain(domain)}</div>
-                                            <div class="score-value">${score || 0}</div>
+                            return `
+                                <div class="assessment-card">
+                                    <div class="assessment-meta">
+                                        <div class="assessment-date">
+                                            ${new Date(assessment.created_at).toLocaleDateString('en-GB')} at 
+                                            ${new Date(assessment.created_at).toLocaleTimeString('en-GB', {hour: '2-digit', minute:'2-digit'})}
                                         </div>
-                                    `).join('')}
+                                        <span class="assessment-type ${assessment.assessment_type || 'initial'}">
+                                            ${assessment.assessment_type || 'Initial'} Assessment
+                                        </span>
+                                    </div>
+                                    
+                                    <div class="assessment-title">Health Assessment Results</div>
+                                    
+                                    ${assessment.practitioner_name ? `
+                                        <p style="font-size: 14px; color: #6b7280; margin-bottom: 10px;">
+                                            Practitioner: ${assessment.practitioner_name}
+                                        </p>
+                                    ` : ''}
+                                    
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                        <div>
+                                            <span style="font-size: 14px; color: #6b7280;">Overall Wellness Score:</span>
+                                            <span style="font-size: 28px; font-weight: bold; color: ${overallScore > 70 ? '#10b981' : overallScore > 40 ? '#f59e0b' : '#ef4444'}; margin-left: 10px;">
+                                                ${100 - overallScore}%
+                                            </span>
+                                        </div>
+                                        <button class="btn-view-report" onclick="viewDetailedReport(${assessment.id}, 'health')">
+                                            View Full Report
+                                        </button>
+                                    </div>
+                                    
+                                    ${Object.keys(scores).length > 0 ? `
+                                        <div class="domain-scores">
+                                            ${Object.entries(scores).map(([domain, score]) => {
+                                                const wellness = 100 - (score || 0);
+                                                const colorClass = wellness > 70 ? 'good' : wellness > 40 ? 'moderate' : 'poor';
+                                                return `
+                                                    <div class="score-item">
+                                                        <div class="score-label">${formatDomain(domain)}</div>
+                                                        <div class="score-value ${colorClass}">${wellness}%</div>
+                                                    </div>
+                                                `;
+                                            }).join('')}
+                                        </div>
+                                    ` : ''}
+                                    
+                                    ${assessment.primary_concerns && assessment.primary_concerns.length > 0 ? `
+                                        <div class="concerns-section">
+                                            <div class="concerns-title">Primary Concerns</div>
+                                            ${assessment.primary_concerns.map(concern => 
+                                                `<span class="concern-tag">${concern}</span>`
+                                            ).join('')}
+                                        </div>
+                                    ` : ''}
                                 </div>
-                            ` : '<p>No scores available</p>'}
-                        </div>
-                    `).join('') : '<p>No health assessments found</p>'}
+                            `;
+                        }).join('')}
+                    ` : '<p style="color: #6b7280; margin: 20px 0;">No health assessments found</p>'}
                     
                     ${irisAssessments && irisAssessments.length > 0 ? `
-                        <h3 style="margin-top: 20px;">Iris Assessments</h3>
+                        <h3 style="margin: 25px 0 15px; color: #1f2937;">IRIS Assessments</h3>
                         ${irisAssessments.map(iris => `
                             <div class="assessment-card">
-                                <div class="assessment-date">
-                                    ${new Date(iris.created_at).toLocaleDateString()}
+                                <div class="assessment-meta">
+                                    <div class="assessment-date">
+                                        ${new Date(iris.created_at).toLocaleDateString('en-GB')} at
+                                        ${new Date(iris.created_at).toLocaleTimeString('en-GB', {hour: '2-digit', minute:'2-digit'})}
+                                    </div>
+                                    <span class="assessment-type">IRIS Analysis</span>
                                 </div>
-                                <h4>Iris Assessment</h4>
-                                <span class="assessment-status">${iris.status}</span>
+                                
+                                <div class="assessment-title">IRIS Assessment Results</div>
+                                
                                 ${iris.constitutional_type ? `
-                                    <p style="margin-top: 10px;">Constitutional Type: ${iris.constitutional_type}</p>
-                                ` : ''}
-                            </div>
-                        `).join('')}
-                    ` : ''}
-                    
-                    ${reports && reports.length > 0 ? `
-                        <h3 style="margin-top: 20px;">Comprehensive Reports</h3>
-                        ${reports.map(report => `
-                            <div class="assessment-card">
-                                <div class="assessment-date">
-                                    ${new Date(report.created_at).toLocaleDateString()}
-                                </div>
-                                <h4>Comprehensive Report</h4>
-                                <span class="assessment-status">${report.status}</span>
-                                ${report.confidence_score ? `
-                                    <p style="margin-top: 10px;">
-                                        Confidence: ${report.confidence_score}% | 
-                                        Correlation: ${report.correlation_percentage}%
+                                    <p style="margin: 10px 0; color: #374151;">
+                                        <strong>Constitutional Type:</strong> ${iris.constitutional_type}
                                     </p>
                                 ` : ''}
+                                
+                                ${iris.health_patterns && iris.health_patterns.length > 0 ? `
+                                    <div class="concerns-section">
+                                        <div class="concerns-title">Identified Patterns</div>
+                                        ${iris.health_patterns.map(pattern => 
+                                            `<span class="concern-tag">${pattern.name || pattern}</span>`
+                                        ).join('')}
+                                    </div>
+                                ` : ''}
+                                
+                                <div style="margin-top: 15px;">
+                                    <button class="btn-view-report" onclick="viewDetailedReport(${iris.id}, 'iris')">
+                                        View IRIS Report
+                                    </button>
+                                </div>
                             </div>
                         `).join('')}
                     ` : ''}
@@ -381,19 +640,45 @@
                 
             } catch (error) {
                 console.error('Error loading assessments:', error);
-                contentDiv.innerHTML = '<p>Error loading assessments</p>';
+                contentDiv.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #ef4444;">
+                        <p>Error loading assessments</p>
+                        <p style="font-size: 14px; margin-top: 10px;">${error.message}</p>
+                    </div>
+                `;
             }
         }
         
         function formatDomain(domain) {
-            return domain.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+            const formats = {
+                sleep: 'Sleep',
+                stress: 'Stress',
+                cardiovascular: 'Cardiovascular',
+                joint: 'Joint Health',
+                digestive: 'Digestive',
+                kidney: 'Kidney',
+                energy: 'Energy',
+                metabolic: 'Metabolic'
+            };
+            return formats[domain] || domain.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
         }
         
-        window.viewFullReport = function(assessmentId) {
-            // Navigate to detailed report viewer
+        window.viewDetailedReport = function(assessmentId, type) {
             sessionStorage.setItem('viewAssessmentId', assessmentId);
-            window.location.href = 'assessment-report.html';
+            sessionStorage.setItem('assessmentType', type);
+            // Navigate to a detailed report viewer page
+            window.location.href = 'assessment-report-detail.html';
         };
+        
+        window.exportPatientData = async function(patientId) {
+            // Export functionality - could generate PDF or CSV
+            alert('Export functionality will be implemented soon');
+        };
+        
+        // Make functions globally available
+        window.selectPatient = selectPatient;
+        window.viewDetailedReport = viewDetailedReport;
+        window.exportPatientData = exportPatientData;
     </script>
 </body>
 </html>
