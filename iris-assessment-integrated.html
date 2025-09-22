@@ -533,7 +533,7 @@
             </div>
             
             <div class="alert alert-info">
-                <strong>Next Step:</strong> Both health and iris assessments are now complete. The system will generate a comprehensive diagnostic report with therapy recommendations.
+                <strong>Next Step:</strong> Both health and IRIS assessments are now complete. The system will now generate a comprehensive diagnostic report with therapy recommendations.
             </div>
             
             <div class="action-buttons">
@@ -560,15 +560,16 @@
         let analysisResults = {};
         let cameraStream = null;
         let currentStep = 1;
+        let healthAssessmentId = null;
         
         // Initialize page
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', async function() {
             // Check if patient ID is in session
             const patientId = sessionStorage.getItem('currentPatientId');
             if (patientId) {
-                loadPatientForWorkflow(patientId);
+                await loadPatientForWorkflow(patientId);
             } else {
-                loadPatients();
+                await loadPatients();
             }
         });
         
@@ -594,6 +595,20 @@
                 
                 if (data) {
                     selectedPatient = data;
+                    
+                    // Check for existing health assessment
+                    const { data: healthAssessment } = await supabase
+                        .from('health_assessments')
+                        .select('id')
+                        .eq('patient_id', patientId)
+                        .order('created_at', { ascending: false })
+                        .limit(1)
+                        .single();
+                    
+                    if (healthAssessment) {
+                        healthAssessmentId = healthAssessment.id;
+                    }
+                    
                     // Auto-select patient
                     const patientSelect = document.getElementById('patientSelect');
                     patientSelect.innerHTML = `<option value="${data.id}" selected>${data.first_name} ${data.last_name} (${data.patient_id})</option>`;
@@ -609,7 +624,7 @@
                 }
             } catch (error) {
                 console.error('Error loading patient:', error);
-                loadPatients(); // Fallback to loading all patients
+                await loadPatients(); // Fallback to loading all patients
             }
         }
         
@@ -777,6 +792,21 @@
                     { name: 'Digestive System', status: 'Needs Support', notes: 'Shows signs of stress' },
                     { name: 'Lymphatic System', status: 'Mild Congestion', notes: 'Minor congestion patterns' },
                     { name: 'Nervous System', status: 'Mild Stress', notes: 'Stress rings visible' }
+                ],
+                stress_indicators: {
+                    level: 'Moderate',
+                    areas: ['Digestive', 'Nervous'],
+                    notes: 'Stress rings present in zones 2-3'
+                },
+                toxicity_markers: {
+                    level: 'Low',
+                    areas: ['Lymphatic'],
+                    notes: 'Minor congestion patterns observed'
+                },
+                genetic_predispositions: [
+                    'Digestive sensitivity',
+                    'Stress response tendency',
+                    'Lymphatic congestion potential'
                 ]
             };
             
@@ -811,7 +841,7 @@
             }, 1500);
         }
         
-        // Save iris assessment
+        // Save iris assessment - FIXED to match database structure
         async function saveIrisAssessment() {
             if (!selectedPatient) {
                 showAlert('No patient selected for assessment', 'error');
@@ -822,46 +852,44 @@
             const clinicId = authData.clinicId || sessionStorage.getItem('currentClinicId') || selectedPatient.clinic_id;
             
             try {
-                const irisData = {
+                // Prepare data matching the database columns
+                const irisAssessmentData = {
+                    patient_id: selectedPatient.id,
                     clinic_id: clinicId,
-                    left_eye_image: capturedImages.left,
-                    right_eye_image: capturedImages.right,
-                    iris_data: {
-                        constitutional_analysis: analysisResults,
-                        captured_images: capturedImages,
-                        analysis_type: document.getElementById('analysisType').value,
-                        analysis_date: new Date().toISOString()
-                    }
+                    health_assessment_id: healthAssessmentId, // Link to health assessment if available
+                    left_eye_images: [capturedImages.left], // Store as array
+                    right_eye_images: [capturedImages.right], // Store as array
+                    constitutional_type: analysisResults.constitutional_type,
+                    organ_analysis: analysisResults.organs,
+                    stress_indicators: analysisResults.stress_indicators,
+                    toxicity_markers: analysisResults.toxicity_markers,
+                    genetic_predispositions: analysisResults.genetic_predispositions,
+                    assessment_type: document.getElementById('analysisType').value,
+                    status: 'completed',
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
                 };
                 
-                // Complete iris assessment using workflow manager
-                const assessment = await workflowManager.completeIrisAssessment(selectedPatient.id, irisData);
+                // Save to database
+                const { data, error } = await supabase
+                    .from('iris_assessments')
+                    .insert([irisAssessmentData])
+                    .select()
+                    .single();
                 
-                if (assessment) {
-                    updateProgress(5);
-                    showCompletionScreen();
-                } else {
-                    // Fallback: save directly if workflow manager fails
-                    const { data, error } = await supabase
-                        .from('iris_assessments')
-                        .insert([{
-                            patient_id: selectedPatient.id,
-                            clinic_id: clinicId,
-                            left_eye_image: capturedImages.left,
-                            right_eye_image: capturedImages.right,
-                            constitutional_type: analysisResults.constitutional_type,
-                            health_patterns: analysisResults.patterns,
-                            analysis_notes: 'IRIS assessment completed',
-                            iris_data: irisData.iris_data,
-                            completed_at: new Date().toISOString()
-                        }])
-                        .select();
-                    
-                    if (error) throw error;
-                    
-                    updateProgress(5);
-                    showCompletionScreen();
-                }
+                if (error) throw error;
+                
+                // Update workflow status to iris_assessment_completed
+                await workflowManager.updateStage(selectedPatient.id, workflowStages.IRIS_ASSESSMENT_COMPLETED);
+                
+                updateProgress(5);
+                showCompletionScreen();
+                
+                // Automatically navigate to report generation after 3 seconds
+                setTimeout(() => {
+                    showAlert('Navigating to report generation...', 'info');
+                    generateComprehensiveReport();
+                }, 3000);
                 
             } catch (error) {
                 console.error('Error saving assessment:', error);
@@ -897,20 +925,23 @@
                     </ul>
                 </div>
                 
-                <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0; border-radius: 8px;">
-                    <strong>Note:</strong> This iris assessment data will be combined with the health assessment to generate comprehensive therapy recommendations.
+                <div style="background: #d1fae5; border-left: 4px solid #10b981; padding: 15px; margin: 20px 0; border-radius: 8px;">
+                    <strong>✓ Success:</strong> IRIS assessment completed. System will now generate comprehensive report combining both assessments.
                 </div>
             `;
             
             document.getElementById('reportPreview').innerHTML = reportContent;
             
-            showAlert('IRIS assessment completed successfully!', 'success');
+            showAlert('IRIS assessment completed successfully! Preparing to generate comprehensive report...', 'success');
         }
         
         // Navigation functions
         window.generateComprehensiveReport = async function() {
             if (selectedPatient) {
-                await workflowManager.generateReport(selectedPatient.id);
+                // Update workflow to report generation stage
+                await workflowManager.updateStage(selectedPatient.id, workflowStages.REPORT_PENDING);
+                // Navigate to report generator
+                window.location.href = `report-generator.html?patient=${selectedPatient.id}`;
             } else {
                 showAlert('Patient data not available', 'error');
             }
