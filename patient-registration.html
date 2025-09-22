@@ -318,14 +318,62 @@
                 return;
             }
             
+            // Get form values
+            const email = document.getElementById('email').value || null;
+            const phone = document.getElementById('phone').value;
+            const firstName = document.getElementById('firstName').value;
+            const lastName = document.getElementById('lastName').value;
+            
+            // Check for duplicate patient BEFORE creating
+            if (email || phone) {
+                try {
+                    let query = supabase
+                        .from('patients')
+                        .select('id, patient_id, first_name, last_name')
+                        .eq('clinic_id', clinicId);
+                    
+                    // Build OR condition for email and phone
+                    let conditions = [];
+                    if (email) conditions.push(`email.eq.${email}`);
+                    if (phone) conditions.push(`phone.eq.${phone}`);
+                    
+                    if (conditions.length > 0) {
+                        query = query.or(conditions.join(','));
+                        
+                        const { data: existingPatients } = await query;
+                        
+                        if (existingPatients && existingPatients.length > 0) {
+                            const existing = existingPatients[0];
+                            const message = `A patient already exists with this ${email ? 'email' : 'phone number'}:\n\n` +
+                                           `Name: ${existing.first_name} ${existing.last_name}\n` +
+                                           `Patient ID: ${existing.patient_id}\n\n` +
+                                           `Would you like to continue their assessment instead?`;
+                            
+                            if (confirm(message)) {
+                                // Use existing patient
+                                registeredPatientId = existing.id;
+                                sessionStorage.setItem('currentPatientId', existing.id);
+                                await workflowManager.continueAssessment(existing.id);
+                                return;
+                            } else {
+                                return; // Cancel registration
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.log('No duplicate found, proceeding with registration');
+                }
+            }
+            
+            // Create patient data
             const patientData = {
                 clinic_id: clinicId,
-                first_name: document.getElementById('firstName').value,
-                last_name: document.getElementById('lastName').value,
+                first_name: firstName,
+                last_name: lastName,
                 date_of_birth: document.getElementById('dob').value,
                 gender: document.getElementById('gender').value,
-                email: document.getElementById('email').value || null,
-                phone: document.getElementById('phone').value,
+                email: email,
+                phone: phone,
                 address: document.getElementById('address').value || null,
                 medical_history: document.getElementById('medicalHistory').value || null,
                 patient_id: generatePatientId(),
@@ -333,22 +381,28 @@
             };
             
             try {
-                // Step 1: Register the patient
+                // Register the patient
                 const { data: newPatient, error } = await supabase
                     .from('patients')
                     .insert(patientData)
                     .select()
                     .single();
                 
-                if (error) throw error;
+                if (error) {
+                    if (error.code === '23505') {
+                        alert('A patient with this email/phone already exists. Please use different contact information or find the existing patient.');
+                        return;
+                    }
+                    throw error;
+                }
                 
                 registeredPatientId = newPatient.id;
                 registeredPatientData = newPatient;
                 
-                // Step 2: Initialize workflow using the CORRECT method name
+                // Initialize workflow
                 await workflowManager.initializeWorkflow(newPatient.id);
                 
-                // Step 3: Show confirmation screen
+                // Show confirmation
                 showConfirmation(newPatient);
                 
             } catch (error) {
@@ -378,17 +432,14 @@
         
         window.continueToAssessment = async function() {
             if (registeredPatientId) {
-                // This will route to health assessment based on workflow stage
                 await workflowManager.continueAssessment(registeredPatientId);
             }
         };
         
         window.editDetails = function() {
-            // Show form again with data
             document.getElementById('registrationForm').style.display = 'block';
             document.getElementById('confirmationScreen').style.display = 'none';
             
-            // Populate form with registered data
             if (registeredPatientData) {
                 document.getElementById('firstName').value = registeredPatientData.first_name;
                 document.getElementById('lastName').value = registeredPatientData.last_name;
