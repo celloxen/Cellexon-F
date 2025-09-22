@@ -162,10 +162,10 @@ const workflowManager = {
         }
     },
 
-    // Start health assessment
+    // Start health assessment - UPDATED to use integrated file
     async startHealthAssessment(patientId) {
         await this.updateStage(patientId, workflowStages.HEALTH_ASSESSMENT_PENDING);
-        window.location.href = 'health-assessment.html';
+        window.location.href = 'lily-ai-agent-integrated.html';
     },
 
     // Complete health assessment
@@ -199,10 +199,10 @@ const workflowManager = {
         }
     },
 
-    // Start iris assessment
+    // Start iris assessment - UPDATED to use integrated file
     async startIrisAssessment(patientId) {
         await this.updateStage(patientId, workflowStages.IRIS_ASSESSMENT_PENDING);
-        window.location.href = 'iris-assessment.html';
+        window.location.href = 'iris-assessment-integrated.html';
     },
 
     // Complete iris assessment
@@ -262,7 +262,26 @@ const workflowManager = {
         await this.updateStage(patientId, workflowStages.HEALTH_ASSESSMENT_PENDING, {
             assessment_type: 'follow-up'
         });
-        window.location.href = 'health-assessment.html';
+        window.location.href = 'lily-ai-agent-integrated.html';
+    },
+
+    // Start patient journey (called from patient registration)
+    async startPatientJourney(patientId) {
+        // Store patient ID in session
+        sessionStorage.setItem('currentPatientId', patientId);
+        // Start with health assessment
+        await this.startHealthAssessment(patientId);
+    },
+
+    // Update workflow status (simplified version for compatibility)
+    async updateWorkflowStatus(stage) {
+        const patientId = this.currentPatientId || sessionStorage.getItem('currentPatientId');
+        if (!patientId) {
+            console.error('No patient ID available for workflow update');
+            return;
+        }
+        
+        return await this.updateStage(patientId, stage);
     },
 
     // Skip to specific stage (practitioner override)
