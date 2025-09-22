@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Patient Registration - Celloxen Platform</title>
     <style>
-        /* Same styles as patient-management-enhanced.html */
         * {
             margin: 0;
             padding: 0;
@@ -19,7 +18,7 @@
         }
         
         .header {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
             color: white;
             padding: 15px 0;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
@@ -89,7 +88,7 @@
         
         .form-input:focus {
             outline: none;
-            border-color: #10b981;
+            border-color: #3b82f6;
         }
         
         .form-actions {
@@ -311,11 +310,11 @@
         });
         
         async function registerPatient() {
-            const authData = JSON.parse(localStorage.getItem('celloxen_auth'));
-            const clinicId = authData.clinicId;
+            const authData = JSON.parse(localStorage.getItem('celloxen_auth') || '{}');
+            const clinicId = authData.clinicId || sessionStorage.getItem('currentClinicId');
             
             if (!clinicId) {
-                alert('No clinic ID found');
+                alert('No clinic ID found. Please log in again.');
                 return;
             }
             
@@ -334,7 +333,8 @@
             };
             
             try {
-                const { data, error } = await supabase
+                // Step 1: Register the patient
+                const { data: newPatient, error } = await supabase
                     .from('patients')
                     .insert(patientData)
                     .select()
@@ -342,17 +342,14 @@
                 
                 if (error) throw error;
                 
-                registeredPatientId = data.id;
-                registeredPatientData = data;
+                registeredPatientId = newPatient.id;
+                registeredPatientData = newPatient;
                 
-                // Create workflow status
-                await workflowManager.updateWorkflowStatus.call(
-                    { currentClinicId: clinicId, currentPatientId: data.id },
-                    'registered'
-                );
+                // Step 2: Initialize workflow using the CORRECT method name
+                await workflowManager.initializeWorkflow(newPatient.id);
                 
-                // Show confirmation screen
-                showConfirmation(data);
+                // Step 3: Show confirmation screen
+                showConfirmation(newPatient);
                 
             } catch (error) {
                 console.error('Error registering patient:', error);
@@ -372,7 +369,7 @@
             
             document.getElementById('confirmPatientId').textContent = patient.patient_id;
             document.getElementById('confirmName').textContent = `${patient.first_name} ${patient.last_name}`;
-            document.getElementById('confirmDob').textContent = new Date(patient.date_of_birth).toLocaleDateString();
+            document.getElementById('confirmDob').textContent = new Date(patient.date_of_birth).toLocaleDateString('en-GB');
             document.getElementById('confirmGender').textContent = patient.gender;
             document.getElementById('confirmEmail').textContent = patient.email || 'N/A';
             document.getElementById('confirmPhone').textContent = patient.phone;
@@ -381,7 +378,8 @@
         
         window.continueToAssessment = async function() {
             if (registeredPatientId) {
-                await workflowManager.startPatientJourney(registeredPatientId);
+                // This will route to health assessment based on workflow stage
+                await workflowManager.continueAssessment(registeredPatientId);
             }
         };
         
