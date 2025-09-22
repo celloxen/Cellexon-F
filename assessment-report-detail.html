@@ -323,8 +323,7 @@
                     </div>
                     
                     <div class="report-actions">
-                        <button class="btn btn-primary" onclick="window.print()">Print Report</button>
-                        <button class="btn btn-secondary" onclick="exportToPDF()">Export as PDF</button>
+                        <button class="btn btn-primary" onclick="window.print()">Print Report / Save as PDF</button>
                         <button class="btn btn-secondary" onclick="window.history.back()">Back</button>
                     </div>
                 </div>
@@ -421,8 +420,7 @@
                     </div>
                     
                     <div class="report-actions">
-                        <button class="btn btn-primary" onclick="window.print()">Print Report</button>
-                        <button class="btn btn-secondary" onclick="exportToPDF()">Export as PDF</button>
+                        <button class="btn btn-primary" onclick="window.print()">Print Report / Save as PDF</button>
                         <button class="btn btn-secondary" onclick="window.history.back()">Back</button>
                     </div>
                 </div>
@@ -500,10 +498,6 @@
                 </div>
             `;
         }
-        
-        window.exportToPDF = function() {
-            alert('PDF export will be implemented with a PDF library. For now, use the Print function and save as PDF.');
-        };
     </script>
 </body>
 </html>
