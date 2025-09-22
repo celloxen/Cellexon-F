@@ -168,34 +168,20 @@ const workflowManager = {
         window.location.href = 'lily-ai-agent-integrated.html';
     },
 
-    // Complete health assessment
+    // Complete health assessment - SIMPLIFIED
     async completeHealthAssessment(patientId, assessmentData) {
         try {
-            // Save assessment data
-            const { data: assessment, error } = await supabase
-                .from('health_assessments')
-                .insert({
-                    patient_id: patientId,
-                    clinic_id: assessmentData.clinic_id,
-                    assessment_data: assessmentData,
-                    assessment_type: assessmentData.assessment_type || 'initial',
-                    created_at: new Date().toISOString()
-                })
-                .select()
-                .single();
-            
-            if (error) throw error;
-            
-            // Update workflow stage
+            // Just update the workflow stage
+            // The actual data is saved by lily-ai-agent-integrated.html
             await this.updateStage(patientId, workflowStages.HEALTH_ASSESSMENT_COMPLETED, {
-                assessment_count: assessmentData.assessment_count || 1,
-                last_assessment_id: assessment.id
+                assessment_count: 1,
+                assessment_type: assessmentData.assessment_type || 'initial'
             });
             
-            return assessment;
+            return true;
         } catch (error) {
-            console.error('Error completing health assessment:', error);
-            return null;
+            console.error('Error updating workflow after health assessment:', error);
+            return false;
         }
     },
 
@@ -214,7 +200,11 @@ const workflowManager = {
                 .insert({
                     patient_id: patientId,
                     clinic_id: assessmentData.clinic_id,
-                    iris_data: assessmentData,
+                    left_eye_image: assessmentData.left_eye_image,
+                    right_eye_image: assessmentData.right_eye_image,
+                    constitutional_type: assessmentData.iris_data?.constitutional_analysis?.constitutional_type,
+                    health_patterns: assessmentData.iris_data?.constitutional_analysis?.patterns,
+                    iris_data: assessmentData.iris_data,
                     created_at: new Date().toISOString()
                 })
                 .select()
@@ -271,17 +261,6 @@ const workflowManager = {
         sessionStorage.setItem('currentPatientId', patientId);
         // Start with health assessment
         await this.startHealthAssessment(patientId);
-    },
-
-    // Update workflow status (simplified version for compatibility)
-    async updateWorkflowStatus(stage) {
-        const patientId = this.currentPatientId || sessionStorage.getItem('currentPatientId');
-        if (!patientId) {
-            console.error('No patient ID available for workflow update');
-            return;
-        }
-        
-        return await this.updateStage(patientId, stage);
     },
 
     // Skip to specific stage (practitioner override)
