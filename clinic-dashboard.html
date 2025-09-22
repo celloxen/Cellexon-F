@@ -980,7 +980,7 @@
                 }
                 document.getElementById('monthlyGrowth').textContent = growth > 0 ? `+${growth}%` : `${growth}%`;
                 
-                // Completed today (kept for compatibility)
+                // Completed today - update completedThisWeek instead since completedToday was removed
                 const todayStart = new Date(today).toISOString();
                 const { count: completedCount } = await supabase
                     .from('therapy_sessions')
@@ -989,7 +989,9 @@
                     .eq('status', 'completed')
                     .gte('created_at', todayStart);
                     
-                document.getElementById('completedToday').textContent = completedCount || 0;
+                // Update today's completed count in the weekly element if needed
+                // or just log it since we removed the completedToday element
+                console.log('Completed today:', completedCount || 0);
                 
             } catch (error) {
                 console.error('Error loading dashboard data:', error);
@@ -1001,23 +1003,18 @@
             try {
                 const stats = await workflowManager.getWorkflowStats();
                 
-                // Add registration count (new patients today)
-                document.getElementById('registrationCount').textContent = '0';
-                document.getElementById('healthCount').textContent = stats.health_assessment || 0;
-                document.getElementById('irisCount').textContent = stats.iris_assessment || 0;
-                document.getElementById('reportCount').textContent = stats.report_generation || 0;
-                document.getElementById('planningCount').textContent = stats.treatment_planning || 0;
-                document.getElementById('treatmentStageCount').textContent = stats.in_treatment || 0;
+                // We removed the pipeline, so no need to update those elements
+                // Just log the stats for debugging if needed
+                console.log('Workflow stats loaded:', stats);
                 
-                // Highlight stages with patients
-                Object.keys(stats).forEach(stage => {
-                    if (stats[stage] > 0) {
-                        const element = document.querySelector(`[data-stage="${stage}"]`);
-                        if (element) {
-                            element.classList.add('has-patients');
-                        }
-                    }
-                });
+                // We could update other relevant stats here if needed
+                // For example, update pending assessments count
+                const pendingCount = (stats.health_assessment || 0) + (stats.iris_assessment || 0);
+                const pendingElement = document.getElementById('pendingAssessments');
+                if (pendingElement) {
+                    pendingElement.textContent = pendingCount;
+                }
+                
             } catch (error) {
                 console.error('Error loading workflow stats:', error);
             }
