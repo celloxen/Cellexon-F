@@ -329,6 +329,8 @@
             font-size: 13px;
             font-weight: 500;
             transition: all 0.3s;
+            min-width: 85px;
+            text-align: center;
         }
         
         .priority-action:hover {
@@ -611,7 +613,7 @@
                             <div class="priority-title">Continue Assessments</div>
                             <div class="priority-detail" id="pendingCount">0 incomplete</div>
                         </div>
-                        <button class="priority-action">Continue</button>
+                        <button class="priority-action" style="min-width: 80px;">Continue</button>
                     </div>
                     
                     <div class="priority-item" onclick="deliverTreatments()">
@@ -619,7 +621,7 @@
                             <div class="priority-title">Deliver Treatments</div>
                             <div class="priority-detail" id="treatmentCount">0 scheduled today</div>
                         </div>
-                        <button class="priority-action">View</button>
+                        <button class="priority-action" style="min-width: 80px;">View</button>
                     </div>
                     
                     <div class="priority-item" onclick="viewAllReports()">
@@ -627,7 +629,7 @@
                             <div class="priority-title">Generate Reports</div>
                             <div class="priority-detail">Diagnosis & treatment plans</div>
                         </div>
-                        <button class="priority-action">Open</button>
+                        <button class="priority-action" style="min-width: 80px;">Open</button>
                     </div>
                     
                     <div class="priority-item" onclick="navigateTo('appointments-management.html')">
@@ -635,7 +637,7 @@
                             <div class="priority-title">Schedule Appointments</div>
                             <div class="priority-detail">Manage calendar</div>
                         </div>
-                        <button class="priority-action">Schedule</button>
+                        <button class="priority-action" style="min-width: 80px;">Schedule</button>
                     </div>
                 </div>
             </div>
