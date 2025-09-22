@@ -344,6 +344,135 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 16px;
+            width: 80%;
+            max-width: 800px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .modal-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 28px;
+            color: #9ca3af;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+        
+        .close-btn:hover {
+            color: #1e293b;
+        }
+        
+        .modal-body {
+            color: #475569;
+            line-height: 1.6;
+        }
+        
+        .detail-section {
+            margin-bottom: 25px;
+        }
+        
+        .detail-section h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 10px;
+        }
+        
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        
+        .detail-item {
+            padding: 12px;
+            background: #f8fafc;
+            border-radius: 8px;
+        }
+        
+        .detail-label {
+            font-size: 12px;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .detail-value {
+            font-size: 14px;
+            color: #1e293b;
+            font-weight: 500;
+            margin-top: 4px;
+        }
+        
+        .iris-images-display {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        .iris-image-box {
+            text-align: center;
+        }
+        
+        .iris-image-placeholder {
+            width: 150px;
+            height: 150px;
+            background: #f3f4f6;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+            font-size: 48px;
+            color: #9ca3af;
+        }
     </style>
 </head>
 <body>
@@ -419,6 +548,19 @@
                     <div class="spinner"></div>
                     <p>Loading assessments...</p>
                 </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Assessment Details Modal -->
+    <div id="detailsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">IRIS Assessment Details</h2>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Details will be populated here -->
             </div>
         </div>
     </div>
@@ -634,16 +776,228 @@
         
         // View assessment details
         window.viewAssessment = function(assessmentId) {
-            // In a real implementation, this would navigate to a detailed view
-            sessionStorage.setItem('viewAssessmentId', assessmentId);
-            window.location.href = `iris-assessment-detail.html?id=${assessmentId}`;
+            const assessment = allAssessments.find(a => a.id === assessmentId);
+            if (!assessment) {
+                alert('Assessment not found');
+                return;
+            }
+            
+            const modal = document.getElementById('detailsModal');
+            const modalBody = document.getElementById('modalBody');
+            
+            // Build detailed view HTML
+            let detailsHTML = `
+                <div class="detail-section">
+                    <h3>Patient Information</h3>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <div class="detail-label">Patient Name</div>
+                            <div class="detail-value">${assessment.patients ? `${assessment.patients.first_name} ${assessment.patients.last_name}` : 'Unknown'}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Patient ID</div>
+                            <div class="detail-value">${assessment.patients?.patient_id || 'N/A'}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Assessment Date</div>
+                            <div class="detail-value">${formatDate(assessment.created_at)}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Status</div>
+                            <div class="detail-value">${assessment.status || 'Completed'}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="detail-section">
+                    <h3>Constitutional Analysis</h3>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <div class="detail-label">Constitutional Type</div>
+                            <div class="detail-value">
+                                <span class="constitutional-badge constitutional-${(assessment.constitutional_type || 'mixed').toLowerCase()}">
+                                    ${assessment.constitutional_type || 'Not Specified'}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Assessment Type</div>
+                            <div class="detail-value">${assessment.assessment_type || 'Standard'}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Add organ analysis if available
+            if (assessment.organ_analysis) {
+                detailsHTML += `
+                    <div class="detail-section">
+                        <h3>Organ System Analysis</h3>
+                        <div style="background: #f8fafc; padding: 15px; border-radius: 8px;">
+                            ${Array.isArray(assessment.organ_analysis) ? 
+                                assessment.organ_analysis.map(organ => 
+                                    `<div style="margin-bottom: 8px;">
+                                        <strong>${organ.name || organ}:</strong> ${organ.status || organ.notes || 'Assessed'}
+                                    </div>`
+                                ).join('') : 
+                                'Analysis data available in full report'}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Add stress indicators if available
+            if (assessment.stress_indicators) {
+                detailsHTML += `
+                    <div class="detail-section">
+                        <h3>Stress Indicators</h3>
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <div class="detail-label">Stress Level</div>
+                                <div class="detail-value">${assessment.stress_indicators.level || 'Not specified'}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Affected Areas</div>
+                                <div class="detail-value">${assessment.stress_indicators.areas?.join(', ') || 'None noted'}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Add IRIS images section
+            detailsHTML += `
+                <div class="detail-section">
+                    <h3>IRIS Images</h3>
+                    <div class="iris-images-display">
+                        <div class="iris-image-box">
+                            <div class="iris-image-placeholder">
+                                ${assessment.left_eye_images ? '👁️' : '—'}
+                            </div>
+                            <div>Left Eye</div>
+                        </div>
+                        <div class="iris-image-box">
+                            <div class="iris-image-placeholder">
+                                ${assessment.right_eye_images ? '👁️' : '—'}
+                            </div>
+                            <div>Right Eye</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Add action buttons
+            detailsHTML += `
+                <div style="margin-top: 30px; display: flex; gap: 15px; justify-content: center;">
+                    <button class="btn-view" style="padding: 10px 24px;" onclick="generateReport(${assessment.patient_id})">
+                        Generate Full Report
+                    </button>
+                    <button class="btn-compare" style="padding: 10px 24px;" onclick="closeModal(); compareAssessment(${assessment.patient_id})">
+                        Compare Assessments
+                    </button>
+                </div>
+            `;
+            
+            modalBody.innerHTML = detailsHTML;
+            modal.style.display = 'block';
+        };
+        
+        // Close modal
+        window.closeModal = function() {
+            document.getElementById('detailsModal').style.display = 'none';
+        };
+        
+        // Generate report for patient
+        window.generateReport = function(patientId) {
+            sessionStorage.setItem('currentPatientId', patientId);
+            window.location.href = `report-generator.html?patient=${patientId}`;
         };
         
         // Compare assessments
         window.compareAssessment = function(patientId) {
-            // In a real implementation, this would show comparison view
-            sessionStorage.setItem('comparePatientId', patientId);
-            window.location.href = `iris-comparison.html?patient=${patientId}`;
+            const patientAssessments = allAssessments.filter(a => a.patient_id === patientId);
+            
+            if (patientAssessments.length < 2) {
+                alert('No previous assessments available for comparison. Patient needs at least 2 assessments to compare.');
+                return;
+            }
+            
+            const modal = document.getElementById('detailsModal');
+            const modalBody = document.getElementById('modalBody');
+            
+            let comparisonHTML = `
+                <div class="detail-section">
+                    <h3>Assessment Comparison for Patient</h3>
+                    <p style="margin-bottom: 20px; color: #64748b;">Showing all IRIS assessments for this patient</p>
+                </div>
+            `;
+            
+            // Create comparison table
+            comparisonHTML += `
+                <table style="width: 100%;">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Constitutional Type</th>
+                            <th>Stress Level</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            patientAssessments.forEach(assessment => {
+                comparisonHTML += `
+                    <tr>
+                        <td>${formatDate(assessment.created_at)}</td>
+                        <td>
+                            <span class="constitutional-badge constitutional-${(assessment.constitutional_type || 'mixed').toLowerCase()}">
+                                ${assessment.constitutional_type || 'Not Specified'}
+                            </span>
+                        </td>
+                        <td>${assessment.stress_indicators?.level || 'N/A'}</td>
+                        <td>${assessment.status || 'Completed'}</td>
+                        <td>
+                            <button class="btn-view" onclick="closeModal(); viewAssessment(${assessment.id})">
+                                View
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            comparisonHTML += `
+                    </tbody>
+                </table>
+                <div style="margin-top: 20px; padding: 15px; background: #f0f9ff; border-radius: 8px;">
+                    <strong>Comparison Analysis:</strong><br>
+                    Total Assessments: ${patientAssessments.length}<br>
+                    Most Recent: ${formatDate(patientAssessments[0].created_at)}<br>
+                    Oldest: ${formatDate(patientAssessments[patientAssessments.length - 1].created_at)}
+                </div>
+            `;
+            
+            modalBody.innerHTML = comparisonHTML;
+            modal.style.display = 'block';
+        };
+        
+        // Start new assessment for specific patient
+        window.startNewAssessment = function(patientId) {
+            if (patientId) {
+                sessionStorage.setItem('currentPatientId', patientId);
+                window.location.href = 'iris-assessment-integrated.html';
+            } else {
+                window.location.href = 'patient-registration.html';
+            }
+        };
+        
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('detailsModal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
         };
         
         // Format date
