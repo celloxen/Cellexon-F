@@ -549,18 +549,6 @@
         <!-- Assessment & Treatment Tools -->
         <h2 class="section-title">Assessment & Treatment Tools</h2>
         <div class="tools-grid">
-            <a href="lily-ai-agent.html" class="tool-card">
-                <div class="tool-icon">🤖</div>
-                <div class="tool-title">Lily AI Health Assessment</div>
-                <div class="tool-description">AI-guided subjective health evaluation and initial screening</div>
-            </a>
-            
-            <a href="iris-analysis.html" class="tool-card">
-                <div class="tool-icon">👁</div>
-                <div class="tool-title">IRIS Assessment</div>
-                <div class="tool-description">Objective constitutional analysis through iris imaging</div>
-            </a>
-            
             <a href="report-generator.html" class="tool-card">
                 <div class="tool-icon">📋</div>
                 <div class="tool-title">Report Generator</div>
@@ -580,7 +568,7 @@
             </a>
             
             <a href="treatment-schedule.html" class="tool-card">
-                <div class="tool-icon">🗓</div>
+                <div class="tool-icon">🗓️</div>
                 <div class="tool-title">Treatment Schedule</div>
                 <div class="tool-description">View full treatment calendar and session timeline</div>
             </a>
@@ -771,7 +759,7 @@
                 if (assessments.length === 0) {
                     incompleteList.innerHTML = `
                         <div class="empty-state">
-                            <div class="empty-state-icon">✓</div>
+                            <div class="empty-state-icon">✔</div>
                             <p>No incomplete assessments</p>
                         </div>
                     `;
@@ -860,7 +848,7 @@
         // Navigate to stage-specific view
         window.navigateToStage = function(stage) {
             const stagePages = {
-                'health_assessment': 'lily-ai-agent.html',
+                'health_assessment': 'health-assessment.html',
                 'iris_assessment': 'iris-analysis.html',
                 'report_generation': 'report-generator.html',
                 'treatment_planning': 'treatment-planning.html',
