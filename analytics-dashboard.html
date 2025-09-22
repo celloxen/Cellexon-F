@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics Dashboard - Celloxen Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            color: #1f2937;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+            color: white;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+        }
+        
+        .header p {
+            color: #cbd5e1;
+            margin-top: 5px;
+            font-size: 14px;
+        }
+        
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        
+        /* Date Range Selector */
+        .date-range-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .date-range-options {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .range-btn {
+            padding: 8px 16px;
+            border: 2px solid #e2e8f0;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        
+        .range-btn.active {
+            background: linear-gradient(135deg, #1e3a8a, #1e40af);
+            color: white;
+            border-color: #1e3a8a;
+        }
+        
+        .custom-range {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .date-input {
+            padding: 8px 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        /* KPI Cards */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .kpi-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+        
+        .kpi-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 15px;
+        }
+        
+        .kpi-title {
+            font-size: 14px;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .kpi-icon {
+            font-size: 24px;
+            opacity: 0.5;
+        }
+        
+        .kpi-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 10px;
+        }
+        
+        .kpi-change {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 14px;
+        }
+        
+        .change-positive {
+            color: #10b981;
+        }
+        
+        .change-negative {
+            color: #ef4444;
+        }
+        
+        /* Charts Section */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .chart-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+        
+        .chart-header {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .chart-placeholder {
+            height: 300px;
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #94a3b8;
+        }
+        
+        /* Detailed Tables */
+        .table-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+        
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .table-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .export-btn {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .export-btn:hover {
+            background: #059669;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th {
+            text-align: left;
+            padding: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #64748b;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        td {
+            padding: 15px 12px;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 14px;
+        }
+        
+        tr:hover {
+            background: #f8fafc;
+        }
+        
+        /* Loading State */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #64748b;
+        }
+        
+        .spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #1e3a8a;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .date-range-card {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .date-range-options {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div>
+                <h1>Analytics Dashboard</h1>
+                <p>Comprehensive clinic performance metrics and insights</p>
+            </div>
+            <a href="clinic-dashboard.html" class="back-btn">← Back to Dashboard</a>
+        </div>
+    </div>
+    
+    <div class="container">
+        <!-- Date Range Selector -->
+        <div class="date-range-card">
+            <div class="date-range-options">
+                <button class="range-btn active" onclick="setDateRange('week')">This Week</button>
+                <button class="range-btn" onclick="setDateRange('month')">This Month</button>
+                <button class="range-btn" onclick="setDateRange('quarter')">This Quarter</button>
+                <button class="range-btn" onclick="setDateRange('year')">This Year</button>
+            </div>
+            <div class="custom-range">
+                <input type="date" class="date-input" id="startDate">
+                <span>to</span>
+                <input type="date" class="date-input" id="endDate">
+                <button class="range-btn" onclick="applyCustomRange()">Apply</button>
+            </div>
+        </div>
+        
+        <!-- KPI Cards -->
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <span class="kpi-title">Total Patients</span>
+                    <span class="kpi-icon">👥</span>
+                </div>
+                <div class="kpi-value" id="totalPatients">0</div>
+                <div class="kpi-change change-positive">
+                    <span>↑</span>
+                    <span id="patientsChange">+0%</span>
+                    <span>vs last period</span>
+                </div>
+            </div>
+            
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <span class="kpi-title">Treatments Delivered</span>
+                    <span class="kpi-icon">💊</span>
+                </div>
+                <div class="kpi-value" id="totalTreatments">0</div>
+                <div class="kpi-change change-positive">
+                    <span>↑</span>
+                    <span id="treatmentsChange">+0%</span>
+                    <span>vs last period</span>
+                </div>
+            </div>
+            
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <span class="kpi-title">Revenue</span>
+                    <span class="kpi-icon">💰</span>
+                </div>
+                <div class="kpi-value" id="totalRevenue">£0</div>
+                <div class="kpi-change change-positive">
+                    <span>↑</span>
+                    <span id="revenueChange">+0%</span>
+                    <span>vs last period</span>
+                </div>
+            </div>
+            
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <span class="kpi-title">Avg Patient Satisfaction</span>
+                    <span class="kpi-icon">⭐</span>
+                </div>
+                <div class="kpi-value" id="avgSatisfaction">0.0</div>
+                <div class="kpi-change change-positive">
+                    <span>↑</span>
+                    <span id="satisfactionChange">+0</span>
+                    <span>points</span>
+                </div>
+            </div>
+            
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <span class="kpi-title">Completion Rate</span>
+                    <span class="kpi-icon">✅</span>
+                </div>
+                <div class="kpi-value" id="completionRate">0%</div>
+                <div class="kpi-change change-positive">
+                    <span>↑</span>
+                    <span id="completionChange">+0%</span>
+                    <span>vs last period</span>
+                </div>
+            </div>
+            
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <span class="kpi-title">Appointment Utilization</span>
+                    <span class="kpi-icon">📅</span>
+                </div>
+                <div class="kpi-value" id="utilization">0%</div>
+                <div class="kpi-change change-negative">
+                    <span>↓</span>
+                    <span id="utilizationChange">-0%</span>
+                    <span>vs last period</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Charts Section -->
+        <div class="charts-grid">
+            <div class="chart-card">
+                <h3 class="chart-header">Patient Growth Trend</h3>
+                <div class="chart-placeholder" id="patientGrowthChart">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>Loading chart data...</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="chart-card">
+                <h3 class="chart-header">Treatment Distribution</h3>
+                <div class="chart-placeholder" id="treatmentDistChart">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>Loading chart data...</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="chart-card">
+                <h3 class="chart-header">Revenue Analysis</h3>
+                <div class="chart-placeholder" id="revenueChart">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>Loading chart data...</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="chart-card">
+                <h3 class="chart-header">Appointment Status Breakdown</h3>
+                <div class="chart-placeholder" id="appointmentChart">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>Loading chart data...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Top Therapies Table -->
+        <div class="table-card">
+            <div class="table-header">
+                <h3 class="table-title">Top Performing Therapies</h3>
+                <button class="export-btn" onclick="exportData('therapies')">Export CSV</button>
+            </div>
+            <div id="therapiesTableContent">
+                <div class="loading">
+                    <p>Loading therapy statistics...</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Patient Outcomes Table -->
+        <div class="table-card">
+            <div class="table-header">
+                <h3 class="table-title">Patient Outcomes Summary</h3>
+                <button class="export-btn" onclick="exportData('outcomes')">Export CSV</button>
+            </div>
+            <div id="outcomesTableContent">
+                <div class="loading">
+                    <p>Loading patient outcomes...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script type="module">
+        import { supabase } from './supabase-config.js';
+        
+        let currentRange = 'week';
+        let analyticsData = {};
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', async function() {
+            await checkAuthentication();
+            await loadAnalytics();
+        });
+        
+        // Check authentication
+        async function checkAuthentication() {
+            const authData = localStorage.getItem('celloxen_auth');
+            if (!authData) {
+                window.location.href = 'unified-login.html';
+                return false;
+            }
+            return true;
+        }
+        
+        // Load all analytics data
+        async function loadAnalytics() {
+            const authData = JSON.parse(localStorage.getItem('celloxen_auth') || '{}');
+            const clinicId = authData.clinicId || sessionStorage.getItem('currentClinicId');
+            
+            // Calculate date ranges
+            const { startDate, endDate } = getDateRange(currentRange);
+            
+            try {
+                // Load KPIs
+                await loadKPIs(clinicId, startDate, endDate);
+                
+                // Load chart data
+                await loadChartData(clinicId, startDate, endDate);
+                
+                // Load tables
+                await loadTherapiesTable(clinicId, startDate, endDate);
+                await loadOutcomesTable(clinicId, startDate, endDate);
+                
+            } catch (error) {
+                console.error('Error loading analytics:', error);
+            }
+        }
+        
+        // Load KPI metrics
+        async function loadKPIs(clinicId, startDate, endDate) {
+            try {
+                // Total patients
+                const { count: totalPatients } = await supabase
+                    .from('patients')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('clinic_id', clinicId)
+                    .gte('created_at', startDate.toISOString())
+                    .lte('created_at', endDate.toISOString());
+                
+                document.getElementById('totalPatients').textContent = totalPatients || 0;
+                
+                // Total treatments
+                const { count: totalTreatments } = await supabase
+                    .from('therapy_sessions')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('clinic_id', clinicId)
+                    .gte('created_at', startDate.toISOString())
+                    .lte('created_at', endDate.toISOString());
+                
+                document.getElementById('totalTreatments').textContent = totalTreatments || 0;
+                
+                // Revenue calculation (simplified)
+                const revenue = (totalTreatments || 0) * 150; // Assuming £150 per treatment
+                document.getElementById('totalRevenue').textContent = `£${revenue.toLocaleString()}`;
+                
+                // Completion rate
+                const { count: completed } = await supabase
+                    .from('therapy_sessions')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('clinic_id', clinicId)
+                    .eq('status', 'completed')
+                    .gte('created_at', startDate.toISOString())
+                    .lte('created_at', endDate.toISOString());
+                
+                const completionRate = totalTreatments > 0 ? 
+                    Math.round((completed / totalTreatments) * 100) : 0;
+                document.getElementById('completionRate').textContent = `${completionRate}%`;
+                
+                // Satisfaction (mock data for demo)
+                document.getElementById('avgSatisfaction').textContent = '4.8';
+                
+                // Utilization
+                const { count: appointments } = await supabase
+                    .from('appointments')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('clinic_id', clinicId)
+                    .gte('appointment_date', startDate.toISOString().split('T')[0])
+                    .lte('appointment_date', endDate.toISOString().split('T')[0]);
+                
+                const workDays = getWorkDays(startDate, endDate);
+                const slotsPerDay = 8;
+                const totalSlots = workDays * slotsPerDay;
+                const utilization = totalSlots > 0 ? 
+                    Math.round((appointments / totalSlots) * 100) : 0;
+                document.getElementById('utilization').textContent = `${utilization}%`;
+                
+            } catch (error) {
+                console.error('Error loading KPIs:', error);
+            }
+        }
+        
+        // Load chart data (simplified for now)
+        async function loadChartData(clinicId, startDate, endDate) {
+            // In a real implementation, you would load actual data and render charts
+            // For now, showing placeholder
+            setTimeout(() => {
+                document.getElementById('patientGrowthChart').innerHTML = 
+                    '<p>Patient growth chart would display here</p>';
+                document.getElementById('treatmentDistChart').innerHTML = 
+                    '<p>Treatment distribution pie chart would display here</p>';
+                document.getElementById('revenueChart').innerHTML = 
+                    '<p>Revenue trend line chart would display here</p>';
+                document.getElementById('appointmentChart').innerHTML = 
+                    '<p>Appointment status breakdown would display here</p>';
+            }, 1000);
+        }
+        
+        // Load top therapies table
+        async function loadTherapiesTable(clinicId, startDate, endDate) {
+            const tableContent = document.getElementById('therapiesTableContent');
+            
+            // Mock data for demonstration
+            const therapies = [
+                { name: 'PEMF Therapy', sessions: 145, revenue: '£21,750', satisfaction: 4.9 },
+                { name: 'Low Level Laser', sessions: 98, revenue: '£14,700', satisfaction: 4.7 },
+                { name: 'RIFE Frequency', sessions: 76, revenue: '£11,400', satisfaction: 4.8 },
+                { name: 'Ozone Therapy', sessions: 64, revenue: '£9,600', satisfaction: 4.6 },
+            ];
+            
+            tableContent.innerHTML = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Therapy Type</th>
+                            <th>Sessions</th>
+                            <th>Revenue</th>
+                            <th>Avg Satisfaction</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${therapies.map(t => `
+                            <tr>
+                                <td><strong>${t.name}</strong></td>
+                                <td>${t.sessions}</td>
+                                <td>${t.revenue}</td>
+                                <td>⭐ ${t.satisfaction}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+        
+        // Load patient outcomes table
+        async function loadOutcomesTable(clinicId, startDate, endDate) {
+            const tableContent = document.getElementById('outcomesTableContent');
+            
+            try {
+                const { data: patients } = await supabase
+                    .from('patients')
+                    .select('first_name, last_name, created_at')
+                    .eq('clinic_id', clinicId)
+                    .limit(5)
+                    .order('created_at', { ascending: false });
+                
+                if (patients && patients.length > 0) {
+                    tableContent.innerHTML = `
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Patient</th>
+                                    <th>Start Date</th>
+                                    <th>Progress</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${patients.map(p => `
+                                    <tr>
+                                        <td><strong>${p.first_name} ${p.last_name}</strong></td>
+                                        <td>${formatDate(p.created_at)}</td>
+                                        <td>
+                                            <div style="width: 100px; height: 8px; background: #e5e7eb; border-radius: 4px;">
+                                                <div style="width: ${Math.random() * 100}%; height: 100%; background: #10b981; border-radius: 4px;"></div>
+                                            </div>
+                                        </td>
+                                        <td><span style="color: #10b981;">Active</span></td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    `;
+                } else {
+                    tableContent.innerHTML = '<p>No patient data available</p>';
+                }
+            } catch (error) {
+                console.error('Error loading outcomes:', error);
+                tableContent.innerHTML = '<p>Error loading data</p>';
+            }
+        }
+        
+        // Date range functions
+        function getDateRange(range) {
+            const endDate = new Date();
+            const startDate = new Date();
+            
+            switch(range) {
+                case 'week':
+                    startDate.setDate(startDate.getDate() - 7);
+                    break;
+                case 'month':
+                    startDate.setMonth(startDate.getMonth() - 1);
+                    break;
+                case 'quarter':
+                    startDate.setMonth(startDate.getMonth() - 3);
+                    break;
+                case 'year':
+                    startDate.setFullYear(startDate.getFullYear() - 1);
+                    break;
+            }
+            
+            return { startDate, endDate };
+        }
+        
+        function getWorkDays(startDate, endDate) {
+            let count = 0;
+            const current = new Date(startDate);
+            
+            while (current <= endDate) {
+                const day = current.getDay();
+                if (day !== 0 && day !== 6) count++;
+                current.setDate(current.getDate() + 1);
+            }
+            
+            return count;
+        }
+        
+        // Event handlers
+        window.setDateRange = function(range) {
+            currentRange = range;
+            
+            // Update button states
+            document.querySelectorAll('.range-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Reload analytics
+            loadAnalytics();
+        };
+        
+        window.applyCustomRange = function() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            
+            if (startDate && endDate) {
+                // Custom range logic
+                loadAnalytics();
+            }
+        };
+        
+        window.exportData = function(type) {
+            alert(`Exporting ${type} data to CSV...`);
+            // In production, implement actual CSV export
+        };
+        
+        // Format date
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-GB', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric'
+            });
+        }
+    </script>
+</body>
+</html>
