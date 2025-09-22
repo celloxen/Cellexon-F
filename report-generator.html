@@ -531,9 +531,9 @@
                 }
                 
                 generatedPDF = pdf;
-                
                 // CRITICAL FIX: Store the PDF blob for email use
                 window.lastGeneratedPDF = pdf.output('blob');
+                window.generatedPDF = pdf; // Also store the PDF object globally
                 
                 showLoading(false);
                 showAlert('Report generated successfully!', 'success');
@@ -646,22 +646,27 @@
         };
         
         window.emailPDF = async function() {
-            if (!selectedPatient || !selectedPatient.email) {
-                showAlert('Patient email not available. Please update patient information.', 'error');
+            if (!window.generatedPDF) {
+                alert('Please generate a report first');
                 return;
             }
             
+            // Convert PDF to blob if not already done
             if (!window.lastGeneratedPDF) {
-                showAlert('Please generate a report first', 'error');
+                window.lastGeneratedPDF = window.generatedPDF.output('blob');
+            }
+            
+            if (!selectedPatient || !selectedPatient.email) {
+                alert('Patient email not available. Please update patient information.');
                 return;
             }
+            
+            const patientName = `${selectedPatient.first_name} ${selectedPatient.last_name}`;
             
             // Show loading
             showAlert('Sending email...', 'info');
             
             try {
-                const patientName = `${selectedPatient.first_name} ${selectedPatient.last_name}`;
-                
                 // Send email using the stored PDF blob
                 const sent = await window.sendReportEmail(
                     window.lastGeneratedPDF,
