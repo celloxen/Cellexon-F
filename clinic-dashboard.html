@@ -165,6 +165,80 @@
             box-shadow: 0 2px 12px rgba(0,0,0,0.08);
         }
         
+        /* Clinic Statistics Dashboard */
+        .stats-dashboard {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        }
+        
+        .stats-header {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #f8f9fa, #ffffff);
+            border-radius: 12px;
+            padding: 20px;
+            border-left: 4px solid #3b82f6;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .stat-icon {
+            font-size: 32px;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .stat-content {
+            flex: 1;
+        }
+        
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            color: #6b7280;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        
         .pipeline-header {
             font-size: 18px;
             font-weight: 600;
@@ -580,6 +654,63 @@
             </div>
         </div>
 
+        <!-- Clinic Statistics Dashboard -->
+        <div class="stats-dashboard">
+            <h3 class="stats-header">
+                <span>📊</span>
+                <span>Clinic Overview</span>
+            </h3>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">👥</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="totalPatients">0</div>
+                        <div class="stat-label">Total Patients</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">📅</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="todayAppointments2">0</div>
+                        <div class="stat-label">Today's Appointments</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">⏳</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="pendingAssessments2">0</div>
+                        <div class="stat-label">Pending Assessments</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">💊</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="activeTherapies">0</div>
+                        <div class="stat-label">Active Therapies</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="completedThisWeek">0</div>
+                        <div class="stat-label">Completed This Week</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">📈</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="monthlyGrowth">0%</div>
+                        <div class="stat-label">Monthly Growth</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Main Content Grid -->
         <div class="main-content-grid">
             <!-- Today's Priority -->
@@ -847,7 +978,16 @@
                     .neq('status', 'cancelled');
                     
                 document.getElementById('todayAppointments').textContent = appointmentsCount || 0;
+                document.getElementById('todayAppointments2').textContent = appointmentsCount || 0;
                 document.getElementById('treatmentCount').textContent = `${appointmentsCount || 0} scheduled today`;
+                
+                // Total patients
+                const { count: totalPatientsCount } = await supabase
+                    .from('patients')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('clinic_id', clinicId);
+                    
+                document.getElementById('totalPatients').textContent = totalPatientsCount || 0;
                 
                 // Active patients (in treatment)
                 const { count: activeCount } = await supabase
@@ -866,9 +1006,46 @@
                     .in('current_stage', ['health_assessment', 'iris_assessment']);
                     
                 document.getElementById('pendingAssessments').textContent = pendingCount || 0;
+                document.getElementById('pendingAssessments2').textContent = pendingCount || 0;
                 document.getElementById('pendingCount').textContent = `${pendingCount || 0} incomplete`;
                 
-                // Completed today
+                // Active therapies (unique therapy types being delivered)
+                const { count: activeTherapiesCount } = await supabase
+                    .from('patient_workflow_status')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('clinic_id', clinicId)
+                    .in('current_stage', ['in_treatment', 'treatment_planning']);
+                    
+                document.getElementById('activeTherapies').textContent = activeTherapiesCount || 0;
+                
+                // Completed this week
+                const weekStart = new Date();
+                weekStart.setDate(weekStart.getDate() - 7);
+                const { count: weekCompletedCount } = await supabase
+                    .from('therapy_sessions')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('clinic_id', clinicId)
+                    .eq('status', 'completed')
+                    .gte('created_at', weekStart.toISOString());
+                    
+                document.getElementById('completedThisWeek').textContent = weekCompletedCount || 0;
+                
+                // Monthly growth calculation
+                const lastMonth = new Date();
+                lastMonth.setMonth(lastMonth.getMonth() - 1);
+                const { count: lastMonthPatients } = await supabase
+                    .from('patients')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('clinic_id', clinicId)
+                    .lte('created_at', lastMonth.toISOString());
+                    
+                let growth = 0;
+                if (lastMonthPatients && lastMonthPatients > 0) {
+                    growth = Math.round(((totalPatientsCount - lastMonthPatients) / lastMonthPatients) * 100);
+                }
+                document.getElementById('monthlyGrowth').textContent = growth > 0 ? `+${growth}%` : `${growth}%`;
+                
+                // Completed today (kept for compatibility)
                 const todayStart = new Date(today).toISOString();
                 const { count: completedCount } = await supabase
                     .from('therapy_sessions')
