@@ -1,19 +1,12 @@
 // email-sender.js
 // Email Sending via Supabase Edge Function
 
-async function sendReportEmail(patient, pdfBlob, reportType) {
+async function sendReportEmail(patient, pdfBlob, reportType, supabaseClient) {
     try {
         // Check if patient has email
         if (!patient.email) {
             alert('Patient does not have an email address on file');
             return false;
-        }
-
-        // Check if we have supabase available
-        if (typeof window.supabase === 'undefined') {
-            // Try to get it from the module
-            const module = await import('./supabase-config.js');
-            window.supabase = module.supabase;
         }
 
         // Convert PDF blob to base64
@@ -28,7 +21,7 @@ async function sendReportEmail(patient, pdfBlob, reportType) {
         const pdfBase64 = await base64Promise;
 
         // Get current session token
-        const session = await window.supabase.auth.getSession();
+        const session = await supabaseClient.auth.getSession();
         const token = session.data.session?.access_token;
 
         if (!token) {
@@ -87,9 +80,9 @@ async function sendReportEmail(patient, pdfBlob, reportType) {
         const result = await response.json();
 
         if (response.ok && result.success) {
-            // Log successful email to database (optional - ignore errors)
+            // Log successful email to database
             try {
-                await window.supabase.from('email_logs').insert({
+                await supabase.from('email_logs').insert({
                     patient_id: patient.id,
                     email_type: 'report',
                     recipient_email: patient.email,
@@ -103,6 +96,7 @@ async function sendReportEmail(patient, pdfBlob, reportType) {
                 });
             } catch (logError) {
                 console.error('Failed to log email:', logError);
+                // Don't fail the whole operation if logging fails
             }
 
             return true;
