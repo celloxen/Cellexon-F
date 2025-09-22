@@ -524,7 +524,6 @@
             
             await loadPatients();
             await loadReports();
-            updateStatistics();
         });
         
         async function loadPatients() {
@@ -577,8 +576,10 @@
                 
                 allReports = data || [];
                 
-                // Apply initial filters
-                applyFilters();
+                // Apply initial filters - this will display the reports
+                filteredReports = allReports; // Set filteredReports to all reports initially
+                displayReports(); // Display all reports on load
+                updateStatistics(); // Update the statistics
                 
             } catch (error) {
                 console.error('Error loading reports:', error);
