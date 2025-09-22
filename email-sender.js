@@ -1,4 +1,4 @@
-// Email sender module for Celloxen platform - Simplified Version
+// Email sender module for Celloxen platform - Updated for health@celloxen.com
 window.sendReportEmail = async function(pdfBlob, patientEmail, patientName) {
     try {
         // Check if user is logged in via database auth
@@ -25,28 +25,40 @@ window.sendReportEmail = async function(pdfBlob, patientEmail, patientName) {
         reader.readAsDataURL(pdfBlob);
         const pdfBase64 = await base64Promise;
 
-        // Prepare email content
+        // Prepare email content with updated sender
         const emailData = {
             to: patientEmail,
+            from: 'health@celloxen.com', // Updated sender
+            replyTo: 'health@celloxen.com', // Updated reply-to
             subject: `Health Assessment Report - ${patientName}`,
             html: `
                 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                    <h2 style="color: #1e3a8a;">Celloxen Wellness Platform</h2>
-                    <p>Dear ${patientName},</p>
-                    <p>Please find attached your comprehensive health assessment report from your recent visit.</p>
-                    <p>This report includes:</p>
-                    <ul>
-                        <li>Health Assessment Results</li>
-                        <li>Constitutional Analysis</li>
-                        <li>Personalized Treatment Recommendations</li>
-                    </ul>
-                    <p>If you have any questions about your report, please don't hesitate to contact us.</p>
-                    <p>Best regards,<br>Your Healthcare Team</p>
+                    <div style="background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%); padding: 20px; text-align: center;">
+                        <h2 style="color: white; margin: 0;">Celloxen Wellness Platform</h2>
+                    </div>
+                    <div style="padding: 20px;">
+                        <p>Dear ${patientName},</p>
+                        <p>Please find attached your comprehensive health assessment report from your recent visit.</p>
+                        <p>This report includes:</p>
+                        <ul>
+                            <li>Health Assessment Results</li>
+                            <li>Constitutional Analysis</li>
+                            <li>Personalized Treatment Recommendations</li>
+                        </ul>
+                        <p>If you have any questions about your report, please don't hesitate to contact us at <a href="mailto:health@celloxen.com">health@celloxen.com</a>.</p>
+                        <p>Best regards,<br>Your Healthcare Team</p>
+                    </div>
                     <hr style="border: 1px solid #e5e7eb; margin: 20px 0;">
-                    <p style="font-size: 12px; color: #6b7280;">
-                        This email contains confidential medical information. 
-                        Please do not share without authorization.
-                    </p>
+                    <div style="padding: 0 20px 20px; text-align: center;">
+                        <p style="font-size: 12px; color: #6b7280;">
+                            This email contains confidential medical information. 
+                            Please do not share without authorization.
+                        </p>
+                        <p style="font-size: 12px; color: #6b7280;">
+                            Sent from: health@celloxen.com<br>
+                            © 2025 Celloxen Wellness Platform. All rights reserved.
+                        </p>
+                    </div>
                 </div>
             `,
             attachments: [{
@@ -80,6 +92,7 @@ window.sendReportEmail = async function(pdfBlob, patientEmail, patientName) {
                         patient_email: patientEmail,
                         email_type: 'report',
                         sent_by: auth.username,
+                        sent_from: 'health@celloxen.com', // Updated sender in logs
                         sent_at: new Date().toISOString()
                     });
                 }
@@ -114,20 +127,33 @@ window.sendAppointmentReminder = async function(patientEmail, patientName, appoi
 
         const emailData = {
             to: patientEmail,
+            from: 'health@celloxen.com', // Updated sender
+            replyTo: 'health@celloxen.com', // Updated reply-to
             subject: `Appointment Reminder - ${appointmentDate}`,
             html: `
                 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                    <h2 style="color: #1e3a8a;">Appointment Reminder</h2>
-                    <p>Dear ${patientName},</p>
-                    <p>This is a reminder of your upcoming appointment:</p>
-                    <div style="background: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
-                        <p><strong>Date:</strong> ${appointmentDate}</p>
-                        <p><strong>Time:</strong> ${appointmentTime}</p>
-                        <p><strong>Location:</strong> Celloxen Wellness Clinic</p>
+                    <div style="background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%); padding: 20px; text-align: center;">
+                        <h2 style="color: white; margin: 0;">Appointment Reminder</h2>
                     </div>
-                    <p>Please arrive 10 minutes early to complete any necessary paperwork.</p>
-                    <p>If you need to reschedule, please contact us as soon as possible.</p>
-                    <p>Best regards,<br>Your Healthcare Team</p>
+                    <div style="padding: 20px;">
+                        <p>Dear ${patientName},</p>
+                        <p>This is a reminder of your upcoming appointment:</p>
+                        <div style="background: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                            <p><strong>Date:</strong> ${appointmentDate}</p>
+                            <p><strong>Time:</strong> ${appointmentTime}</p>
+                            <p><strong>Location:</strong> Celloxen Wellness Clinic</p>
+                        </div>
+                        <p>Please arrive 10 minutes early to complete any necessary paperwork.</p>
+                        <p>If you need to reschedule, please contact us at <a href="mailto:health@celloxen.com">health@celloxen.com</a> as soon as possible.</p>
+                        <p>Best regards,<br>Your Healthcare Team</p>
+                    </div>
+                    <div style="padding: 0 20px 20px; text-align: center;">
+                        <hr style="border: 1px solid #e5e7eb; margin: 20px 0;">
+                        <p style="font-size: 12px; color: #6b7280;">
+                            Sent from: health@celloxen.com<br>
+                            © 2025 Celloxen Wellness Platform. All rights reserved.
+                        </p>
+                    </div>
                 </div>
             `
         };
@@ -150,8 +176,8 @@ window.sendAppointmentReminder = async function(patientEmail, patientName, appoi
     }
 };
 
-// Function to test email configuration with your registered email
-window.testEmailConfiguration = async function(testEmail = 'givespotuk@gmail.com') {
+// Function to test email configuration with health@celloxen.com
+window.testEmailConfiguration = async function(testEmail = 'health@celloxen.com') {
     try {
         const anonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlZmlmd3pnYXpxbHJpZ3d1bXFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcyNTM0MjYsImV4cCI6MjA3MjgyOTQyNn0.wcUBq6Pszjtqn5aBtuu3iXBE4BLmu8x9LtJbsMWlIiA';
         
@@ -164,17 +190,25 @@ window.testEmailConfiguration = async function(testEmail = 'givespotuk@gmail.com
             },
             body: JSON.stringify({
                 to: testEmail,
+                from: 'health@celloxen.com', // Updated sender
+                replyTo: 'health@celloxen.com', // Updated reply-to
                 subject: 'Test Email - Celloxen Platform',
                 html: `
                     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                        <h2 style="color: #1e3a8a;">Celloxen Email Test</h2>
-                        <p>This is a test email to verify your email configuration is working correctly.</p>
-                        <p>If you received this email, your Celloxen platform email system is properly configured!</p>
+                        <div style="background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%); padding: 20px; text-align: center;">
+                            <h2 style="color: white; margin: 0;">Celloxen Email Test</h2>
+                        </div>
+                        <div style="padding: 20px;">
+                            <p>This is a test email to verify your email configuration is working correctly.</p>
+                            <p>If you received this email, your Celloxen platform email system is properly configured!</p>
+                        </div>
                         <hr style="border: 1px solid #e5e7eb; margin: 20px 0;">
-                        <p style="font-size: 12px; color: #6b7280;">
-                            Email sent from: Celloxen Wellness Platform<br>
-                            Timestamp: ${new Date().toISOString()}
-                        </p>
+                        <div style="padding: 0 20px 20px; text-align: center;">
+                            <p style="font-size: 12px; color: #6b7280;">
+                                Email sent from: health@celloxen.com<br>
+                                Timestamp: ${new Date().toISOString()}
+                            </p>
+                        </div>
                     </div>
                 `
             })
@@ -196,5 +230,85 @@ window.testEmailConfiguration = async function(testEmail = 'givespotuk@gmail.com
     }
 };
 
-console.log('Email sender module loaded successfully (Simplified Version)');
-console.log('Test with: testEmailConfiguration("givespotuk@gmail.com")');
+// Function to send welcome email to new patients
+window.sendWelcomeEmail = async function(patientEmail, patientName) {
+    try {
+        const authData = localStorage.getItem('celloxen_auth');
+        if (!authData) {
+            alert('Please log in to send emails');
+            return false;
+        }
+
+        const anonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlZmlmd3pnYXpxbHJpZ3d1bXFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcyNTM0MjYsImV4cCI6MjA3MjgyOTQyNn0.wcUBq6Pszjtqn5aBtuu3iXBE4BLmu8x9LtJbsMWlIiA';
+
+        const emailData = {
+            to: patientEmail,
+            from: 'health@celloxen.com',
+            replyTo: 'health@celloxen.com',
+            subject: `Welcome to Celloxen Wellness Platform - ${patientName}`,
+            html: `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                    <div style="background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%); padding: 30px; text-align: center;">
+                        <h2 style="color: white; margin: 0;">Welcome to Celloxen</h2>
+                    </div>
+                    <div style="padding: 30px;">
+                        <p>Dear ${patientName},</p>
+                        <p>Welcome to the Celloxen Wellness Platform! We're delighted to have you as our patient.</p>
+                        <p>At Celloxen, we're committed to providing you with personalized, comprehensive healthcare using advanced IRIS analysis and holistic health assessments.</p>
+                        
+                        <div style="background: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                            <h3 style="color: #1e3a8a;">What to Expect:</h3>
+                            <ul style="color: #374151;">
+                                <li>Comprehensive health assessments</li>
+                                <li>Advanced IRIS constitutional analysis</li>
+                                <li>Personalized treatment plans</li>
+                                <li>Regular progress monitoring</li>
+                            </ul>
+                        </div>
+                        
+                        <p>If you have any questions or need assistance, please don't hesitate to contact us at <a href="mailto:health@celloxen.com">health@celloxen.com</a>.</p>
+                        
+                        <p>We look forward to supporting you on your wellness journey!</p>
+                        
+                        <p>Warm regards,<br>The Celloxen Healthcare Team</p>
+                    </div>
+                    <hr style="border: 1px solid #e5e7eb; margin: 20px 0;">
+                    <div style="padding: 0 20px 20px; text-align: center;">
+                        <p style="font-size: 12px; color: #6b7280;">
+                            Sent from: health@celloxen.com<br>
+                            © 2025 Celloxen Wellness Platform. All rights reserved.<br>
+                            This email contains confidential information.
+                        </p>
+                    </div>
+                </div>
+            `
+        };
+
+        const response = await fetch('https://defifwzgazqlrigwumqn.supabase.co/functions/v1/send-email', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${anonKey}`,
+                'apikey': anonKey
+            },
+            body: JSON.stringify(emailData)
+        });
+
+        const result = await response.json();
+        
+        if (response.ok && result.success) {
+            console.log('Welcome email sent successfully');
+            return true;
+        } else {
+            console.error('Welcome email failed:', result);
+            return false;
+        }
+    } catch (error) {
+        console.error('Error sending welcome email:', error);
+        return false;
+    }
+};
+
+console.log('Email sender module loaded successfully (Updated: health@celloxen.com)');
+console.log('Test with: testEmailConfiguration("your-email@example.com")');
+console.log('Default test email is now: health@celloxen.com');
