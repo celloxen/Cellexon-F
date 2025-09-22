@@ -671,8 +671,77 @@
         };
         
         window.exportPatientData = async function(patientId) {
-            // Export functionality - could generate PDF or CSV
-            alert('Export functionality will be implemented soon');
+            try {
+                const patient = allPatients.find(p => p.id === patientId);
+                if (!patient) {
+                    alert('Patient not found');
+                    return;
+                }
+                
+                // Get all assessments
+                const { data: healthAssessments } = await supabase
+                    .from('health_assessments')
+                    .select('*')
+                    .eq('patient_id', patientId)
+                    .order('created_at', { ascending: false });
+                
+                const { data: irisAssessments } = await supabase
+                    .from('iris_assessments')
+                    .select('*')
+                    .eq('patient_id', patientId)
+                    .order('created_at', { ascending: false });
+                
+                // Create CSV content
+                let csvContent = 'Patient Assessment Export\n';
+                csvContent += `Patient Name:,${patient.first_name} ${patient.last_name}\n`;
+                csvContent += `Patient ID:,${patient.patient_id || 'N/A'}\n`;
+                csvContent += `Export Date:,${new Date().toLocaleDateString('en-GB')}\n\n`;
+                
+                // Health Assessments
+                csvContent += 'HEALTH ASSESSMENTS\n';
+                csvContent += 'Date,Type,Overall Score,Primary Concerns\n';
+                
+                if (healthAssessments) {
+                    healthAssessments.forEach(assessment => {
+                        const date = new Date(assessment.created_at).toLocaleDateString('en-GB');
+                        const type = assessment.assessment_type || 'Initial';
+                        const score = 100 - (assessment.overall_score || 0);
+                        const concerns = (assessment.primary_concerns || []).join('; ');
+                        csvContent += `${date},${type},${score}%,"${concerns}"\n`;
+                    });
+                }
+                
+                csvContent += '\n';
+                
+                // IRIS Assessments
+                csvContent += 'IRIS ASSESSMENTS\n';
+                csvContent += 'Date,Constitutional Type,Patterns\n';
+                
+                if (irisAssessments) {
+                    irisAssessments.forEach(assessment => {
+                        const date = new Date(assessment.created_at).toLocaleDateString('en-GB');
+                        const type = assessment.constitutional_type || 'N/A';
+                        const patterns = assessment.health_patterns ? 
+                            assessment.health_patterns.map(p => p.name || p).join('; ') : '';
+                        csvContent += `${date},"${type}","${patterns}"\n`;
+                    });
+                }
+                
+                // Create download link
+                const blob = new Blob([csvContent], { type: 'text/csv' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${patient.first_name}_${patient.last_name}_assessments_${new Date().toISOString().split('T')[0]}.csv`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+                
+            } catch (error) {
+                console.error('Error exporting data:', error);
+                alert('Error exporting data. Please try again.');
+            }
         };
         
         // Make functions globally available
