@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Report Generator with PDF Export - Celloxen</title>
+    <title>Comprehensive Diagnosis Report - Celloxen Platform</title>
     <style>
         * {
             margin: 0;
@@ -12,85 +12,160 @@
         }
         
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f0f4f8;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
             min-height: 100vh;
+            color: #1f2937;
         }
         
-        /* Header - Matching original design */
         .header {
-            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
             color: white;
-            padding: 20px 0;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
         }
         
-        .header-container {
+        .header-content {
             max-width: 1400px;
             margin: 0 auto;
-            padding: 0 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
         
-        .logo {
-            font-size: 24px;
-            font-weight: bold;
-            letter-spacing: 1px;
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
         }
         
-        .nav-buttons {
-            display: flex;
-            gap: 15px;
-        }
-        
-        .btn-nav {
+        .back-btn {
             background: rgba(255,255,255,0.2);
             border: 1px solid rgba(255,255,255,0.3);
             color: white;
             padding: 8px 20px;
             border-radius: 6px;
             cursor: pointer;
-            transition: all 0.3s;
             text-decoration: none;
-            font-size: 14px;
+            transition: all 0.3s ease;
         }
         
-        .btn-nav:hover {
+        .back-btn:hover {
             background: rgba(255,255,255,0.3);
         }
         
-        /* Main Container */
         .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 30px 20px;
+            max-width: 1400px;
+            margin: 30px auto;
+            padding: 0 20px;
         }
         
-        /* Page Header */
-        .page-header {
+        .progress-bar {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+        
+        .progress-steps {
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+        }
+        
+        .progress-step {
+            flex: 1;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .progress-step::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: -50%;
+            right: -50%;
+            height: 2px;
+            background: #e2e8f0;
+            z-index: -1;
+        }
+        
+        .progress-step:first-child::before {
+            display: none;
+        }
+        
+        .progress-step.completed::before {
+            background: #10b981;
+        }
+        
+        .progress-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #e2e8f0;
+            margin: 0 auto 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .progress-step.active .progress-circle {
+            background: linear-gradient(135deg, #1e3a8a, #1e40af);
+            color: white;
+            transform: scale(1.1);
+        }
+        
+        .progress-step.completed .progress-circle {
+            background: #10b981;
+            color: white;
+        }
+        
+        .report-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
             margin-bottom: 30px;
         }
         
-        .page-title {
-            font-size: 28px;
+        .report-header {
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 20px;
+            margin-bottom: 25px;
+        }
+        
+        .patient-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 15px;
+        }
+        
+        .info-item {
+            padding: 10px;
+            background: #f8fafc;
+            border-radius: 8px;
+        }
+        
+        .info-label {
+            font-size: 12px;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .info-value {
+            font-size: 16px;
             font-weight: 600;
             color: #1e293b;
-            margin-bottom: 10px;
+            margin-top: 5px;
         }
         
-        .page-subtitle {
-            color: #64748b;
-        }
-        
-        /* Content Card */
-        .content-card {
-            background: white;
-            border-radius: 12px;
-            padding: 30px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-            margin-bottom: 25px;
+        .diagnosis-section {
+            margin: 30px 0;
         }
         
         .section-title {
@@ -98,133 +173,177 @@
             font-weight: 600;
             color: #1e293b;
             margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
         
-        /* Patient Selection */
-        .patient-selection {
-            margin-bottom: 20px;
+        .health-domain {
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid #1e3a8a;
         }
         
-        .form-group {
-            margin-bottom: 20px;
+        .domain-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
         }
         
-        .form-label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: #374151;
+        .domain-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .domain-score {
+            padding: 6px 12px;
+            border-radius: 20px;
             font-size: 14px;
+            font-weight: 600;
         }
         
-        .form-select {
-            width: 100%;
-            padding: 10px;
-            border: 2px solid #e5e7eb;
-            border-radius: 8px;
-            font-size: 14px;
-            background: white;
-            cursor: pointer;
-            transition: all 0.3s;
+        .score-excellent {
+            background: #d1fae5;
+            color: #065f46;
         }
         
-        .form-select:focus {
-            outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        .score-good {
+            background: #fef3c7;
+            color: #92400e;
         }
         
-        /* Report Type Selection */
-        .report-types {
+        .score-concern {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .iris-findings {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 25px;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
         }
         
-        .report-type-card {
-            border: 2px solid #e5e7eb;
-            border-radius: 10px;
+        .iris-card {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+        }
+        
+        .iris-card h4 {
+            color: #475569;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        
+        .therapy-selection {
+            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+            border-radius: 16px;
+            padding: 25px;
+            margin-top: 30px;
+        }
+        
+        .therapy-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .therapy-option {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
             padding: 15px;
             cursor: pointer;
-            transition: all 0.3s;
-            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
         }
         
-        .report-type-card:hover {
-            border-color: #3b82f6;
-            background: #f0f9ff;
+        .therapy-option:hover {
+            border-color: #1e3a8a;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(30, 58, 138, 0.15);
         }
         
-        .report-type-card.selected {
-            border-color: #3b82f6;
-            background: #eff6ff;
+        .therapy-option.selected {
+            border-color: #10b981;
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
         }
         
-        .report-icon {
-            font-size: 32px;
+        .therapy-option.selected::after {
+            content: '✓';
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 24px;
+            height: 24px;
+            background: #10b981;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        
+        .therapy-name {
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+        
+        .therapy-description {
+            font-size: 14px;
+            color: #64748b;
             margin-bottom: 10px;
         }
         
-        .report-name {
-            font-weight: 600;
-            color: #1e293b;
-            margin-bottom: 5px;
-        }
-        
-        .report-desc {
+        .therapy-indication {
             font-size: 12px;
-            color: #6b7280;
+            color: #10b981;
+            font-weight: 500;
         }
         
-        /* Action Buttons */
         .action-buttons {
             display: flex;
             gap: 15px;
-            margin-top: 25px;
+            justify-content: center;
+            margin-top: 30px;
         }
         
         .btn {
             padding: 12px 24px;
-            border: none;
             border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
+            font-size: 16px;
             font-weight: 600;
-            transition: all 0.3s;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
         }
         
         .btn-primary {
-            background: #3b82f6;
+            background: linear-gradient(135deg, #10b981, #059669);
             color: white;
         }
         
         .btn-primary:hover {
-            background: #2563eb;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
         }
         
         .btn-secondary {
-            background: #10b981;
-            color: white;
+            background: #e5e7eb;
+            color: #374151;
         }
         
         .btn-secondary:hover {
-            background: #059669;
-        }
-        
-        .btn-outline {
-            background: white;
-            color: #3b82f6;
-            border: 2px solid #3b82f6;
-        }
-        
-        .btn-outline:hover {
-            background: #eff6ff;
+            background: #d1d5db;
         }
         
         .btn:disabled {
@@ -232,512 +351,609 @@
             cursor: not-allowed;
         }
         
-        /* Loading Spinner */
-        .loading {
-            display: none;
-            text-align: center;
-            padding: 40px;
+        .alert {
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
         
-        .loading.show {
-            display: block;
+        .alert-info {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            color: #92400e;
+            border-left: 4px solid #f59e0b;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #64748b;
         }
         
         .spinner {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #3b82f6;
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #1e3a8a;
             border-radius: 50%;
             width: 40px;
             height: 40px;
             animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
+            margin: 20px auto;
         }
         
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        
-        /* Success Message */
-        .alert {
-            padding: 12px 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            display: none;
-        }
-        
-        .alert.show {
-            display: block;
-        }
-        
-        .alert-success {
-            background: #d1fae5;
-            color: #065f46;
-            border: 1px solid #a7f3d0;
-        }
-        
-        .alert-info {
-            background: #dbeafe;
-            color: #1e3a8a;
-            border: 1px solid #bfdbfe;
-        }
-        
-        .alert-error {
-            background: #fee2e2;
-            color: #991b1b;
-            border: 1px solid #fecaca;
-        }
-        
-        /* PDF Actions */
-        .pdf-actions {
-            background: #f0f9ff;
-            border: 2px solid #3b82f6;
-            border-radius: 10px;
-            padding: 20px;
-            margin-top: 20px;
-            display: none;
-        }
-        
-        .pdf-actions.show {
-            display: block;
-        }
-        
-        .pdf-actions-title {
-            font-size: 16px;
-            font-weight: 600;
-            color: #1e3a8a;
-            margin-bottom: 15px;
-        }
-        
-        .pdf-buttons {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
     </style>
 </head>
 <body>
-    <!-- Header -->
     <div class="header">
-        <div class="header-container">
-            <div class="logo">CELLOXEN - Report Generator</div>
-            <div class="nav-buttons">
-                <a href="clinic-dashboard.html" class="btn-nav">← Back to Dashboard</a>
+        <div class="header-content">
+            <div>
+                <h1>Comprehensive Diagnosis Report</h1>
+                <p style="color: #cbd5e1; margin-top: 5px;">Combined Health & IRIS Assessment Results</p>
             </div>
+            <a href="clinic-dashboard.html" class="back-btn">← Back to Dashboard</a>
         </div>
     </div>
-
-    <!-- Main Container -->
+    
     <div class="container">
-        <!-- Page Header -->
-        <div class="page-header">
-            <h1 class="page-title">Medical Report Generator</h1>
-            <p class="page-subtitle">Generate comprehensive reports with PDF export</p>
-        </div>
-
-        <!-- Alert Messages -->
-        <div id="alertMessage" class="alert"></div>
-
-        <!-- Report Configuration -->
-        <div class="content-card">
-            <h2 class="section-title">Configure Report</h2>
-            
-            <!-- Patient Selection -->
-            <div class="form-group">
-                <label class="form-label">Select Patient</label>
-                <select class="form-select" id="patientSelect">
-                    <option value="">-- Select Patient --</option>
-                </select>
+        <!-- Progress Bar -->
+        <div class="progress-bar">
+            <div class="progress-steps">
+                <div class="progress-step completed">
+                    <div class="progress-circle">✓</div>
+                    <div>Health Assessment</div>
+                </div>
+                <div class="progress-step completed">
+                    <div class="progress-circle">✓</div>
+                    <div>IRIS Analysis</div>
+                </div>
+                <div class="progress-step active">
+                    <div class="progress-circle">3</div>
+                    <div>Diagnosis Report</div>
+                </div>
+                <div class="progress-step">
+                    <div class="progress-circle">4</div>
+                    <div>Therapy Selection</div>
+                </div>
+                <div class="progress-step">
+                    <div class="progress-circle">5</div>
+                    <div>Treatment Plan</div>
+                </div>
             </div>
-            
-            <!-- Report Type Selection -->
-            <div class="form-group">
-                <label class="form-label">Select Report Type</label>
-                <div class="report-types">
-                    <div class="report-type-card" data-type="comprehensive" onclick="selectReportType('comprehensive')">
-                        <div class="report-icon">📊</div>
-                        <div class="report-name">Comprehensive Report</div>
-                        <div class="report-desc">Full diagnostic & treatment plan</div>
-                    </div>
-                    <div class="report-type-card" data-type="progress" onclick="selectReportType('progress')">
-                        <div class="report-icon">📈</div>
-                        <div class="report-name">Progress Report</div>
-                        <div class="report-desc">Treatment progress & metrics</div>
-                    </div>
-                    <div class="report-type-card" data-type="assessment" onclick="selectReportType('assessment')">
-                        <div class="report-icon">🔍</div>
-                        <div class="report-name">Assessment Report</div>
-                        <div class="report-desc">Health & IRIS assessments</div>
-                    </div>
-                    <div class="report-type-card" data-type="summary" onclick="selectReportType('summary')">
-                        <div class="report-icon">📝</div>
-                        <div class="report-name">Summary Report</div>
-                        <div class="report-desc">Brief treatment summary</div>
-                    </div>
+        </div>
+        
+        <!-- Loading State -->
+        <div id="loadingState" class="report-card">
+            <div class="loading">
+                <div class="spinner"></div>
+                <h3>Generating Comprehensive Report...</h3>
+                <p>Combining health assessment and IRIS analysis data</p>
+            </div>
+        </div>
+        
+        <!-- Report Content (Initially Hidden) -->
+        <div id="reportContent" style="display: none;">
+            <!-- Patient Information -->
+            <div class="report-card">
+                <div class="report-header">
+                    <h2>Patient Information</h2>
+                </div>
+                <div class="patient-info" id="patientInfo">
+                    <!-- Patient details will be populated here -->
                 </div>
             </div>
             
-            <!-- Action Buttons -->
-            <div class="action-buttons">
-                <button class="btn btn-primary" onclick="generateReport()" disabled id="generateBtn">
-                    <span>🔄</span> Generate Report
-                </button>
+            <!-- Health Assessment Results -->
+            <div class="report-card">
+                <div class="section-title">
+                    <span>📋</span>
+                    <span>Health Assessment Findings</span>
+                </div>
+                <div id="healthDomains">
+                    <!-- Health domain results will be populated here -->
+                </div>
             </div>
-        </div>
-
-        <!-- Loading Indicator -->
-        <div class="loading" id="loadingIndicator">
-            <div class="spinner"></div>
-            <p>Generating report...</p>
-        </div>
-
-        <!-- PDF Actions -->
-        <div class="pdf-actions" id="pdfActions">
-            <div class="pdf-actions-title">📄 PDF Report Generated Successfully!</div>
-            <div class="pdf-buttons">
-                <button class="btn btn-primary" onclick="downloadPDF()">
-                    <span>⬇️</span> Download PDF
-                </button>
-                <button class="btn btn-secondary" onclick="emailPDF()">
-                    <span>📧</span> Email to Patient
-                </button>
-                <button class="btn btn-outline" onclick="savePDFToDatabase()">
-                    <span>💾</span> Save to Records
-                </button>
-                <button class="btn btn-outline" onclick="printPDF()">
-                    <span>🖨️</span> Print Report
-                </button>
+            
+            <!-- IRIS Analysis Results -->
+            <div class="report-card">
+                <div class="section-title">
+                    <span>👁️</span>
+                    <span>IRIS Analysis Results</span>
+                </div>
+                <div class="iris-findings" id="irisFindings">
+                    <!-- IRIS findings will be populated here -->
+                </div>
+            </div>
+            
+            <!-- Combined Diagnosis -->
+            <div class="report-card">
+                <div class="section-title">
+                    <span>🔬</span>
+                    <span>Combined Diagnosis & Recommendations</span>
+                </div>
+                <div id="combinedDiagnosis">
+                    <!-- Combined diagnosis will be populated here -->
+                </div>
+            </div>
+            
+            <!-- Therapy Selection -->
+            <div class="report-card">
+                <div class="section-title">
+                    <span>💊</span>
+                    <span>Recommended Therapies</span>
+                </div>
+                <div class="alert alert-info">
+                    Select appropriate therapies based on the diagnosis. Multiple therapies can be selected for comprehensive treatment.
+                </div>
+                <div class="therapy-selection">
+                    <h3>Available Therapies</h3>
+                    <div class="therapy-grid" id="therapyGrid">
+                        <!-- Therapy options will be populated here -->
+                    </div>
+                </div>
+                
+                <div class="action-buttons">
+                    <button class="btn btn-secondary" onclick="saveDraft()">Save as Draft</button>
+                    <button class="btn btn-primary" id="confirmTherapiesBtn" onclick="confirmTherapies()" disabled>
+                        Confirm Selected Therapies →
+                    </button>
+                </div>
             </div>
         </div>
     </div>
-
-    <!-- Include jsPDF library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     
-    <!-- Include email sender -->
-    <script src="email-sender.js"></script>
-    
-    <!-- Include Supabase -->
     <script type="module">
         import { supabase } from './supabase-config.js';
-        import { pdfGenerator } from './pdf-generator.js';
         
-        let selectedPatient = null;
-        let selectedReportType = null;
-        let generatedPDF = null;
-        let reportData = null;
+        let patientData = null;
+        let healthAssessment = null;
+        let irisAssessment = null;
+        let selectedTherapies = [];
+        let reportData = {};
         
-        // Load patients on page load
+        // Available therapies
+        const availableTherapies = [
+            {
+                id: 'frequency_therapy',
+                name: 'Frequency Therapy',
+                description: 'Targeted frequency treatment for cellular optimization',
+                indications: ['Stress', 'Sleep', 'Energy'],
+                duration: '30-45 minutes'
+            },
+            {
+                id: 'light_therapy',
+                name: 'Light Therapy',
+                description: 'Photobiomodulation for healing and regeneration',
+                indications: ['Joint Health', 'Inflammation', 'Circulation'],
+                duration: '20-30 minutes'
+            },
+            {
+                id: 'pemf_therapy',
+                name: 'PEMF Therapy',
+                description: 'Pulsed electromagnetic field therapy',
+                indications: ['Pain', 'Recovery', 'Cellular Health'],
+                duration: '30 minutes'
+            },
+            {
+                id: 'ozone_therapy',
+                name: 'Ozone Therapy',
+                description: 'Oxygenation therapy for immune support',
+                indications: ['Immune', 'Detox', 'Energy'],
+                duration: '30-60 minutes'
+            },
+            {
+                id: 'iv_therapy',
+                name: 'IV Nutrient Therapy',
+                description: 'Intravenous nutrient supplementation',
+                indications: ['Nutrition', 'Hydration', 'Recovery'],
+                duration: '45-60 minutes'
+            },
+            {
+                id: 'hyperbaric_oxygen',
+                name: 'Hyperbaric Oxygen',
+                description: 'Pressurized oxygen therapy',
+                indications: ['Healing', 'Brain Health', 'Recovery'],
+                duration: '60-90 minutes'
+            },
+            {
+                id: 'cryotherapy',
+                name: 'Cryotherapy',
+                description: 'Cold therapy for inflammation and recovery',
+                indications: ['Inflammation', 'Pain', 'Recovery'],
+                duration: '3-5 minutes'
+            },
+            {
+                id: 'infrared_sauna',
+                name: 'Infrared Sauna',
+                description: 'Deep heat therapy for detoxification',
+                indications: ['Detox', 'Circulation', 'Relaxation'],
+                duration: '30-45 minutes'
+            }
+        ];
+        
+        // Initialize on page load
         document.addEventListener('DOMContentLoaded', async function() {
-            await loadPatients();
+            const urlParams = new URLSearchParams(window.location.search);
+            const patientId = urlParams.get('patient') || sessionStorage.getItem('currentPatientId');
+            
+            if (!patientId) {
+                alert('No patient selected. Redirecting to dashboard.');
+                window.location.href = 'clinic-dashboard.html';
+                return;
+            }
+            
+            await loadComprehensiveData(patientId);
         });
         
-        async function loadPatients() {
+        async function loadComprehensiveData(patientId) {
             try {
-                const authData = JSON.parse(localStorage.getItem('celloxen_auth') || '{}');
-                const clinicId = authData.clinicId || sessionStorage.getItem('currentClinicId');
-                
-                if (!clinicId) return;
-                
-                const { data, error } = await supabase
+                // Load patient data
+                const { data: patient, error: patientError } = await supabase
                     .from('patients')
                     .select('*')
-                    .eq('clinic_id', clinicId)
-                    .order('first_name');
+                    .eq('id', patientId)
+                    .single();
                 
-                if (error) throw error;
+                if (patientError) throw patientError;
+                patientData = patient;
                 
-                const select = document.getElementById('patientSelect');
-                select.innerHTML = '<option value="">-- Select Patient --</option>';
-                
-                if (data) {
-                    data.forEach(patient => {
-                        const email = patient.email ? `data-email="${patient.email}"` : 'data-email="undefined"';
-                        select.innerHTML += `
-                            <option value="${patient.id}" ${email}>
-                                ${patient.first_name} ${patient.last_name} (${patient.patient_id})
-                            </option>
-                        `;
-                    });
-                }
-                
-                // Add event listener for patient selection
-                select.addEventListener('change', function() {
-                    if (this.value) {
-                        selectedPatient = data.find(p => p.id === parseInt(this.value));
-                        updateButtonStates();
-                    }
-                });
-                
-            } catch (error) {
-                console.error('Error loading patients:', error);
-                showAlert('Error loading patients', 'error');
-            }
-        }
-        
-        window.selectReportType = function(type) {
-            // Remove previous selection
-            document.querySelectorAll('.report-type-card').forEach(card => {
-                card.classList.remove('selected');
-            });
-            
-            // Add selection to clicked card
-            document.querySelector(`.report-type-card[data-type="${type}"]`).classList.add('selected');
-            selectedReportType = type;
-            
-            updateButtonStates();
-        };
-        
-        function updateButtonStates() {
-            const generateBtn = document.getElementById('generateBtn');
-            
-            if (selectedPatient && selectedReportType) {
-                generateBtn.disabled = false;
-            } else {
-                generateBtn.disabled = true;
-            }
-        }
-        
-        window.generateReport = async function() {
-            if (!selectedPatient || !selectedReportType) {
-                showAlert('Please select a patient and report type', 'info');
-                return;
-            }
-            
-            showLoading(true);
-            document.getElementById('pdfActions').classList.remove('show');
-            
-            try {
-                // Load report data based on type
-                reportData = await loadReportData();
-                
-                // Generate PDF based on report type
-                let pdf;
-                switch (selectedReportType) {
-                    case 'comprehensive':
-                        pdf = await pdfGenerator.generateComprehensiveReport(reportData, selectedPatient);
-                        break;
-                    case 'progress':
-                        const sessions = await loadSessionsData();
-                        const metrics = await loadMetricsData();
-                        pdf = await pdfGenerator.generateProgressReport(selectedPatient, sessions, metrics);
-                        break;
-                    case 'assessment':
-                        pdf = await pdfGenerator.generateComprehensiveReport(reportData, selectedPatient);
-                        break;
-                    case 'summary':
-                        pdf = await pdfGenerator.generateComprehensiveReport(reportData, selectedPatient);
-                        break;
-                }
-                
-                generatedPDF = pdf;
-                // CRITICAL FIX: Store the PDF blob for email use
-                window.lastGeneratedPDF = pdf.output('blob');
-                window.generatedPDF = pdf; // Also store the PDF object globally
-                
-                showLoading(false);
-                showAlert('Report generated successfully!', 'success');
-                document.getElementById('pdfActions').classList.add('show');
-                
-            } catch (error) {
-                console.error('Error generating report:', error);
-                showAlert('Error generating report', 'error');
-                showLoading(false);
-            }
-        };
-        
-        async function loadReportData() {
-            const data = {};
-            
-            try {
                 // Load health assessment
-                const { data: healthData } = await supabase
+                const { data: health, error: healthError } = await supabase
                     .from('health_assessments')
                     .select('*')
-                    .eq('patient_id', selectedPatient.id)
+                    .eq('patient_id', patientId)
                     .order('created_at', { ascending: false })
                     .limit(1)
                     .single();
                 
-                if (healthData) {
-                    data.health_assessment = healthData.assessment_data;
-                }
-            } catch (error) {
-                console.log('No health assessment found');
-            }
-            
-            try {
+                if (!healthError) healthAssessment = health;
+                
                 // Load IRIS assessment
-                const { data: irisData } = await supabase
+                const { data: iris, error: irisError } = await supabase
                     .from('iris_assessments')
                     .select('*')
-                    .eq('patient_id', selectedPatient.id)
+                    .eq('patient_id', patientId)
                     .order('created_at', { ascending: false })
                     .limit(1)
                     .single();
                 
-                if (irisData) {
-                    data.iris_assessment = irisData.assessment_data;
-                }
-            } catch (error) {
-                console.log('No iris assessment found');
-            }
-            
-            try {
-                // Load recommendations
-                const { data: reportRecord } = await supabase
-                    .from('medical_reports')
-                    .select('*')
-                    .eq('patient_id', selectedPatient.id)
-                    .order('created_at', { ascending: false })
-                    .limit(1)
-                    .single();
+                if (!irisError) irisAssessment = iris;
                 
-                if (reportRecord) {
-                    data.recommendations = reportRecord.recommendations;
-                    data.therapy_recommendations = reportRecord.report_data?.therapy_recommendations;
-                }
-            } catch (error) {
-                console.log('No medical reports found');
-            }
-            
-            return data;
-        }
-        
-        async function loadSessionsData() {
-            const { data } = await supabase
-                .from('therapy_sessions')
-                .select('*')
-                .eq('patient_id', selectedPatient.id)
-                .order('session_date');
-            
-            return data || [];
-        }
-        
-        async function loadMetricsData() {
-            const { data } = await supabase
-                .from('wellness_metrics')
-                .select('*')
-                .eq('patient_id', selectedPatient.id)
-                .order('created_at');
-            
-            return data || [];
-        }
-        
-        function getReportTitle() {
-            const titles = {
-                comprehensive: 'Comprehensive Diagnostic Report',
-                progress: 'Treatment Progress Report',
-                assessment: 'Health Assessment Report',
-                summary: 'Treatment Summary Report'
-            };
-            return titles[selectedReportType] || 'Medical Report';
-        }
-        
-        window.downloadPDF = function() {
-            if (generatedPDF) {
-                const patientName = `${selectedPatient.first_name}_${selectedPatient.last_name}`;
-                const reportType = selectedReportType;
-                const date = new Date().toISOString().split('T')[0];
-                const filename = `${patientName}_${reportType}_${date}.pdf`;
+                // Generate report
+                generateComprehensiveReport();
                 
-                generatedPDF.save(filename);
+            } catch (error) {
+                console.error('Error loading data:', error);
+                document.getElementById('loadingState').innerHTML = `
+                    <div class="alert alert-error">
+                        Error loading assessment data: ${error.message}
+                    </div>
+                `;
             }
-        };
+        }
         
-        window.emailPDF = async function() {
-            if (!window.generatedPDF) {
-                alert('Please generate a report first');
+        function generateComprehensiveReport() {
+            // Hide loading, show content
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('reportContent').style.display = 'block';
+            
+            // Populate patient information
+            displayPatientInfo();
+            
+            // Display health assessment results
+            displayHealthAssessment();
+            
+            // Display IRIS analysis results
+            displayIrisAnalysis();
+            
+            // Generate combined diagnosis
+            generateCombinedDiagnosis();
+            
+            // Display therapy options
+            displayTherapyOptions();
+        }
+        
+        function displayPatientInfo() {
+            const patientInfoDiv = document.getElementById('patientInfo');
+            
+            patientInfoDiv.innerHTML = `
+                <div class="info-item">
+                    <div class="info-label">Patient Name</div>
+                    <div class="info-value">${patientData.first_name} ${patientData.last_name}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Patient ID</div>
+                    <div class="info-value">${patientData.patient_id}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Age</div>
+                    <div class="info-value">${calculateAge(patientData.date_of_birth)} years</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Gender</div>
+                    <div class="info-value">${patientData.gender || 'Not specified'}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Assessment Date</div>
+                    <div class="info-value">${new Date().toLocaleDateString('en-GB')}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Report ID</div>
+                    <div class="info-value">RPT-${Date.now()}</div>
+                </div>
+            `;
+        }
+        
+        function displayHealthAssessment() {
+            const healthDomainsDiv = document.getElementById('healthDomains');
+            
+            if (!healthAssessment || !healthAssessment.scores) {
+                healthDomainsDiv.innerHTML = '<p>No health assessment data available</p>';
                 return;
             }
             
-            // Convert PDF to blob if not already done
-            if (!window.lastGeneratedPDF) {
-                window.lastGeneratedPDF = window.generatedPDF.output('blob');
+            const scores = healthAssessment.scores;
+            let domainsHtml = '';
+            
+            for (const [domain, score] of Object.entries(scores)) {
+                const wellness = 100 - score;
+                const status = score < 30 ? 'score-excellent' : score < 70 ? 'score-good' : 'score-concern';
+                const statusText = score < 30 ? 'Excellent' : score < 70 ? 'Needs Attention' : 'Significant Concern';
+                
+                domainsHtml += `
+                    <div class="health-domain">
+                        <div class="domain-header">
+                            <div class="domain-name">${formatDomain(domain)}</div>
+                            <div class="domain-score ${status}">${statusText} (${wellness}% wellness)</div>
+                        </div>
+                        <div style="font-size: 14px; color: #64748b;">
+                            Score: ${score}/100 - ${getRecommendation(domain, score)}
+                        </div>
+                    </div>
+                `;
             }
             
-            if (!selectedPatient || !selectedPatient.email) {
-                alert('Patient email not available. Please update patient information.');
+            healthDomainsDiv.innerHTML = domainsHtml;
+        }
+        
+        function displayIrisAnalysis() {
+            const irisFindingsDiv = document.getElementById('irisFindings');
+            
+            if (!irisAssessment) {
+                irisFindingsDiv.innerHTML = '<p>No IRIS assessment data available</p>';
                 return;
             }
             
-            const patientName = `${selectedPatient.first_name} ${selectedPatient.last_name}`;
+            let irisHtml = '';
             
-            // Show loading
-            showAlert('Sending email...', 'info');
+            // Constitutional Type
+            irisHtml += `
+                <div class="iris-card">
+                    <h4>Constitutional Type</h4>
+                    <p><strong>Type:</strong> ${irisAssessment.constitutional_type || 'Not determined'}</p>
+                    <p style="font-size: 14px; color: #64748b; margin-top: 10px;">
+                        ${getConstitutionalDescription(irisAssessment.constitutional_type)}
+                    </p>
+                </div>
+            `;
             
-            try {
-                // Send email using the stored PDF blob
-                const sent = await window.sendReportEmail(
-                    window.lastGeneratedPDF,
-                    selectedPatient.email,
-                    patientName
-                );
-                
-                if (sent) {
-                    showAlert(`Report sent successfully to ${selectedPatient.email}`, 'success');
-                } else {
-                    showAlert('Failed to send email', 'error');
-                }
-            } catch (error) {
-                console.error('Error sending email:', error);
-                showAlert('Failed to send email: ' + error.message, 'error');
-            }
-        };
-        
-        window.savePDFToDatabase = async function() {
-            if (!generatedPDF) {
-                showAlert('No PDF to save', 'error');
-                return;
+            // Organ Analysis
+            if (irisAssessment.organ_analysis) {
+                irisHtml += `
+                    <div class="iris-card">
+                        <h4>Organ System Analysis</h4>
+                        ${irisAssessment.organ_analysis.map(organ => `
+                            <p style="margin: 8px 0;">
+                                <strong>${organ.name}:</strong> ${organ.status}
+                            </p>
+                        `).join('')}
+                    </div>
+                `;
             }
             
-            try {
-                const base64 = btoa(generatedPDF.output('binary'));
-                
-                // Save to database
-                const { error } = await supabase
-                    .from('medical_reports')
-                    .update({ 
-                        pdf_data: base64,
-                        pdf_generated_at: new Date().toISOString()
-                    })
-                    .eq('patient_id', selectedPatient.id)
-                    .order('created_at', { ascending: false })
-                    .limit(1);
-                
-                if (error) throw error;
-                
-                showAlert('PDF saved to patient records', 'success');
-            } catch (error) {
-                console.error('Error saving PDF:', error);
-                showAlert('Error saving PDF to database', 'error');
+            // Stress Indicators
+            if (irisAssessment.stress_indicators) {
+                irisHtml += `
+                    <div class="iris-card">
+                        <h4>Stress Indicators</h4>
+                        <p><strong>Level:</strong> ${irisAssessment.stress_indicators.level}</p>
+                        <p><strong>Areas:</strong> ${irisAssessment.stress_indicators.areas?.join(', ') || 'None'}</p>
+                    </div>
+                `;
             }
-        };
+            
+            irisFindingsDiv.innerHTML = irisHtml;
+        }
         
-        window.printPDF = function() {
-            if (generatedPDF) {
-                window.open(generatedPDF.output('bloburl'), '_blank');
+        function generateCombinedDiagnosis() {
+            const diagnosisDiv = document.getElementById('combinedDiagnosis');
+            
+            // Analyze both assessments to generate recommendations
+            const primaryConcerns = healthAssessment?.primary_concerns || [];
+            const secondaryConcerns = healthAssessment?.secondary_concerns || [];
+            
+            let diagnosisHtml = `
+                <div style="background: linear-gradient(135deg, #f0f9ff, #e0f2fe); border-radius: 12px; padding: 20px; margin-bottom: 20px;">
+                    <h3 style="color: #1e293b; margin-bottom: 15px;">Primary Diagnosis</h3>
+            `;
+            
+            if (primaryConcerns.length > 0) {
+                diagnosisHtml += `
+                    <p><strong>Primary Areas of Concern:</strong></p>
+                    <ul style="margin: 10px 0 20px 20px;">
+                        ${primaryConcerns.map(concern => `<li>${concern}</li>`).join('')}
+                    </ul>
+                `;
             }
-        };
+            
+            if (secondaryConcerns.length > 0) {
+                diagnosisHtml += `
+                    <p><strong>Secondary Considerations:</strong></p>
+                    <ul style="margin: 10px 0 20px 20px;">
+                        ${secondaryConcerns.map(concern => `<li>${concern}</li>`).join('')}
+                    </ul>
+                `;
+            }
+            
+            // Constitutional considerations from IRIS
+            if (irisAssessment?.constitutional_type) {
+                diagnosisHtml += `
+                    <p><strong>Constitutional Considerations:</strong></p>
+                    <p style="margin: 10px 0; color: #475569;">
+                        Based on ${irisAssessment.constitutional_type} constitution, focus on supportive therapies
+                        that address inherent constitutional weaknesses.
+                    </p>
+                `;
+            }
+            
+            diagnosisHtml += `
+                    <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin-top: 20px; border-radius: 8px;">
+                        <strong>Clinical Recommendation:</strong> A multi-modal therapeutic approach combining 
+                        frequency medicine, nutritional support, and lifestyle modifications is recommended 
+                        for optimal results.
+                    </div>
+                </div>
+            `;
+            
+            diagnosisDiv.innerHTML = diagnosisHtml;
+        }
         
-        function showLoading(show) {
-            const loading = document.getElementById('loadingIndicator');
-            if (show) {
-                loading.classList.add('show');
+        function displayTherapyOptions() {
+            const therapyGrid = document.getElementById('therapyGrid');
+            
+            // Get recommended therapies based on assessment
+            const recommendedTherapies = getRecommendedTherapies();
+            
+            let therapyHtml = '';
+            availableTherapies.forEach(therapy => {
+                const isRecommended = recommendedTherapies.includes(therapy.id);
+                
+                therapyHtml += `
+                    <div class="therapy-option ${isRecommended ? 'recommended' : ''}" 
+                         data-therapy-id="${therapy.id}"
+                         onclick="toggleTherapy('${therapy.id}')">
+                        <div class="therapy-name">${therapy.name}</div>
+                        <div class="therapy-description">${therapy.description}</div>
+                        <div class="therapy-indication">
+                            ${isRecommended ? '⭐ Recommended - ' : ''}
+                            ${therapy.indications.join(', ')}
+                        </div>
+                        <div style="font-size: 12px; color: #94a3b8; margin-top: 8px;">
+                            Duration: ${therapy.duration}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            therapyGrid.innerHTML = therapyHtml;
+        }
+        
+        function getRecommendedTherapies() {
+            const recommended = [];
+            
+            if (!healthAssessment?.scores) return recommended;
+            
+            const scores = healthAssessment.scores;
+            
+            // Recommend therapies based on scores
+            if (scores.stress > 50) recommended.push('frequency_therapy');
+            if (scores.joint > 50) recommended.push('light_therapy', 'pemf_therapy');
+            if (scores.energy > 50) recommended.push('ozone_therapy', 'iv_therapy');
+            if (scores.sleep > 50) recommended.push('frequency_therapy', 'infrared_sauna');
+            
+            return recommended;
+        }
+        
+        function toggleTherapy(therapyId) {
+            const therapyElement = document.querySelector(`[data-therapy-id="${therapyId}"]`);
+            
+            if (selectedTherapies.includes(therapyId)) {
+                // Remove from selected
+                selectedTherapies = selectedTherapies.filter(id => id !== therapyId);
+                therapyElement.classList.remove('selected');
             } else {
-                loading.classList.remove('show');
+                // Add to selected
+                selectedTherapies.push(therapyId);
+                therapyElement.classList.add('selected');
             }
+            
+            // Enable/disable confirm button
+            document.getElementById('confirmTherapiesBtn').disabled = selectedTherapies.length === 0;
         }
         
-        function showAlert(message, type) {
-            const alertDiv = document.getElementById('alertMessage');
-            alertDiv.textContent = message;
-            alertDiv.className = `alert alert-${type} show`;
+        window.confirmTherapies = async function() {
+            if (selectedTherapies.length === 0) {
+                alert('Please select at least one therapy');
+                return;
+            }
             
-            setTimeout(() => {
-                alertDiv.classList.remove('show');
-            }, 5000);
+            // Prepare therapy data
+            const therapyData = {
+                patient_id: patientData.id,
+                selected_therapies: selectedTherapies,
+                health_assessment_id: healthAssessment?.id,
+                iris_assessment_id: irisAssessment?.id,
+                created_at: new Date().toISOString()
+            };
+            
+            // Save to session and navigate to treatment schedule
+            sessionStorage.setItem('selectedTherapies', JSON.stringify(therapyData));
+            window.location.href = `treatment-schedule.html?patient=${patientData.id}`;
+        };
+        
+        window.saveDraft = async function() {
+            // Save current report as draft
+            alert('Report saved as draft. You can continue later from the dashboard.');
+        };
+        
+        function calculateAge(dateOfBirth) {
+            if (!dateOfBirth) return 'Unknown';
+            const birthDate = new Date(dateOfBirth);
+            const today = new Date();
+            let age = today.getFullYear() - birthDate.getFullYear();
+            const monthDiff = today.getMonth() - birthDate.getMonth();
+            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                age--;
+            }
+            return age;
         }
+        
+        function formatDomain(domain) {
+            const formats = {
+                sleep: 'Sleep Quality',
+                stress: 'Stress Management',
+                cardiovascular: 'Cardiovascular Health',
+                joint: 'Joint Health',
+                digestive: 'Digestive Wellness',
+                kidney: 'Kidney Function',
+                energy: 'Energy Levels',
+                metabolic: 'Metabolic Health'
+            };
+            return formats[domain] || domain;
+        }
+        
+        function getRecommendation(domain, score) {
+            if (score < 30) return 'Maintain current wellness practices';
+            if (score < 70) return 'Moderate intervention recommended';
+            return 'Immediate therapeutic intervention advised';
+        }
+        
+        function getConstitutionalDescription(type) {
+            const descriptions = {
+                'Lymphatic': 'Tendency towards lymphatic congestion. Focus on drainage and immune support.',
+                'Haematogenic': 'Predisposition to circulatory issues. Emphasis on cardiovascular health.',
+                'Biliary': 'Digestive system sensitivity. Liver and gallbladder support recommended.',
+                'Mixed': 'Multiple constitutional factors. Comprehensive approach required.'
+            };
+            return descriptions[type] || 'Constitutional assessment provides insight into inherent health tendencies.';
+        }
+        
+        // Make functions globally accessible
+        window.toggleTherapy = toggleTherapy;
     </script>
 </body>
 </html>
