@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assessment Report Detail - Celloxen Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+            color: white;
+            padding: 15px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+        
+        .report-container {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+        
+        .report-header {
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .report-title {
+            font-size: 28px;
+            color: #1f2937;
+            margin-bottom: 10px;
+        }
+        
+        .report-meta {
+            display: flex;
+            gap: 30px;
+            color: #6b7280;
+            font-size: 14px;
+        }
+        
+        .report-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+        
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #374151;
+        }
+        
+        .btn-secondary:hover {
+            background: #d1d5db;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+        }
+        
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .score-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .score-card {
+            background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .score-domain {
+            font-size: 12px;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 5px;
+        }
+        
+        .score-value {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .score-value.good { color: #10b981; }
+        .score-value.moderate { color: #f59e0b; }
+        .score-value.poor { color: #ef4444; }
+        
+        .score-label {
+            font-size: 13px;
+            color: #6b7280;
+        }
+        
+        .concerns-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .concern-tag {
+            background: white;
+            border: 1px solid #e5e7eb;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 14px;
+            color: #4b5563;
+        }
+        
+        .question-answer {
+            background: #f9fafb;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .question {
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 5px;
+        }
+        
+        .answer {
+            color: #1f2937;
+            padding-left: 20px;
+        }
+        
+        @media print {
+            .header, .report-actions, .back-btn {
+                display: none;
+            }
+            
+            body {
+                background: white;
+            }
+            
+            .container {
+                padding: 0;
+            }
+            
+            .report-container {
+                box-shadow: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-container">
+            <h1 style="font-size: 20px;">Assessment Report Detail</h1>
+            <a href="health-assessments-viewer.html" class="back-btn">← Back to Assessments</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="report-container" id="reportContainer">
+            <div style="text-align: center; padding: 40px; color: #6b7280;">
+                Loading assessment report...
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { supabase } from './supabase-config.js';
+        
+        let assessmentData = null;
+        let patientData = null;
+        
+        document.addEventListener('DOMContentLoaded', async function() {
+            const assessmentId = sessionStorage.getItem('viewAssessmentId');
+            const assessmentType = sessionStorage.getItem('assessmentType');
+            
+            if (!assessmentId) {
+                showError('No assessment ID provided');
+                return;
+            }
+            
+            await loadAssessmentData(assessmentId, assessmentType);
+        });
+        
+        async function loadAssessmentData(assessmentId, type) {
+            try {
+                if (type === 'health') {
+                    // Load health assessment
+                    const { data: assessment, error } = await supabase
+                        .from('health_assessments')
+                        .select('*')
+                        .eq('id', assessmentId)
+                        .single();
+                    
+                    if (error) throw error;
+                    assessmentData = assessment;
+                    
+                    // Load patient data
+                    const { data: patient } = await supabase
+                        .from('patients')
+                        .select('*')
+                        .eq('id', assessment.patient_id)
+                        .single();
+                    
+                    patientData = patient;
+                    displayHealthAssessment();
+                    
+                } else if (type === 'iris') {
+                    // Load IRIS assessment
+                    const { data: assessment, error } = await supabase
+                        .from('iris_assessments')
+                        .select('*')
+                        .eq('id', assessmentId)
+                        .single();
+                    
+                    if (error) throw error;
+                    assessmentData = assessment;
+                    
+                    // Load patient data
+                    const { data: patient } = await supabase
+                        .from('patients')
+                        .select('*')
+                        .eq('id', assessment.patient_id)
+                        .single();
+                    
+                    patientData = patient;
+                    displayIrisAssessment();
+                }
+            } catch (error) {
+                console.error('Error loading assessment:', error);
+                showError('Error loading assessment data');
+            }
+        }
+        
+        function displayHealthAssessment() {
+            const container = document.getElementById('reportContainer');
+            const scores = assessmentData.scores || assessmentData.domain_scores || {};
+            const overallScore = assessmentData.overall_score || 0;
+            const questions = assessmentData.questions || [];
+            const answers = assessmentData.answers || [];
+            
+            container.innerHTML = `
+                <div class="report-header">
+                    <h1 class="report-title">Health Assessment Report</h1>
+                    <div class="report-meta">
+                        <div>
+                            <strong>Patient:</strong> ${patientData?.first_name} ${patientData?.last_name}
+                        </div>
+                        <div>
+                            <strong>Patient ID:</strong> ${patientData?.patient_id || 'N/A'}
+                        </div>
+                        <div>
+                            <strong>Date:</strong> ${new Date(assessmentData.created_at).toLocaleDateString('en-GB')}
+                        </div>
+                    </div>
+                    
+                    <div class="report-actions">
+                        <button class="btn btn-primary" onclick="window.print()">Print Report</button>
+                        <button class="btn btn-secondary" onclick="exportToPDF()">Export as PDF</button>
+                        <button class="btn btn-secondary" onclick="window.history.back()">Back</button>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h2 class="section-title">Overall Wellness Score</h2>
+                    <div style="text-align: center; padding: 20px; background: #f9fafb; border-radius: 10px;">
+                        <div style="font-size: 48px; font-weight: 700; color: ${100-overallScore > 70 ? '#10b981' : 100-overallScore > 40 ? '#f59e0b' : '#ef4444'};">
+                            ${100 - overallScore}%
+                        </div>
+                        <div style="color: #6b7280; margin-top: 10px;">Overall Wellness</div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h2 class="section-title">Domain Scores</h2>
+                    <div class="score-grid">
+                        ${Object.entries(scores).map(([domain, score]) => {
+                            const wellness = 100 - (score || 0);
+                            const colorClass = wellness > 70 ? 'good' : wellness > 40 ? 'moderate' : 'poor';
+                            return `
+                                <div class="score-card">
+                                    <div class="score-domain">${formatDomain(domain)}</div>
+                                    <div class="score-value ${colorClass}">${wellness}%</div>
+                                    <div class="score-label">Wellness Score</div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+                
+                ${assessmentData.primary_concerns && assessmentData.primary_concerns.length > 0 ? `
+                    <div class="section">
+                        <h2 class="section-title">Primary Concerns</h2>
+                        <div class="concerns-list">
+                            ${assessmentData.primary_concerns.map(concern => 
+                                `<span class="concern-tag">${concern}</span>`
+                            ).join('')}
+                        </div>
+                    </div>
+                ` : ''}
+                
+                ${assessmentData.secondary_concerns && assessmentData.secondary_concerns.length > 0 ? `
+                    <div class="section">
+                        <h2 class="section-title">Secondary Concerns</h2>
+                        <div class="concerns-list">
+                            ${assessmentData.secondary_concerns.map(concern => 
+                                `<span class="concern-tag">${concern}</span>`
+                            ).join('')}
+                        </div>
+                    </div>
+                ` : ''}
+                
+                ${answers.length > 0 ? `
+                    <div class="section">
+                        <h2 class="section-title">Assessment Responses</h2>
+                        ${answers.map((answer, index) => `
+                            <div class="question-answer">
+                                <div class="question">Q${index + 1}: ${answer.question}</div>
+                                <div class="answer">→ ${answer.response}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                ` : ''}
+                
+                <div class="section">
+                    <h2 class="section-title">Assessment Details</h2>
+                    <div style="background: #f9fafb; padding: 15px; border-radius: 8px;">
+                        <p><strong>Assessment Type:</strong> ${assessmentData.assessment_type || 'Initial'}</p>
+                        <p><strong>Practitioner:</strong> ${assessmentData.practitioner_name || 'Not recorded'}</p>
+                        <p><strong>Date & Time:</strong> ${new Date(assessmentData.created_at).toLocaleString('en-GB')}</p>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function displayIrisAssessment() {
+            const container = document.getElementById('reportContainer');
+            const irisData = assessmentData.iris_data || {};
+            
+            container.innerHTML = `
+                <div class="report-header">
+                    <h1 class="report-title">IRIS Assessment Report</h1>
+                    <div class="report-meta">
+                        <div>
+                            <strong>Patient:</strong> ${patientData?.first_name} ${patientData?.last_name}
+                        </div>
+                        <div>
+                            <strong>Patient ID:</strong> ${patientData?.patient_id || 'N/A'}
+                        </div>
+                        <div>
+                            <strong>Date:</strong> ${new Date(assessmentData.created_at).toLocaleDateString('en-GB')}
+                        </div>
+                    </div>
+                    
+                    <div class="report-actions">
+                        <button class="btn btn-primary" onclick="window.print()">Print Report</button>
+                        <button class="btn btn-secondary" onclick="exportToPDF()">Export as PDF</button>
+                        <button class="btn btn-secondary" onclick="window.history.back()">Back</button>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h2 class="section-title">Constitutional Analysis</h2>
+                    <div style="background: #f9fafb; padding: 20px; border-radius: 10px;">
+                        <p><strong>Constitutional Type:</strong> ${assessmentData.constitutional_type || 'Not determined'}</p>
+                        ${irisData.constitutional_analysis ? `
+                            <p><strong>Constitution:</strong> ${irisData.constitutional_analysis.constitution || 'N/A'}</p>
+                            <p><strong>Iris Color Classification:</strong> ${irisData.constitutional_analysis.iris_color || 'N/A'}</p>
+                        ` : ''}
+                    </div>
+                </div>
+                
+                ${assessmentData.health_patterns && assessmentData.health_patterns.length > 0 ? `
+                    <div class="section">
+                        <h2 class="section-title">Health Patterns Identified</h2>
+                        ${assessmentData.health_patterns.map(pattern => `
+                            <div class="question-answer">
+                                <div class="question">${pattern.name || pattern}</div>
+                                ${pattern.severity ? `<div class="answer">Severity: ${pattern.severity}</div>` : ''}
+                                ${pattern.area ? `<div class="answer">Area: ${pattern.area}</div>` : ''}
+                                ${pattern.location ? `<div class="answer">Location: ${pattern.location}</div>` : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                ` : ''}
+                
+                ${irisData.constitutional_analysis?.organs ? `
+                    <div class="section">
+                        <h2 class="section-title">Organ System Assessment</h2>
+                        ${irisData.constitutional_analysis.organs.map(organ => `
+                            <div class="question-answer">
+                                <div class="question">${organ.name}</div>
+                                <div class="answer">Status: ${organ.status}</div>
+                                ${organ.notes ? `<div class="answer">Notes: ${organ.notes}</div>` : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                ` : ''}
+                
+                <div class="section">
+                    <h2 class="section-title">Assessment Details</h2>
+                    <div style="background: #f9fafb; padding: 15px; border-radius: 8px;">
+                        <p><strong>Analysis Type:</strong> ${irisData.analysis_type || 'Comprehensive'}</p>
+                        <p><strong>Date & Time:</strong> ${new Date(assessmentData.created_at).toLocaleString('en-GB')}</p>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function formatDomain(domain) {
+            const formats = {
+                sleep: 'Sleep Quality',
+                stress: 'Stress Management',
+                cardiovascular: 'Cardiovascular',
+                joint: 'Joint Health',
+                digestive: 'Digestive',
+                kidney: 'Kidney Function',
+                energy: 'Energy Levels',
+                metabolic: 'Metabolic Health'
+            };
+            return formats[domain] || domain.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        }
+        
+        function showError(message) {
+            document.getElementById('reportContainer').innerHTML = `
+                <div style="text-align: center; padding: 40px; color: #ef4444;">
+                    <h2>Error</h2>
+                    <p>${message}</p>
+                    <button class="btn btn-secondary" onclick="window.history.back()" style="margin-top: 20px;">
+                        Go Back
+                    </button>
+                </div>
+            `;
+        }
+        
+        window.exportToPDF = function() {
+            alert('PDF export will be implemented with a PDF library. For now, use the Print function and save as PDF.');
+        };
+    </script>
+</body>
+</html>
