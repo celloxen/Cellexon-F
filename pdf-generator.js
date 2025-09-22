@@ -1,743 +1,511 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Report Generator with PDF Export - Celloxen</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f0f4f8;
-            min-height: 100vh;
-        }
-        
-        /* Header - Matching original design */
-        .header {
-            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
-            color: white;
-            padding: 20px 0;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        
-        .header-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 0 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .logo {
-            font-size: 24px;
-            font-weight: bold;
-            letter-spacing: 1px;
-        }
-        
-        .nav-buttons {
-            display: flex;
-            gap: 15px;
-        }
-        
-        .btn-nav {
-            background: rgba(255,255,255,0.2);
-            border: 1px solid rgba(255,255,255,0.3);
-            color: white;
-            padding: 8px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-decoration: none;
-            font-size: 14px;
-        }
-        
-        .btn-nav:hover {
-            background: rgba(255,255,255,0.3);
-        }
-        
-        /* Main Container */
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 30px 20px;
-        }
-        
-        /* Page Header */
-        .page-header {
-            margin-bottom: 30px;
-        }
-        
-        .page-title {
-            font-size: 28px;
-            font-weight: 600;
-            color: #1e293b;
-            margin-bottom: 10px;
-        }
-        
-        .page-subtitle {
-            color: #64748b;
-        }
-        
-        /* Content Card */
-        .content-card {
-            background: white;
-            border-radius: 12px;
-            padding: 30px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-            margin-bottom: 25px;
-        }
-        
-        .section-title {
-            font-size: 20px;
-            font-weight: 600;
-            color: #1e293b;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #e5e7eb;
-        }
-        
-        /* Patient Selection */
-        .patient-selection {
-            margin-bottom: 20px;
-        }
-        
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        .form-label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: #374151;
-            font-size: 14px;
-        }
-        
-        .form-select {
-            width: 100%;
-            padding: 10px;
-            border: 2px solid #e5e7eb;
-            border-radius: 8px;
-            font-size: 14px;
-            background: white;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .form-select:focus {
-            outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
-        
-        /* Report Type Selection */
-        .report-types {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 25px;
-        }
-        
-        .report-type-card {
-            border: 2px solid #e5e7eb;
-            border-radius: 10px;
-            padding: 15px;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-align: center;
-        }
-        
-        .report-type-card:hover {
-            border-color: #3b82f6;
-            background: #f0f9ff;
-        }
-        
-        .report-type-card.selected {
-            border-color: #3b82f6;
-            background: #eff6ff;
-        }
-        
-        .report-icon {
-            font-size: 32px;
-            margin-bottom: 10px;
-        }
-        
-        .report-name {
-            font-weight: 600;
-            color: #1e293b;
-            margin-bottom: 5px;
-        }
-        
-        .report-desc {
-            font-size: 12px;
-            color: #6b7280;
-        }
-        
-        /* Action Buttons */
-        .action-buttons {
-            display: flex;
-            gap: 15px;
-            margin-top: 25px;
-        }
-        
-        .btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            transition: all 0.3s;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .btn-primary {
-            background: #3b82f6;
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            background: #2563eb;
-        }
-        
-        .btn-secondary {
-            background: #10b981;
-            color: white;
-        }
-        
-        .btn-secondary:hover {
-            background: #059669;
-        }
-        
-        .btn-outline {
-            background: white;
-            color: #3b82f6;
-            border: 2px solid #3b82f6;
-        }
-        
-        .btn-outline:hover {
-            background: #eff6ff;
-        }
-        
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        
-        /* Loading Spinner */
-        .loading {
-            display: none;
-            text-align: center;
-            padding: 40px;
-        }
-        
-        .loading.show {
-            display: block;
-        }
-        
-        .spinner {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #3b82f6;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        /* Success Message */
-        .alert {
-            padding: 12px 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            display: none;
-        }
-        
-        .alert.show {
-            display: block;
-        }
-        
-        .alert-success {
-            background: #d1fae5;
-            color: #065f46;
-            border: 1px solid #a7f3d0;
-        }
-        
-        .alert-info {
-            background: #dbeafe;
-            color: #1e3a8a;
-            border: 1px solid #bfdbfe;
-        }
-        
-        .alert-error {
-            background: #fee2e2;
-            color: #991b1b;
-            border: 1px solid #fecaca;
-        }
-        
-        /* PDF Actions */
-        .pdf-actions {
-            background: #f0f9ff;
-            border: 2px solid #3b82f6;
-            border-radius: 10px;
-            padding: 20px;
-            margin-top: 20px;
-            display: none;
-        }
-        
-        .pdf-actions.show {
-            display: block;
-        }
-        
-        .pdf-actions-title {
-            font-size: 16px;
-            font-weight: 600;
-            color: #1e3a8a;
-            margin-bottom: 15px;
-        }
-        
-        .pdf-buttons {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-    </style>
-</head>
-<body>
-    <!-- Header -->
-    <div class="header">
-        <div class="header-container">
-            <div class="logo">CELLOXEN - Report Generator</div>
-            <div class="nav-buttons">
-                <a href="clinic-dashboard.html" class="btn-nav">← Back to Dashboard</a>
-            </div>
-        </div>
-    </div>
+// pdf-generator.js
+// PDF Generation Module for Medical Reports using jsPDF
 
-    <!-- Main Container -->
-    <div class="container">
-        <!-- Page Header -->
-        <div class="page-header">
-            <h1 class="page-title">Medical Report Generator</h1>
-            <p class="page-subtitle">Generate comprehensive reports with PDF export</p>
-        </div>
+class PDFGenerator {
+    constructor() {
+        this.pageWidth = 210; // A4 width in mm
+        this.pageHeight = 297; // A4 height in mm
+        this.margins = {
+            top: 20,
+            right: 20,
+            bottom: 20,
+            left: 20
+        };
+        this.currentY = this.margins.top;
+        this.lineHeight = 7;
+        this.primaryColor = [30, 58, 138]; // RGB for #1e3a8a
+        this.secondaryColor = [59, 130, 246]; // RGB for #3b82f6
+    }
 
-        <!-- Alert Messages -->
-        <div id="alertMessage" class="alert"></div>
+    // Generate Comprehensive Diagnostic Report
+    async generateComprehensiveReport(reportData, patientData) {
+        // Create new jsPDF instance
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF({
+            orientation: 'portrait',
+            unit: 'mm',
+            format: 'a4'
+        });
 
-        <!-- Report Configuration -->
-        <div class="content-card">
-            <h2 class="section-title">Configure Report</h2>
+        // Add header
+        this.addReportHeader(pdf, 'Comprehensive Diagnostic Report', patientData);
+        
+        // Add patient information section
+        this.addPatientInfoSection(pdf, patientData);
+        
+        // Add assessment scores if available
+        if (reportData.health_assessment) {
+            this.addHealthAssessmentSection(pdf, reportData.health_assessment);
+        }
+        
+        // Add IRIS assessment if available
+        if (reportData.iris_assessment) {
+            this.addIrisAssessmentSection(pdf, reportData.iris_assessment);
+        }
+        
+        // Add recommendations
+        if (reportData.recommendations) {
+            this.addRecommendationsSection(pdf, reportData.recommendations);
+        }
+        
+        // Add therapy recommendations
+        if (reportData.therapy_recommendations) {
+            this.addTherapyRecommendationsSection(pdf, reportData.therapy_recommendations);
+        }
+        
+        // Add footer to all pages
+        this.addFooterToAllPages(pdf);
+        
+        return pdf;
+    }
+
+    // Add report header with logo and title
+    addReportHeader(pdf, title, patientData) {
+        // Add blue header background
+        pdf.setFillColor(...this.primaryColor);
+        pdf.rect(0, 0, this.pageWidth, 40, 'F');
+        
+        // Add clinic name
+        pdf.setTextColor(255, 255, 255);
+        pdf.setFontSize(24);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text('CELLOXEN CLINIC', this.margins.left, 15);
+        
+        // Add report title
+        pdf.setFontSize(16);
+        pdf.setFont('helvetica', 'normal');
+        pdf.text(title, this.margins.left, 25);
+        
+        // Add date
+        pdf.setFontSize(10);
+        const today = new Date().toLocaleDateString('en-GB');
+        pdf.text(`Report Date: ${today}`, this.pageWidth - this.margins.right - 40, 25);
+        
+        // Reset text color
+        pdf.setTextColor(0, 0, 0);
+        this.currentY = 50;
+    }
+
+    // Add patient information section
+    addPatientInfoSection(pdf, patientData) {
+        this.addSectionTitle(pdf, 'Patient Information');
+        
+        const patientInfo = [
+            ['Patient Name:', `${patientData.first_name} ${patientData.last_name}`],
+            ['Patient ID:', patientData.patient_id || 'N/A'],
+            ['Date of Birth:', patientData.date_of_birth ? new Date(patientData.date_of_birth).toLocaleDateString('en-GB') : 'N/A'],
+            ['Gender:', patientData.gender || 'N/A'],
+            ['Contact:', patientData.phone || 'N/A'],
+            ['Email:', patientData.email || 'N/A']
+        ];
+        
+        this.addInfoTable(pdf, patientInfo);
+        this.currentY += 10;
+    }
+
+    // Add health assessment section
+    addHealthAssessmentSection(pdf, assessmentData) {
+        this.addSectionTitle(pdf, 'Health Assessment Results');
+        
+        if (assessmentData.scores && assessmentData.scores.categories) {
+            // Overall wellness score
+            pdf.setFontSize(12);
+            pdf.setFont('helvetica', 'bold');
+            const overallScore = assessmentData.scores.overall_wellness || 0;
+            pdf.text(`Overall Wellness Score: ${overallScore}%`, this.margins.left, this.currentY);
+            this.currentY += 10;
             
-            <!-- Patient Selection -->
-            <div class="form-group">
-                <label class="form-label">Select Patient</label>
-                <select class="form-select" id="patientSelect">
-                    <option value="">-- Select Patient --</option>
-                </select>
-            </div>
+            // Category scores
+            pdf.setFontSize(10);
+            pdf.setFont('helvetica', 'normal');
+            pdf.text('Domain Scores:', this.margins.left, this.currentY);
+            this.currentY += 5;
             
-            <!-- Report Type Selection -->
-            <div class="form-group">
-                <label class="form-label">Select Report Type</label>
-                <div class="report-types">
-                    <div class="report-type-card" data-type="comprehensive" onclick="selectReportType('comprehensive')">
-                        <div class="report-icon">📊</div>
-                        <div class="report-name">Comprehensive Report</div>
-                        <div class="report-desc">Full diagnostic & treatment plan</div>
-                    </div>
-                    <div class="report-type-card" data-type="progress" onclick="selectReportType('progress')">
-                        <div class="report-icon">📈</div>
-                        <div class="report-name">Progress Report</div>
-                        <div class="report-desc">Treatment progress & metrics</div>
-                    </div>
-                    <div class="report-type-card" data-type="assessment" onclick="selectReportType('assessment')">
-                        <div class="report-icon">🔍</div>
-                        <div class="report-name">Assessment Report</div>
-                        <div class="report-desc">Health & IRIS assessments</div>
-                    </div>
-                    <div class="report-type-card" data-type="summary" onclick="selectReportType('summary')">
-                        <div class="report-icon">📝</div>
-                        <div class="report-name">Summary Report</div>
-                        <div class="report-desc">Brief treatment summary</div>
-                    </div>
-                </div>
-            </div>
+            const categories = assessmentData.scores.categories;
+            Object.keys(categories).forEach(domain => {
+                const score = 100 - categories[domain]; // Convert to wellness percentage
+                this.addProgressBar(pdf, this.formatDomain(domain), score);
+            });
+        }
+        
+        // Add health insights if available
+        if (assessmentData.insights && assessmentData.insights.length > 0) {
+            this.currentY += 5;
+            pdf.setFont('helvetica', 'bold');
+            pdf.text('Key Health Insights:', this.margins.left, this.currentY);
+            this.currentY += 5;
             
-            <!-- Action Buttons -->
-            <div class="action-buttons">
-                <button class="btn btn-primary" onclick="generateReport()" disabled id="generateBtn">
-                    <span>🔄</span> Generate Report
-                </button>
-            </div>
-        </div>
-
-        <!-- Loading Indicator -->
-        <div class="loading" id="loadingIndicator">
-            <div class="spinner"></div>
-            <p>Generating report...</p>
-        </div>
-
-        <!-- PDF Actions -->
-        <div class="pdf-actions" id="pdfActions">
-            <div class="pdf-actions-title">📄 PDF Report Generated Successfully!</div>
-            <div class="pdf-buttons">
-                <button class="btn btn-primary" onclick="downloadPDF()">
-                    <span>⬇️</span> Download PDF
-                </button>
-                <button class="btn btn-secondary" onclick="emailPDF()">
-                    <span>📧</span> Email to Patient
-                </button>
-                <button class="btn btn-outline" onclick="savePDFToDatabase()">
-                    <span>💾</span> Save to Records
-                </button>
-                <button class="btn btn-outline" onclick="printPDF()">
-                    <span>🖨️</span> Print Report
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Include jsPDF library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    
-    <!-- Include email sender -->
-    <script src="email-sender.js"></script>
-    
-    <!-- Include Supabase -->
-    <script type="module">
-        import { supabase } from './supabase-config.js';
-        import { pdfGenerator } from './pdf-generator.js';
+            pdf.setFont('helvetica', 'normal');
+            assessmentData.insights.forEach(insight => {
+                this.addBulletPoint(pdf, insight);
+            });
+        }
         
-        let selectedPatient = null;
-        let selectedReportType = null;
-        let generatedPDF = null;
-        let reportData = null;
+        this.currentY += 10;
+    }
+
+    // Add IRIS assessment section
+    addIrisAssessmentSection(pdf, irisData) {
+        this.checkPageBreak(pdf);
+        this.addSectionTitle(pdf, 'IRIS Assessment Findings');
         
-        // Load patients on page load
-        document.addEventListener('DOMContentLoaded', async function() {
-            await loadPatients();
+        if (irisData.constitutional_analysis) {
+            const analysis = irisData.constitutional_analysis;
+            
+            // Constitutional type
+            pdf.setFontSize(10);
+            pdf.setFont('helvetica', 'bold');
+            pdf.text('Constitutional Type:', this.margins.left, this.currentY);
+            pdf.setFont('helvetica', 'normal');
+            pdf.text(analysis.constitutional_type || 'Not determined', this.margins.left + 40, this.currentY);
+            this.currentY += 7;
+            
+            // Patterns detected
+            if (analysis.patterns && analysis.patterns.length > 0) {
+                pdf.setFont('helvetica', 'bold');
+                pdf.text('Iris Patterns Detected:', this.margins.left, this.currentY);
+                this.currentY += 5;
+                
+                pdf.setFont('helvetica', 'normal');
+                analysis.patterns.forEach(pattern => {
+                    const text = `• ${pattern.area}: ${pattern.indication} (${pattern.severity})`;
+                    this.addWrappedText(pdf, text, this.margins.left + 5, this.currentY);
+                });
+            }
+            
+            // Predispositions
+            if (analysis.predispositions && analysis.predispositions.length > 0) {
+                this.currentY += 5;
+                pdf.setFont('helvetica', 'bold');
+                pdf.text('Health Predispositions:', this.margins.left, this.currentY);
+                this.currentY += 5;
+                
+                pdf.setFont('helvetica', 'normal');
+                analysis.predispositions.forEach(pred => {
+                    this.addBulletPoint(pdf, pred);
+                });
+            }
+        }
+        
+        this.currentY += 10;
+    }
+
+    // Add recommendations section
+    addRecommendationsSection(pdf, recommendations) {
+        this.checkPageBreak(pdf);
+        this.addSectionTitle(pdf, 'Clinical Recommendations');
+        
+        pdf.setFontSize(10);
+        recommendations.forEach((recommendation, index) => {
+            pdf.setFont('helvetica', 'bold');
+            pdf.text(`${index + 1}.`, this.margins.left, this.currentY);
+            pdf.setFont('helvetica', 'normal');
+            this.addWrappedText(pdf, recommendation, this.margins.left + 10, this.currentY);
+            this.currentY += 2;
         });
         
-        async function loadPatients() {
-            try {
-                const authData = JSON.parse(localStorage.getItem('celloxen_auth') || '{}');
-                const clinicId = authData.clinicId || sessionStorage.getItem('currentClinicId');
-                
-                if (!clinicId) return;
-                
-                const { data, error } = await supabase
-                    .from('patients')
-                    .select('*')
-                    .eq('clinic_id', clinicId)
-                    .order('first_name');
-                
-                if (error) throw error;
-                
-                const select = document.getElementById('patientSelect');
-                select.innerHTML = '<option value="">-- Select Patient --</option>';
-                
-                if (data) {
-                    data.forEach(patient => {
-                        const email = patient.email ? `data-email="${patient.email}"` : 'data-email="undefined"';
-                        select.innerHTML += `
-                            <option value="${patient.id}" ${email}>
-                                ${patient.first_name} ${patient.last_name} (${patient.patient_id})
-                            </option>
-                        `;
-                    });
-                }
-                
-                // Add event listener for patient selection
-                select.addEventListener('change', function() {
-                    if (this.value) {
-                        selectedPatient = data.find(p => p.id === parseInt(this.value));
-                        updateButtonStates();
-                    }
-                });
-                
-            } catch (error) {
-                console.error('Error loading patients:', error);
-                showAlert('Error loading patients', 'error');
-            }
+        this.currentY += 10;
+    }
+
+    // Add therapy recommendations section
+    addTherapyRecommendationsSection(pdf, therapies) {
+        this.checkPageBreak(pdf);
+        this.addSectionTitle(pdf, 'Recommended Therapies');
+        
+        // Create therapy table
+        const headers = ['Therapy Name', 'Code', 'Priority', 'Duration'];
+        const data = therapies.map(therapy => [
+            therapy.name,
+            therapy.code,
+            therapy.priority || 'Standard',
+            therapy.duration || '45 min'
+        ]);
+        
+        this.addTable(pdf, headers, data);
+        this.currentY += 10;
+    }
+
+    // Generate Treatment Progress Report
+    async generateProgressReport(patientData, sessionsData, metricsData) {
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF({
+            orientation: 'portrait',
+            unit: 'mm',
+            format: 'a4'
+        });
+
+        // Add header
+        this.addReportHeader(pdf, 'Treatment Progress Report', patientData);
+        
+        // Add patient info
+        this.addPatientInfoSection(pdf, patientData);
+        
+        // Add treatment summary
+        this.addTreatmentSummary(pdf, sessionsData);
+        
+        // Add wellness metrics
+        if (metricsData && metricsData.length > 0) {
+            this.addWellnessMetrics(pdf, metricsData);
         }
         
-        window.selectReportType = function(type) {
-            // Remove previous selection
-            document.querySelectorAll('.report-type-card').forEach(card => {
-                card.classList.remove('selected');
+        // Add session history
+        if (sessionsData && sessionsData.length > 0) {
+            this.addSessionHistory(pdf, sessionsData);
+        }
+        
+        // Add footer
+        this.addFooterToAllPages(pdf);
+        
+        return pdf;
+    }
+
+    // Add treatment summary
+    addTreatmentSummary(pdf, sessionsData) {
+        this.addSectionTitle(pdf, 'Treatment Summary');
+        
+        const totalSessions = sessionsData.length;
+        const completedSessions = sessionsData.filter(s => s.completed).length;
+        const completionRate = totalSessions > 0 ? Math.round((completedSessions / totalSessions) * 100) : 0;
+        
+        const summaryInfo = [
+            ['Total Sessions Scheduled:', totalSessions.toString()],
+            ['Sessions Completed:', completedSessions.toString()],
+            ['Completion Rate:', `${completionRate}%`],
+            ['Treatment Duration:', '8 weeks'],
+            ['Current Week:', Math.ceil(completedSessions / 2).toString()]
+        ];
+        
+        this.addInfoTable(pdf, summaryInfo);
+        this.currentY += 10;
+    }
+
+    // Add wellness metrics
+    addWellnessMetrics(pdf, metricsData) {
+        this.checkPageBreak(pdf);
+        this.addSectionTitle(pdf, 'Wellness Metrics Progress');
+        
+        // Get latest metrics
+        const latestMetrics = metricsData[metricsData.length - 1];
+        
+        if (latestMetrics) {
+            pdf.setFontSize(10);
+            
+            // Sleep Quality
+            this.addProgressBar(pdf, 'Sleep Quality', latestMetrics.sleep_quality * 10);
+            
+            // Stress Level (inverse for display)
+            this.addProgressBar(pdf, 'Stress Management', (10 - latestMetrics.stress_level) * 10);
+            
+            // Energy Level
+            this.addProgressBar(pdf, 'Energy Level', latestMetrics.energy_level * 10);
+            
+            // Overall Wellbeing
+            this.addProgressBar(pdf, 'Overall Wellbeing', latestMetrics.overall_wellbeing * 10);
+        }
+        
+        this.currentY += 10;
+    }
+
+    // Add session history
+    addSessionHistory(pdf, sessionsData) {
+        this.checkPageBreak(pdf);
+        this.addSectionTitle(pdf, 'Recent Session History');
+        
+        // Take last 10 sessions
+        const recentSessions = sessionsData.slice(-10);
+        
+        const headers = ['Date', 'Therapy', 'Status', 'Response'];
+        const data = recentSessions.map(session => [
+            new Date(session.session_date).toLocaleDateString('en-GB'),
+            session.therapy_type || 'N/A',
+            session.completed ? 'Completed' : 'Scheduled',
+            session.post_response || 'N/A'
+        ]);
+        
+        this.addTable(pdf, headers, data);
+    }
+
+    // Helper Methods
+    
+    addSectionTitle(pdf, title) {
+        this.checkPageBreak(pdf);
+        pdf.setFillColor(...this.secondaryColor);
+        pdf.rect(this.margins.left, this.currentY - 5, this.pageWidth - this.margins.left - this.margins.right, 8, 'F');
+        
+        pdf.setTextColor(255, 255, 255);
+        pdf.setFontSize(12);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text(title, this.margins.left + 2, this.currentY);
+        
+        pdf.setTextColor(0, 0, 0);
+        this.currentY += 10;
+    }
+
+    addInfoTable(pdf, data) {
+        pdf.setFontSize(10);
+        data.forEach(([label, value]) => {
+            pdf.setFont('helvetica', 'bold');
+            pdf.text(label, this.margins.left, this.currentY);
+            pdf.setFont('helvetica', 'normal');
+            pdf.text(value, this.margins.left + 50, this.currentY);
+            this.currentY += 6;
+        });
+    }
+
+    addProgressBar(pdf, label, percentage) {
+        pdf.setFontSize(9);
+        pdf.text(label, this.margins.left, this.currentY);
+        
+        // Draw background bar
+        pdf.setFillColor(229, 231, 235); // Light gray
+        pdf.rect(this.margins.left + 50, this.currentY - 3, 80, 4, 'F');
+        
+        // Draw progress bar
+        const color = percentage >= 70 ? [16, 185, 129] : percentage >= 40 ? [251, 191, 36] : [239, 68, 68];
+        pdf.setFillColor(...color);
+        pdf.rect(this.margins.left + 50, this.currentY - 3, (80 * percentage) / 100, 4, 'F');
+        
+        // Add percentage text
+        pdf.text(`${percentage}%`, this.margins.left + 135, this.currentY);
+        
+        this.currentY += 7;
+    }
+
+    addBulletPoint(pdf, text) {
+        pdf.text('•', this.margins.left + 5, this.currentY);
+        this.addWrappedText(pdf, text, this.margins.left + 10, this.currentY);
+    }
+
+    addWrappedText(pdf, text, x, startY) {
+        const maxWidth = this.pageWidth - this.margins.left - this.margins.right - (x - this.margins.left);
+        const lines = pdf.splitTextToSize(text, maxWidth);
+        
+        lines.forEach(line => {
+            this.checkPageBreak(pdf);
+            pdf.text(line, x, this.currentY);
+            this.currentY += 5;
+        });
+    }
+
+    addTable(pdf, headers, data) {
+        this.checkPageBreak(pdf);
+        
+        const colWidth = (this.pageWidth - this.margins.left - this.margins.right) / headers.length;
+        let startX = this.margins.left;
+        
+        // Headers
+        pdf.setFillColor(...this.secondaryColor);
+        pdf.rect(this.margins.left, this.currentY - 5, this.pageWidth - this.margins.left - this.margins.right, 7, 'F');
+        
+        pdf.setTextColor(255, 255, 255);
+        pdf.setFontSize(9);
+        pdf.setFont('helvetica', 'bold');
+        headers.forEach((header, index) => {
+            pdf.text(header, startX + (index * colWidth) + 2, this.currentY);
+        });
+        
+        pdf.setTextColor(0, 0, 0);
+        this.currentY += 8;
+        
+        // Data rows
+        pdf.setFont('helvetica', 'normal');
+        data.forEach((row, rowIndex) => {
+            this.checkPageBreak(pdf);
+            
+            // Alternate row background
+            if (rowIndex % 2 === 1) {
+                pdf.setFillColor(248, 250, 252);
+                pdf.rect(this.margins.left, this.currentY - 4, this.pageWidth - this.margins.left - this.margins.right, 6, 'F');
+            }
+            
+            row.forEach((cell, cellIndex) => {
+                const text = cell.toString().substring(0, 20); // Truncate long text
+                pdf.text(text, startX + (cellIndex * colWidth) + 2, this.currentY);
             });
+            this.currentY += 6;
+        });
+        
+        this.currentY += 5;
+    }
+
+    checkPageBreak(pdf, requiredSpace = 30) {
+        if (this.currentY + requiredSpace > this.pageHeight - this.margins.bottom) {
+            pdf.addPage();
+            this.currentY = this.margins.top;
+            return true;
+        }
+        return false;
+    }
+
+    addFooterToAllPages(pdf) {
+        const pageCount = pdf.internal.getNumberOfPages();
+        
+        for (let i = 1; i <= pageCount; i++) {
+            pdf.setPage(i);
             
-            // Add selection to clicked card
-            document.querySelector(`.report-type-card[data-type="${type}"]`).classList.add('selected');
-            selectedReportType = type;
+            // Add footer line
+            pdf.setDrawColor(229, 231, 235);
+            pdf.line(this.margins.left, this.pageHeight - 15, this.pageWidth - this.margins.right, this.pageHeight - 15);
             
-            updateButtonStates();
+            // Add page number
+            pdf.setFontSize(8);
+            pdf.setTextColor(107, 114, 128);
+            pdf.text(
+                `Page ${i} of ${pageCount}`,
+                this.pageWidth / 2,
+                this.pageHeight - 10,
+                { align: 'center' }
+            );
+            
+            // Add generation timestamp
+            const timestamp = new Date().toLocaleString('en-GB');
+            pdf.text(
+                `Generated: ${timestamp}`,
+                this.margins.left,
+                this.pageHeight - 10
+            );
+            
+            // Add clinic name
+            pdf.text(
+                'Celloxen Clinic',
+                this.pageWidth - this.margins.right,
+                this.pageHeight - 10,
+                { align: 'right' }
+            );
+        }
+    }
+
+    formatDomain(domain) {
+        const formats = {
+            sleep: 'Sleep Quality',
+            stress: 'Stress Management',
+            cardiovascular: 'Cardiovascular Health',
+            joint: 'Joint Health',
+            digestive: 'Digestive Wellness',
+            kidney: 'Kidney Function',
+            energy: 'Energy Levels',
+            metabolic: 'Metabolic Health'
         };
-        
-        function updateButtonStates() {
-            const generateBtn = document.getElementById('generateBtn');
-            
-            if (selectedPatient && selectedReportType) {
-                generateBtn.disabled = false;
-            } else {
-                generateBtn.disabled = true;
-            }
-        }
-        
-        window.generateReport = async function() {
-            if (!selectedPatient || !selectedReportType) {
-                showAlert('Please select a patient and report type', 'info');
-                return;
-            }
-            
-            showLoading(true);
-            document.getElementById('pdfActions').classList.remove('show');
-            
-            try {
-                // Load report data based on type
-                reportData = await loadReportData();
-                
-                // Generate PDF based on report type
-                let pdf;
-                switch (selectedReportType) {
-                    case 'comprehensive':
-                        pdf = await pdfGenerator.generateComprehensiveReport(reportData, selectedPatient);
-                        break;
-                    case 'progress':
-                        const sessions = await loadSessionsData();
-                        const metrics = await loadMetricsData();
-                        pdf = await pdfGenerator.generateProgressReport(selectedPatient, sessions, metrics);
-                        break;
-                    case 'assessment':
-                        pdf = await pdfGenerator.generateComprehensiveReport(reportData, selectedPatient);
-                        break;
-                    case 'summary':
-                        pdf = await pdfGenerator.generateComprehensiveReport(reportData, selectedPatient);
-                        break;
-                }
-                
-                generatedPDF = pdf;
-                // CRITICAL FIX: Store the PDF blob for email use
-                window.lastGeneratedPDF = pdf.output('blob');
-                window.generatedPDF = pdf; // Also store the PDF object globally
-                
-                showLoading(false);
-                showAlert('Report generated successfully!', 'success');
-                document.getElementById('pdfActions').classList.add('show');
-                
-            } catch (error) {
-                console.error('Error generating report:', error);
-                showAlert('Error generating report', 'error');
-                showLoading(false);
-            }
-        };
-        
-        async function loadReportData() {
-            const data = {};
-            
-            try {
-                // Load health assessment
-                const { data: healthData } = await supabase
-                    .from('health_assessments')
-                    .select('*')
-                    .eq('patient_id', selectedPatient.id)
-                    .order('created_at', { ascending: false })
-                    .limit(1)
-                    .single();
-                
-                if (healthData) {
-                    data.health_assessment = healthData.assessment_data;
-                }
-            } catch (error) {
-                console.log('No health assessment found');
-            }
-            
-            try {
-                // Load IRIS assessment
-                const { data: irisData } = await supabase
-                    .from('iris_assessments')
-                    .select('*')
-                    .eq('patient_id', selectedPatient.id)
-                    .order('created_at', { ascending: false })
-                    .limit(1)
-                    .single();
-                
-                if (irisData) {
-                    data.iris_assessment = irisData.assessment_data;
-                }
-            } catch (error) {
-                console.log('No iris assessment found');
-            }
-            
-            try {
-                // Load recommendations
-                const { data: reportRecord } = await supabase
-                    .from('medical_reports')
-                    .select('*')
-                    .eq('patient_id', selectedPatient.id)
-                    .order('created_at', { ascending: false })
-                    .limit(1)
-                    .single();
-                
-                if (reportRecord) {
-                    data.recommendations = reportRecord.recommendations;
-                    data.therapy_recommendations = reportRecord.report_data?.therapy_recommendations;
-                }
-            } catch (error) {
-                console.log('No medical reports found');
-            }
-            
-            return data;
-        }
-        
-        async function loadSessionsData() {
-            const { data } = await supabase
-                .from('therapy_sessions')
-                .select('*')
-                .eq('patient_id', selectedPatient.id)
-                .order('session_date');
-            
-            return data || [];
-        }
-        
-        async function loadMetricsData() {
-            const { data } = await supabase
-                .from('wellness_metrics')
-                .select('*')
-                .eq('patient_id', selectedPatient.id)
-                .order('created_at');
-            
-            return data || [];
-        }
-        
-        function getReportTitle() {
-            const titles = {
-                comprehensive: 'Comprehensive Diagnostic Report',
-                progress: 'Treatment Progress Report',
-                assessment: 'Health Assessment Report',
-                summary: 'Treatment Summary Report'
-            };
-            return titles[selectedReportType] || 'Medical Report';
-        }
-        
-        window.downloadPDF = function() {
-            if (generatedPDF) {
-                const patientName = `${selectedPatient.first_name}_${selectedPatient.last_name}`;
-                const reportType = selectedReportType;
-                const date = new Date().toISOString().split('T')[0];
-                const filename = `${patientName}_${reportType}_${date}.pdf`;
-                
-                generatedPDF.save(filename);
-            }
-        };
-        
-        window.emailPDF = async function() {
-            if (!window.generatedPDF) {
-                alert('Please generate a report first');
-                return;
-            }
-            
-            // Convert PDF to blob if not already done
-            if (!window.lastGeneratedPDF) {
-                window.lastGeneratedPDF = window.generatedPDF.output('blob');
-            }
-            
-            if (!selectedPatient || !selectedPatient.email) {
-                alert('Patient email not available. Please update patient information.');
-                return;
-            }
-            
-            const patientName = `${selectedPatient.first_name} ${selectedPatient.last_name}`;
-            
-            // Show loading
-            showAlert('Sending email...', 'info');
-            
-            try {
-                // Send email using the stored PDF blob
-                const sent = await window.sendReportEmail(
-                    window.lastGeneratedPDF,
-                    selectedPatient.email,
-                    patientName
-                );
-                
-                if (sent) {
-                    showAlert(`Report sent successfully to ${selectedPatient.email}`, 'success');
-                } else {
-                    showAlert('Failed to send email', 'error');
-                }
-            } catch (error) {
-                console.error('Error sending email:', error);
-                showAlert('Failed to send email: ' + error.message, 'error');
-            }
-        };
-        
-        window.savePDFToDatabase = async function() {
-            if (!generatedPDF) {
-                showAlert('No PDF to save', 'error');
-                return;
-            }
-            
-            try {
-                const base64 = btoa(generatedPDF.output('binary'));
-                
-                // Save to database
-                const { error } = await supabase
-                    .from('medical_reports')
-                    .update({ 
-                        pdf_data: base64,
-                        pdf_generated_at: new Date().toISOString()
-                    })
-                    .eq('patient_id', selectedPatient.id)
-                    .order('created_at', { ascending: false })
-                    .limit(1);
-                
-                if (error) throw error;
-                
-                showAlert('PDF saved to patient records', 'success');
-            } catch (error) {
-                console.error('Error saving PDF:', error);
-                showAlert('Error saving PDF to database', 'error');
-            }
-        };
-        
-        window.printPDF = function() {
-            if (generatedPDF) {
-                window.open(generatedPDF.output('bloburl'), '_blank');
-            }
-        };
-        
-        function showLoading(show) {
-            const loading = document.getElementById('loadingIndicator');
-            if (show) {
-                loading.classList.add('show');
-            } else {
-                loading.classList.remove('show');
-            }
-        }
-        
-        function showAlert(message, type) {
-            const alertDiv = document.getElementById('alertMessage');
-            alertDiv.textContent = message;
-            alertDiv.className = `alert alert-${type} show`;
-            
-            setTimeout(() => {
-                alertDiv.classList.remove('show');
-            }, 5000);
-        }
-    </script>
-</body>
-</html>
+        return formats[domain] || domain;
+    }
+
+    // Save PDF with appropriate filename
+    savePDF(pdf, patientName, reportType) {
+        const timestamp = new Date().toISOString().split('T')[0];
+        const filename = `${patientName.replace(/\s+/g, '_')}_${reportType}_${timestamp}.pdf`;
+        pdf.save(filename);
+    }
+
+    // Get PDF as blob for email attachment
+    getPDFBlob(pdf) {
+        return pdf.output('blob');
+    }
+
+    // Get PDF as base64 for storage
+    getPDFBase64(pdf) {
+        return pdf.output('datauristring');
+    }
+}
+
+// Export singleton instance
+export const pdfGenerator = new PDFGenerator();
