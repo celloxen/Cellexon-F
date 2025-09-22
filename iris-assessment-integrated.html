@@ -468,30 +468,42 @@
                     </div>
 
                     <div id="captureInstructions">
-                        <h4>Capture Instructions:</h4>
+                        <h4>Image Capture/Upload Instructions:</h4>
                         <ol>
-                            <li>Position patient 30-40cm from camera</li>
+                            <li><strong>Camera Capture:</strong> Position patient 30-40cm from camera</li>
                             <li>Ensure good lighting on the iris</li>
-                            <li>Capture left eye first, then right eye</li>
                             <li>Keep eye wide open and focused</li>
                             <li>Avoid reflections and shadows</li>
+                            <li><strong>Upload Option:</strong> You can also upload existing high-quality iris photos</li>
+                            <li>Ensure uploaded images are clear and well-lit</li>
+                            <li>Both left and right eye images are required</li>
                         </ol>
                     </div>
 
                     <div class="iris-images">
                         <div class="iris-image-container" id="leftEyeContainer">
                             <h4>Left Eye</h4>
-                            <div id="leftEyePreview" style="margin-top: 15px;">
+                            <div id="leftEyePreview" style="margin-top: 15px; min-height: 150px;">
                                 <p style="color: #94a3b8;">Not captured</p>
                             </div>
-                            <button class="btn btn-secondary" style="margin-top: 15px;" onclick="setCurrentEye('left')">Capture Left</button>
+                            <div style="display: flex; gap: 10px; justify-content: center; margin-top: 15px;">
+                                <button class="btn btn-secondary" onclick="setCurrentEye('left')" title="Use camera to capture">📷 Capture</button>
+                                <button class="btn btn-secondary" onclick="triggerUpload('left')" title="Upload existing image">📁 Upload</button>
+                            </div>
+                            <button class="btn btn-danger" id="leftClearBtn" style="display: none; margin-top: 10px; font-size: 12px; padding: 6px 12px;" onclick="clearImage('left')">Clear Image</button>
+                            <input type="file" id="leftEyeUpload" style="display: none;" accept="image/*" onchange="handleImageUpload('left', this)">
                         </div>
                         <div class="iris-image-container" id="rightEyeContainer">
                             <h4>Right Eye</h4>
-                            <div id="rightEyePreview" style="margin-top: 15px;">
+                            <div id="rightEyePreview" style="margin-top: 15px; min-height: 150px;">
                                 <p style="color: #94a3b8;">Not captured</p>
                             </div>
-                            <button class="btn btn-secondary" style="margin-top: 15px;" onclick="setCurrentEye('right')">Capture Right</button>
+                            <div style="display: flex; gap: 10px; justify-content: center; margin-top: 15px;">
+                                <button class="btn btn-secondary" onclick="setCurrentEye('right')" title="Use camera to capture">📷 Capture</button>
+                                <button class="btn btn-secondary" onclick="triggerUpload('right')" title="Upload existing image">📁 Upload</button>
+                            </div>
+                            <button class="btn btn-danger" id="rightClearBtn" style="display: none; margin-top: 10px; font-size: 12px; padding: 6px 12px;" onclick="clearImage('right')">Clear Image</button>
+                            <input type="file" id="rightEyeUpload" style="display: none;" accept="image/*" onchange="handleImageUpload('right', this)">
                         </div>
                     </div>
                 </div>
@@ -724,6 +736,65 @@
             document.querySelector(`#${eye === 'left' ? 'right' : 'left'}EyeContainer`).style.border = '2px solid #e2e8f0';
         };
         
+        // Trigger file upload dialog
+        window.triggerUpload = function(eye) {
+            document.getElementById(`${eye}EyeUpload`).click();
+        };
+        
+        // Handle uploaded image
+        window.handleImageUpload = function(eye, input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    const imageDataUrl = e.target.result;
+                    capturedImages[eye] = imageDataUrl;
+                    
+                    // Update preview
+                    const previewElement = document.getElementById(`${eye}EyePreview`);
+                    previewElement.innerHTML = `<img src="${imageDataUrl}" class="captured-image" alt="${eye} eye">`;
+                    document.getElementById(`${eye}EyeContainer`).classList.add('captured');
+                    
+                    // Show clear button
+                    document.getElementById(`${eye}ClearBtn`).style.display = 'inline-block';
+                    
+                    showAlert(`${eye.charAt(0).toUpperCase() + eye.slice(1)} eye image uploaded successfully`, 'success');
+                    
+                    // Check if both eyes have images
+                    if (capturedImages.left && capturedImages.right) {
+                        showAlert('Both eyes captured/uploaded. Starting analysis...', 'info');
+                        setTimeout(() => {
+                            performAnalysis();
+                        }, 1500);
+                    } else {
+                        const nextEye = eye === 'left' ? 'right' : 'left';
+                        showAlert(`Please capture or upload the ${nextEye} eye image`, 'info');
+                    }
+                };
+                
+                reader.readAsDataURL(input.files[0]);
+            }
+        };
+        
+        // Clear captured/uploaded image
+        window.clearImage = function(eye) {
+            capturedImages[eye] = null;
+            
+            // Reset preview
+            const previewElement = document.getElementById(`${eye}EyePreview`);
+            previewElement.innerHTML = '<p style="color: #94a3b8;">Not captured</p>';
+            document.getElementById(`${eye}EyeContainer`).classList.remove('captured');
+            
+            // Hide clear button
+            document.getElementById(`${eye}ClearBtn`).style.display = 'none';
+            
+            // Reset file input
+            document.getElementById(`${eye}EyeUpload`).value = '';
+            
+            showAlert(`${eye.charAt(0).toUpperCase() + eye.slice(1)} eye image cleared`, 'info');
+        };
+        
+        
         window.captureIris = function() {
             if (!cameraStream) {
                 showAlert('Please start the camera first', 'error');
@@ -745,6 +816,9 @@
             const previewElement = document.getElementById(`${currentEye}EyePreview`);
             previewElement.innerHTML = `<img src="${imageDataUrl}" class="captured-image" alt="${currentEye} eye">`;
             document.getElementById(`${currentEye}EyeContainer`).classList.add('captured');
+            
+            // Show clear button
+            document.getElementById(`${currentEye}ClearBtn`).style.display = 'inline-block';
             
             // Check if both eyes captured
             if (capturedImages.left && capturedImages.right) {
@@ -975,6 +1049,9 @@
         window.stopCamera = stopCamera;
         window.setCurrentEye = setCurrentEye;
         window.captureIris = captureIris;
+        window.triggerUpload = triggerUpload;
+        window.handleImageUpload = handleImageUpload;
+        window.clearImage = clearImage;
     </script>
 </body>
 </html>
