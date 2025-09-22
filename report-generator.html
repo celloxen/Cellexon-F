@@ -452,8 +452,9 @@
                 
                 if (data) {
                     data.forEach(patient => {
+                        const email = patient.email ? `data-email="${patient.email}"` : 'data-email="undefined"';
                         select.innerHTML += `
-                            <option value="${patient.id}">
+                            <option value="${patient.id}" ${email}>
                                 ${patient.first_name} ${patient.last_name} (${patient.patient_id})
                             </option>
                         `;
@@ -531,6 +532,9 @@
                 
                 generatedPDF = pdf;
                 
+                // CRITICAL FIX: Store the PDF blob for email use
+                window.lastGeneratedPDF = pdf.output('blob');
+                
                 showLoading(false);
                 showAlert('Report generated successfully!', 'success');
                 document.getElementById('pdfActions').classList.add('show');
@@ -545,44 +549,56 @@
         async function loadReportData() {
             const data = {};
             
-            // Load health assessment
-            const { data: healthData } = await supabase
-                .from('health_assessments')
-                .select('*')
-                .eq('patient_id', selectedPatient.id)
-                .order('created_at', { ascending: false })
-                .limit(1)
-                .single();
-            
-            if (healthData) {
-                data.health_assessment = healthData.assessment_data;
+            try {
+                // Load health assessment
+                const { data: healthData } = await supabase
+                    .from('health_assessments')
+                    .select('*')
+                    .eq('patient_id', selectedPatient.id)
+                    .order('created_at', { ascending: false })
+                    .limit(1)
+                    .single();
+                
+                if (healthData) {
+                    data.health_assessment = healthData.assessment_data;
+                }
+            } catch (error) {
+                console.log('No health assessment found');
             }
             
-            // Load IRIS assessment
-            const { data: irisData } = await supabase
-                .from('iris_assessments')
-                .select('*')
-                .eq('patient_id', selectedPatient.id)
-                .order('created_at', { ascending: false })
-                .limit(1)
-                .single();
-            
-            if (irisData) {
-                data.iris_assessment = irisData.assessment_data;
+            try {
+                // Load IRIS assessment
+                const { data: irisData } = await supabase
+                    .from('iris_assessments')
+                    .select('*')
+                    .eq('patient_id', selectedPatient.id)
+                    .order('created_at', { ascending: false })
+                    .limit(1)
+                    .single();
+                
+                if (irisData) {
+                    data.iris_assessment = irisData.assessment_data;
+                }
+            } catch (error) {
+                console.log('No iris assessment found');
             }
             
-            // Load recommendations
-            const { data: reportRecord } = await supabase
-                .from('medical_reports')
-                .select('*')
-                .eq('patient_id', selectedPatient.id)
-                .order('created_at', { ascending: false })
-                .limit(1)
-                .single();
-            
-            if (reportRecord) {
-                data.recommendations = reportRecord.recommendations;
-                data.therapy_recommendations = reportRecord.report_data?.therapy_recommendations;
+            try {
+                // Load recommendations
+                const { data: reportRecord } = await supabase
+                    .from('medical_reports')
+                    .select('*')
+                    .eq('patient_id', selectedPatient.id)
+                    .order('created_at', { ascending: false })
+                    .limit(1)
+                    .single();
+                
+                if (reportRecord) {
+                    data.recommendations = reportRecord.recommendations;
+                    data.therapy_recommendations = reportRecord.report_data?.therapy_recommendations;
+                }
+            } catch (error) {
+                console.log('No medical reports found');
             }
             
             return data;
@@ -620,18 +636,22 @@
         
         window.downloadPDF = function() {
             if (generatedPDF) {
-                const patientName = `${selectedPatient.first_name} ${selectedPatient.last_name}`;
-                pdfGenerator.savePDF(generatedPDF, patientName, selectedReportType);
+                const patientName = `${selectedPatient.first_name}_${selectedPatient.last_name}`;
+                const reportType = selectedReportType;
+                const date = new Date().toISOString().split('T')[0];
+                const filename = `${patientName}_${reportType}_${date}.pdf`;
+                
+                generatedPDF.save(filename);
             }
         };
         
         window.emailPDF = async function() {
-            if (!selectedPatient.email) {
-                showAlert('Patient email not available', 'error');
+            if (!selectedPatient || !selectedPatient.email) {
+                showAlert('Patient email not available. Please update patient information.', 'error');
                 return;
             }
             
-            if (!generatedPDF) {
+            if (!window.lastGeneratedPDF) {
                 showAlert('Please generate a report first', 'error');
                 return;
             }
@@ -640,44 +660,52 @@
             showAlert('Sending email...', 'info');
             
             try {
-                // Get PDF as blob
-                const pdfBlob = pdfGenerator.getPDFBlob(generatedPDF);
+                const patientName = `${selectedPatient.first_name} ${selectedPatient.last_name}`;
                 
-                // Send email
-                const sent = await sendReportEmail(selectedPatient, pdfBlob, selectedReportType);
+                // Send email using the stored PDF blob
+                const sent = await window.sendReportEmail(
+                    window.lastGeneratedPDF,
+                    selectedPatient.email,
+                    patientName
+                );
                 
                 if (sent) {
                     showAlert(`Report sent successfully to ${selectedPatient.email}`, 'success');
+                } else {
+                    showAlert('Failed to send email', 'error');
                 }
             } catch (error) {
                 console.error('Error sending email:', error);
-                showAlert('Failed to send email', 'error');
+                showAlert('Failed to send email: ' + error.message, 'error');
             }
         };
         
         window.savePDFToDatabase = async function() {
-            if (generatedPDF) {
-                try {
-                    const base64 = pdfGenerator.getPDFBase64(generatedPDF);
-                    
-                    // Save to database
-                    const { error } = await supabase
-                        .from('medical_reports')
-                        .update({ 
-                            pdf_data: base64,
-                            pdf_generated_at: new Date().toISOString()
-                        })
-                        .eq('patient_id', selectedPatient.id)
-                        .order('created_at', { ascending: false })
-                        .limit(1);
-                    
-                    if (error) throw error;
-                    
-                    showAlert('PDF saved to patient records', 'success');
-                } catch (error) {
-                    console.error('Error saving PDF:', error);
-                    showAlert('Error saving PDF to database', 'error');
-                }
+            if (!generatedPDF) {
+                showAlert('No PDF to save', 'error');
+                return;
+            }
+            
+            try {
+                const base64 = btoa(generatedPDF.output('binary'));
+                
+                // Save to database
+                const { error } = await supabase
+                    .from('medical_reports')
+                    .update({ 
+                        pdf_data: base64,
+                        pdf_generated_at: new Date().toISOString()
+                    })
+                    .eq('patient_id', selectedPatient.id)
+                    .order('created_at', { ascending: false })
+                    .limit(1);
+                
+                if (error) throw error;
+                
+                showAlert('PDF saved to patient records', 'success');
+            } catch (error) {
+                console.error('Error saving PDF:', error);
+                showAlert('Error saving PDF to database', 'error');
             }
         };
         
