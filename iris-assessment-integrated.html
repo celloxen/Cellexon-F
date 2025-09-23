@@ -1033,6 +1033,7 @@
             }
         };
         
+        // FIXED completeAssessment function
         window.completeAssessment = async function() {
             const assessmentData = collectAssessmentData();
             
@@ -1041,43 +1042,70 @@
                 return;
             }
             
-            assessmentData.status = 'completed';
-            assessmentData.completed_at = new Date().toISOString();
-            
             try {
+                // Prepare save data with multiple format compatibility
+                let saveData = {
+                    patient_id: currentPatient.id,
+                    clinic_id: currentPatient.clinic_id,
+                    constitution_type: assessmentData.findings.constitution_type,
+                    fiber_density: assessmentData.findings.fiber_density,
+                    pupil_size: assessmentData.findings.pupil_size,
+                    collarette_position: assessmentData.findings.collarette_position,
+                    lacunae: assessmentData.findings.lacunae,
+                    stress_rings: assessmentData.findings.stress_rings,
+                    clinical_notes: assessmentData.findings.clinical_notes,
+                    images: {
+                        left: irisImages.left ? {
+                            url: irisImages.left.publicUrl || irisImages.left.url,
+                            path: irisImages.left.storagePath,
+                            uploaded: irisImages.left.uploaded
+                        } : null,
+                        right: irisImages.right ? {
+                            url: irisImages.right.publicUrl || irisImages.right.url,
+                            path: irisImages.right.storagePath,
+                            uploaded: irisImages.right.uploaded
+                        } : null
+                    },
+                    status: 'completed',
+                    completed_at: new Date().toISOString(),
+                    created_at: new Date().toISOString()
+                };
+                
+                // Add image URLs if available
+                if (irisImages.left && irisImages.left.publicUrl) {
+                    saveData.left_iris_url = irisImages.left.publicUrl;
+                    saveData.left_iris_path = irisImages.left.storagePath;
+                }
+                if (irisImages.right && irisImages.right.publicUrl) {
+                    saveData.right_iris_url = irisImages.right.publicUrl;
+                    saveData.right_iris_path = irisImages.right.storagePath;
+                }
+                
+                console.log('Saving assessment data:', saveData);
+                
                 const { data, error } = await supabase
                     .from('iris_assessments')
-                    .insert([{
-                        patient_id: currentPatient.id,
-                        clinic_id: currentPatient.clinic_id,
-                        assessment_data: assessmentData,
-                        images: {
-                            left: irisImages.left ? {
-                                url: irisImages.left.publicUrl || irisImages.left.url,
-                                path: irisImages.left.storagePath,
-                                uploaded: irisImages.left.uploaded
-                            } : null,
-                            right: irisImages.right ? {
-                                url: irisImages.right.publicUrl || irisImages.right.url,
-                                path: irisImages.right.storagePath,
-                                uploaded: irisImages.right.uploaded
-                            } : null
-                        },
-                        created_at: new Date().toISOString()
-                    }])
+                    .insert([saveData])
                     .select()
                     .single();
                 
                 if (error) throw error;
                 
+                // Store in session for report generation
                 sessionStorage.setItem('irisAssessmentId', data.id);
                 sessionStorage.setItem('irisAssessmentCompleted', 'true');
+                sessionStorage.setItem('irisAssessmentData', JSON.stringify(data));
                 
                 document.getElementById('successModal').classList.add('active');
                 
             } catch (error) {
                 console.error('Error completing assessment:', error);
-                alert('Error saving assessment. Please try again.');
+                
+                if (error.code === 'PGRST204') {
+                    alert('Database configuration error. Please run the database migration script.');
+                } else {
+                    alert('Error saving assessment: ' + (error.message || 'Unknown error'));
+                }
             }
         };
         
