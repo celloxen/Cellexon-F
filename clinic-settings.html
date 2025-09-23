@@ -602,6 +602,104 @@
                         <button class="btn btn-secondary">View Invoices</button>
                     </div>
                 </div>
+                
+                <!-- Users & Access Section -->
+                <div id="users" class="section">
+                    <div class="section-header">
+                        <h2 class="section-title">Users & Access</h2>
+                        <p class="section-subtitle">Manage clinic staff and permissions</p>
+                    </div>
+                    
+                    <div class="info-card">
+                        <h3 style="margin-bottom: 15px;">Current Users</h3>
+                        <div class="info-row">
+                            <div class="info-label">Total Users:</div>
+                            <div class="info-value">3</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Active Users:</div>
+                            <div class="info-value">3</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">User Limit:</div>
+                            <div class="info-value">10 users</div>
+                        </div>
+                    </div>
+                    
+                    <div class="btn-group">
+                        <button class="btn btn-primary">Invite User</button>
+                        <button class="btn btn-secondary">Manage Permissions</button>
+                        <button class="btn btn-secondary">View Activity Log</button>
+                    </div>
+                </div>
+                
+                <!-- Preferences Section -->
+                <div id="preferences" class="section">
+                    <div class="section-header">
+                        <h2 class="section-title">Preferences</h2>
+                        <p class="section-subtitle">Customise your clinic settings</p>
+                    </div>
+                    
+                    <form id="preferencesForm">
+                        <div class="form-group">
+                            <label class="form-label">Default Appointment Duration</label>
+                            <select class="form-select" id="appointmentDuration">
+                                <option value="30">30 minutes</option>
+                                <option value="45">45 minutes</option>
+                                <option value="60" selected>60 minutes</option>
+                                <option value="90">90 minutes</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Currency</label>
+                            <select class="form-select" id="currency">
+                                <option value="GBP" selected>£ GBP (British Pound)</option>
+                                <option value="EUR">€ EUR (Euro)</option>
+                                <option value="USD">$ USD (US Dollar)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Date Format</label>
+                            <select class="form-select" id="dateFormat">
+                                <option value="DD/MM/YYYY" selected>DD/MM/YYYY</option>
+                                <option value="MM/DD/YYYY">MM/DD/YYYY</option>
+                                <option value="YYYY-MM-DD">YYYY-MM-DD</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Time Format</label>
+                            <select class="form-select" id="timeFormat">
+                                <option value="24" selected>24-hour</option>
+                                <option value="12">12-hour (AM/PM)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Email Notifications</label>
+                            <div style="margin-top: 10px;">
+                                <label style="display: block; margin-bottom: 10px;">
+                                    <input type="checkbox" id="emailAppointments" checked>
+                                    Appointment reminders
+                                </label>
+                                <label style="display: block; margin-bottom: 10px;">
+                                    <input type="checkbox" id="emailReports" checked>
+                                    Weekly reports
+                                </label>
+                                <label style="display: block; margin-bottom: 10px;">
+                                    <input type="checkbox" id="emailBilling">
+                                    Billing notifications
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="btn-group">
+                            <button type="submit" class="btn btn-primary">Save Preferences</button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
@@ -846,13 +944,26 @@
             document.querySelectorAll('.nav-item').forEach(item => {
                 item.classList.remove('active');
             });
-            event.target.closest('.nav-item').classList.add('active');
+            if (event && event.target) {
+                event.target.closest('.nav-item').classList.add('active');
+            }
             
-            // Show section
+            // Show section - check if it exists first
             document.querySelectorAll('.section').forEach(section => {
                 section.classList.remove('active');
             });
-            document.getElementById(sectionId).classList.add('active');
+            
+            const targetSection = document.getElementById(sectionId);
+            if (targetSection) {
+                targetSection.classList.add('active');
+            } else {
+                console.warn(`Section with ID '${sectionId}' not found`);
+                // Show profile section as fallback
+                const profileSection = document.getElementById('profile');
+                if (profileSection) {
+                    profileSection.classList.add('active');
+                }
+            }
         };
     </script>
 </body>
