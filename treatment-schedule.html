@@ -392,6 +392,16 @@
         .close-btn:hover {
             color: #1e293b;
         }
+        
+        .bulk-action-btn {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+        }
+        
+        .bulk-action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+        }
     </style>
 </head>
 <body>
@@ -513,8 +523,11 @@
             <div class="action-buttons">
                 <button class="btn btn-secondary" onclick="saveDraft()">Save as Draft</button>
                 <button class="btn btn-outline" onclick="printPlan()">Print Treatment Plan</button>
+                <button class="btn bulk-action-btn" onclick="proceedToBulkScheduling()">
+                    Generate Bulk Appointments →
+                </button>
                 <button class="btn btn-primary" onclick="confirmTreatmentPlan()">
-                    Confirm & Generate Treatment Plan →
+                    Confirm & Save Plan →
                 </button>
             </div>
         </div>
@@ -537,6 +550,9 @@
             </div>
             <div class="action-buttons">
                 <button class="btn btn-secondary" onclick="viewPlan()">View Full Plan</button>
+                <button class="btn bulk-action-btn" onclick="goToAutomatedScheduler()">
+                    Create Appointments →
+                </button>
                 <button class="btn btn-primary" onclick="goToDashboard()">Return to Dashboard</button>
             </div>
         </div>
@@ -549,55 +565,16 @@
         let selectedTherapies = [];
         let selectedDays = [];
         let therapyFrequencies = {};
+        let treatmentPlanId = null;
         
-        // Available therapy details
-        const therapyDetails = {
-            frequency_therapy: {
-                name: 'Frequency Therapy',
-                duration: '30-45 minutes',
-                recommendedFrequency: 3
-            },
-            light_therapy: {
-                name: 'Light Therapy',
-                duration: '20-30 minutes',
-                recommendedFrequency: 3
-            },
-            pemf_therapy: {
-                name: 'PEMF Therapy',
-                duration: '30 minutes',
-                recommendedFrequency: 2
-            },
-            ozone_therapy: {
-                name: 'Ozone Therapy',
-                duration: '30-60 minutes',
-                recommendedFrequency: 2
-            },
-            iv_therapy: {
-                name: 'IV Nutrient Therapy',
-                duration: '45-60 minutes',
-                recommendedFrequency: 1
-            },
-            hyperbaric_oxygen: {
-                name: 'Hyperbaric Oxygen',
-                duration: '60-90 minutes',
-                recommendedFrequency: 2
-            },
-            cryotherapy: {
-                name: 'Cryotherapy',
-                duration: '3-5 minutes',
-                recommendedFrequency: 3
-            },
-            infrared_sauna: {
-                name: 'Infrared Sauna',
-                duration: '30-45 minutes',
-                recommendedFrequency: 2
-            }
-        };
+        // Available therapy details (from database)
+        const therapyDetails = {};
         
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', async function() {
             const urlParams = new URLSearchParams(window.location.search);
             const patientId = urlParams.get('patient') || sessionStorage.getItem('currentPatientId');
+            const planId = urlParams.get('planId') || sessionStorage.getItem('treatmentPlanId');
             
             if (!patientId) {
                 alert('No patient selected. Redirecting to dashboard.');
@@ -605,21 +582,72 @@
                 return;
             }
             
-            // Load selected therapies from session
-            const therapyData = sessionStorage.getItem('selectedTherapies');
-            if (!therapyData) {
-                alert('No therapies selected. Please complete therapy selection first.');
-                window.location.href = `report-generator.html?patient=${patientId}`;
-                return;
-            }
+            // Load therapy protocols from database
+            await loadTherapyProtocols();
             
-            const parsedData = JSON.parse(therapyData);
-            selectedTherapies = parsedData.selected_therapies || [];
+            // Load treatment plan if exists
+            if (planId) {
+                await loadExistingPlan(planId);
+            } else {
+                // Load selected therapies from session
+                const therapyData = sessionStorage.getItem('selectedTherapies');
+                if (!therapyData) {
+                    alert('No therapies selected. Please complete therapy selection first.');
+                    window.location.href = `report-generator.html?patient=${patientId}`;
+                    return;
+                }
+                
+                const parsedData = JSON.parse(therapyData);
+                selectedTherapies = parsedData.selected_therapies || [];
+            }
             
             await loadPatientData(patientId);
             displaySelectedTherapies();
             updateTreatmentSummary();
         });
+        
+        async function loadTherapyProtocols() {
+            try {
+                const { data, error } = await supabase
+                    .from('therapy_configurations')
+                    .select('*')
+                    .eq('is_active', true);
+                
+                if (error) throw error;
+                
+                data.forEach(therapy => {
+                    therapyDetails[therapy.therapy_code] = {
+                        name: therapy.therapy_name,
+                        duration: `${therapy.duration || 45} minutes`,
+                        recommendedFrequency: 2,
+                        category: therapy.category,
+                        notes: therapy.notes
+                    };
+                });
+                
+            } catch (error) {
+                console.error('Error loading therapy protocols:', error);
+            }
+        }
+        
+        async function loadExistingPlan(planId) {
+            try {
+                const { data, error } = await supabase
+                    .from('treatment_plans')
+                    .select('*')
+                    .eq('id', planId)
+                    .single();
+                
+                if (error) throw error;
+                
+                treatmentPlanId = planId;
+                selectedTherapies = data.protocols || [];
+                // Load other plan data
+                
+            } catch (error) {
+                console.error('Error loading plan:', error);
+            }
+        }
         
         async function loadPatientData(patientId) {
             try {
@@ -668,8 +696,11 @@
             
             let therapyHtml = '';
             selectedTherapies.forEach(therapyId => {
-                const therapy = therapyDetails[therapyId];
-                if (!therapy) return;
+                const therapy = therapyDetails[therapyId] || {
+                    name: therapyId,
+                    duration: '45 minutes',
+                    recommendedFrequency: 2
+                };
                 
                 const recommendedFreq = therapy.recommendedFrequency;
                 therapyFrequencies[therapyId] = recommendedFreq;
@@ -697,7 +728,7 @@
                 `;
             });
             
-            therapyListDiv.innerHTML = therapyHtml;
+            therapyListDiv.innerHTML = therapyHtml || '<p>No therapies selected</p>';
         }
         
         window.updateFrequency = function(therapyId, value) {
@@ -760,44 +791,79 @@
             const duration = parseInt(document.getElementById('treatmentDuration').value);
             const timeSlot = document.getElementById('timeSlot').value;
             
+            // Calculate total sessions
+            let totalSessions = 0;
+            selectedTherapies.forEach(therapyId => {
+                const frequency = therapyFrequencies[therapyId] || 0;
+                totalSessions += frequency * duration;
+            });
+            
             // Create treatment plan object
             const treatmentPlan = {
                 patient_id: patientData.id,
-                patient_name: `${patientData.first_name} ${patientData.last_name}`,
-                therapies: selectedTherapies.map(id => ({
-                    therapy_id: id,
-                    name: therapyDetails[id].name,
-                    frequency: therapyFrequencies[id],
-                    duration: therapyDetails[id].duration
-                })),
-                schedule: {
-                    duration_weeks: duration,
-                    days: selectedDays,
-                    time_slot: timeSlot
-                },
+                clinic_id: patientData.clinic_id,
+                duration_weeks: duration,
+                sessions_per_week: Math.ceil(totalSessions / duration),
+                total_sessions: totalSessions,
+                protocols: selectedTherapies,
+                protocol_details: selectedTherapies.map(id => therapyDetails[id] || { therapy_code: id }),
+                selected_days: selectedDays,
+                time_preference: timeSlot,
                 start_date: new Date().toISOString(),
-                end_date: new Date(Date.now() + (duration * 7 * 24 * 60 * 60 * 1000)).toISOString(),
-                status: 'active',
+                status: 'planned',
                 created_at: new Date().toISOString()
             };
             
-            // Save to localStorage (since we don't have the treatment_plans table)
-            const planId = `PLAN-${Date.now()}`;
-            localStorage.setItem(`treatment_plan_${planId}`, JSON.stringify(treatmentPlan));
+            try {
+                // Save to database
+                const { data, error } = await supabase
+                    .from('treatment_plans')
+                    .insert([treatmentPlan])
+                    .select()
+                    .single();
+                
+                if (error) throw error;
+                
+                treatmentPlanId = data.id;
+                
+                // Save to session for next steps
+                sessionStorage.setItem('treatmentPlanId', data.id);
+                sessionStorage.setItem('treatmentPlan', JSON.stringify(data));
+                
+                // Show success modal
+                showSuccessModal(data.id, treatmentPlan);
+                
+            } catch (error) {
+                console.error('Error saving plan:', error);
+                // Fallback to localStorage
+                const planId = `PLAN-${Date.now()}`;
+                localStorage.setItem(`treatment_plan_${planId}`, JSON.stringify(treatmentPlan));
+                sessionStorage.setItem('treatmentPlanId', planId);
+                sessionStorage.setItem('treatmentPlan', JSON.stringify(treatmentPlan));
+                showSuccessModal(planId, treatmentPlan);
+            }
+        };
+        
+        window.proceedToBulkScheduling = function() {
+            // Save current configuration
+            const config = {
+                patient_id: patientData.id,
+                therapies: selectedTherapies,
+                frequencies: therapyFrequencies,
+                days: selectedDays,
+                duration: document.getElementById('treatmentDuration').value,
+                timeSlot: document.getElementById('timeSlot').value
+            };
             
-            // Also save to session for immediate use
-            sessionStorage.setItem('currentTreatmentPlan', JSON.stringify({
-                ...treatmentPlan,
-                plan_id: planId
-            }));
+            sessionStorage.setItem('schedulingConfig', JSON.stringify(config));
             
-            // Show success modal
-            showSuccessModal(planId, treatmentPlan);
+            // Redirect to automated scheduler
+            window.location.href = 'treatment-scheduler-auto.html';
         };
         
         function showSuccessModal(planId, plan) {
             const modal = document.getElementById('successModal');
-            const totalSessions = plan.therapies.reduce((sum, t) => sum + (t.frequency * plan.schedule.duration_weeks), 0);
+            const totalSessions = plan.total_sessions;
             
             document.getElementById('planId').textContent = planId;
             document.getElementById('startDate').textContent = new Date().toLocaleDateString('en-GB');
@@ -813,6 +879,10 @@
         window.viewPlan = function() {
             window.print();
             closeModal();
+        };
+        
+        window.goToAutomatedScheduler = function() {
+            window.location.href = `treatment-scheduler-auto.html?planId=${treatmentPlanId}`;
         };
         
         window.goToDashboard = function() {
