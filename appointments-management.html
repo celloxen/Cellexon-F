@@ -104,6 +104,21 @@
             box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
         }
         
+        .btn-bulk {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        
+        .btn-bulk:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+        
         /* Calendar Grid */
         .calendar-container {
             background: white;
@@ -176,6 +191,11 @@
             white-space: nowrap;
         }
         
+        .day-appointment.treatment {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
         /* List View */
         .appointments-list {
             background: white;
@@ -224,6 +244,25 @@
             font-size: 14px;
         }
         
+        .appointment-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+        
+        .badge-treatment {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .badge-assessment {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        
         .appointment-actions-btns {
             display: flex;
             gap: 8px;
@@ -251,6 +290,11 @@
         .btn-cancel {
             color: #ef4444;
             border-color: #ef4444;
+        }
+        
+        .btn-complete {
+            color: #10b981;
+            border-color: #10b981;
         }
         
         /* Modal */
@@ -364,6 +408,33 @@
             padding: 40px;
             color: #9ca3af;
         }
+        
+        .appointment-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #1f2937;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 5px;
+        }
     </style>
 </head>
 <body>
@@ -375,6 +446,26 @@
     </div>
 
     <div class="container">
+        <!-- Appointment Statistics -->
+        <div class="appointment-stats">
+            <div class="stat-card">
+                <div class="stat-number" id="todayCount">0</div>
+                <div class="stat-label">Today's Appointments</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="weekCount">0</div>
+                <div class="stat-label">This Week</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="treatmentCount">0</div>
+                <div class="stat-label">Treatment Sessions</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="pendingCount">0</div>
+                <div class="stat-label">Pending Confirmation</div>
+            </div>
+        </div>
+        
         <!-- View Controls -->
         <div class="view-controls">
             <div class="view-tabs">
@@ -391,6 +482,7 @@
             
             <div class="appointment-actions">
                 <button class="btn-new" onclick="openNewAppointment()">+ New Appointment</button>
+                <button class="btn-bulk" onclick="openBulkScheduler()">📅 Bulk Schedule</button>
             </div>
         </div>
 
@@ -460,17 +552,22 @@
                     <label class="form-label">Appointment Type</label>
                     <select class="form-select" id="appointmentType" required>
                         <option value="">Select Type</option>
-                        <option value="Consultation">Consultation</option>
-                        <option value="Treatment">Treatment</option>
-                        <option value="Assessment">Health Assessment</option>
-                        <option value="Iris">Iris Assessment</option>
-                        <option value="Follow-up">Follow-up</option>
+                        <option value="consultation">Consultation</option>
+                        <option value="treatment">Treatment Session</option>
+                        <option value="assessment">Health Assessment</option>
+                        <option value="iris">IRIS Assessment</option>
+                        <option value="follow-up">Follow-up</option>
                     </select>
                 </div>
                 
                 <div class="form-group">
                     <label class="form-label">Therapy Code (if treatment)</label>
-                    <input type="text" class="form-input" id="therapyCode" placeholder="e.g., 101, 102">
+                    <input type="text" class="form-input" id="therapyCode" placeholder="e.g., 101, 602">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Session Number (if part of treatment plan)</label>
+                    <input type="number" class="form-input" id="sessionNumber" min="1" placeholder="e.g., 1">
                 </div>
                 
                 <div class="form-group">
@@ -488,6 +585,7 @@
 
     <script type="module">
         import { supabase } from './supabase-config.js';
+        import { createBulkAppointments } from './appointments-bulk-creator.js';
         
         let currentClinicId = null;
         let currentView = 'list';
@@ -500,14 +598,17 @@
         window.switchView = switchView;
         window.navigateDate = navigateDate;
         window.openNewAppointment = openNewAppointment;
+        window.openBulkScheduler = openBulkScheduler;
         window.editAppointment = editAppointment;
         window.cancelAppointment = cancelAppointment;
+        window.markComplete = markComplete;
         window.closeModal = closeModal;
         
         document.addEventListener('DOMContentLoaded', async function() {
             await loadClinicId();
             await loadPatients();
             await loadAppointments();
+            await loadStatistics();
             setupEventListeners();
             updateDateDisplay();
         });
@@ -599,6 +700,61 @@
             }
         }
         
+        async function loadStatistics() {
+            if (!currentClinicId) return;
+            
+            try {
+                // Today's appointments
+                const today = new Date().toISOString().split('T')[0];
+                const { count: todayCount } = await supabase
+                    .from('appointments')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('clinic_id', currentClinicId)
+                    .eq('appointment_date', today)
+                    .eq('status', 'scheduled');
+                
+                document.getElementById('todayCount').textContent = todayCount || 0;
+                
+                // This week's appointments
+                const weekStart = new Date();
+                weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+                const weekEnd = new Date(weekStart);
+                weekEnd.setDate(weekEnd.getDate() + 6);
+                
+                const { count: weekCount } = await supabase
+                    .from('appointments')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('clinic_id', currentClinicId)
+                    .gte('appointment_date', weekStart.toISOString().split('T')[0])
+                    .lte('appointment_date', weekEnd.toISOString().split('T')[0])
+                    .eq('status', 'scheduled');
+                
+                document.getElementById('weekCount').textContent = weekCount || 0;
+                
+                // Treatment sessions
+                const { count: treatmentCount } = await supabase
+                    .from('appointments')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('clinic_id', currentClinicId)
+                    .eq('appointment_type', 'treatment')
+                    .eq('status', 'scheduled');
+                
+                document.getElementById('treatmentCount').textContent = treatmentCount || 0;
+                
+                // Pending confirmations
+                const { count: pendingCount } = await supabase
+                    .from('appointments')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('clinic_id', currentClinicId)
+                    .eq('status', 'pending');
+                
+                document.getElementById('pendingCount').textContent = pendingCount || 0;
+                
+            } catch (error) {
+                console.error('Error loading statistics:', error);
+            }
+        }
+        
         function displayAppointments() {
             if (currentView === 'list') {
                 displayListView();
@@ -622,28 +778,39 @@
                 return;
             }
             
-            listDiv.innerHTML = appointments.map(apt => `
-                <div class="appointment-item">
-                    <div style="display: flex; align-items: center;">
-                        <span class="appointment-time">${apt.appointment_time?.substring(0, 5) || ''}</span>
-                        <div class="appointment-details">
-                            <div class="patient-name">
-                                ${apt.patients ? `${apt.patients.first_name} ${apt.patients.last_name}` : 'Unknown'}
-                            </div>
-                            <div class="appointment-type">
-                                ${apt.appointment_type || ''} ${apt.therapy_code ? `- ${apt.therapy_code}` : ''}
-                                ${apt.status === 'cancelled' ? '(CANCELLED)' : ''}
+            listDiv.innerHTML = appointments.map(apt => {
+                const typeClass = apt.appointment_type === 'treatment' ? 'badge-treatment' : 'badge-assessment';
+                const statusBadge = apt.session_number ? 
+                    `<span class="appointment-badge ${typeClass}">Session ${apt.session_number}</span>` : '';
+                
+                return `
+                    <div class="appointment-item">
+                        <div style="display: flex; align-items: center;">
+                            <span class="appointment-time">${apt.appointment_time?.substring(0, 5) || ''}</span>
+                            <div class="appointment-details">
+                                <div class="patient-name">
+                                    ${apt.patients ? `${apt.patients.first_name} ${apt.patients.last_name}` : 'Unknown'}
+                                </div>
+                                <div class="appointment-type">
+                                    ${apt.appointment_type || ''} 
+                                    ${apt.therapy_code ? `- Code: ${apt.therapy_code}` : ''}
+                                    ${statusBadge}
+                                    ${apt.status === 'cancelled' ? '(CANCELLED)' : ''}
+                                </div>
                             </div>
                         </div>
+                        <div class="appointment-actions-btns">
+                            ${apt.status !== 'completed' ? `
+                                <button class="action-btn btn-complete" onclick="markComplete(${apt.id})">Complete</button>
+                            ` : ''}
+                            <button class="action-btn btn-edit" onclick="editAppointment(${apt.id})">Edit</button>
+                            <button class="action-btn btn-cancel" onclick="cancelAppointment(${apt.id})">
+                                ${apt.status === 'cancelled' ? 'Delete' : 'Cancel'}
+                            </button>
+                        </div>
                     </div>
-                    <div class="appointment-actions-btns">
-                        <button class="action-btn btn-edit" onclick="editAppointment(${apt.id})">Edit</button>
-                        <button class="action-btn btn-cancel" onclick="cancelAppointment(${apt.id})">
-                            ${apt.status === 'cancelled' ? 'Delete' : 'Cancel'}
-                        </button>
-                    </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
         }
         
         function displayDayView() {
@@ -669,10 +836,11 @@
                             hourAppointments.map(apt => `
                                 <div style="margin-left: 60px; margin-top: 10px; padding: 10px; background: #f9fafb; border-radius: 6px;">
                                     <strong>${apt.patients?.first_name || ''} ${apt.patients?.last_name || ''}</strong><br>
-                                    ${apt.appointment_type || ''} ${apt.therapy_code ? `- ${apt.therapy_code}` : ''}
+                                    ${apt.appointment_type || ''} ${apt.therapy_code ? `- Code: ${apt.therapy_code}` : ''}
+                                    ${apt.session_number ? `(Session ${apt.session_number})` : ''}
                                 </div>
                             `).join('') : 
-                            '<span style="margin-left: 60px; color: #9ca3af;">-</span>'
+                            '<span style="margin-left: 60px; color: #9ca3af;">Available</span>'
                         }
                     </div>
                 `;
@@ -708,11 +876,14 @@
                 calendarHTML += `
                     <div class="calendar-day ${isToday ? 'today' : ''}" onclick="selectDate('${dateStr}')">
                         <div class="day-number">${day}</div>
-                        ${dayAppointments.slice(0, 3).map(apt => `
-                            <div class="day-appointment">
-                                ${apt.appointment_time?.substring(0, 5) || ''} ${apt.patients?.last_name || 'Unknown'}
-                            </div>
-                        `).join('')}
+                        ${dayAppointments.slice(0, 3).map(apt => {
+                            const typeClass = apt.appointment_type === 'treatment' ? 'treatment' : '';
+                            return `
+                                <div class="day-appointment ${typeClass}">
+                                    ${apt.appointment_time?.substring(0, 5) || ''} ${apt.patients?.last_name || 'Unknown'}
+                                </div>
+                            `;
+                        }).join('')}
                         ${dayAppointments.length > 3 ? `<div style="font-size: 11px; color: #6b7280;">+${dayAppointments.length - 3} more</div>` : ''}
                     </div>
                 `;
@@ -736,6 +907,7 @@
                 appointment_time: document.getElementById('appointmentTime').value,
                 appointment_type: document.getElementById('appointmentType').value,
                 therapy_code: document.getElementById('therapyCode').value || null,
+                session_number: parseInt(document.getElementById('sessionNumber').value) || null,
                 notes: document.getElementById('appointmentNotes').value || null,
                 status: 'scheduled'
             };
@@ -760,6 +932,7 @@
                 
                 closeModal();
                 await loadAppointments();
+                await loadStatistics();
                 alert('Appointment saved successfully');
                 
             } catch (error) {
@@ -828,6 +1001,11 @@
             document.getElementById('appointmentModal').classList.add('active');
         }
         
+        function openBulkScheduler() {
+            // Redirect to automated scheduler
+            window.location.href = 'treatment-scheduler-auto.html';
+        }
+        
         function editAppointment(id) {
             const appointment = [...appointments, ...allAppointments].find(a => a.id === id);
             if (!appointment) return;
@@ -839,9 +1017,34 @@
             document.getElementById('appointmentTime').value = appointment.appointment_time;
             document.getElementById('appointmentType').value = appointment.appointment_type;
             document.getElementById('therapyCode').value = appointment.therapy_code || '';
+            document.getElementById('sessionNumber').value = appointment.session_number || '';
             document.getElementById('appointmentNotes').value = appointment.notes || '';
             
             document.getElementById('appointmentModal').classList.add('active');
+        }
+        
+        async function markComplete(id) {
+            if (!confirm('Mark this appointment as completed?')) return;
+            
+            try {
+                const { error } = await supabase
+                    .from('appointments')
+                    .update({ 
+                        status: 'completed',
+                        completed_at: new Date().toISOString()
+                    })
+                    .eq('id', id);
+                
+                if (error) throw error;
+                
+                await loadAppointments();
+                await loadStatistics();
+                alert('Appointment marked as completed');
+                
+            } catch (error) {
+                console.error('Error updating appointment:', error);
+                alert('Error updating appointment');
+            }
         }
         
         async function cancelAppointment(id) {
@@ -860,6 +1063,7 @@
                     if (error) throw error;
                     
                     await loadAppointments();
+                    await loadStatistics();
                     alert('Appointment deleted');
                 } catch (error) {
                     console.error('Error deleting appointment:', error);
@@ -878,6 +1082,7 @@
                     if (error) throw error;
                     
                     await loadAppointments();
+                    await loadStatistics();
                     alert('Appointment cancelled');
                 } catch (error) {
                     console.error('Error cancelling appointment:', error);
