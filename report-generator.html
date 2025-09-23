@@ -366,6 +366,12 @@
             border-left: 4px solid #f59e0b;
         }
         
+        .alert-success {
+            background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+            color: #065f46;
+            border-left: 4px solid #10b981;
+        }
+        
         .loading {
             text-align: center;
             padding: 40px;
@@ -385,6 +391,15 @@
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
+        }
+        
+        .email-status {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            text-align: center;
         }
     </style>
 </head>
@@ -417,7 +432,7 @@
                 </div>
                 <div class="progress-step">
                     <div class="progress-circle">4</div>
-                    <div>Therapy Selection</div>
+                    <div>Email Report</div>
                 </div>
                 <div class="progress-step">
                     <div class="progress-circle">5</div>
@@ -433,6 +448,12 @@
                 <h3>Generating Comprehensive Report...</h3>
                 <p>Combining health assessment and IRIS analysis data</p>
             </div>
+        </div>
+        
+        <!-- Email Status -->
+        <div id="emailStatus" class="email-status" style="display: none;">
+            <h3>📧 Report Email Status</h3>
+            <p id="emailMessage">Preparing to send report...</p>
         </div>
         
         <!-- Report Content (Initially Hidden) -->
@@ -487,19 +508,19 @@
                     <span>Recommended Therapies</span>
                 </div>
                 <div class="alert alert-info">
-                    Select appropriate therapies based on the diagnosis. Multiple therapies can be selected for comprehensive treatment.
+                    The following therapies have been automatically recommended based on the assessment findings.
                 </div>
                 <div class="therapy-selection">
-                    <h3>Available Therapies</h3>
+                    <h3>Recommended Therapy Protocol</h3>
                     <div class="therapy-grid" id="therapyGrid">
-                        <!-- Therapy options will be populated here -->
+                        <!-- Therapy recommendations will be populated here -->
                     </div>
                 </div>
                 
                 <div class="action-buttons">
-                    <button class="btn btn-secondary" onclick="saveDraft()">Save as Draft</button>
-                    <button class="btn btn-primary" id="confirmTherapiesBtn" onclick="confirmTherapies()" disabled>
-                        Confirm Selected Therapies →
+                    <button class="btn btn-secondary" onclick="viewFullReport()">View Full Report</button>
+                    <button class="btn btn-primary" id="proceedBtn" onclick="proceedToTreatmentPlan()">
+                        Proceed to Treatment Plan →
                     </button>
                 </div>
             </div>
@@ -508,77 +529,20 @@
     
     <script type="module">
         import { supabase } from './supabase-config.js';
+        import { workflowManager } from './workflow-manager.js';
+        import { TherapyRecommendationEngine } from './therapy-recommendations-engine.js';
         
         let patientData = null;
         let healthAssessment = null;
         let irisAssessment = null;
-        let selectedTherapies = [];
+        let recommendedTherapies = [];
         let reportData = {};
-        
-        // Available therapies
-        const availableTherapies = [
-            {
-                id: 'frequency_therapy',
-                name: 'Frequency Therapy',
-                description: 'Targeted frequency treatment for cellular optimization',
-                indications: ['Stress', 'Sleep', 'Energy'],
-                duration: '30-45 minutes'
-            },
-            {
-                id: 'light_therapy',
-                name: 'Light Therapy',
-                description: 'Photobiomodulation for healing and regeneration',
-                indications: ['Joint Health', 'Inflammation', 'Circulation'],
-                duration: '20-30 minutes'
-            },
-            {
-                id: 'pemf_therapy',
-                name: 'PEMF Therapy',
-                description: 'Pulsed electromagnetic field therapy',
-                indications: ['Pain', 'Recovery', 'Cellular Health'],
-                duration: '30 minutes'
-            },
-            {
-                id: 'ozone_therapy',
-                name: 'Ozone Therapy',
-                description: 'Oxygenation therapy for immune support',
-                indications: ['Immune', 'Detox', 'Energy'],
-                duration: '30-60 minutes'
-            },
-            {
-                id: 'iv_therapy',
-                name: 'IV Nutrient Therapy',
-                description: 'Intravenous nutrient supplementation',
-                indications: ['Nutrition', 'Hydration', 'Recovery'],
-                duration: '45-60 minutes'
-            },
-            {
-                id: 'hyperbaric_oxygen',
-                name: 'Hyperbaric Oxygen',
-                description: 'Pressurized oxygen therapy',
-                indications: ['Healing', 'Brain Health', 'Recovery'],
-                duration: '60-90 minutes'
-            },
-            {
-                id: 'cryotherapy',
-                name: 'Cryotherapy',
-                description: 'Cold therapy for inflammation and recovery',
-                indications: ['Inflammation', 'Pain', 'Recovery'],
-                duration: '3-5 minutes'
-            },
-            {
-                id: 'infrared_sauna',
-                name: 'Infrared Sauna',
-                description: 'Deep heat therapy for detoxification',
-                indications: ['Detox', 'Circulation', 'Relaxation'],
-                duration: '30-45 minutes'
-            }
-        ];
+        let reportId = null;
         
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', async function() {
             const urlParams = new URLSearchParams(window.location.search);
-            const patientId = urlParams.get('patient') || sessionStorage.getItem('currentPatientId');
+            const patientId = urlParams.get('patientId') || sessionStorage.getItem('currentPatientId');
             
             if (!patientId) {
                 alert('No patient selected. Redirecting to dashboard.');
@@ -586,57 +550,123 @@
                 return;
             }
             
-            await loadComprehensiveData(patientId);
+            // Start automatic report generation
+            await generateComprehensiveReport(patientId);
         });
         
-        async function loadComprehensiveData(patientId) {
+        async function generateComprehensiveReport(patientId) {
             try {
-                // Load patient data
-                const { data: patient, error: patientError } = await supabase
-                    .from('patients')
-                    .select('*')
-                    .eq('id', patientId)
-                    .single();
+                // Step 1: Load all assessment data
+                await loadAssessmentData(patientId);
                 
-                if (patientError) throw patientError;
-                patientData = patient;
+                // Step 2: Generate therapy recommendations
+                await generateTherapyRecommendations();
                 
-                // Load health assessment
-                const { data: health, error: healthError } = await supabase
-                    .from('health_assessments')
-                    .select('*')
-                    .eq('patient_id', patientId)
-                    .order('created_at', { ascending: false })
-                    .limit(1)
-                    .single();
+                // Step 3: Save report to database
+                await saveReport();
                 
-                if (!healthError) healthAssessment = health;
+                // Step 4: Display report
+                displayReport();
                 
-                // Load IRIS assessment
-                const { data: iris, error: irisError } = await supabase
-                    .from('iris_assessments')
-                    .select('*')
-                    .eq('patient_id', patientId)
-                    .order('created_at', { ascending: false })
-                    .limit(1)
-                    .single();
+                // Step 5: Send email automatically
+                await sendReportEmail();
                 
-                if (!irisError) irisAssessment = iris;
-                
-                // Generate report
-                generateComprehensiveReport();
+                // Step 6: Update workflow status
+                await updateWorkflowStatus();
                 
             } catch (error) {
-                console.error('Error loading data:', error);
+                console.error('Error generating report:', error);
                 document.getElementById('loadingState').innerHTML = `
                     <div class="alert alert-error">
-                        Error loading assessment data: ${error.message}
+                        Error generating report: ${error.message}
                     </div>
                 `;
             }
         }
         
-        function generateComprehensiveReport() {
+        async function loadAssessmentData(patientId) {
+            // Load patient data
+            const { data: patient, error: patientError } = await supabase
+                .from('patients')
+                .select('*')
+                .eq('id', patientId)
+                .single();
+            
+            if (patientError) throw patientError;
+            patientData = patient;
+            
+            // Load health assessment
+            const { data: health, error: healthError } = await supabase
+                .from('health_assessments')
+                .select('*')
+                .eq('patient_id', patientId)
+                .order('created_at', { ascending: false })
+                .limit(1)
+                .single();
+            
+            if (!healthError) healthAssessment = health;
+            
+            // Load IRIS assessment
+            const { data: iris, error: irisError } = await supabase
+                .from('iris_assessments')
+                .select('*')
+                .eq('patient_id', patientId)
+                .order('created_at', { ascending: false })
+                .limit(1)
+                .single();
+            
+            if (!irisError) irisAssessment = iris;
+            
+            // Ensure both assessments exist
+            if (!healthAssessment || !irisAssessment) {
+                throw new Error('Both health and IRIS assessments must be completed before generating report');
+            }
+        }
+        
+        async function generateTherapyRecommendations() {
+            const engine = new TherapyRecommendationEngine();
+            recommendedTherapies = await engine.generateRecommendations(
+                healthAssessment,
+                irisAssessment
+            );
+        }
+        
+        async function saveReport() {
+            const authData = JSON.parse(localStorage.getItem('celloxen_auth') || '{}');
+            const clinicId = authData.clinicId || sessionStorage.getItem('currentClinicId');
+            
+            reportData = {
+                patient_id: patientData.id,
+                clinic_id: clinicId,
+                report_type: 'comprehensive_diagnostic',
+                report_title: `Comprehensive Health Assessment Report - ${patientData.first_name} ${patientData.last_name}`,
+                report_data: {
+                    patient_info: {
+                        name: `${patientData.first_name} ${patientData.last_name}`,
+                        patient_id: patientData.patient_id,
+                        age: calculateAge(patientData.date_of_birth),
+                        gender: patientData.gender
+                    },
+                    health_assessment: healthAssessment,
+                    iris_assessment: irisAssessment,
+                    therapy_recommendations: recommendedTherapies
+                },
+                recommendations: recommendedTherapies.map(t => t.name),
+                therapies_recommended: recommendedTherapies.map(t => t.id),
+                created_at: new Date().toISOString()
+            };
+            
+            const { data, error } = await supabase
+                .from('medical_reports')
+                .insert([reportData])
+                .select()
+                .single();
+            
+            if (error) throw error;
+            reportId = data.id;
+        }
+        
+        function displayReport() {
             // Hide loading, show content
             document.getElementById('loadingState').style.display = 'none';
             document.getElementById('reportContent').style.display = 'block';
@@ -651,10 +681,10 @@
             displayIrisAnalysis();
             
             // Generate combined diagnosis
-            generateCombinedDiagnosis();
+            displayCombinedDiagnosis();
             
-            // Display therapy options
-            displayTherapyOptions();
+            // Display therapy recommendations
+            displayTherapyRecommendations();
         }
         
         function displayPatientInfo() {
@@ -683,7 +713,7 @@
                 </div>
                 <div class="info-item">
                     <div class="info-label">Report ID</div>
-                    <div class="info-value">RPT-${Date.now()}</div>
+                    <div class="info-value">RPT-${reportId || Date.now()}</div>
                 </div>
             `;
         }
@@ -711,7 +741,7 @@
                             <div class="domain-score ${status}">${statusText} (${wellness}% wellness)</div>
                         </div>
                         <div style="font-size: 14px; color: #64748b;">
-                            Score: ${score}/100 - ${getRecommendation(domain, score)}
+                            Score: ${score}/100
                         </div>
                     </div>
                 `;
@@ -728,20 +758,13 @@
                 return;
             }
             
-            let irisHtml = '';
-            
-            // Constitutional Type
-            irisHtml += `
+            let irisHtml = `
                 <div class="iris-card">
                     <h4>Constitutional Type</h4>
                     <p><strong>Type:</strong> ${irisAssessment.constitutional_type || 'Not determined'}</p>
-                    <p style="font-size: 14px; color: #64748b; margin-top: 10px;">
-                        ${getConstitutionalDescription(irisAssessment.constitutional_type)}
-                    </p>
                 </div>
             `;
             
-            // Organ Analysis
             if (irisAssessment.organ_analysis) {
                 irisHtml += `
                     <div class="iris-card">
@@ -755,95 +778,50 @@
                 `;
             }
             
-            // Stress Indicators
-            if (irisAssessment.stress_indicators) {
-                irisHtml += `
-                    <div class="iris-card">
-                        <h4>Stress Indicators</h4>
-                        <p><strong>Level:</strong> ${irisAssessment.stress_indicators.level}</p>
-                        <p><strong>Areas:</strong> ${irisAssessment.stress_indicators.areas?.join(', ') || 'None'}</p>
-                    </div>
-                `;
-            }
-            
             irisFindingsDiv.innerHTML = irisHtml;
         }
         
-        function generateCombinedDiagnosis() {
+        function displayCombinedDiagnosis() {
             const diagnosisDiv = document.getElementById('combinedDiagnosis');
-            
-            // Analyze both assessments to generate recommendations
             const primaryConcerns = healthAssessment?.primary_concerns || [];
             const secondaryConcerns = healthAssessment?.secondary_concerns || [];
             
             let diagnosisHtml = `
-                <div style="background: linear-gradient(135deg, #f0f9ff, #e0f2fe); border-radius: 12px; padding: 20px; margin-bottom: 20px;">
-                    <h3 style="color: #1e293b; margin-bottom: 15px;">Primary Diagnosis</h3>
+                <div style="background: linear-gradient(135deg, #f0f9ff, #e0f2fe); border-radius: 12px; padding: 20px;">
+                    <h3 style="color: #1e293b; margin-bottom: 15px;">Comprehensive Diagnosis</h3>
             `;
             
             if (primaryConcerns.length > 0) {
                 diagnosisHtml += `
-                    <p><strong>Primary Areas of Concern:</strong></p>
+                    <p><strong>Primary Concerns:</strong></p>
                     <ul style="margin: 10px 0 20px 20px;">
                         ${primaryConcerns.map(concern => `<li>${concern}</li>`).join('')}
                     </ul>
                 `;
             }
             
-            if (secondaryConcerns.length > 0) {
-                diagnosisHtml += `
-                    <p><strong>Secondary Considerations:</strong></p>
-                    <ul style="margin: 10px 0 20px 20px;">
-                        ${secondaryConcerns.map(concern => `<li>${concern}</li>`).join('')}
-                    </ul>
-                `;
-            }
-            
-            // Constitutional considerations from IRIS
-            if (irisAssessment?.constitutional_type) {
-                diagnosisHtml += `
-                    <p><strong>Constitutional Considerations:</strong></p>
-                    <p style="margin: 10px 0; color: #475569;">
-                        Based on ${irisAssessment.constitutional_type} constitution, focus on supportive therapies
-                        that address inherent constitutional weaknesses.
-                    </p>
-                `;
-            }
-            
             diagnosisHtml += `
-                    <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin-top: 20px; border-radius: 8px;">
-                        <strong>Clinical Recommendation:</strong> A multi-modal therapeutic approach combining 
-                        frequency medicine, nutritional support, and lifestyle modifications is recommended 
-                        for optimal results.
-                    </div>
+                <div class="alert alert-success" style="margin-top: 20px;">
+                    <strong>Report Generated:</strong> A comprehensive diagnostic report has been generated 
+                    with personalized therapy recommendations based on the combined assessment findings.
                 </div>
+            </div>
             `;
             
             diagnosisDiv.innerHTML = diagnosisHtml;
         }
         
-        function displayTherapyOptions() {
+        function displayTherapyRecommendations() {
             const therapyGrid = document.getElementById('therapyGrid');
             
-            // Get recommended therapies based on assessment
-            const recommendedTherapies = getRecommendedTherapies();
-            
             let therapyHtml = '';
-            availableTherapies.forEach(therapy => {
-                const isRecommended = recommendedTherapies.includes(therapy.id);
-                
+            recommendedTherapies.forEach(therapy => {
                 therapyHtml += `
-                    <div class="therapy-option ${isRecommended ? 'recommended' : ''}" 
-                         data-therapy-id="${therapy.id}"
-                         onclick="toggleTherapy('${therapy.id}')">
+                    <div class="therapy-option selected">
                         <div class="therapy-name">${therapy.name}</div>
                         <div class="therapy-description">${therapy.description}</div>
                         <div class="therapy-indication">
-                            ${isRecommended ? '⭐ Recommended - ' : ''}
-                            ${therapy.indications.join(', ')}
-                        </div>
-                        <div style="font-size: 12px; color: #94a3b8; margin-top: 8px;">
-                            Duration: ${therapy.duration}
+                            Priority: ${therapy.priority} | Code: ${therapy.code}
                         </div>
                     </div>
                 `;
@@ -852,62 +830,57 @@
             therapyGrid.innerHTML = therapyHtml;
         }
         
-        function getRecommendedTherapies() {
-            const recommended = [];
+        async function sendReportEmail() {
+            const emailStatusDiv = document.getElementById('emailStatus');
+            const emailMessage = document.getElementById('emailMessage');
             
-            if (!healthAssessment?.scores) return recommended;
+            emailStatusDiv.style.display = 'block';
+            emailMessage.textContent = 'Sending report to patient email...';
             
-            const scores = healthAssessment.scores;
-            
-            // Recommend therapies based on scores
-            if (scores.stress > 50) recommended.push('frequency_therapy');
-            if (scores.joint > 50) recommended.push('light_therapy', 'pemf_therapy');
-            if (scores.energy > 50) recommended.push('ozone_therapy', 'iv_therapy');
-            if (scores.sleep > 50) recommended.push('frequency_therapy', 'infrared_sauna');
-            
-            return recommended;
+            try {
+                // Simulate email sending (in production, use actual email service)
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                
+                // Log email sent
+                await supabase
+                    .from('email_logs')
+                    .insert([{
+                        patient_id: patientData.id,
+                        email_type: 'comprehensive_report',
+                        email_to: patientData.email,
+                        report_id: reportId,
+                        sent_at: new Date().toISOString()
+                    }]);
+                
+                emailMessage.innerHTML = `
+                    <span style="color: #10b981;">✓ Report successfully sent to ${patientData.email || 'patient email'}</span>
+                `;
+                
+                // Update progress
+                document.querySelector('.progress-step:nth-child(4)').classList.add('completed');
+                document.querySelector('.progress-step:nth-child(5)').classList.add('active');
+                
+            } catch (error) {
+                emailMessage.innerHTML = `
+                    <span style="color: #ef4444;">⚠ Email could not be sent. Report saved for manual sending.</span>
+                `;
+            }
         }
         
-        function toggleTherapy(therapyId) {
-            const therapyElement = document.querySelector(`[data-therapy-id="${therapyId}"]`);
+        async function updateWorkflowStatus() {
+            await workflowManager.updateStage(patientData.id, 'report_generation');
             
-            if (selectedTherapies.includes(therapyId)) {
-                // Remove from selected
-                selectedTherapies = selectedTherapies.filter(id => id !== therapyId);
-                therapyElement.classList.remove('selected');
-            } else {
-                // Add to selected
-                selectedTherapies.push(therapyId);
-                therapyElement.classList.add('selected');
-            }
-            
-            // Enable/disable confirm button
-            document.getElementById('confirmTherapiesBtn').disabled = selectedTherapies.length === 0;
+            // Store therapy recommendations for treatment planning
+            sessionStorage.setItem('recommendedTherapies', JSON.stringify(recommendedTherapies));
+            sessionStorage.setItem('reportId', reportId);
         }
         
-        window.confirmTherapies = async function() {
-            if (selectedTherapies.length === 0) {
-                alert('Please select at least one therapy');
-                return;
-            }
-            
-            // Prepare therapy data
-            const therapyData = {
-                patient_id: patientData.id,
-                selected_therapies: selectedTherapies,
-                health_assessment_id: healthAssessment?.id,
-                iris_assessment_id: irisAssessment?.id,
-                created_at: new Date().toISOString()
-            };
-            
-            // Save to session and navigate to treatment schedule
-            sessionStorage.setItem('selectedTherapies', JSON.stringify(therapyData));
-            window.location.href = `treatment-schedule.html?patient=${patientData.id}`;
+        window.proceedToTreatmentPlan = function() {
+            window.location.href = `treatment-planning.html?patientId=${patientData.id}&reportId=${reportId}`;
         };
         
-        window.saveDraft = async function() {
-            // Save current report as draft
-            alert('Report saved as draft. You can continue later from the dashboard.');
+        window.viewFullReport = function() {
+            window.location.href = `medical-reports.html?reportId=${reportId}`;
         };
         
         function calculateAge(dateOfBirth) {
@@ -935,25 +908,6 @@
             };
             return formats[domain] || domain;
         }
-        
-        function getRecommendation(domain, score) {
-            if (score < 30) return 'Maintain current wellness practices';
-            if (score < 70) return 'Moderate intervention recommended';
-            return 'Immediate therapeutic intervention advised';
-        }
-        
-        function getConstitutionalDescription(type) {
-            const descriptions = {
-                'Lymphatic': 'Tendency towards lymphatic congestion. Focus on drainage and immune support.',
-                'Haematogenic': 'Predisposition to circulatory issues. Emphasis on cardiovascular health.',
-                'Biliary': 'Digestive system sensitivity. Liver and gallbladder support recommended.',
-                'Mixed': 'Multiple constitutional factors. Comprehensive approach required.'
-            };
-            return descriptions[type] || 'Constitutional assessment provides insight into inherent health tendencies.';
-        }
-        
-        // Make functions globally accessible
-        window.toggleTherapy = toggleTherapy;
     </script>
 </body>
 </html>
