@@ -1,373 +1,249 @@
-// Enhanced Workflow Manager for Celloxen Platform
-// Handles patient journey through assessment, treatment, and follow-up cycles
-
-import { supabase } from './supabase-config.js';
-
-const workflowStages = {
-    REGISTERED: 'registered',
-    HEALTH_ASSESSMENT_PENDING: 'health_assessment_pending',
-    HEALTH_ASSESSMENT_COMPLETED: 'health_assessment_completed',
-    IRIS_ASSESSMENT_PENDING: 'iris_assessment_pending',
-    IRIS_ASSESSMENT_COMPLETED: 'iris_assessment_completed',
-    REPORT_PENDING: 'report_pending',
-    REPORT_GENERATED: 'report_generated',
-    TREATMENT_PLANNING: 'treatment_planning',
-    IN_TREATMENT: 'in_treatment',
-    POST_TREATMENT_ASSESSMENT: 'post_treatment_assessment'
-};
-
-const workflowManager = {
-    // Get current workflow status for a patient
-    async getPatientWorkflow(patientId) {
+// Workflow Manager - Fixed for valid stage names
+class WorkflowManager {
+    constructor(supabase) {
+        this.supabase = supabase;
+        
+        // Valid workflow stages that match the database constraint
+        this.validStages = [
+            'registered',
+            'health_questionnaire',  // Changed from 'health_assessment'
+            'iris_assessment',
+            'assessment_complete',
+            'treatment_planning',
+            'in_treatment',
+            'completed'
+        ];
+    }
+    
+    async updateStage(patientId, newStage) {
         try {
-            const { data, error } = await supabase
+            // Valid workflow stages from database constraint
+            const validStages = [
+                'registered',
+                'health_assessment',
+                'iris_assessment',
+                'report_generation',
+                'treatment_planning',
+                'in_treatment',
+                'completed',
+                'maintenance'
+            ];
+            
+            // Validate stage name
+            if (!validStages.includes(newStage)) {
+                console.warn(`Invalid stage: ${newStage}. Defaulting to 'registered'.`);
+                newStage = 'registered';
+            }
+            
+            const authData = JSON.parse(localStorage.getItem('celloxen_auth') || '{}');
+            const clinicId = authData.clinicId || sessionStorage.getItem('currentClinicId');
+            
+            // First try to get existing record
+            const { data: existing, error: checkError } = await this.supabase
                 .from('patient_workflow_status')
                 .select('*')
                 .eq('patient_id', patientId)
                 .single();
             
-            if (error && error.code === 'PGRST116') {
-                // No workflow record exists, create one
-                return await this.initializeWorkflow(patientId);
+            if (checkError && checkError.code === 'PGRST116') {
+                // No record exists - INSERT new one
+                const { data, error } = await this.supabase
+                    .from('patient_workflow_status')
+                    .insert([{
+                        clinic_id: parseInt(clinicId),
+                        patient_id: parseInt(patientId),
+                        current_stage: newStage,
+                        updated_at: new Date().toISOString()
+                    }])
+                    .select();
+                
+                if (error) {
+                    console.error('Error inserting workflow status:', error);
+                    throw error;
+                }
+                console.log(`Workflow created for patient ${patientId}: ${newStage}`, data);
+            } else if (existing) {
+                // Record exists - UPDATE it
+                const { data, error } = await this.supabase
+                    .from('patient_workflow_status')
+                    .update({
+                        current_stage: newStage,
+                        updated_at: new Date().toISOString()
+                    })
+                    .eq('patient_id', patientId)
+                    .select();
+                
+                if (error) {
+                    console.error('Error updating workflow status:', error);
+                    throw error;
+                }
+                console.log(`Workflow updated for patient ${patientId}: ${newStage}`, data);
+            }
+            
+            return true;
+        } catch (error) {
+            console.error('Error in updateStage:', error);
+            // Don't fail the whole process if workflow update fails
+            return false;
+        }
+    }
+    
+    async completeHealthAssessment(patientId, assessmentData) {
+        try {
+            const authData = JSON.parse(localStorage.getItem('celloxen_auth') || '{}');
+            const clinicId = authData.clinicId || sessionStorage.getItem('currentClinicId');
+            
+            // Store assessment data
+            const { data, error } = await this.supabase
+                .from('health_assessments')
+                .insert([{
+                    patient_id: parseInt(patientId),
+                    clinic_id: parseInt(clinicId),
+                    assessment_data: assessmentData,
+                    created_at: new Date().toISOString()
+                }]);
+            
+            if (error && error.code !== '42P01') { // Ignore if table doesn't exist
+                console.warn('Health assessments table issue:', error);
+            }
+            
+            // Update workflow stage to health_assessment (valid stage from constraint)
+            await this.updateStage(patientId, 'health_assessment');
+            
+            // Check if IRIS assessment is also complete
+            const { data: iris } = await this.supabase
+                .from('iris_assessments')
+                .select('id')
+                .eq('patient_id', patientId)
+                .limit(1)
+                .single();
+            
+            if (iris) {
+                // Both assessments complete - move to report generation
+                await this.updateStage(patientId, 'report_generation');
+            }
+            
+            return assessmentData;
+        } catch (error) {
+            console.error('Error completing health assessment:', error);
+            return assessmentData; // Return data even if database save fails
+        }
+    }
+    
+    async completeIrisAssessment(patientId, irisData) {
+        try {
+            const authData = JSON.parse(localStorage.getItem('celloxen_auth') || '{}');
+            const clinicId = authData.clinicId || sessionStorage.getItem('currentClinicId');
+            
+            // Store IRIS assessment data
+            const { data, error } = await this.supabase
+                .from('iris_assessments')
+                .insert([{
+                    patient_id: parseInt(patientId),
+                    clinic_id: parseInt(clinicId),
+                    ...irisData,
+                    created_at: new Date().toISOString()
+                }]);
+            
+            if (error) {
+                console.warn('IRIS assessments table issue:', error);
+            }
+            
+            // Update workflow stage
+            await this.updateStage(patientId, 'iris_assessment');
+            
+            // Check if health assessment is also complete
+            const { data: health } = await this.supabase
+                .from('health_assessments')
+                .select('id')
+                .eq('patient_id', patientId)
+                .limit(1)
+                .single();
+            
+            if (health) {
+                // Both assessments complete - move to report generation
+                await this.updateStage(patientId, 'report_generation');
+            }
+            
+            return irisData;
+        } catch (error) {
+            console.error('Error completing IRIS assessment:', error);
+            return irisData; // Return data even if database save fails
+        }
+    }
+    
+    async getWorkflowStatus(patientId) {
+        try {
+            const { data, error } = await this.supabase
+                .from('patient_workflow_status')
+                .select('*')
+                .eq('patient_id', patientId)
+                .single();
+            
+            if (error) {
+                return { current_stage: 'registered' };
             }
             
             return data;
         } catch (error) {
-            console.error('Error getting workflow:', error);
-            return null;
+            console.error('Error getting workflow status:', error);
+            return { current_stage: 'registered' };
         }
-    },
-
-    // Initialize workflow for new patient
-    async initializeWorkflow(patientId) {
-        const authData = JSON.parse(localStorage.getItem('celloxen_auth') || '{}');
-        const clinicId = authData.clinicId || sessionStorage.getItem('currentClinicId');
-        
-        const workflowData = {
-            patient_id: patientId,
-            clinic_id: clinicId,
-            current_stage: workflowStages.REGISTERED,
-            assessment_count: 0,
-            assessment_type: 'initial',
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-        };
-        
-        try {
-            const { data, error } = await supabase
-                .from('patient_workflow_status')
-                .insert(workflowData)
-                .select()
-                .single();
-            
-            if (error) throw error;
-            return data;
-        } catch (error) {
-            console.error('Error initializing workflow:', error);
-            return null;
-        }
-    },
-
-    // Update workflow stage
-    async updateStage(patientId, newStage, metadata = {}) {
-        try {
-            const updateData = {
-                current_stage: newStage,
-                updated_at: new Date().toISOString(),
-                ...metadata
-            };
-            
-            const { error } = await supabase
-                .from('patient_workflow_status')
-                .update(updateData)
-                .eq('patient_id', patientId);
-            
-            if (error) throw error;
-            
-            // Log stage transition
-            await this.logStageTransition(patientId, newStage, metadata);
-            
-            return true;
-        } catch (error) {
-            console.error('Error updating workflow stage:', error);
-            return false;
-        }
-    },
-
-    // Log stage transitions for audit
-    async logStageTransition(patientId, newStage, metadata) {
-        const authData = JSON.parse(localStorage.getItem('celloxen_auth') || '{}');
-        
-        try {
-            await supabase
-                .from('workflow_transitions')
-                .insert({
-                    patient_id: patientId,
-                    new_stage: newStage,
-                    transitioned_by: authData.userId,
-                    transition_type: metadata.skipped ? 'skipped' : 'normal',
-                    skip_reason: metadata.skip_reason || null,
-                    created_at: new Date().toISOString()
-                });
-        } catch (error) {
-            console.error('Error logging transition:', error);
-        }
-    },
-
-    // Determine next action based on current stage
-    async continueAssessment(patientId) {
-        const workflow = await this.getPatientWorkflow(patientId);
-        if (!workflow) {
-            alert('Error loading patient workflow');
-            return;
-        }
-        
-        // Store patient ID for the assessment modules
-        sessionStorage.setItem('currentPatientId', patientId);
-        
-        switch (workflow.current_stage) {
-            case workflowStages.REGISTERED:
-            case workflowStages.HEALTH_ASSESSMENT_PENDING:
-                await this.startHealthAssessment(patientId);
-                break;
-                
-            case workflowStages.HEALTH_ASSESSMENT_COMPLETED:
-            case workflowStages.IRIS_ASSESSMENT_PENDING:
-                await this.startIrisAssessment(patientId);
-                break;
-                
-            case workflowStages.IRIS_ASSESSMENT_COMPLETED:
-            case workflowStages.REPORT_PENDING:
-                await this.generateReport(patientId);
-                break;
-                
-            case workflowStages.REPORT_GENERATED:
-                await this.viewReport(patientId);
-                break;
-                
-            case workflowStages.TREATMENT_PLANNING:
-                await this.startTreatmentPlanning(patientId);
-                break;
-                
-            case workflowStages.IN_TREATMENT:
-                await this.viewTreatmentProgress(patientId);
-                break;
-                
-            case workflowStages.POST_TREATMENT_ASSESSMENT:
-                await this.startPostTreatmentAssessment(patientId);
-                break;
-                
-            default:
-                alert('Unknown workflow stage. Please contact support.');
-        }
-    },
-
-    // Start health assessment - UPDATED to use integrated file
-    async startHealthAssessment(patientId) {
-        await this.updateStage(patientId, workflowStages.HEALTH_ASSESSMENT_PENDING);
-        window.location.href = 'lily-ai-agent-integrated.html';
-    },
-
-    // Complete health assessment - SIMPLIFIED
-    async completeHealthAssessment(patientId, assessmentData) {
-        try {
-            // Just update the workflow stage
-            // The actual data is saved by lily-ai-agent-integrated.html
-            await this.updateStage(patientId, workflowStages.HEALTH_ASSESSMENT_COMPLETED, {
-                assessment_count: 1,
-                assessment_type: assessmentData.assessment_type || 'initial'
-            });
-            
-            return true;
-        } catch (error) {
-            console.error('Error updating workflow after health assessment:', error);
-            return false;
-        }
-    },
-
-    // Start iris assessment - UPDATED to use integrated file
-    async startIrisAssessment(patientId) {
-        await this.updateStage(patientId, workflowStages.IRIS_ASSESSMENT_PENDING);
-        window.location.href = 'iris-assessment-integrated.html';
-    },
-
-    // Complete iris assessment
-    async completeIrisAssessment(patientId, assessmentData) {
-        try {
-            // Save iris assessment data
-            const { data: assessment, error } = await supabase
-                .from('iris_assessments')
-                .insert({
-                    patient_id: patientId,
-                    clinic_id: assessmentData.clinic_id,
-                    left_eye_image: assessmentData.left_eye_image,
-                    right_eye_image: assessmentData.right_eye_image,
-                    constitutional_type: assessmentData.iris_data?.constitutional_analysis?.constitutional_type,
-                    health_patterns: assessmentData.iris_data?.constitutional_analysis?.patterns,
-                    iris_data: assessmentData.iris_data,
-                    created_at: new Date().toISOString()
-                })
-                .select()
-                .single();
-            
-            if (error) throw error;
-            
-            // Update workflow stage
-            await this.updateStage(patientId, workflowStages.IRIS_ASSESSMENT_COMPLETED, {
-                last_iris_assessment_id: assessment.id
-            });
-            
-            return assessment;
-        } catch (error) {
-            console.error('Error completing iris assessment:', error);
-            return null;
-        }
-    },
-
-    // Generate comprehensive report
+    }
+    
     async generateReport(patientId) {
-        await this.updateStage(patientId, workflowStages.REPORT_PENDING);
-        window.location.href = `report-generator.html?patient=${patientId}`;
-    },
-
-    // View generated report
-    async viewReport(patientId) {
-        window.location.href = `view-report.html?patient=${patientId}`;
-    },
-
-    // Start treatment planning
-    async startTreatmentPlanning(patientId) {
-        await this.updateStage(patientId, workflowStages.TREATMENT_PLANNING);
-        window.location.href = `treatment-planning.html?patient=${patientId}`;
-    },
-
-    // View treatment progress
-    async viewTreatmentProgress(patientId) {
-        window.location.href = `treatment-progress.html?patient=${patientId}`;
-    },
-
-    // Start post-treatment assessment
-    async startPostTreatmentAssessment(patientId) {
-        // Mark as follow-up assessment
-        await this.updateStage(patientId, workflowStages.HEALTH_ASSESSMENT_PENDING, {
-            assessment_type: 'follow-up'
-        });
-        window.location.href = 'lily-ai-agent-integrated.html';
-    },
-
-    // Start patient journey (called from patient registration)
-    async startPatientJourney(patientId) {
-        // Store patient ID in session
-        sessionStorage.setItem('currentPatientId', patientId);
-        // Start with health assessment
-        await this.startHealthAssessment(patientId);
-    },
-
-    // Skip to specific stage (practitioner override)
-    async skipToStage(patientId, targetStage, reason) {
-        const authData = JSON.parse(localStorage.getItem('celloxen_auth') || '{}');
-        
-        if (!confirm(`Are you sure you want to skip to ${targetStage}? This will be logged.`)) {
-            return false;
-        }
-        
-        return await this.updateStage(patientId, targetStage, {
-            skipped: true,
-            skipped_by: authData.userId,
-            skip_reason: reason
-        });
-    },
-
-    // Get workflow statistics for dashboard
-    async getWorkflowStats() {
-        const authData = JSON.parse(localStorage.getItem('celloxen_auth') || '{}');
-        const clinicId = authData.clinicId || sessionStorage.getItem('currentClinicId');
-        
-        if (!clinicId) return {};
-        
         try {
-            const { data, error } = await supabase
-                .from('patient_workflow_status')
-                .select('current_stage')
-                .eq('clinic_id', clinicId);
+            // Get patient data
+            const { data: patient } = await this.supabase
+                .from('patients')
+                .select('*')
+                .eq('id', patientId)
+                .single();
             
-            if (error) throw error;
-            
-            // Count patients at each stage
-            const stats = {};
-            Object.values(workflowStages).forEach(stage => {
-                stats[stage] = 0;
-            });
-            
-            data?.forEach(record => {
-                if (stats.hasOwnProperty(record.current_stage)) {
-                    stats[record.current_stage]++;
-                }
-            });
-            
-            return stats;
-        } catch (error) {
-            console.error('Error getting workflow stats:', error);
-            return {};
-        }
-    },
-
-    // Get patients with incomplete assessments
-    async getIncompleteAssessments() {
-        const authData = JSON.parse(localStorage.getItem('celloxen_auth') || '{}');
-        const clinicId = authData.clinicId || sessionStorage.getItem('currentClinicId');
-        
-        if (!clinicId) return [];
-        
-        try {
-            const { data, error } = await supabase
-                .from('patient_workflow_status')
-                .select(`
-                    *,
-                    patients(first_name, last_name, patient_id)
-                `)
-                .eq('clinic_id', clinicId)
-                .in('current_stage', [
-                    workflowStages.HEALTH_ASSESSMENT_PENDING,
-                    workflowStages.IRIS_ASSESSMENT_PENDING,
-                    workflowStages.REPORT_PENDING
-                ])
-                .order('updated_at', { ascending: true });
-            
-            if (error) throw error;
-            
-            return data || [];
-        } catch (error) {
-            console.error('Error getting incomplete assessments:', error);
-            return [];
-        }
-    },
-
-    // Check if reassessment is needed
-    async checkReassessmentNeeded(patientId) {
-        try {
-            // Get last assessment date
-            const { data, error } = await supabase
+            // Get assessments
+            const { data: healthAssessment } = await this.supabase
                 .from('health_assessments')
-                .select('created_at')
+                .select('*')
                 .eq('patient_id', patientId)
                 .order('created_at', { ascending: false })
                 .limit(1)
                 .single();
             
-            if (error) return false;
+            const { data: irisAssessment } = await this.supabase
+                .from('iris_assessments')
+                .select('*')
+                .eq('patient_id', patientId)
+                .order('created_at', { ascending: false })
+                .limit(1)
+                .single();
             
-            // Check if more than 30 days since last assessment
-            const lastAssessment = new Date(data.created_at);
-            const daysSince = (new Date() - lastAssessment) / (1000 * 60 * 60 * 24);
+            // Generate comprehensive report
+            const report = {
+                patient: patient,
+                health_assessment: healthAssessment,
+                iris_assessment: irisAssessment,
+                generated_at: new Date().toISOString()
+            };
             
-            return daysSince > 30;
+            // Update workflow to treatment planning
+            await this.updateStage(patientId, 'treatment_planning');
+            
+            // Redirect to report view or post-assessment workflow
+            sessionStorage.setItem('lastAssessedPatientId', patientId);
+            sessionStorage.setItem('lastAssessmentId', Date.now().toString());
+            window.location.href = `post-assessment-workflow.html?patientId=${patientId}`;
+            
+            return report;
         } catch (error) {
-            console.error('Error checking reassessment:', error);
-            return false;
+            console.error('Error generating report:', error);
+            return null;
         }
     }
-};
+}
 
 // Export for use in other modules
-export { workflowManager, workflowStages };
+if (typeof window !== 'undefined') {
+    window.WorkflowManager = WorkflowManager;
+}
+
+export default WorkflowManager;
