@@ -502,11 +502,13 @@
             <div class="modal-footer">
                 <button class="btn btn-primary" onclick="printReport()">Print Report</button>
                 <button class="btn btn-primary" onclick="downloadReport()">Download PDF</button>
+                <button class="btn btn-primary" onclick="emailReportToPatient()">📧 Email to Patient</button>
                 <button class="btn btn-secondary" onclick="closeModal()">Close</button>
             </div>
         </div>
     </div>
 
+    <script src="email-sender.js"></script>
     <script type="module">
         import { supabase } from './supabase-config.js';
         
@@ -914,6 +916,115 @@
             if (!currentReport) return;
             // In a real implementation, this would generate a PDF
             alert('PDF generation would be implemented here');
+        };
+        
+        // Email report to patient function
+        window.emailReportToPatient = async function() {
+            if (!currentReport) {
+                alert('No report loaded');
+                return;
+            }
+            
+            // Check if patient has email
+            const patientEmail = currentReport.patientEmail || currentReport.patient?.email;
+            const patientName = currentReport.patientName || 
+                               `${currentReport.patient?.first_name || ''} ${currentReport.patient?.last_name || ''}`.trim() ||
+                               'Patient';
+            
+            if (!patientEmail) {
+                const enteredEmail = prompt(`Enter email address for ${patientName}:`);
+                if (!enteredEmail) return;
+                currentReport.patientEmail = enteredEmail;
+            }
+            
+            try {
+                // Generate PDF blob from report content
+                const reportContent = document.getElementById('reportContent').innerHTML;
+                
+                // Create a printable HTML document
+                const printWindow = window.open('', '', 'width=800,height=600');
+                printWindow.document.write(`
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <title>Health Assessment Report - ${patientName}</title>
+                        <style>
+                            body { 
+                                font-family: Arial, sans-serif; 
+                                padding: 20px;
+                                color: #333;
+                            }
+                            h1, h2, h3 { color: #1e3a8a; }
+                            .section { margin-bottom: 30px; }
+                            .metrics-grid { 
+                                display: grid; 
+                                grid-template-columns: repeat(2, 1fr); 
+                                gap: 15px;
+                                margin: 20px 0;
+                            }
+                            .metric-card {
+                                border: 1px solid #e5e7eb;
+                                padding: 15px;
+                                border-radius: 8px;
+                            }
+                            table { 
+                                width: 100%; 
+                                border-collapse: collapse; 
+                                margin: 10px 0;
+                            }
+                            th, td { 
+                                padding: 10px; 
+                                border: 1px solid #e5e7eb;
+                                text-align: left;
+                            }
+                            th { background: #f3f4f6; }
+                        </style>
+                    </head>
+                    <body>
+                        <h1>Health Assessment Report</h1>
+                        <p><strong>Patient:</strong> ${patientName}</p>
+                        <p><strong>Date:</strong> ${new Date().toLocaleDateString()}</p>
+                        <hr>
+                        ${reportContent}
+                    </body>
+                    </html>
+                `);
+                printWindow.document.close();
+                
+                // For demonstration, create a simple PDF blob
+                // In production, use a proper PDF library like jsPDF or html2pdf
+                const htmlContent = printWindow.document.documentElement.outerHTML;
+                const pdfBlob = new Blob([htmlContent], { type: 'application/pdf' });
+                printWindow.close();
+                
+                // Use the existing sendReportEmail function from email-sender.js
+                if (window.sendReportEmail) {
+                    const success = await window.sendReportEmail(
+                        pdfBlob, 
+                        currentReport.patientEmail || patientEmail,
+                        patientName
+                    );
+                    
+                    if (success) {
+                        // Log the email sent
+                        console.log('Report emailed successfully');
+                        
+                        // Optional: Update UI to show email was sent
+                        const modalFooter = document.querySelector('.modal-footer');
+                        const successMsg = document.createElement('span');
+                        successMsg.style.color = '#10b981';
+                        successMsg.style.marginRight = '10px';
+                        successMsg.textContent = '✓ Email sent!';
+                        modalFooter.prepend(successMsg);
+                        setTimeout(() => successMsg.remove(), 3000);
+                    }
+                } else {
+                    alert('Email service not loaded. Please ensure email-sender.js is included.');
+                }
+            } catch (error) {
+                console.error('Error sending email:', error);
+                alert('Failed to send email: ' + error.message);
+            }
         };
         
         window.printReportDirect = function(reportId) {
