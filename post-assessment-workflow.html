@@ -228,7 +228,7 @@
         <div class="assessment-summary">
             <div class="summary-item">
                 <span class="summary-label">Assessment Type</span>
-                <span class="summary-value" id="assessmentType">Comprehensive Health Assessment</span>
+                <span class="summary-value" id="assessmentType">Loading...</span>
             </div>
             <div class="summary-item">
                 <span class="summary-label">Date</span>
@@ -293,6 +293,10 @@
             
             // Set today's date
             document.getElementById('assessmentDate').textContent = new Date().toLocaleDateString('en-GB');
+            
+            // Set assessment type
+            const assessmentType = urlParams.get('type') || sessionStorage.getItem('assessmentType') || 'Health Assessment';
+            document.getElementById('assessmentType').textContent = assessmentType;
             
             if (patientId) {
                 await loadPatientData(patientId);
