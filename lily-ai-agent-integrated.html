@@ -1113,11 +1113,21 @@ Shall we proceed with the preliminary health assessment?`, 'lily', ['Yes, procee
                 // Save assessment to database
                 await this.saveAssessmentData(finalScores, primaryConcerns, secondaryConcerns);
                 
-                // Show completion options
+                // Store data for post-assessment workflow
+                if (this.sessionData.patientId) {
+                    sessionStorage.setItem('lastAssessedPatientId', this.sessionData.patientId);
+                    sessionStorage.setItem('lastAssessmentId', Date.now().toString());
+                    sessionStorage.setItem('assessmentType', 'Health Assessment');
+                }
+                
+                // Show completion options with redirect button
                 await this.addMessage("Would you like to:", 'lily');
                 
                 const actionButtons = `
                     <div class="action-buttons">
+                        <button class="action-btn primary" onclick="window.location.href='post-assessment-workflow.html?patientId=${this.sessionData.patientId || ''}&assessmentId=${sessionStorage.getItem('lastAssessmentId')}'">
+                            📧 Email Report to Patient
+                        </button>
                         <button class="btn-action btn-action-primary" onclick="lily.handleCompletionOptions('Continue to Iris Assessment')">
                             Continue to Iris Assessment →
                         </button>
