@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Automated Treatment Scheduling - Celloxen Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            color: #1f2937;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+            color: white;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+        }
+        
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        
+        .progress-bar {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+        
+        .progress-steps {
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+        }
+        
+        .progress-step {
+            flex: 1;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .progress-step::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: -50%;
+            right: -50%;
+            height: 2px;
+            background: #e2e8f0;
+            z-index: -1;
+        }
+        
+        .progress-step:first-child::before {
+            display: none;
+        }
+        
+        .progress-step.completed::before {
+            background: #10b981;
+        }
+        
+        .progress-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #e2e8f0;
+            margin: 0 auto 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .progress-step.active .progress-circle {
+            background: linear-gradient(135deg, #1e3a8a, #1e40af);
+            color: white;
+            transform: scale(1.1);
+        }
+        
+        .progress-step.completed .progress-circle {
+            background: #10b981;
+            color: white;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+            margin-bottom: 30px;
+        }
+        
+        .card-header {
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 20px;
+            margin-bottom: 25px;
+        }
+        
+        .card-title {
+            font-size: 22px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .plan-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .summary-item {
+            padding: 15px;
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            border-radius: 12px;
+        }
+        
+        .summary-label {
+            font-size: 12px;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .summary-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-top: 5px;
+        }
+        
+        .schedule-options {
+            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .option-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .option-group {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        
+        .option-label {
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 10px;
+            display: block;
+        }
+        
+        .time-slots {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .time-slot {
+            padding: 8px 16px;
+            background: #f1f5f9;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .time-slot:hover {
+            background: #e0f2fe;
+            border-color: #3b82f6;
+        }
+        
+        .time-slot.selected {
+            background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+            border-color: #3b82f6;
+            font-weight: 600;
+        }
+        
+        .day-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: #f8fafc;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            cursor: pointer;
+        }
+        
+        .day-checkbox:hover {
+            background: #f1f5f9;
+        }
+        
+        .day-checkbox input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+        
+        .schedule-preview {
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 12px;
+        }
+        
+        .session-item {
+            background: white;
+            border-left: 4px solid #10b981;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .session-info {
+            flex: 1;
+        }
+        
+        .session-number {
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 5px;
+        }
+        
+        .session-datetime {
+            font-size: 14px;
+            color: #64748b;
+        }
+        
+        .session-therapy {
+            background: #e0f2fe;
+            color: #1e3a8a;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #374151;
+        }
+        
+        .btn-secondary:hover {
+            background: #d1d5db;
+        }
+        
+        .btn-outline {
+            background: white;
+            color: #1e3a8a;
+            border: 2px solid #1e3a8a;
+        }
+        
+        .btn-outline:hover {
+            background: #f0f9ff;
+        }
+        
+        .alert {
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .alert-info {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            color: #92400e;
+            border-left: 4px solid #f59e0b;
+        }
+        
+        .alert-success {
+            background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+            color: #065f46;
+            border-left: 4px solid #10b981;
+        }
+        
+        .alert-warning {
+            background: linear-gradient(135deg, #fee2e2, #fecaca);
+            color: #991b1b;
+            border-left: 4px solid #ef4444;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #64748b;
+        }
+        
+        .spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #1e3a8a;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .conflict-warning {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 10px;
+            font-size: 14px;
+            color: #991b1b;
+        }
+        
+        .success-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .success-modal.show {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            width: 90%;
+            text-align: center;
+        }
+        
+        .success-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div>
+                <h1>Automated Treatment Scheduling</h1>
+                <p style="color: #cbd5e1; margin-top: 5px;">Generate and confirm appointment schedule</p>
+            </div>
+            <a href="treatment-planning.html" class="back-btn">← Back to Planning</a>
+        </div>
+    </div>
+    
+    <div class="container">
+        <!-- Progress Bar -->
+        <div class="progress-bar">
+            <div class="progress-steps">
+                <div class="progress-step completed">
+                    <div class="progress-circle">✓</div>
+                    <div>Assessment</div>
+                </div>
+                <div class="progress-step completed">
+                    <div class="progress-circle">✓</div>
+                    <div>Diagnosis</div>
+                </div>
+                <div class="progress-step completed">
+                    <div class="progress-circle">✓</div>
+                    <div>Planning</div>
+                </div>
+                <div class="progress-step active">
+                    <div class="progress-circle">4</div>
+                    <div>Scheduling</div>
+                </div>
+                <div class="progress-step">
+                    <div class="progress-circle">5</div>
+                    <div>Treatment</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Treatment Plan Summary -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Treatment Plan Summary</h2>
+            </div>
+            <div class="plan-summary" id="planSummary">
+                <div class="summary-item">
+                    <div class="summary-label">Patient</div>
+                    <div class="summary-value" id="patientName">Loading...</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">Duration</div>
+                    <div class="summary-value" id="planDuration">8 weeks</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">Total Sessions</div>
+                    <div class="summary-value" id="totalSessions">16</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">Start Date</div>
+                    <div class="summary-value" id="startDate">--</div>
+                </div>
+            </div>
+            <div id="therapiesList"></div>
+        </div>
+        
+        <!-- Scheduling Options -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Configure Schedule</h2>
+            </div>
+            
+            <div class="schedule-options">
+                <div class="alert alert-info">
+                    The system will automatically generate appointment slots based on your preferences. 
+                    Conflicts will be checked and highlighted.
+                </div>
+                
+                <div class="option-grid">
+                    <div class="option-group">
+                        <label class="option-label">Preferred Days</label>
+                        <div id="daySelection">
+                            <div class="day-checkbox">
+                                <input type="checkbox" id="monday" value="1" checked>
+                                <label for="monday">Monday</label>
+                            </div>
+                            <div class="day-checkbox">
+                                <input type="checkbox" id="tuesday" value="2">
+                                <label for="tuesday">Tuesday</label>
+                            </div>
+                            <div class="day-checkbox">
+                                <input type="checkbox" id="wednesday" value="3" checked>
+                                <label for="wednesday">Wednesday</label>
+                            </div>
+                            <div class="day-checkbox">
+                                <input type="checkbox" id="thursday" value="4">
+                                <label for="thursday">Thursday</label>
+                            </div>
+                            <div class="day-checkbox">
+                                <input type="checkbox" id="friday" value="5" checked>
+                                <label for="friday">Friday</label>
+                            </div>
+                            <div class="day-checkbox">
+                                <input type="checkbox" id="saturday" value="6">
+                                <label for="saturday">Saturday</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="option-group">
+                        <label class="option-label">Preferred Time Slots</label>
+                        <div class="time-slots">
+                            <div class="time-slot" onclick="selectTime(this, '09:00')">9:00 AM</div>
+                            <div class="time-slot selected" onclick="selectTime(this, '10:00')">10:00 AM</div>
+                            <div class="time-slot" onclick="selectTime(this, '11:00')">11:00 AM</div>
+                            <div class="time-slot" onclick="selectTime(this, '14:00')">2:00 PM</div>
+                            <div class="time-slot" onclick="selectTime(this, '15:00')">3:00 PM</div>
+                            <div class="time-slot" onclick="selectTime(this, '16:00')">4:00 PM</div>
+                        </div>
+                        
+                        <div style="margin-top: 20px;">
+                            <label class="option-label">Session Spacing</label>
+                            <select id="sessionSpacing" style="width: 100%; padding: 10px; border: 2px solid #e2e8f0; border-radius: 8px;">
+                                <option value="optimal">Optimal (Evenly distributed)</option>
+                                <option value="consecutive">Consecutive days</option>
+                                <option value="weekly">Same days each week</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="text-align: center; margin-top: 20px;">
+                    <button class="btn btn-primary" onclick="generateSchedule()">
+                        Generate Schedule →
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Schedule Preview -->
+        <div class="card" id="schedulePreviewCard" style="display: none;">
+            <div class="card-header">
+                <h2 class="card-title">Generated Schedule Preview</h2>
+            </div>
+            
+            <div class="alert alert-success">
+                Schedule generated successfully! Review the appointments below and confirm to save.
+            </div>
+            
+            <div class="schedule-preview" id="schedulePreview">
+                <!-- Generated schedule will appear here -->
+            </div>
+            
+            <div id="conflictsWarning" style="display: none;">
+                <div class="alert alert-warning">
+                    Some time slots have conflicts. Please review and adjust if needed.
+                </div>
+            </div>
+            
+            <div class="action-buttons">
+                <button class="btn btn-secondary" onclick="regenerateSchedule()">Regenerate</button>
+                <button class="btn btn-outline" onclick="exportSchedule()">Export to Calendar</button>
+                <button class="btn btn-primary" onclick="confirmSchedule()">
+                    Confirm & Create Appointments →
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Success Modal -->
+    <div class="success-modal" id="successModal">
+        <div class="modal-content">
+            <div class="success-icon">🎉</div>
+            <h2 style="color: #1e293b; margin-bottom: 15px;">Schedule Created Successfully!</h2>
+            <p style="color: #64748b; margin-bottom: 30px;">
+                <span id="createdCount">0</span> appointments have been created and saved to the system.
+            </p>
+            <div class="action-buttons">
+                <button class="btn btn-secondary" onclick="viewAppointments()">View Appointments</button>
+                <button class="btn btn-primary" onclick="goToDashboard()">Go to Dashboard</button>
+            </div>
+        </div>
+    </div>
+    
+    <script type="module">
+        import { supabase } from './supabase-config.js';
+        import { createBulkAppointments } from './appointments-bulk-creator.js';
+        
+        let treatmentPlan = null;
+        let patient = null;
+        let generatedSchedule = [];
+        let selectedTime = '10:00';
+        let selectedDays = [1, 3, 5]; // Monday, Wednesday, Friday
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Get treatment plan from session
+            const planId = sessionStorage.getItem('treatmentPlanId');
+            const patientId = sessionStorage.getItem('currentPatientId');
+            
+            if (!planId || !patientId) {
+                alert('No treatment plan found. Please complete planning first.');
+                window.location.href = 'treatment-planning.html';
+                return;
+            }
+            
+            await loadTreatmentPlan(planId);
+            await loadPatient(patientId);
+            displayPlanSummary();
+        });
+        
+        async function loadTreatmentPlan(planId) {
+            try {
+                const { data, error } = await supabase
+                    .from('treatment_plans')
+                    .select('*')
+                    .eq('id', planId)
+                    .single();
+                
+                if (error) throw error;
+                
+                treatmentPlan = data;
+                
+            } catch (error) {
+                console.error('Error loading treatment plan:', error);
+                // Load from session if database fails
+                const sessionPlan = sessionStorage.getItem('treatmentPlan');
+                if (sessionPlan) {
+                    treatmentPlan = JSON.parse(sessionPlan);
+                }
+            }
+        }
+        
+        async function loadPatient(patientId) {
+            try {
+                const { data, error } = await supabase
+                    .from('patients')
+                    .select('*')
+                    .eq('id', patientId)
+                    .single();
+                
+                if (error) throw error;
+                
+                patient = data;
+                
+            } catch (error) {
+                console.error('Error loading patient:', error);
+            }
+        }
+        
+        function displayPlanSummary() {
+            if (!treatmentPlan || !patient) return;
+            
+            document.getElementById('patientName').textContent = 
+                `${patient.first_name} ${patient.last_name}`;
+            document.getElementById('planDuration').textContent = 
+                `${treatmentPlan.duration_weeks} weeks`;
+            document.getElementById('totalSessions').textContent = 
+                treatmentPlan.total_sessions;
+            document.getElementById('startDate').textContent = 
+                new Date().toLocaleDateString('en-GB');
+            
+            // Display selected therapies
+            const therapiesList = document.getElementById('therapiesList');
+            if (treatmentPlan.protocol_details) {
+                therapiesList.innerHTML = `
+                    <div style="margin-top: 20px;">
+                        <h3 style="font-size: 16px; margin-bottom: 10px;">Selected Therapies:</h3>
+                        ${treatmentPlan.protocol_details.map(therapy => `
+                            <span class="session-therapy" style="margin-right: 10px;">
+                                ${therapy.therapy_name} (${therapy.duration || 45} min)
+                            </span>
+                        `).join('')}
+                    </div>
+                `;
+            }
+        }
+        
+        window.selectTime = function(element, time) {
+            // Remove selected from all
+            document.querySelectorAll('.time-slot').forEach(slot => {
+                slot.classList.remove('selected');
+            });
+            
+            // Add selected to clicked
+            element.classList.add('selected');
+            selectedTime = time;
+        };
+        
+        window.generateSchedule = function() {
+            // Get selected days
+            selectedDays = [];
+            document.querySelectorAll('#daySelection input:checked').forEach(checkbox => {
+                selectedDays.push(parseInt(checkbox.value));
+            });
+            
+            if (selectedDays.length === 0) {
+                alert('Please select at least one day');
+                return;
+            }
+            
+            const spacing = document.getElementById('sessionSpacing').value;
+            const startDate = new Date();
+            const totalSessions = treatmentPlan.total_sessions || 16;
+            const durationWeeks = treatmentPlan.duration_weeks || 8;
+            
+            generatedSchedule = [];
+            let currentDate = new Date(startDate);
+            let sessionCount = 0;
+            
+            // Generate sessions based on spacing preference
+            while (sessionCount < totalSessions && 
+                   currentDate <= new Date(startDate.getTime() + (durationWeeks * 7 * 24 * 60 * 60 * 1000))) {
+                
+                const dayOfWeek = currentDate.getDay();
+                
+                if (selectedDays.includes(dayOfWeek)) {
+                    // Rotate through therapies
+                    const therapyIndex = sessionCount % treatmentPlan.protocol_details.length;
+                    const therapy = treatmentPlan.protocol_details[therapyIndex];
+                    
+                    generatedSchedule.push({
+                        session_number: sessionCount + 1,
+                        date: new Date(currentDate),
+                        time: selectedTime,
+                        therapy: therapy,
+                        therapy_code: therapy.therapy_code,
+                        duration: therapy.duration || 45
+                    });
+                    
+                    sessionCount++;
+                    
+                    // For consecutive spacing, don't skip days
+                    if (spacing === 'consecutive' && sessionCount < totalSessions) {
+                        currentDate.setDate(currentDate.getDate() + 1);
+                        // Find next selected day
+                        while (!selectedDays.includes(currentDate.getDay())) {
+                            currentDate.setDate(currentDate.getDate() + 1);
+                        }
+                    } else {
+                        currentDate.setDate(currentDate.getDate() + 1);
+                    }
+                } else {
+                    currentDate.setDate(currentDate.getDate() + 1);
+                }
+            }
+            
+            displaySchedulePreview();
+            checkConflicts();
+        };
+        
+        function displaySchedulePreview() {
+            const previewDiv = document.getElementById('schedulePreview');
+            
+            previewDiv.innerHTML = generatedSchedule.map(session => {
+                const dateStr = session.date.toLocaleDateString('en-GB', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+                
+                const timeStr = formatTime(session.time);
+                
+                return `
+                    <div class="session-item">
+                        <div class="session-info">
+                            <div class="session-number">Session ${session.session_number}</div>
+                            <div class="session-datetime">${dateStr} at ${timeStr}</div>
+                        </div>
+                        <div>
+                            <span class="session-therapy">${session.therapy.therapy_name}</span>
+                            <span style="margin-left: 10px; color: #64748b;">${session.duration} min</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            // Show preview card
+            document.getElementById('schedulePreviewCard').style.display = 'block';
+            document.getElementById('schedulePreviewCard').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        async function checkConflicts() {
+            // Check for existing appointments at these times
+            try {
+                const dates = generatedSchedule.map(s => 
+                    s.date.toISOString().split('T')[0]
+                );
+                
+                const { data, error } = await supabase
+                    .from('appointments')
+                    .select('appointment_date, appointment_time')
+                    .in('appointment_date', dates)
+                    .eq('appointment_time', selectedTime + ':00')
+                    .eq('status', 'scheduled');
+                
+                if (!error && data && data.length > 0) {
+                    document.getElementById('conflictsWarning').style.display = 'block';
+                }
+                
+            } catch (error) {
+                console.error('Error checking conflicts:', error);
+            }
+        }
+        
+        window.regenerateSchedule = function() {
+            document.getElementById('schedulePreviewCard').style.display = 'none';
+            document.getElementById('conflictsWarning').style.display = 'none';
+            window.scrollTo({ top: 200, behavior: 'smooth' });
+        };
+        
+        window.confirmSchedule = async function() {
+            if (generatedSchedule.length === 0) {
+                alert('No schedule generated');
+                return;
+            }
+            
+            try {
+                // Prepare appointments for bulk insert
+                const appointments = generatedSchedule.map(session => ({
+                    patient_id: patient.id,
+                    clinic_id: patient.clinic_id,
+                    appointment_date: session.date.toISOString().split('T')[0],
+                    appointment_time: session.time + ':00',
+                    appointment_type: 'treatment',
+                    therapy_code: session.therapy_code,
+                    treatment_plan_id: treatmentPlan.id || null,
+                    session_number: session.session_number,
+                    status: 'scheduled',
+                    duration_minutes: session.duration,
+                    notes: `Treatment session ${session.session_number} - ${session.therapy.therapy_name}`
+                }));
+                
+                // Use bulk creator
+                const result = await createBulkAppointments(appointments);
+                
+                if (result.success) {
+                    // Show success modal
+                    document.getElementById('createdCount').textContent = result.count;
+                    document.getElementById('successModal').classList.add('show');
+                    
+                    // Update treatment plan status
+                    if (treatmentPlan.id) {
+                        await supabase
+                            .from('treatment_plans')
+                            .update({ 
+                                status: 'scheduled',
+                                appointments_created: true,
+                                scheduled_at: new Date().toISOString()
+                            })
+                            .eq('id', treatmentPlan.id);
+                    }
+                } else {
+                    alert('Error creating appointments: ' + result.error);
+                }
+                
+            } catch (error) {
+                console.error('Error creating appointments:', error);
+                alert('Error creating appointments. Please try again.');
+            }
+        };
+        
+        window.exportSchedule = function() {
+            // Generate ICS calendar file
+            let icsContent = 'BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Celloxen//Treatment Schedule//EN\n';
+            
+            generatedSchedule.forEach(session => {
+                const startTime = new Date(session.date);
+                const [hours, minutes] = session.time.split(':');
+                startTime.setHours(parseInt(hours), parseInt(minutes));
+                
+                const endTime = new Date(startTime);
+                endTime.setMinutes(endTime.getMinutes() + session.duration);
+                
+                icsContent += 'BEGIN:VEVENT\n';
+                icsContent += `DTSTART:${formatICSDate(startTime)}\n`;
+                icsContent += `DTEND:${formatICSDate(endTime)}\n`;
+                icsContent += `SUMMARY:Treatment Session ${session.session_number} - ${patient.first_name} ${patient.last_name}\n`;
+                icsContent += `DESCRIPTION:${session.therapy.therapy_name}\\nPatient: ${patient.first_name} ${patient.last_name}\\nTherapy Code: ${session.therapy_code}\n`;
+                icsContent += `LOCATION:Celloxen Clinic\n`;
+                icsContent += 'END:VEVENT\n';
+            });
+            
+            icsContent += 'END:VCALENDAR';
+            
+            // Download the file
+            const blob = new Blob([icsContent], { type: 'text/calendar' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `treatment-schedule-${patient.patient_id}.ics`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        };
+        
+        function formatTime(time) {
+            const [hours, minutes] = time.split(':');
+            const hour = parseInt(hours);
+            const ampm = hour >= 12 ? 'PM' : 'AM';
+            const displayHour = hour > 12 ? hour - 12 : hour;
+            return `${displayHour}:${minutes} ${ampm}`;
+        }
+        
+        function formatICSDate(date) {
+            return date.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+        }
+        
+        window.viewAppointments = function() {
+            window.location.href = 'appointments-management.html';
+        };
+        
+        window.goToDashboard = function() {
+            window.location.href = 'clinic-dashboard.html';
+        };
+    </script>
+</body>
+</html>
