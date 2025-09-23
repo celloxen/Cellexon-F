@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Celloxen Health Iris Diagnostics</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- html2pdf.js for PDF generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .loader {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            width: 1.5rem;
+            height: 1.5rem;
+            animation: spin 1s linear infinite;
+        }
+        #report-content {
+            box-shadow: none;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <div class="container mx-auto p-4 md:p-8 max-w-4xl">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-teal-700">Celloxen Health Iris Diagnostics</h1>
+            <p class="text-gray-600 mt-2">Upload a scan to generate a holistic wellness report.</p>
+        </header>
+
+        <main class="bg-white p-6 md:p-8 rounded-2xl shadow-lg space-y-8">
+            <!-- API Configuration & User Input Section -->
+            <div id="input-section">
+                <h3 class="text-xl font-semibold text-gray-800 text-center mb-6">Step 1: Configuration & Client Details</h3>
+                <div class="space-y-6">
+                    <!-- API Settings -->
+                    <div class="bg-gray-50 p-4 rounded-lg border">
+                        <h4 class="font-semibold text-gray-700 mb-3">System Configuration</h4>
+                        <div class="space-y-4">
+                             <div>
+                                <label for="apiEndpoint" class="block text-sm font-medium text-gray-700 mb-1">API Endpoint URL</label>
+                                <input type="text" id="apiEndpoint" value="https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-vision:generateContent" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 bg-gray-100" readonly>
+                            </div>
+                             <div>
+                                <label for="apiKey" class="block text-sm font-medium text-gray-700 mb-1">Your API Key</label>
+                                <input type="password" id="apiKey" placeholder="AIzaSyClSDlGS1bsiVT2Z3RGoEB353S96hBNsZY" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500">
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Client Details -->
+                    <div>
+                        <label for="clientName" class="block text-sm font-medium text-gray-700 mb-1">Client Name</label>
+                        <input type="text" id="clientName" placeholder="Enter client's name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500">
+                    </div>
+                    <div>
+                        <label for="iris-upload-input" class="block text-sm font-medium text-gray-700 mb-1">Upload Iris Scan</label>
+                        <div class="mt-2 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg">
+                            <div class="space-y-1 text-center">
+                                <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true"><path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                                <div class="flex text-sm text-gray-600"><label for="iris-upload-input" class="relative cursor-pointer bg-white rounded-md font-medium text-teal-600 hover:text-teal-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-teal-500"><span>Upload a file</span><input id="iris-upload-input" type="file" class="sr-only" accept="image/*"></label><p class="pl-1">or drag and drop</p></div>
+                                <p class="text-xs text-gray-500">PNG, JPG up to 10MB</p>
+                            </div>
+                        </div>
+                    </div>
+                     <div id="image-preview-container" class="hidden text-center"><p class="text-sm font-medium text-gray-700 mb-2">Image Preview:</p><img id="image-preview" src="#" alt="Iris Scan Preview" class="max-w-xs mx-auto rounded-lg shadow-md"/></div>
+                    <button id="analyze-btn" class="w-full bg-teal-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-teal-700 transition-all duration-300 ease-in-out flex items-center justify-center space-x-2 disabled:bg-gray-400" disabled>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                        <span>Analyze & Generate Report</span>
+                    </button>
+                </div>
+            </div>
+            
+             <!-- Loading State -->
+             <div id="loading-state" class="hidden flex-col items-center justify-center text-center p-8 space-y-4">
+                <div class="loader" style="border-top-color: #0d9488;"></div>
+                <p class="text-teal-700 font-medium">Contacting the analysis system...<br>Please wait for the analysis to complete.</p>
+            </div>
+            
+            <!-- Error State -->
+            <div id="error-state" class="hidden flex-col items-center justify-center text-center p-8 space-y-4 bg-red-50 border border-red-200 rounded-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <h4 class="text-lg font-bold text-red-700">Analysis Failed</h4>
+                <p id="error-message" class="text-red-600"></p>
+                <button id="try-again-btn" class="bg-red-500 text-white font-bold py-2 px-5 rounded-lg hover:bg-red-600 transition-all">Try Again</button>
+            </div>
+
+
+            <!-- Generated Report Section -->
+            <div id="report-container" class="hidden">
+                 <div id="report-content" class="bg-white p-6 md:p-10">
+                    <!-- Report Header -->
+                    <div class="text-center border-b-2 border-teal-100 pb-6 mb-6">
+                        <h2 class="text-3xl font-bold text-teal-700">Celloxen Health Iris Insight Report</h2>
+                        <p class="text-gray-600 mt-2">A wellness perspective on your unique iris patterns.</p>
+                        <p class="text-lg font-semibold mt-4" id="report-client-name"></p>
+                        <p class="text-sm text-gray-500" id="report-date"></p>
+                    </div>
+
+                    <!-- Disclaimer -->
+                    <div class="bg-amber-100 border-l-4 border-amber-500 text-amber-800 p-4 rounded-lg mb-8">
+                        <h3 class="font-bold">Important Disclaimer</h3>
+                        <p class="mt-1 text-sm">This report is based on the principles of iridology and is intended for informational and holistic wellness purposes only. It is **not a medical diagnosis** and does not replace consultation with a qualified healthcare professional. The insights provided are meant to support self-awareness on your personal wellness journey.</p>
+                    </div>
+
+                    <!-- Iris Image in Report -->
+                    <div class="text-center mb-8">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-4">Your Iris Scan</h3>
+                        <img id="report-image" src="#" alt="Analyzed Iris Scan" class="max-w-sm mx-auto rounded-lg shadow-lg border-4 border-white"/>
+                    </div>
+                    
+                    <!-- Dynamic Findings Area -->
+                    <div id="findings-area" class="space-y-8"></div>
+
+                     <!-- General Wellness Suggestions -->
+                    <div class="mt-12 pt-6 border-t-2 border-teal-100">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-4 text-center">Invitations for Balance & Wellness</h3>
+                        <ul class="list-disc list-inside space-y-2 text-gray-700">
+                             <li><strong>Nourish Your Body:</strong> Consider a balanced diet rich in colorful fruits and vegetables.</li>
+                            <li><strong>Mindful Hydration:</strong> Drinking adequate water supports all of your body's systems.</li>
+                            <li><strong>Rest and Recharge:</strong> Prioritize quality sleep to allow your body and mind to rejuvenate.</li>
+                            <li><strong>Gentle Movement:</strong> Activities like walking, stretching, or yoga can support circulation and manage stress.</li>
+                        </ul>
+                    </div>
+                 </div>
+                 
+                 <div class="mt-8 text-center space-x-4">
+                    <button id="download-pdf-btn" class="bg-green-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-700 transition-all">Download Report as PDF</button>
+                    <button id="start-over-btn" class="bg-gray-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-600 transition-all">Start New Analysis</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // DOM Elements
+        const apiEndpointInput = document.getElementById('apiEndpoint');
+        const apiKeyInput = document.getElementById('apiKey');
+        const clientNameInput = document.getElementById('clientName');
+        const uploadInput = document.getElementById('iris-upload-input');
+        const imagePreviewContainer = document.getElementById('image-preview-container');
+        const imagePreview = document.getElementById('image-preview');
+        const analyzeBtn = document.getElementById('analyze-btn');
+        
+        const inputSection = document.getElementById('input-section');
+        const loadingState = document.getElementById('loading-state');
+        const errorState = document.getElementById('error-state');
+        const errorMessage = document.getElementById('error-message');
+        const tryAgainBtn = document.getElementById('try-again-btn');
+        
+        const reportContainer = document.getElementById('report-container');
+        const reportContent = document.getElementById('report-content');
+        const reportClientName = document.getElementById('report-client-name');
+        const reportDate = document.getElementById('report-date');
+        const reportImage = document.getElementById('report-image');
+        const findingsArea = document.getElementById('findings-area');
+        const downloadPdfBtn = document.getElementById('download-pdf-btn');
+        const startOverBtn = document.getElementById('start-over-btn');
+
+        // App State
+        let uploadedImageBase64 = null;
+        let uploadedImageUrl = null;
+        let uploadedImageType = null; // To store MIME type like 'image/jpeg'
+
+        // --- Event Listeners ---
+        uploadInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                uploadedImageType = file.type; // Capture the MIME type
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    uploadedImageUrl = event.target.result;
+                    imagePreview.src = uploadedImageUrl;
+                    imagePreviewContainer.classList.remove('hidden');
+                    // Convert to Base64 for API
+                    const base64Reader = new FileReader();
+                    base64Reader.onloadend = () => {
+                        uploadedImageBase64 = base64Reader.result.split(',')[1]; // Get just the base64 part
+                        analyzeBtn.disabled = false;
+                    };
+                    base64Reader.readAsDataURL(file);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+        
+        analyzeBtn.addEventListener('click', async () => {
+            const apiEndpoint = apiEndpointInput.value.trim();
+            const apiKey = apiKeyInput.value.trim();
+            const clientName = clientNameInput.value.trim();
+
+            if (!apiKey || !clientName || !uploadedImageBase64) {
+                alert('Please fill in all fields: API Key, Client Name, and upload an image.');
+                return;
+            }
+
+            inputSection.classList.add('hidden');
+            loadingState.classList.remove('hidden');
+            loadingState.classList.add('flex');
+            errorState.classList.add('hidden');
+
+            try {
+                const response = await callAiApi(apiEndpoint, apiKey, uploadedImageBase64, uploadedImageType);
+                // Gemini's response has the JSON string in a specific part. We need to extract and parse it.
+                const jsonString = response.candidates[0].content.parts[0].text;
+                const parsedResponse = JSON.parse(jsonString);
+                generateReport(clientName, uploadedImageUrl, parsedResponse.findings);
+                loadingState.classList.add('hidden');
+                reportContainer.classList.remove('hidden');
+            } catch (error) {
+                loadingState.classList.add('hidden');
+                errorMessage.textContent = error.message;
+                errorState.classList.remove('hidden');
+                errorState.classList.add('flex');
+            }
+        });
+
+        async function callAiApi(endpoint, key, imageBase64, imageType) {
+            // This function is now specifically tailored for the Google Gemini Pro Vision API.
+            
+            const systemPrompt = `You are a world-class iridology expert. Your task is to analyze an image of a human iris and provide a holistic, non-diagnostic wellness report. You must base your analysis on established iridology theories (e.g., Dr. Bernard Jensen, German iridology).
+
+            VERY IMPORTANT: Your response MUST be a single, valid JSON object and nothing else. Do not include any text, backticks, or markdown formatting before or after the JSON object. The JSON object must have a single key "findings", which is an array of objects. Each object in the array should represent a single finding and must have the following keys: "name", "zone", "interpretation", and "invitation".
+
+            Example of the required JSON output format:
+            {
+              "findings": [
+                {
+                  "name": "Stress Rings",
+                  "zone": "Nervous System",
+                  "interpretation": "Based on the work of Dr. Bernard Jensen, these concentric rings suggest a state of neuromuscular tension...",
+                  "invitation": "To harmonize this pattern, consider practices that support the parasympathetic nervous system, such as meditation or yoga."
+                },
+                {
+                  "name": "Lacuna",
+                  "zone": "Kidney & Adrenals",
+                  "interpretation": "Following German iridology charts, this 'open weave' pattern may indicate an inherited energetic weakness...",
+                  "invitation": "Supporting this area could involve proper hydration and managing stress."
+                }
+              ]
+            }`;
+            
+            const requestUrl = `${endpoint}?key=${key}`;
+
+            const payload = {
+                contents: [
+                    {
+                        parts: [
+                            { text: systemPrompt },
+                            {
+                                "inline_data": {
+                                    "mime_type": imageType,
+                                    "data": imageBase64
+                                }
+                            },
+                            { text: "Please analyze this iris image and provide the report in the required JSON format." }
+                        ]
+                    }
+                ],
+                "generationConfig": {
+                    "response_mime_type": "application/json"
+                }
+            };
+
+            const response = await fetch(requestUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const responseData = await response.json();
+
+            if (!response.ok) {
+                const errorDetails = responseData.error || { message: 'An unknown error occurred.' };
+                throw new Error(`API Error (${response.status}): ${errorDetails.message}`);
+            }
+            
+            if (!responseData.candidates || !responseData.candidates[0].content.parts[0].text) {
+                throw new Error('Invalid response structure from Gemini API. The model may have refused to answer.');
+            }
+
+            return responseData;
+        }
+        
+        function generateReport(clientName, imageUrl, findings) {
+            reportClientName.textContent = `For: ${clientName}`;
+            reportDate.textContent = `Date of Analysis: ${new Date().toLocaleDateString()}`;
+            reportImage.src = imageUrl;
+            findingsArea.innerHTML = '';
+
+            if (findings && findings.length > 0) {
+                 findings.forEach(finding => {
+                    const findingHtml = `
+                        <div class="bg-gray-50 p-6 rounded-xl border border-gray-200">
+                            <h4 class="text-lg font-semibold text-teal-700">${finding.name} in the ${finding.zone}</h4>
+                            <div class="mt-4 space-y-3">
+                                <p><strong class="font-medium text-gray-800">Holistic Interpretation:</strong> ${finding.interpretation}</p>
+                                <p><strong class="font-medium text-gray-800">Wellness Invitation:</strong> ${finding.invitation}</p>
+                            </div>
+                        </div>
+                    `;
+                    findingsArea.innerHTML += findingHtml;
+                });
+            } else {
+                 findingsArea.innerHTML = `<p class="text-center text-gray-600">The analysis returned no specific patterns for analysis. This may suggest a state of general constitutional balance.</p>`;
+            }
+        }
+
+        downloadPdfBtn.addEventListener('click', () => {
+            const clientName = clientNameInput.value.trim().replace(/\s+/g, '_') || 'Client';
+            const date = new Date().toISOString().split('T')[0];
+            const filename = `Iris_Insight_Report_${clientName}_${date}.pdf`;
+
+            const opt = { margin: 0.5, filename: filename, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, useCORS: true }, jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }};
+            html2pdf().from(reportContent).set(opt).save();
+        });
+        
+        function resetApp() {
+            // Reset state
+            clientNameInput.value = '';
+            uploadInput.value = null;
+            uploadedImageBase64 = null;
+            uploadedImageUrl = null;
+            uploadedImageType = null;
+            analyzeBtn.disabled = true;
+            
+            // Reset UI
+            reportContainer.classList.add('hidden');
+            errorState.classList.add('hidden');
+            loadingState.classList.add('hidden');
+            imagePreviewContainer.classList.add('hidden');
+            inputSection.classList.remove('hidden');
+        }
+
+        startOverBtn.addEventListener('click', resetApp);
+        tryAgainBtn.addEventListener('click', resetApp);
+
+    </script>
+</body>
+</html>
+
