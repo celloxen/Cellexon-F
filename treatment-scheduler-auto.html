@@ -592,22 +592,15 @@
     
     <!-- Success Modal -->
     <div class="success-modal" id="successModal">
-        <div class="modal-content">
-            <div class="success-icon">🎉</div>
-            <h2 style="color: #1e293b; margin-bottom: 15px;">Schedule Created Successfully!</h2>
-            <p style="color: #64748b; margin-bottom: 30px;">
-                <span id="createdCount">0</span> appointments have been created and saved to the system.
-            </p>
-            <div class="action-buttons">
-                <button class="btn btn-secondary" onclick="viewAppointments()">View Appointments</button>
-                <button class="btn btn-primary" onclick="goToDashboard()">Go to Dashboard</button>
-            </div>
+        <div id="confirmationContent">
+            <!-- Confirmation screen will be loaded here -->
         </div>
     </div>
     
     <script type="module">
         import { supabase } from './supabase-config.js';
         import { createBulkAppointments } from './appointments-bulk-creator.js';
+        import { confirmTreatmentPlan, displayConfirmationScreen } from './treatment-confirmation.js';
         
         let treatmentPlan = null;
         let patient = null;
@@ -859,10 +852,6 @@
                 const result = await createBulkAppointments(appointments);
                 
                 if (result.success) {
-                    // Show success modal
-                    document.getElementById('createdCount').textContent = result.count;
-                    document.getElementById('successModal').classList.add('show');
-                    
                     // Update treatment plan status
                     if (treatmentPlan.id) {
                         await supabase
@@ -874,6 +863,17 @@
                             })
                             .eq('id', treatmentPlan.id);
                     }
+                    
+                    // Complete confirmation process
+                    const confirmationResult = await confirmTreatmentPlan(treatmentPlan, result.appointments);
+                    
+                    // Display confirmation screen
+                    const confirmationContainer = document.getElementById('confirmationContent');
+                    displayConfirmationScreen(confirmationContainer, confirmationResult.summary);
+                    
+                    // Show modal
+                    document.getElementById('successModal').classList.add('show');
+                    
                 } else {
                     alert('Error creating appointments: ' + result.error);
                 }
@@ -929,10 +929,6 @@
         function formatICSDate(date) {
             return date.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
         }
-        
-        window.viewAppointments = function() {
-            window.location.href = 'appointments-management.html';
-        };
         
         window.goToDashboard = function() {
             window.location.href = 'clinic-dashboard.html';
