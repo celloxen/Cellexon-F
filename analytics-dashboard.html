@@ -623,36 +623,99 @@
         async function loadTherapiesTable(clinicId, startDate, endDate) {
             const tableContent = document.getElementById('therapiesTableContent');
             
-            // Mock data for demonstration
-            const therapies = [
-                { name: 'PEMF Therapy', sessions: 145, revenue: '£21,750', satisfaction: 4.9 },
-                { name: 'Low Level Laser', sessions: 98, revenue: '£14,700', satisfaction: 4.7 },
-                { name: 'RIFE Frequency', sessions: 76, revenue: '£11,400', satisfaction: 4.8 },
-                { name: 'Ozone Therapy', sessions: 64, revenue: '£9,600', satisfaction: 4.6 },
-            ];
-            
-            tableContent.innerHTML = `
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Therapy Type</th>
-                            <th>Sessions</th>
-                            <th>Revenue</th>
-                            <th>Avg Satisfaction</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${therapies.map(t => `
+            try {
+                // Get actual therapy sessions from database
+                const { data: sessions, error } = await supabase
+                    .from('therapy_sessions')
+                    .select('*')
+                    .eq('clinic_id', clinicId)
+                    .gte('session_date', startDate.toISOString().split('T')[0])
+                    .lte('session_date', endDate.toISOString().split('T')[0]);
+                
+                if (error) throw error;
+                
+                if (!sessions || sessions.length === 0) {
+                    // No data yet - show helpful message
+                    tableContent.innerHTML = `
+                        <div style="text-align: center; padding: 20px; color: #6b7280;">
+                            <p>No therapy session data available yet.</p>
+                            <p style="font-size: 14px; margin-top: 10px;">
+                                Therapy statistics will appear here once you start recording sessions.
+                            </p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Group sessions by therapy type
+                const therapyStats = {};
+                sessions.forEach(session => {
+                    const type = session.therapy_type || 'Unknown';
+                    if (!therapyStats[type]) {
+                        therapyStats[type] = {
+                            name: type,
+                            sessions: 0,
+                            revenue: 0,
+                            feedbackScores: [],
+                            satisfaction: 0
+                        };
+                    }
+                    therapyStats[type].sessions++;
+                    therapyStats[type].revenue += parseFloat(session.price || 150);
+                    if (session.patient_feedback_score) {
+                        therapyStats[type].feedbackScores.push(session.patient_feedback_score);
+                    }
+                });
+                
+                // Calculate averages and format for display
+                const therapies = Object.values(therapyStats)
+                    .map(therapy => {
+                        // Calculate average satisfaction
+                        if (therapy.feedbackScores.length > 0) {
+                            therapy.satisfaction = (
+                                therapy.feedbackScores.reduce((a, b) => a + b, 0) / 
+                                therapy.feedbackScores.length
+                            ).toFixed(1);
+                        } else {
+                            therapy.satisfaction = 'N/A';
+                        }
+                        return therapy;
+                    })
+                    .sort((a, b) => b.sessions - a.sessions) // Sort by most sessions
+                    .slice(0, 10); // Top 10 therapies
+                
+                // Display the real data
+                tableContent.innerHTML = `
+                    <table>
+                        <thead>
                             <tr>
-                                <td><strong>${t.name}</strong></td>
-                                <td>${t.sessions}</td>
-                                <td>${t.revenue}</td>
-                                <td>⭐ ${t.satisfaction}</td>
+                                <th>Therapy Type</th>
+                                <th>Sessions</th>
+                                <th>Revenue</th>
+                                <th>Avg Satisfaction</th>
                             </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-            `;
+                        </thead>
+                        <tbody>
+                            ${therapies.map(t => `
+                                <tr>
+                                    <td><strong>${t.name}</strong></td>
+                                    <td>${t.sessions}</td>
+                                    <td>£${t.revenue.toFixed(2)}</td>
+                                    <td>${t.satisfaction !== 'N/A' ? '⭐ ' + t.satisfaction : t.satisfaction}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+                
+            } catch (error) {
+                console.error('Error loading therapy statistics:', error);
+                tableContent.innerHTML = `
+                    <div style="text-align: center; padding: 20px; color: #ef4444;">
+                        Error loading therapy statistics
+                    </div>
+                `;
+            }
         }
         
         // Load patient outcomes table
