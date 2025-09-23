@@ -663,6 +663,7 @@
                     
                     if (!error && data) {
                         this.patientData = data;
+                        this.sessionData.patientId = data.id;
                     }
                 } catch (error) {
                     console.error('Error loading patient:', error);
@@ -1113,23 +1114,13 @@ Shall we proceed with the preliminary health assessment?`, 'lily', ['Yes, procee
                 // Save assessment to database
                 await this.saveAssessmentData(finalScores, primaryConcerns, secondaryConcerns);
                 
-                // Store data for post-assessment workflow
-                if (this.sessionData.patientId) {
-                    sessionStorage.setItem('lastAssessedPatientId', this.sessionData.patientId);
-                    sessionStorage.setItem('lastAssessmentId', Date.now().toString());
-                    sessionStorage.setItem('assessmentType', 'Health Assessment');
-                }
-                
-                // Show completion options with redirect button
-                await this.addMessage("Would you like to:", 'lily');
+                // Show completion options (NO email button per workflow)
+                await this.addMessage("Assessment complete! What would you like to do next?", 'lily');
                 
                 const actionButtons = `
                     <div class="action-buttons">
-                        <button class="action-btn primary" onclick="window.location.href='post-assessment-workflow.html?patientId=${this.sessionData.patientId || ''}&assessmentId=${sessionStorage.getItem('lastAssessmentId')}'">
-                            📧 Email Report to Patient
-                        </button>
                         <button class="btn-action btn-action-primary" onclick="lily.handleCompletionOptions('Continue to Iris Assessment')">
-                            Continue to Iris Assessment →
+                            Continue to IRIS Assessment →
                         </button>
                         <button class="btn-action btn-action-secondary" onclick="lily.handleCompletionOptions('View Preliminary Report')">
                             View Preliminary Report
@@ -1189,9 +1180,9 @@ Shall we proceed with the preliminary health assessment?`, 'lily', ['Yes, procee
                         console.log('Assessment saved to database');
                     }
                     
-                    // Update workflow status (if available)
+                    // Update workflow status
                     if (window.workflowManager) {
-                        await window.workflowManager.completeHealthAssessment(this.patientId, assessmentData);
+                        await window.workflowManager.updateStage(this.patientId, 'health_assessment');
                     }
                     
                     console.log('Assessment process complete');
@@ -1205,8 +1196,12 @@ Shall we proceed with the preliminary health assessment?`, 'lily', ['Yes, procee
                 switch(option) {
                     case 'Continue to Iris Assessment':
                         if (this.patientId) {
-                            // This will automatically update workflow and redirect
-                            await workflowManager.startIrisAssessment(this.patientId);
+                            // Update workflow and redirect to IRIS assessment
+                            sessionStorage.setItem('currentPatientId', this.patientId);
+                            if (window.workflowManager) {
+                                await window.workflowManager.updateStage(this.patientId, 'iris_assessment');
+                            }
+                            window.location.href = `iris-assessment-integrated.html?patientId=${this.patientId}`;
                         } else {
                             window.location.href = 'iris-assessment-integrated.html';
                         }
