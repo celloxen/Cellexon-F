@@ -3,1020 +3,1077 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IRIS Assessment - Celloxen Platform</title>
+    <title>IRIS Assessment with Image Capture - Celloxen Platform</title>
     <style>
-        * { 
-            margin: 0; 
-            padding: 0; 
-            box-sizing: border-box; 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
         
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            color: #1f2937;
         }
         
-        .header { 
-            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
-            color: white;
-            padding: 20px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
         
-        .header-content {
+        .header-container {
             max-width: 1400px;
             margin: 0 auto;
+            padding: 0 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
         
-        .header h1 {
-            font-size: 28px;
-            font-weight: 700;
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
         }
         
-        .header p {
-            color: #cbd5e1;
-            margin-top: 5px;
-            font-size: 14px;
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
         }
         
-        .back-btn {
-            background: rgba(255,255,255,0.2);
-            border: 1px solid rgba(255,255,255,0.3);
+        .btn-nav {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: none;
+            background: #667eea;
             color: white;
-            padding: 8px 20px;
-            border-radius: 6px;
             cursor: pointer;
-            text-decoration: none;
             transition: all 0.3s ease;
         }
         
-        .back-btn:hover {
-            background: rgba(255,255,255,0.3);
+        .btn-nav:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
         }
         
-        .container { 
-            max-width: 1400px; 
-            margin: 30px auto; 
-            padding: 0 20px; 
+        .container {
+            max-width: 1400px;
+            margin: 30px auto;
+            padding: 0 20px;
         }
         
-        .analysis-grid { 
-            display: grid; 
-            grid-template-columns: 1fr 1fr; 
-            gap: 25px; 
-            margin-top: 25px;
-        }
-        
-        @media (max-width: 968px) {
-            .analysis-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-        
-        .card { 
+        .assessment-card {
             background: white;
             border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
-            margin-bottom: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            margin-bottom: 30px;
         }
         
-        .card h2 {
-            font-size: 22px;
-            font-weight: 600;
-            color: #1e293b;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #f1f5f9;
+        .patient-info {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
         }
         
-        .card h3 {
+        .info-item {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .info-label {
+            font-size: 12px;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+        
+        .info-value {
             font-size: 18px;
             font-weight: 600;
-            color: #475569;
-            margin: 20px 0 15px;
+            color: #1f2937;
         }
         
-        .camera-container { 
-            background: linear-gradient(135deg, #f8fafc, #e2e8f0);
-            border-radius: 16px; 
-            padding: 30px; 
-            text-align: center; 
-            position: relative; 
-            min-height: 400px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        /* Image Upload Section */
+        .image-section {
+            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
         }
         
-        .video-element { 
-            width: 100%; 
-            max-width: 500px; 
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        .image-section h3 {
+            color: #1e3a8a;
+            margin-bottom: 20px;
+            font-size: 20px;
         }
         
-        .capture-overlay { 
-            position: absolute; 
-            top: 50%; 
-            left: 50%; 
-            transform: translate(-50%, -50%); 
-            border: 3px solid #10b981; 
-            border-radius: 50%; 
-            width: 200px; 
-            height: 200px; 
-            pointer-events: none;
-            animation: pulse 2s infinite;
+        .iris-images-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
         }
         
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-        
-        .btn { 
-            padding: 12px 24px; 
-            border: none; 
-            border-radius: 12px; 
-            cursor: pointer; 
-            font-size: 15px;
-            font-weight: 600; 
-            margin: 5px;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .btn-primary { 
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            color: white;
-            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
-        }
-        
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
-        }
-        
-        .btn-secondary { 
-            background: #f1f5f9;
-            color: #475569;
-        }
-        
-        .btn-secondary:hover {
-            background: #e2e8f0;
-        }
-        
-        .btn-danger { 
-            background: linear-gradient(135deg, #f56565, #dc2626);
-            color: white;
-        }
-        
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        
-        .iris-images { 
-            display: grid; 
-            grid-template-columns: 1fr 1fr; 
-            gap: 20px; 
-            margin: 25px 0; 
-        }
-        
-        .iris-image-container { 
-            border: 2px solid #e2e8f0; 
-            border-radius: 16px; 
-            padding: 20px; 
-            text-align: center; 
-            min-height: 250px;
-            background: #f8fafc;
-            transition: all 0.3s ease;
-        }
-        
-        .iris-image-container.captured { 
-            border-color: #10b981; 
-            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
-            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.1);
-        }
-        
-        .iris-image-container h4 {
-            color: #475569;
-            margin-bottom: 15px;
-            font-size: 16px;
-        }
-        
-        .captured-image { 
-            width: 100%; 
-            max-width: 180px; 
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
-        
-        .analysis-results { 
-            max-height: 500px; 
-            overflow-y: auto;
-            padding-right: 10px;
-        }
-        
-        .pattern-item { 
-            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
-            margin: 12px 0; 
-            padding: 16px; 
-            border-radius: 12px; 
-            border-left: 4px solid #1e3a8a;
-            transition: all 0.3s ease;
-        }
-        
-        .pattern-item:hover {
-            transform: translateX(5px);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        }
-        
-        .pattern-item strong {
-            color: #1e293b;
-            font-weight: 600;
-        }
-        
-        .pattern-item em {
-            color: #64748b;
-            font-style: normal;
-            font-size: 14px;
-        }
-        
-        .progress-steps { 
-            display: flex; 
-            justify-content: space-between; 
-            margin: 30px 0;
+        .iris-image-box {
             background: white;
+            border-radius: 12px;
             padding: 20px;
-            border-radius: 16px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        }
-        
-        .step { 
-            flex: 1; 
-            text-align: center; 
-            padding: 12px; 
-            border-radius: 10px; 
-            margin: 0 5px; 
-            background: #f1f5f9;
-            color: #94a3b8;
-            font-size: 14px;
-            font-weight: 500;
+            border: 2px solid #e0e7ff;
             transition: all 0.3s ease;
         }
         
-        .step.active { 
-            background: linear-gradient(135deg, #1e3a8a, #1e40af);
-            color: white;
-            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.3);
+        .iris-image-box:hover {
+            border-color: #667eea;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
         }
         
-        .step.completed { 
-            background: linear-gradient(135deg, #d1fae5, #a7f3d0);
-            color: #065f46;
-        }
-        
-        .alert { 
-            padding: 16px 20px; 
-            border-radius: 12px; 
-            margin: 15px 0;
+        .iris-image-title {
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 15px;
+            font-size: 18px;
             display: flex;
             align-items: center;
             gap: 10px;
         }
         
-        .alert-success { 
-            background: linear-gradient(135deg, #d1fae5, #a7f3d0);
-            color: #065f46;
-            border-left: 4px solid #10b981;
+        .iris-icon {
+            width: 30px;
+            height: 30px;
+            background: #667eea;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
         }
         
-        .alert-error { 
-            background: linear-gradient(135deg, #fee2e2, #fecaca);
-            color: #991b1b;
-            border-left: 4px solid #ef4444;
+        .image-upload-area {
+            border: 2px dashed #cbd5e1;
+            border-radius: 10px;
+            padding: 40px 20px;
+            text-align: center;
+            background: #f8fafc;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
         }
         
-        .alert-info { 
-            background: linear-gradient(135deg, #fef3c7, #fde68a);
+        .image-upload-area:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+        
+        .image-upload-area.has-image {
+            padding: 0;
+            border: 2px solid #10b981;
+            background: #1e293b;
+        }
+        
+        .upload-icon {
+            font-size: 48px;
+            color: #94a3b8;
+            margin-bottom: 10px;
+        }
+        
+        .upload-text {
+            color: #64748b;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        
+        .upload-button {
+            background: #667eea;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .upload-button:hover {
+            background: #5a67d8;
+        }
+        
+        .uploaded-image {
+            width: 100%;
+            height: 300px;
+            object-fit: contain;
+            border-radius: 8px;
+            background: #1e293b;
+        }
+        
+        .image-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .image-control-btn {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-retake {
+            background: #fef3c7;
             color: #92400e;
-            border-left: 4px solid #f59e0b;
         }
         
-        .report-preview { 
-            background: white; 
-            color: #1f2937; 
-            border-radius: 16px; 
-            padding: 30px; 
-            margin: 20px 0; 
-            max-height: 500px; 
-            overflow-y: auto;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        .btn-retake:hover {
+            background: #fde68a;
+        }
+        
+        .btn-zoom {
+            background: #e0e7ff;
+            color: #3730a3;
+        }
+        
+        .btn-zoom:hover {
+            background: #c7d2fe;
+        }
+        
+        .btn-delete {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .btn-delete:hover {
+            background: #fecaca;
+        }
+        
+        /* Camera Modal */
+        .camera-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .camera-modal.active {
+            display: flex;
+        }
+        
+        .camera-container {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            max-width: 800px;
+            width: 90%;
+        }
+        
+        .camera-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .camera-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .close-camera {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #6b7280;
+        }
+        
+        #camera-feed {
+            width: 100%;
+            border-radius: 10px;
+            background: #000;
+        }
+        
+        .camera-controls {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .camera-btn {
+            padding: 12px 24px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-capture {
+            background: #10b981;
+            color: white;
+            font-size: 16px;
+        }
+        
+        .btn-capture:hover {
+            background: #059669;
+        }
+        
+        .btn-cancel {
+            background: #e5e7eb;
+            color: #374151;
+        }
+        
+        /* Assessment Form */
+        .assessment-section {
+            margin-bottom: 30px;
+        }
+        
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .finding-card {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+            transition: all 0.3s ease;
+        }
+        
+        .finding-card:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .finding-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .finding-title {
+            font-weight: 600;
+            color: #1e293b;
+            font-size: 16px;
+        }
+        
+        .finding-location {
+            background: #667eea;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+        }
+        
+        .finding-grid {
+            display: grid;
+            gap: 15px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .form-label {
+            font-size: 13px;
+            color: #6b7280;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .form-select, .form-textarea {
+            padding: 10px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
         
         .action-buttons {
             display: flex;
             gap: 15px;
-            justify-content: center;
-            margin-top: 25px;
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 2px solid #e5e7eb;
         }
         
-        select, input[type="text"] {
-            width: 100%;
-            padding: 12px 16px;
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
-            font-size: 15px;
-            background: white;
-            transition: all 0.3s ease;
-        }
-        
-        select:focus, input[type="text"]:focus {
-            outline: none;
-            border-color: #1e3a8a;
-            box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
-        }
-        
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-size: 14px;
+        .btn {
+            padding: 12px 24px;
+            border-radius: 10px;
             font-weight: 600;
-            color: #475569;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            font-size: 16px;
         }
         
-        .hidden { 
-            display: none; 
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            flex: 1;
         }
         
-        #cameraPlaceholder {
-            color: #94a3b8;
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
         }
         
-        #captureInstructions {
-            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
-            padding: 20px;
-            border-radius: 12px;
-            margin: 20px 0;
-            border-left: 4px solid #1e3a8a;
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #374151;
         }
         
-        #captureInstructions h4 {
-            color: #475569;
-            margin-bottom: 10px;
+        .btn-secondary:hover {
+            background: #d1d5db;
         }
         
-        #captureInstructions ol {
-            margin-left: 20px;
-            margin-top: 10px;
-            color: #64748b;
+        .btn-success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
         }
         
-        #captureInstructions li {
-            margin: 8px 0;
+        /* Success Modal */
+        .success-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
         }
         
-        #patientInfo {
-            margin-top: 15px;
-            padding: 15px;
-            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
-            border-radius: 12px;
-            border-left: 4px solid #1e3a8a;
-            color: #475569;
+        .success-modal.show {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+        }
+        
+        .success-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        input[type="file"] {
+            display: none;
         }
     </style>
 </head>
 <body>
     <div class="header">
-        <div class="header-content">
-            <div>
-                <h1>CELLOXEN IRIS Assessment</h1>
-                <p>Objective Constitutional Analysis System</p>
+        <div class="header-container">
+            <div class="logo">IRIS Assessment System</div>
+            <div class="nav-buttons">
+                <button class="btn-nav" onclick="saveDraft()">Save Draft</button>
+                <button class="btn-nav" onclick="exitAssessment()">Exit</button>
             </div>
-            <a href="clinic-dashboard.html" class="back-btn">← Back to Dashboard</a>
         </div>
     </div>
-    
+
     <div class="container">
-        <div id="alertContainer"></div>
-        
-        <!-- Patient Selection -->
-        <div class="card" id="patientSelection">
-            <h2>IRIS Assessment Setup</h2>
-            <div class="alert alert-info">
-                <strong>Note:</strong> This assessment should follow the Lily AI Health Assessment for comprehensive evaluation.
-            </div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 25px;">
-                <div>
-                    <label>Select Patient:</label>
-                    <select id="patientSelect">
-                        <option value="">Select a patient...</option>
-                    </select>
-                    <div id="patientInfo" style="display: none;"></div>
+        <div class="assessment-card">
+            <h1 style="color: #1e293b; margin-bottom: 30px;">IRIS Constitutional Assessment</h1>
+            
+            <!-- Patient Information -->
+            <div class="patient-info">
+                <div class="info-item">
+                    <div class="info-label">Patient Name</div>
+                    <div class="info-value" id="patientName">Loading...</div>
                 </div>
-                <div>
-                    <label>Analysis Type:</label>
-                    <select id="analysisType">
-                        <option value="comprehensive">Comprehensive Analysis</option>
-                        <option value="constitutional">Constitutional Only</option>
-                        <option value="health_focus">Health Focus Areas</option>
-                    </select>
-                    <button class="btn btn-primary" style="margin-top: 20px; width: 100%;" onclick="startAnalysis()">
-                        Start IRIS Assessment
-                    </button>
+                <div class="info-item">
+                    <div class="info-label">Patient ID</div>
+                    <div class="info-value" id="patientId">Loading...</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Age</div>
+                    <div class="info-value" id="patientAge">Loading...</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Assessment Date</div>
+                    <div class="info-value" id="assessmentDate">Loading...</div>
                 </div>
             </div>
-        </div>
 
-        <!-- Progress Steps -->
-        <div class="progress-steps" id="progressSteps">
-            <div class="step active">1. Setup</div>
-            <div class="step">2. Capture</div>
-            <div class="step">3. Analysis</div>
-            <div class="step">4. Results</div>
-            <div class="step">5. Complete</div>
-        </div>
-
-        <div class="analysis-grid">
-            <!-- Camera & Capture Section -->
-            <div class="card">
-                <h2>IRIS Image Capture</h2>
-                <div id="captureSection" style="display: none;">
-                    <div class="camera-container">
-                        <video id="cameraPreview" class="video-element" autoplay muted style="display: none;"></video>
-                        <div class="capture-overlay"></div>
-                        <div id="cameraPlaceholder" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
-                            <div style="font-size: 4rem; margin-bottom: 20px;">📷</div>
-                            <p>Click "Start Camera" to begin iris capture</p>
+            <!-- Iris Image Capture Section -->
+            <div class="image-section">
+                <h3>📸 Iris Image Capture</h3>
+                <p style="color: #64748b; margin-bottom: 20px;">
+                    Capture high-quality images of both irises for analysis. Ensure proper lighting and focus.
+                </p>
+                
+                <div class="iris-images-container">
+                    <!-- Left Iris -->
+                    <div class="iris-image-box">
+                        <div class="iris-image-title">
+                            <div class="iris-icon">L</div>
+                            Left Iris
+                        </div>
+                        <div class="image-upload-area" id="leftIrisArea" onclick="openImageOptions('left')">
+                            <div class="upload-icon">👁️</div>
+                            <div class="upload-text">Click to capture or upload left iris image</div>
+                            <button class="upload-button" type="button">Choose Method</button>
+                        </div>
+                        <input type="file" id="leftIrisFile" accept="image/*" onchange="handleFileUpload(event, 'left')">
+                        <div class="image-controls hidden" id="leftIrisControls">
+                            <button class="image-control-btn btn-zoom" onclick="zoomImage('left')">🔍 Zoom</button>
+                            <button class="image-control-btn btn-retake" onclick="retakeImage('left')">📷 Retake</button>
+                            <button class="image-control-btn btn-delete" onclick="deleteImage('left')">🗑️ Delete</button>
                         </div>
                     </div>
                     
-                    <div style="text-align: center; margin: 25px 0;">
-                        <button class="btn btn-primary" id="startCameraBtn" onclick="startCamera()">Start Camera</button>
-                        <button class="btn btn-secondary" id="captureBtn" onclick="captureIris()" disabled>Capture IRIS</button>
-                        <button class="btn btn-danger" id="stopCameraBtn" onclick="stopCamera()" disabled>Stop Camera</button>
-                    </div>
-
-                    <div id="captureInstructions">
-                        <h4>Capture Instructions:</h4>
-                        <ol>
-                            <li>Position patient 30-40cm from camera</li>
-                            <li>Ensure good lighting on the iris</li>
-                            <li>Capture left eye first, then right eye</li>
-                            <li>Keep eye wide open and focused</li>
-                            <li>Avoid reflections and shadows</li>
-                        </ol>
-                    </div>
-
-                    <div class="iris-images">
-                        <div class="iris-image-container" id="leftEyeContainer">
-                            <h4>Left Eye</h4>
-                            <div id="leftEyePreview" style="margin-top: 15px;">
-                                <p style="color: #94a3b8;">Not captured</p>
-                            </div>
-                            <button class="btn btn-secondary" style="margin-top: 15px;" onclick="setCurrentEye('left')">Capture Left</button>
+                    <!-- Right Iris -->
+                    <div class="iris-image-box">
+                        <div class="iris-image-title">
+                            <div class="iris-icon">R</div>
+                            Right Iris
                         </div>
-                        <div class="iris-image-container" id="rightEyeContainer">
-                            <h4>Right Eye</h4>
-                            <div id="rightEyePreview" style="margin-top: 15px;">
-                                <p style="color: #94a3b8;">Not captured</p>
-                            </div>
-                            <button class="btn btn-secondary" style="margin-top: 15px;" onclick="setCurrentEye('right')">Capture Right</button>
+                        <div class="image-upload-area" id="rightIrisArea" onclick="openImageOptions('right')">
+                            <div class="upload-icon">👁️</div>
+                            <div class="upload-text">Click to capture or upload right iris image</div>
+                            <button class="upload-button" type="button">Choose Method</button>
+                        </div>
+                        <input type="file" id="rightIrisFile" accept="image/*" onchange="handleFileUpload(event, 'right')">
+                        <div class="image-controls hidden" id="rightIrisControls">
+                            <button class="image-control-btn btn-zoom" onclick="zoomImage('right')">🔍 Zoom</button>
+                            <button class="image-control-btn btn-retake" onclick="retakeImage('right')">📷 Retake</button>
+                            <button class="image-control-btn btn-delete" onclick="deleteImage('right')">🗑️ Delete</button>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Analysis Results Section -->
-            <div class="card">
-                <h2>Analysis Results</h2>
-                <div id="analysisSection" style="display: none;">
-                    <div class="analysis-results">
-                        <h3>Constitutional Analysis</h3>
-                        <div id="constitutionalResults">
-                            <p style="color: #94a3b8;">Analysis will appear here after image capture</p>
+            <!-- Assessment Form -->
+            <div class="assessment-section">
+                <h2 class="section-title">Constitutional Findings</h2>
+                
+                <!-- Finding 1 -->
+                <div class="finding-card">
+                    <div class="finding-header">
+                        <div class="finding-title">Primary Constitution</div>
+                        <div class="finding-location">Both Eyes</div>
+                    </div>
+                    <div class="finding-grid">
+                        <div class="form-group">
+                            <label class="form-label">Constitutional Type</label>
+                            <select class="form-select" id="constitutionType">
+                                <option value="">Select Type</option>
+                                <option value="neurogenic">Neurogenic</option>
+                                <option value="polyglandular">Polyglandular</option>
+                                <option value="connective_tissue">Connective Tissue</option>
+                                <option value="lymphatic">Lymphatic</option>
+                                <option value="biliary">Biliary</option>
+                            </select>
                         </div>
-
-                        <h3>Health Patterns Detected</h3>
-                        <div id="healthPatterns">
-                            <p style="color: #94a3b8;">Health pattern analysis pending</p>
-                        </div>
-
-                        <h3>Organ System Assessment</h3>
-                        <div id="organAssessment">
-                            <p style="color: #94a3b8;">Organ system analysis pending</p>
+                        <div class="form-group">
+                            <label class="form-label">Fiber Density</label>
+                            <select class="form-select" id="fiberDensity">
+                                <option value="">Select Density</option>
+                                <option value="tight">Tight (Strong)</option>
+                                <option value="moderate">Moderate</option>
+                                <option value="loose">Loose (Weak)</option>
+                                <option value="very_loose">Very Loose</option>
+                            </select>
                         </div>
                     </div>
                 </div>
+
+                <!-- Finding 2 -->
+                <div class="finding-card">
+                    <div class="finding-header">
+                        <div class="finding-title">Pupil & Collarette Assessment</div>
+                        <div class="finding-location">Central Zone</div>
+                    </div>
+                    <div class="finding-grid">
+                        <div class="form-group">
+                            <label class="form-label">Pupil Size</label>
+                            <select class="form-select" id="pupilSize">
+                                <option value="">Select Size</option>
+                                <option value="miotic">Miotic (Small)</option>
+                                <option value="normal">Normal</option>
+                                <option value="mydriatic">Mydriatic (Large)</option>
+                                <option value="anisocoria">Anisocoria (Unequal)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Collarette Position</label>
+                            <select class="form-select" id="collarettePosition">
+                                <option value="">Select Position</option>
+                                <option value="central">Central (1/3)</option>
+                                <option value="extended">Extended (>1/3)</option>
+                                <option value="contracted">Contracted (<1/3)</option>
+                                <option value="irregular">Irregular</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Finding 3 -->
+                <div class="finding-card">
+                    <div class="finding-header">
+                        <div class="finding-title">Markings & Signs</div>
+                        <div class="finding-location">All Zones</div>
+                    </div>
+                    <div class="finding-grid">
+                        <div class="form-group">
+                            <label class="form-label">Lacunae Present</label>
+                            <select class="form-select" id="lacunae">
+                                <option value="">Select</option>
+                                <option value="none">None</option>
+                                <option value="few">Few (1-3)</option>
+                                <option value="moderate">Moderate (4-7)</option>
+                                <option value="many">Many (>7)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Stress Rings</label>
+                            <select class="form-select" id="stressRings">
+                                <option value="">Select</option>
+                                <option value="none">None</option>
+                                <option value="partial">Partial (1-2)</option>
+                                <option value="moderate">Moderate (3-4)</option>
+                                <option value="severe">Severe (>4)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notes Section -->
+                <div class="finding-card">
+                    <div class="finding-header">
+                        <div class="finding-title">Clinical Notes</div>
+                        <div class="finding-location">Additional Observations</div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Detailed Observations</label>
+                        <textarea class="form-textarea" id="clinicalNotes" rows="4" 
+                            placeholder="Enter additional findings, markings, or relevant observations..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <button class="btn btn-secondary" onclick="saveDraft()">Save as Draft</button>
+                <button class="btn btn-primary" onclick="completeAssessment()">Complete Assessment →</button>
             </div>
         </div>
+    </div>
 
-        <!-- Assessment Complete -->
-        <div class="card" id="completionSection" style="display: none;">
-            <h2>IRIS Assessment Complete</h2>
-            <div class="alert alert-success">
-                <strong>Success!</strong> IRIS assessment has been completed and saved.
+    <!-- Camera Modal -->
+    <div class="camera-modal" id="cameraModal">
+        <div class="camera-container">
+            <div class="camera-header">
+                <h3 class="camera-title">Capture Iris Image</h3>
+                <button class="close-camera" onclick="closeCamera()">×</button>
             </div>
-            
-            <div class="report-preview" id="reportPreview">
-                <!-- Report content will be generated here -->
+            <video id="camera-feed" autoplay></video>
+            <canvas id="camera-canvas" style="display: none;"></canvas>
+            <div class="camera-controls">
+                <button class="camera-btn btn-capture" onclick="captureImage()">📷 Capture</button>
+                <button class="camera-btn btn-cancel" onclick="closeCamera()">Cancel</button>
             </div>
-            
-            <div class="alert alert-info" id="nextStepAlert">
-                <!-- Dynamic content based on whether both assessments are complete -->
-            </div>
-            
-            <div class="action-buttons" id="completionActions">
-                <!-- Dynamic buttons based on completion status -->
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div class="success-modal" id="successModal">
+        <div class="modal-content">
+            <div class="success-icon">✓</div>
+            <h2 style="color: #1e293b; margin-bottom: 15px;">Assessment Complete!</h2>
+            <p style="color: #6b7280; margin-bottom: 30px;">
+                IRIS assessment has been saved successfully. Images have been uploaded and stored.
+            </p>
+            <div class="modal-buttons">
+                <button class="btn btn-secondary" onclick="viewReport()">View Report</button>
+                <button class="btn btn-success" onclick="proceedToNext()">Generate Comprehensive Report →</button>
             </div>
         </div>
     </div>
 
     <script type="module">
         import { supabase } from './supabase-config.js';
-        import { workflowManager, workflowStages } from './workflow-manager.js';
         
-        let selectedPatient = null;
-        let currentEye = 'left';
-        let capturedImages = { left: null, right: null };
-        let analysisResults = {};
-        let cameraStream = null;
-        let currentStep = 1;
+        let currentPatient = null;
+        let currentIrisSide = null;
+        let mediaStream = null;
+        let irisImages = {
+            left: null,
+            right: null
+        };
         
-        // Initialize page
-        document.addEventListener('DOMContentLoaded', function() {
-            // Check if patient ID is in session
-            const patientId = sessionStorage.getItem('currentPatientId');
-            if (patientId) {
-                loadPatientForWorkflow(patientId);
-            } else {
-                loadPatients();
-            }
-        });
-        
-        // Show alert messages
-        function showAlert(message, type = 'success') {
-            const alertContainer = document.getElementById('alertContainer');
-            alertContainer.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
-            setTimeout(() => {
-                alertContainer.innerHTML = '';
-            }, 5000);
-        }
-        
-        // Load specific patient for workflow
-        async function loadPatientForWorkflow(patientId) {
-            try {
-                const { data, error } = await supabase
-                    .from('patients')
-                    .select('*, clinics (clinic_name, clinic_code)')
-                    .eq('id', patientId)
-                    .single();
-                    
-                if (error) throw error;
-                
-                if (data) {
-                    selectedPatient = data;
-                    // Auto-select patient
-                    const patientSelect = document.getElementById('patientSelect');
-                    patientSelect.innerHTML = `<option value="${data.id}" selected>${data.first_name} ${data.last_name} (${data.patient_id})</option>`;
-                    patientSelect.disabled = true;
-                    
-                    // Show patient info
-                    document.getElementById('patientInfo').style.display = 'block';
-                    document.getElementById('patientInfo').innerHTML = `
-                        <strong>${data.first_name} ${data.last_name}</strong><br>
-                        ID: ${data.patient_id}<br>
-                        Status: Continuing from Health Assessment
-                    `;
-                }
-            } catch (error) {
-                console.error('Error loading patient:', error);
-                loadPatients(); // Fallback to loading all patients
-            }
-        }
-        
-        // Load all patients
-        async function loadPatients() {
-            try {
-                const authData = JSON.parse(localStorage.getItem('celloxen_auth') || '{}');
-                const clinicId = authData.clinicId || sessionStorage.getItem('currentClinicId');
-                
-                const { data, error } = await supabase
-                    .from('patients')
-                    .select('*, clinics (clinic_name, clinic_code)')
-                    .eq('clinic_id', clinicId)
-                    .order('created_at', { ascending: false });
-                    
-                if (error) throw error;
-                
-                const patientSelect = document.getElementById('patientSelect');
-                patientSelect.innerHTML = '<option value="">Select a patient...</option>';
-                
-                if (data && data.length > 0) {
-                    data.forEach(patient => {
-                        patientSelect.innerHTML += `<option value="${patient.id}" data-patient='${JSON.stringify(patient)}'>${patient.first_name} ${patient.last_name} (${patient.patient_id})</option>`;
-                    });
-                }
-            } catch (error) {
-                console.error('Error loading patients:', error);
-                showAlert('Error loading patients: ' + error.message, 'error');
-            }
-        }
-        
-        // Start analysis
-        window.startAnalysis = function() {
-            const patientId = document.getElementById('patientSelect').value;
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const patientId = urlParams.get('patientId') || sessionStorage.getItem('currentPatientId');
+            
             if (!patientId) {
-                showAlert('Please select a patient first', 'error');
+                alert('No patient selected. Redirecting to patient selection.');
+                window.location.href = 'patient-management.html';
                 return;
             }
             
-            if (!selectedPatient) {
-                const selectedOption = document.getElementById('patientSelect').selectedOptions[0];
-                selectedPatient = JSON.parse(selectedOption.dataset.patient);
+            await loadPatientData(patientId);
+            document.getElementById('assessmentDate').textContent = new Date().toLocaleDateString('en-GB');
+        });
+        
+        // Load patient data
+        async function loadPatientData(patientId) {
+            try {
+                const { data, error } = await supabase
+                    .from('patients')
+                    .select('*')
+                    .eq('id', patientId)
+                    .single();
+                
+                if (error) throw error;
+                
+                currentPatient = data;
+                document.getElementById('patientName').textContent = `${data.first_name} ${data.last_name}`;
+                document.getElementById('patientId').textContent = data.patient_id;
+                document.getElementById('patientAge').textContent = calculateAge(data.date_of_birth);
+                
+            } catch (error) {
+                console.error('Error loading patient:', error);
+                alert('Error loading patient data');
             }
+        }
+        
+        // Image handling functions
+        window.openImageOptions = function(side) {
+            currentIrisSide = side;
             
-            // Show patient info
-            document.getElementById('patientInfo').style.display = 'block';
-            document.getElementById('patientInfo').innerHTML = `
-                <strong>${selectedPatient.first_name} ${selectedPatient.last_name}</strong><br>
-                ID: ${selectedPatient.patient_id}<br>
-                Analysis Type: ${document.getElementById('analysisType').value}
-            `;
-            
-            // Show capture section and update progress
-            document.getElementById('captureSection').style.display = 'block';
-            updateProgress(2);
+            // Create options dialog
+            if (confirm('Choose image source:\n\nOK = Use Camera\nCancel = Upload from Device')) {
+                openCamera();
+            } else {
+                document.getElementById(`${side}IrisFile`).click();
+            }
         };
         
-        // Camera functions
-        window.startCamera = async function() {
+        window.openCamera = async function() {
             try {
-                cameraStream = await navigator.mediaDevices.getUserMedia({ 
+                const modal = document.getElementById('cameraModal');
+                const video = document.getElementById('camera-feed');
+                
+                // Request camera access
+                mediaStream = await navigator.mediaDevices.getUserMedia({ 
                     video: { 
-                        width: { ideal: 1280 },
-                        height: { ideal: 720 },
+                        width: { ideal: 1920 },
+                        height: { ideal: 1080 },
                         facingMode: 'user'
                     } 
                 });
                 
-                const video = document.getElementById('cameraPreview');
-                video.srcObject = cameraStream;
-                video.style.display = 'block';
-                document.getElementById('cameraPlaceholder').style.display = 'none';
-                
-                document.getElementById('startCameraBtn').disabled = true;
-                document.getElementById('captureBtn').disabled = false;
-                document.getElementById('stopCameraBtn').disabled = false;
+                video.srcObject = mediaStream;
+                modal.classList.add('active');
                 
             } catch (error) {
-                console.error('Error accessing camera:', error);
-                showAlert('Error accessing camera. Please ensure camera permissions are granted.', 'error');
+                console.error('Camera error:', error);
+                alert('Unable to access camera. Please check permissions or use file upload instead.');
             }
         };
         
-        window.stopCamera = function() {
-            if (cameraStream) {
-                cameraStream.getTracks().forEach(track => track.stop());
-                cameraStream = null;
-            }
+        window.captureImage = function() {
+            const video = document.getElementById('camera-feed');
+            const canvas = document.getElementById('camera-canvas');
+            const context = canvas.getContext('2d');
             
-            document.getElementById('cameraPreview').style.display = 'none';
-            document.getElementById('cameraPlaceholder').style.display = 'flex';
-            
-            document.getElementById('startCameraBtn').disabled = false;
-            document.getElementById('captureBtn').disabled = true;
-            document.getElementById('stopCameraBtn').disabled = true;
-        };
-        
-        window.setCurrentEye = function(eye) {
-            currentEye = eye;
-            document.querySelector(`#${eye}EyeContainer`).style.border = '2px solid #10b981';
-            document.querySelector(`#${eye === 'left' ? 'right' : 'left'}EyeContainer`).style.border = '2px solid #e2e8f0';
-        };
-        
-        window.captureIris = function() {
-            if (!cameraStream) {
-                showAlert('Please start the camera first', 'error');
-                return;
-            }
-            
-            const video = document.getElementById('cameraPreview');
-            const canvas = document.createElement('canvas');
+            // Set canvas size to video size
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
             
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(video, 0, 0);
+            // Draw video frame to canvas
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
             
-            const imageDataUrl = canvas.toDataURL('image/jpeg', 0.8);
-            capturedImages[currentEye] = imageDataUrl;
-            
-            // Update preview
-            const previewElement = document.getElementById(`${currentEye}EyePreview`);
-            previewElement.innerHTML = `<img src="${imageDataUrl}" class="captured-image" alt="${currentEye} eye">`;
-            document.getElementById(`${currentEye}EyeContainer`).classList.add('captured');
-            
-            // Check if both eyes captured
-            if (capturedImages.left && capturedImages.right) {
-                setTimeout(() => {
-                    performAnalysis();
-                }, 1000);
-            } else {
-                // Switch to other eye
-                const nextEye = currentEye === 'left' ? 'right' : 'left';
-                setCurrentEye(nextEye);
-                showAlert(`${currentEye} eye captured. Please capture ${nextEye} eye.`, 'success');
+            // Convert to blob
+            canvas.toBlob(async (blob) => {
+                await processImage(blob, currentIrisSide);
+                closeCamera();
+            }, 'image/jpeg', 0.95);
+        };
+        
+        window.closeCamera = function() {
+            if (mediaStream) {
+                mediaStream.getTracks().forEach(track => track.stop());
+                mediaStream = null;
+            }
+            document.getElementById('cameraModal').classList.remove('active');
+        };
+        
+        window.handleFileUpload = async function(event, side) {
+            const file = event.target.files[0];
+            if (file && file.type.startsWith('image/')) {
+                await processImage(file, side);
             }
         };
         
-        // AI Analysis simulation
-        function performAnalysis() {
-            updateProgress(3);
-            document.getElementById('analysisSection').style.display = 'block';
-            
-            showAlert('Analysing iris patterns...', 'info');
-            
-            // Simulate AI analysis delay
-            setTimeout(() => {
-                generateAnalysisResults();
-            }, 2000);
+        async function processImage(imageFile, side) {
+            try {
+                // Create object URL for preview
+                const imageUrl = URL.createObjectURL(imageFile);
+                
+                // Update UI
+                const uploadArea = document.getElementById(`${side}IrisArea`);
+                uploadArea.classList.add('has-image');
+                uploadArea.innerHTML = `<img src="${imageUrl}" class="uploaded-image" alt="${side} iris">`;
+                
+                // Show controls
+                document.getElementById(`${side}IrisControls`).classList.remove('hidden');
+                
+                // Store image data
+                irisImages[side] = {
+                    file: imageFile,
+                    url: imageUrl,
+                    uploaded: false
+                };
+                
+                // Upload to Supabase storage
+                await uploadImageToStorage(imageFile, side);
+                
+            } catch (error) {
+                console.error('Error processing image:', error);
+                alert('Error processing image. Please try again.');
+            }
         }
         
-        function generateAnalysisResults() {
-            // Simulate constitutional analysis
-            const constitutionalTypes = ['Lymphatic', 'Haematogenic', 'Biliary'];
-            const constitutionalType = constitutionalTypes[Math.floor(Math.random() * constitutionalTypes.length)];
-            const constitution = Math.random() > 0.5 ? 'Strong' : 'Moderate';
-            const irisColor = Math.random() > 0.5 ? 'Blue-grey (Lymphatic)' : 'Brown (Haematogenic)';
-            
-            analysisResults = {
-                constitutional_type: constitutionalType,
-                constitution: constitution,
-                iris_color: irisColor,
-                patterns: [
-                    { name: 'Radial Furrows', area: 'Digestive System', severity: 'Moderate', location: 'Stomach area (11-1 o\'clock)' },
-                    { name: 'Lymphatic Congestion', area: 'Lymphatic System', severity: 'Mild', location: 'Upper lymph nodes' },
-                    { name: 'Nervous Arc', area: 'Nervous System', severity: 'Mild', location: 'Temporal area' }
-                ],
-                organs: [
-                    { name: 'Digestive System', status: 'Needs Support', notes: 'Shows signs of stress' },
-                    { name: 'Lymphatic System', status: 'Mild Congestion', notes: 'Minor congestion patterns' },
-                    { name: 'Nervous System', status: 'Mild Stress', notes: 'Stress rings visible' }
-                ]
-            };
-            
-            document.getElementById('constitutionalResults').innerHTML = `
-                <div class="pattern-item">
-                    <strong>Constitutional Type:</strong> ${constitutionalType}<br>
-                    <strong>Overall Constitution:</strong> ${constitution}<br>
-                    <strong>Iris Colour Classification:</strong> ${irisColor}
-                </div>
+        async function uploadImageToStorage(file, side) {
+            try {
+                const fileName = `iris_${currentPatient.id}_${side}_${Date.now()}.jpg`;
+                const filePath = `iris-images/${currentPatient.id}/${fileName}`;
+                
+                // Upload to Supabase storage
+                const { data, error } = await supabase.storage
+                    .from('medical-images')
+                    .upload(filePath, file, {
+                        contentType: 'image/jpeg',
+                        upsert: true
+                    });
+                
+                if (error) throw error;
+                
+                // Get public URL
+                const { data: { publicUrl } } = supabase.storage
+                    .from('medical-images')
+                    .getPublicUrl(filePath);
+                
+                // Update stored image data
+                irisImages[side].uploaded = true;
+                irisImages[side].storagePath = filePath;
+                irisImages[side].publicUrl = publicUrl;
+                
+                console.log(`${side} iris image uploaded successfully`);
+                
+            } catch (error) {
+                console.error('Error uploading image:', error);
+                // Continue without upload - store locally
+                irisImages[side].uploaded = false;
+            }
+        }
+        
+        window.retakeImage = function(side) {
+            if (confirm('Retake this image?')) {
+                deleteImage(side);
+                openImageOptions(side);
+            }
+        };
+        
+        window.zoomImage = function(side) {
+            if (irisImages[side] && irisImages[side].url) {
+                window.open(irisImages[side].url, '_blank');
+            }
+        };
+        
+        window.deleteImage = function(side) {
+            // Clear UI
+            const uploadArea = document.getElementById(`${side}IrisArea`);
+            uploadArea.classList.remove('has-image');
+            uploadArea.innerHTML = `
+                <div class="upload-icon">👁️</div>
+                <div class="upload-text">Click to capture or upload ${side} iris image</div>
+                <button class="upload-button" type="button">Choose Method</button>
             `;
             
-            document.getElementById('healthPatterns').innerHTML = analysisResults.patterns.map(pattern => `
-                <div class="pattern-item">
-                    <strong>${pattern.name}</strong> - ${pattern.severity}<br>
-                    <em>Area:</em> ${pattern.area}<br>
-                    <em>Location:</em> ${pattern.location}
-                </div>
-            `).join('');
+            // Hide controls
+            document.getElementById(`${side}IrisControls`).classList.add('hidden');
             
-            document.getElementById('organAssessment').innerHTML = analysisResults.organs.map(organ => `
-                <div class="pattern-item">
-                    <strong>${organ.name}:</strong> ${organ.status}<br>
-                    <em>Notes:</em> ${organ.notes}
-                </div>
-            `).join('');
+            // Clear stored data
+            if (irisImages[side] && irisImages[side].url) {
+                URL.revokeObjectURL(irisImages[side].url);
+            }
+            irisImages[side] = null;
             
-            updateProgress(4);
-            
-            // Save assessment after analysis
-            setTimeout(() => {
-                saveIrisAssessment();
-            }, 1500);
-        }
+            // Reset file input
+            document.getElementById(`${side}IrisFile`).value = '';
+        };
         
-        // Save iris assessment with proper workflow checks
-        async function saveIrisAssessment() {
-            if (!selectedPatient) {
-                showAlert('No patient selected for assessment', 'error');
+        // Assessment functions
+        window.saveDraft = async function() {
+            const assessmentData = collectAssessmentData();
+            assessmentData.status = 'draft';
+            
+            try {
+                // Save to localStorage as backup
+                localStorage.setItem(`iris_draft_${currentPatient.id}`, JSON.stringify(assessmentData));
+                alert('Draft saved successfully');
+            } catch (error) {
+                console.error('Error saving draft:', error);
+                alert('Error saving draft');
+            }
+        };
+        
+        window.completeAssessment = async function() {
+            const assessmentData = collectAssessmentData();
+            
+            // Validate required fields
+            if (!assessmentData.findings.constitution_type || !assessmentData.findings.fiber_density) {
+                alert('Please complete all required fields');
                 return;
             }
             
-            const authData = JSON.parse(localStorage.getItem('celloxen_auth') || '{}');
-            const clinicId = authData.clinicId || sessionStorage.getItem('currentClinicId') || selectedPatient.clinic_id;
+            assessmentData.status = 'completed';
+            assessmentData.completed_at = new Date().toISOString();
             
             try {
-                const irisData = {
-                    clinic_id: clinicId,
-                    patient_id: selectedPatient.id,
-                    left_eye_images: capturedImages.left,
-                    right_eye_images: capturedImages.right,
-                    constitutional_type: analysisResults.constitutional_type,
-                    organ_analysis: analysisResults.organs,
-                    stress_indicators: {
-                        level: 'Moderate',
-                        areas: analysisResults.patterns.map(p => p.area)
-                    },
-                    iris_data: {
-                        constitutional_analysis: analysisResults,
-                        captured_images: capturedImages,
-                        analysis_type: document.getElementById('analysisType').value,
-                        analysis_date: new Date().toISOString()
-                    },
-                    created_at: new Date().toISOString()
-                };
-                
                 // Save to database
                 const { data, error } = await supabase
                     .from('iris_assessments')
-                    .insert([irisData])
+                    .insert([{
+                        patient_id: currentPatient.id,
+                        clinic_id: currentPatient.clinic_id,
+                        assessment_data: assessmentData,
+                        images: {
+                            left: irisImages.left ? {
+                                url: irisImages.left.publicUrl || irisImages.left.url,
+                                path: irisImages.left.storagePath
+                            } : null,
+                            right: irisImages.right ? {
+                                url: irisImages.right.publicUrl || irisImages.right.url,
+                                path: irisImages.right.storagePath
+                            } : null
+                        },
+                        created_at: new Date().toISOString()
+                    }])
                     .select()
                     .single();
                 
                 if (error) throw error;
                 
-                // Update workflow status to iris_assessment
-                await workflowManager.updateStage(selectedPatient.id, 'iris_assessment');
+                // Update session storage
+                sessionStorage.setItem('irisAssessmentId', data.id);
+                sessionStorage.setItem('irisAssessmentCompleted', 'true');
                 
-                // Check if health assessment is also complete
-                const healthAssessment = sessionStorage.getItem('lastHealthAssessment');
-                const { data: workflowStatus } = await supabase
-                    .from('patient_workflow_status')
-                    .select('current_stage')
-                    .eq('patient_id', selectedPatient.id)
-                    .single();
-                
-                // Check if health assessment was completed
-                const { data: healthData } = await supabase
-                    .from('health_assessments')
-                    .select('id')
-                    .eq('patient_id', selectedPatient.id)
-                    .order('created_at', { ascending: false })
-                    .limit(1);
-                
-                const healthAssessmentComplete = healthAssessment || 
-                    (healthData && healthData.length > 0) || 
-                    (workflowStatus && workflowStatus.current_stage === 'health_assessment');
-                
-                if (healthAssessmentComplete) {
-                    // Both assessments complete - proceed to report generation
-                    await workflowManager.updateStage(selectedPatient.id, 'report_generation');
-                    updateProgress(5);
-                    showCompletionScreen(true); // true = both complete
-                } else {
-                    // Only IRIS complete - inform user
-                    updateProgress(5);
-                    showCompletionScreen(false); // false = only iris complete
-                }
+                // Show success modal
+                document.getElementById('successModal').classList.add('show');
                 
             } catch (error) {
-                console.error('Error saving assessment:', error);
-                showAlert('Error saving assessment: ' + error.message, 'error');
-            }
-        }
-        
-        function showCompletionScreen(bothComplete = false) {
-            document.getElementById('completionSection').style.display = 'block';
-            
-            const reportContent = `
-                <h3 style="color: #1e293b;">IRIS Assessment Summary</h3>
-                <div style="margin-top: 20px;">
-                    <h4 style="color: #475569;">Patient Information</h4>
-                    <p><strong>Name:</strong> ${selectedPatient.first_name} ${selectedPatient.last_name}</p>
-                    <p><strong>Patient ID:</strong> ${selectedPatient.patient_id}</p>
-                    <p><strong>Assessment Date:</strong> ${new Date().toLocaleDateString('en-GB')}</p>
-                </div>
-                
-                <div style="margin-top: 20px;">
-                    <h4 style="color: #475569;">Constitutional Analysis</h4>
-                    <p><strong>Type:</strong> ${analysisResults.constitutional_type}</p>
-                    <p><strong>Constitution:</strong> ${analysisResults.constitution}</p>
-                    <p><strong>Iris Classification:</strong> ${analysisResults.iris_color}</p>
-                </div>
-                
-                <div style="margin-top: 20px;">
-                    <h4 style="color: #475569;">Key Findings</h4>
-                    <ul>
-                        ${analysisResults.patterns.map(pattern => 
-                            `<li>${pattern.name} - ${pattern.severity} (${pattern.area})</li>`
-                        ).join('')}
-                    </ul>
-                </div>
-            `;
-            
-            document.getElementById('reportPreview').innerHTML = reportContent;
-            
-            const nextStepAlert = document.getElementById('nextStepAlert');
-            const completionActions = document.getElementById('completionActions');
-            
-            if (bothComplete) {
-                // Both assessments complete
-                nextStepAlert.innerHTML = `
-                    <strong>Next Step:</strong> Both health and IRIS assessments are complete! 
-                    The system will now generate a comprehensive diagnostic report and send it to the patient.
-                `;
-                
-                completionActions.innerHTML = `
-                    <button class="btn btn-primary" onclick="generateComprehensiveReport()">
-                        Generate Comprehensive Report →
-                    </button>
-                    <button class="btn btn-secondary" onclick="viewPreliminaryData()">
-                        View Assessment Data
-                    </button>
-                    <button class="btn btn-secondary" onclick="returnToDashboard()">
-                        Return to Dashboard
-                    </button>
-                `;
-                
-                showAlert('Both assessments completed! Preparing comprehensive report...', 'success');
-                
-                // Store data and auto-redirect to post-assessment workflow
-                sessionStorage.setItem('lastAssessedPatientId', selectedPatient.id);
-                sessionStorage.setItem('lastAssessmentId', Date.now().toString());
-                sessionStorage.setItem('assessmentType', 'IRIS Assessment');
-                
-                setTimeout(() => {
-                    window.location.href = `post-assessment-workflow.html?patientId=${selectedPatient.id}`;
-                }, 2000);
-            } else {
-                // Only IRIS complete
-                nextStepAlert.innerHTML = `
-                    <strong>Next Step:</strong> IRIS assessment is complete. 
-                    Please ensure the Health Assessment (Lily AI) is also completed for this patient 
-                    to generate the comprehensive diagnostic report.
-                `;
-                
-                completionActions.innerHTML = `
-                    <button class="btn btn-primary" onclick="proceedToHealthAssessment()">
-                        Complete Health Assessment →
-                    </button>
-                    <button class="btn btn-secondary" onclick="viewPreliminaryData()">
-                        View Assessment Data
-                    </button>
-                    <button class="btn btn-secondary" onclick="returnToDashboard()">
-                        Return to Dashboard
-                    </button>
-                `;
-                
-                showAlert('IRIS assessment completed. Health assessment still required.', 'info');
-            }
-        }
-        
-        // Navigation functions
-        window.proceedToHealthAssessment = function() {
-            sessionStorage.setItem('currentPatientId', selectedPatient.id);
-            window.location.href = `lily-ai-agent-integrated.html?patientId=${selectedPatient.id}`;
-        };
-        
-        window.generateComprehensiveReport = async function() {
-            if (selectedPatient) {
-                sessionStorage.setItem('currentPatientId', selectedPatient.id);
-                window.location.href = `post-assessment-workflow.html?patientId=${selectedPatient.id}`;
-            } else {
-                showAlert('Patient data not available', 'error');
+                console.error('Error completing assessment:', error);
+                alert('Error saving assessment. Please try again.');
             }
         };
         
-        window.viewPreliminaryData = function() {
-            window.print();
-        };
-        
-        window.returnToDashboard = function() {
-            window.location.href = 'clinic-dashboard.html';
-        };
-        
-        // Progress management
-        function updateProgress(step) {
-            currentStep = step;
-            const steps = document.querySelectorAll('.step');
-            steps.forEach((stepEl, index) => {
-                stepEl.classList.remove('active', 'completed');
-                if (index + 1 < step) {
-                    stepEl.classList.add('completed');
-                } else if (index + 1 === step) {
-                    stepEl.classList.add('active');
+        function collectAssessmentData() {
+            return {
+                patient_id: currentPatient.id,
+                patient_name: `${currentPatient.first_name} ${currentPatient.last_name}`,
+                assessment_date: new Date().toISOString(),
+                findings: {
+                    constitution_type: document.getElementById('constitutionType').value,
+                    fiber_density: document.getElementById('fiberDensity').value,
+                    pupil_size: document.getElementById('pupilSize').value,
+                    collarette_position: document.getElementById('collarettePosition').value,
+                    lacunae: document.getElementById('lacunae').value,
+                    stress_rings: document.getElementById('stressRings').value,
+                    clinical_notes: document.getElementById('clinicalNotes').value
+                },
+                images: {
+                    left: irisImages.left ? 'captured' : null,
+                    right: irisImages.right ? 'captured' : null
                 }
-            });
+            };
         }
         
-        // Make functions globally available
-        window.startAnalysis = startAnalysis;
-        window.startCamera = startCamera;
-        window.stopCamera = stopCamera;
-        window.setCurrentEye = setCurrentEye;
-        window.captureIris = captureIris;
+        window.viewReport = function() {
+            // Implement report viewing
+            alert('Report viewing will be implemented');
+        };
+        
+        window.proceedToNext = function() {
+            // Redirect to report generator
+            window.location.href = `report-generator.html?patientId=${currentPatient.id}`;
+        };
+        
+        window.exitAssessment = function() {
+            if (confirm('Exit assessment? Any unsaved changes will be lost.')) {
+                window.location.href = 'clinic-dashboard.html';
+            }
+        };
+        
+        function calculateAge(dateOfBirth) {
+            if (!dateOfBirth) return 'N/A';
+            const today = new Date();
+            const birthDate = new Date(dateOfBirth);
+            let age = today.getFullYear() - birthDate.getFullYear();
+            const monthDiff = today.getMonth() - birthDate.getMonth();
+            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                age--;
+            }
+            return age;
+        }
     </script>
 </body>
 </html>
