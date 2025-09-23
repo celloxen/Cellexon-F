@@ -647,61 +647,102 @@
         }
         
         function populateFields(data) {
-            // Profile fields
-            document.getElementById('clinicName').value = data.clinic_name || '';
-            document.getElementById('clinicCode').value = data.clinic_code || '';
-            document.getElementById('registrationNumber').value = data.registration_number || '';
-            document.getElementById('taxId').value = data.tax_id || '';
-            document.getElementById('aboutClinic').value = data.about || '';
+            // Profile fields - check elements exist before accessing
+            const clinicName = document.getElementById('clinicName');
+            if (clinicName) clinicName.value = data.clinic_name || '';
+            
+            const clinicCode = document.getElementById('clinicCode');
+            if (clinicCode) clinicCode.value = data.clinic_code || '';
+            
+            const registrationNumber = document.getElementById('registrationNumber');
+            if (registrationNumber) registrationNumber.value = data.registration_number || '';
+            
+            const taxId = document.getElementById('taxId');
+            if (taxId) taxId.value = data.tax_id || '';
+            
+            const aboutClinic = document.getElementById('aboutClinic');
+            if (aboutClinic) aboutClinic.value = data.about || '';
             
             // Contact fields
-            document.getElementById('phoneNumber').value = data.phone || '';
-            document.getElementById('emergencyPhone').value = data.emergency_phone || '';
-            document.getElementById('emailAddress').value = data.email || '';
-            document.getElementById('website').value = data.website || '';
-            document.getElementById('streetAddress').value = data.street_address || '';
-            document.getElementById('city').value = data.city || '';
-            document.getElementById('postcode').value = data.postcode || '';
-            document.getElementById('county').value = data.county || '';
-            document.getElementById('country').value = data.country || 'United Kingdom';
+            const phoneNumber = document.getElementById('phoneNumber');
+            if (phoneNumber) phoneNumber.value = data.phone || '';
+            
+            const emergencyPhone = document.getElementById('emergencyPhone');
+            if (emergencyPhone) emergencyPhone.value = data.emergency_phone || '';
+            
+            const emailAddress = document.getElementById('emailAddress');
+            if (emailAddress) emailAddress.value = data.email || '';
+            
+            const website = document.getElementById('website');
+            if (website) website.value = data.website || '';
+            
+            const streetAddress = document.getElementById('streetAddress');
+            if (streetAddress) streetAddress.value = data.street_address || data.address || '';
+            
+            const city = document.getElementById('city');
+            if (city) city.value = data.city || '';
+            
+            const postcode = document.getElementById('postcode');
+            if (postcode) postcode.value = data.postcode || '';
+            
+            const county = document.getElementById('county');
+            if (county) county.value = data.county || '';
+            
+            const country = document.getElementById('country');
+            if (country) country.value = data.country || 'United Kingdom';
             
             // Dates
             if (data.created_at) {
-                document.getElementById('memberSince').textContent = 
-                    new Date(data.created_at).toLocaleDateString();
+                const memberSince = document.getElementById('memberSince');
+                if (memberSince) {
+                    memberSince.textContent = new Date(data.created_at).toLocaleDateString();
+                }
             }
             if (data.updated_at) {
-                document.getElementById('lastUpdated').textContent = 
-                    new Date(data.updated_at).toLocaleDateString();
+                const lastUpdated = document.getElementById('lastUpdated');
+                if (lastUpdated) {
+                    lastUpdated.textContent = new Date(data.updated_at).toLocaleDateString();
+                }
             }
             
             // Calculate next payment (30 days from creation)
             if (data.created_at) {
-                const nextPayment = new Date(data.created_at);
-                nextPayment.setDate(nextPayment.getDate() + 30);
-                document.getElementById('nextPayment').textContent = 
-                    nextPayment.toLocaleDateString();
+                const nextPaymentEl = document.getElementById('nextPayment');
+                if (nextPaymentEl) {
+                    const nextPayment = new Date(data.created_at);
+                    nextPayment.setDate(nextPayment.getDate() + 30);
+                    nextPaymentEl.textContent = nextPayment.toLocaleDateString();
+                }
             }
         }
         
         function setupEventListeners() {
             // Profile form
-            document.getElementById('profileForm').addEventListener('submit', async (e) => {
-                e.preventDefault();
-                await saveProfile();
-            });
+            const profileForm = document.getElementById('profileForm');
+            if (profileForm) {
+                profileForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    await saveProfile();
+                });
+            }
             
             // Contact form
-            document.getElementById('contactForm').addEventListener('submit', async (e) => {
-                e.preventDefault();
-                await saveContact();
-            });
+            const contactForm = document.getElementById('contactForm');
+            if (contactForm) {
+                contactForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    await saveContact();
+                });
+            }
             
             // Hours form
-            document.getElementById('hoursForm').addEventListener('submit', async (e) => {
-                e.preventDefault();
-                await saveHours();
-            });
+            const hoursForm = document.getElementById('hoursForm');
+            if (hoursForm) {
+                hoursForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    await saveHours();
+                });
+            }
         }
         
         async function saveProfile() {
