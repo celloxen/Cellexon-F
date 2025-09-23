@@ -260,22 +260,16 @@
         </div>
     </div>
 
-    <!-- Direct Supabase Integration -->
-    <script src="https://unpkg.com/@supabase/supabase-js@1.35.7/dist/umd/supabase.js"></script>
-    
-    <script>
-        // Initialize Supabase directly
+    <!-- Updated to Supabase v2 for consistency -->
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+        
+        // Initialize Supabase with the CORRECT ANON KEY (not service_role)
         const supabaseUrl = 'https://defifwzgazqlrigwumqn.supabase.co';
-        const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlZmlmd3pnYXpxbHJpZ3d1bXFuIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NzI1MzQyNiwiZXhwIjoyMDcyODI5NDI2fQ.Z2rYuNduatwFsIfiA4aO-g__GNtQKAXBEyHBLG4r5W8';
+        const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlZmlmd3pnYXpxbHJpZ3d1bXFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcyNTM0MjYsImV4cCI6MjA3MjgyOTQyNn0.wcUBq6Pszjtqn5aBtuu3iXBE4BLmu8x9LtJbsMWlIiA';
         
-        let supabase;
-        
-        try {
-            supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
-            console.log('Supabase client initialized successfully');
-        } catch (error) {
-            console.error('Failed to initialize Supabase:', error);
-        }
+        const supabase = createClient(supabaseUrl, supabaseAnonKey);
+        console.log('Supabase client initialized successfully');
         
         // Check for login messages from other pages
         document.addEventListener('DOMContentLoaded', function() {
@@ -423,7 +417,7 @@
             return 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
         }
         
-        function showAlert(message, type) {
+        window.showAlert = function(message, type) {
             const alertBox = document.getElementById('alertBox');
             alertBox.innerHTML = `
                 <div class="alert alert-${type}">
@@ -437,7 +431,7 @@
             }, 5000);
         }
         
-        function forgotPassword() {
+        window.forgotPassword = function() {
             showAlert('Password reset functionality coming soon. Please contact support.', 'info');
         }
     </script>
