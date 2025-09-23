@@ -468,42 +468,30 @@
                     </div>
 
                     <div id="captureInstructions">
-                        <h4>Image Capture/Upload Instructions:</h4>
+                        <h4>Capture Instructions:</h4>
                         <ol>
-                            <li><strong>Camera Capture:</strong> Position patient 30-40cm from camera</li>
+                            <li>Position patient 30-40cm from camera</li>
                             <li>Ensure good lighting on the iris</li>
+                            <li>Capture left eye first, then right eye</li>
                             <li>Keep eye wide open and focused</li>
                             <li>Avoid reflections and shadows</li>
-                            <li><strong>Upload Option:</strong> You can also upload existing high-quality iris photos</li>
-                            <li>Ensure uploaded images are clear and well-lit</li>
-                            <li>Both left and right eye images are required</li>
                         </ol>
                     </div>
 
                     <div class="iris-images">
                         <div class="iris-image-container" id="leftEyeContainer">
                             <h4>Left Eye</h4>
-                            <div id="leftEyePreview" style="margin-top: 15px; min-height: 150px;">
+                            <div id="leftEyePreview" style="margin-top: 15px;">
                                 <p style="color: #94a3b8;">Not captured</p>
                             </div>
-                            <div style="display: flex; gap: 10px; justify-content: center; margin-top: 15px;">
-                                <button class="btn btn-secondary" onclick="setCurrentEye('left')" title="Use camera to capture">📷 Capture</button>
-                                <button class="btn btn-secondary" onclick="triggerUpload('left')" title="Upload existing image">📁 Upload</button>
-                            </div>
-                            <button class="btn btn-danger" id="leftClearBtn" style="display: none; margin-top: 10px; font-size: 12px; padding: 6px 12px;" onclick="clearImage('left')">Clear Image</button>
-                            <input type="file" id="leftEyeUpload" style="display: none;" accept="image/*" onchange="handleImageUpload('left', this)">
+                            <button class="btn btn-secondary" style="margin-top: 15px;" onclick="setCurrentEye('left')">Capture Left</button>
                         </div>
                         <div class="iris-image-container" id="rightEyeContainer">
                             <h4>Right Eye</h4>
-                            <div id="rightEyePreview" style="margin-top: 15px; min-height: 150px;">
+                            <div id="rightEyePreview" style="margin-top: 15px;">
                                 <p style="color: #94a3b8;">Not captured</p>
                             </div>
-                            <div style="display: flex; gap: 10px; justify-content: center; margin-top: 15px;">
-                                <button class="btn btn-secondary" onclick="setCurrentEye('right')" title="Use camera to capture">📷 Capture</button>
-                                <button class="btn btn-secondary" onclick="triggerUpload('right')" title="Upload existing image">📁 Upload</button>
-                            </div>
-                            <button class="btn btn-danger" id="rightClearBtn" style="display: none; margin-top: 10px; font-size: 12px; padding: 6px 12px;" onclick="clearImage('right')">Clear Image</button>
-                            <input type="file" id="rightEyeUpload" style="display: none;" accept="image/*" onchange="handleImageUpload('right', this)">
+                            <button class="btn btn-secondary" style="margin-top: 15px;" onclick="setCurrentEye('right')">Capture Right</button>
                         </div>
                     </div>
                 </div>
@@ -545,7 +533,7 @@
             </div>
             
             <div class="alert alert-info">
-                <strong>Next Step:</strong> Both health and IRIS assessments are now complete. The system will now generate a comprehensive diagnostic report with therapy recommendations.
+                <strong>Next Step:</strong> Both health and iris assessments are now complete. The system will generate a comprehensive diagnostic report with therapy recommendations.
             </div>
             
             <div class="action-buttons">
@@ -572,16 +560,15 @@
         let analysisResults = {};
         let cameraStream = null;
         let currentStep = 1;
-        let healthAssessmentId = null;
         
         // Initialize page
-        document.addEventListener('DOMContentLoaded', async function() {
+        document.addEventListener('DOMContentLoaded', function() {
             // Check if patient ID is in session
             const patientId = sessionStorage.getItem('currentPatientId');
             if (patientId) {
-                await loadPatientForWorkflow(patientId);
+                loadPatientForWorkflow(patientId);
             } else {
-                await loadPatients();
+                loadPatients();
             }
         });
         
@@ -607,20 +594,6 @@
                 
                 if (data) {
                     selectedPatient = data;
-                    
-                    // Check for existing health assessment
-                    const { data: healthAssessment } = await supabase
-                        .from('health_assessments')
-                        .select('id')
-                        .eq('patient_id', patientId)
-                        .order('created_at', { ascending: false })
-                        .limit(1)
-                        .single();
-                    
-                    if (healthAssessment) {
-                        healthAssessmentId = healthAssessment.id;
-                    }
-                    
                     // Auto-select patient
                     const patientSelect = document.getElementById('patientSelect');
                     patientSelect.innerHTML = `<option value="${data.id}" selected>${data.first_name} ${data.last_name} (${data.patient_id})</option>`;
@@ -636,7 +609,7 @@
                 }
             } catch (error) {
                 console.error('Error loading patient:', error);
-                await loadPatients(); // Fallback to loading all patients
+                loadPatients(); // Fallback to loading all patients
             }
         }
         
@@ -736,65 +709,6 @@
             document.querySelector(`#${eye === 'left' ? 'right' : 'left'}EyeContainer`).style.border = '2px solid #e2e8f0';
         };
         
-        // Trigger file upload dialog
-        window.triggerUpload = function(eye) {
-            document.getElementById(`${eye}EyeUpload`).click();
-        };
-        
-        // Handle uploaded image
-        window.handleImageUpload = function(eye, input) {
-            if (input.files && input.files[0]) {
-                const reader = new FileReader();
-                
-                reader.onload = function(e) {
-                    const imageDataUrl = e.target.result;
-                    capturedImages[eye] = imageDataUrl;
-                    
-                    // Update preview
-                    const previewElement = document.getElementById(`${eye}EyePreview`);
-                    previewElement.innerHTML = `<img src="${imageDataUrl}" class="captured-image" alt="${eye} eye">`;
-                    document.getElementById(`${eye}EyeContainer`).classList.add('captured');
-                    
-                    // Show clear button
-                    document.getElementById(`${eye}ClearBtn`).style.display = 'inline-block';
-                    
-                    showAlert(`${eye.charAt(0).toUpperCase() + eye.slice(1)} eye image uploaded successfully`, 'success');
-                    
-                    // Check if both eyes have images
-                    if (capturedImages.left && capturedImages.right) {
-                        showAlert('Both eyes captured/uploaded. Starting analysis...', 'info');
-                        setTimeout(() => {
-                            performAnalysis();
-                        }, 1500);
-                    } else {
-                        const nextEye = eye === 'left' ? 'right' : 'left';
-                        showAlert(`Please capture or upload the ${nextEye} eye image`, 'info');
-                    }
-                };
-                
-                reader.readAsDataURL(input.files[0]);
-            }
-        };
-        
-        // Clear captured/uploaded image
-        window.clearImage = function(eye) {
-            capturedImages[eye] = null;
-            
-            // Reset preview
-            const previewElement = document.getElementById(`${eye}EyePreview`);
-            previewElement.innerHTML = '<p style="color: #94a3b8;">Not captured</p>';
-            document.getElementById(`${eye}EyeContainer`).classList.remove('captured');
-            
-            // Hide clear button
-            document.getElementById(`${eye}ClearBtn`).style.display = 'none';
-            
-            // Reset file input
-            document.getElementById(`${eye}EyeUpload`).value = '';
-            
-            showAlert(`${eye.charAt(0).toUpperCase() + eye.slice(1)} eye image cleared`, 'info');
-        };
-        
-        
         window.captureIris = function() {
             if (!cameraStream) {
                 showAlert('Please start the camera first', 'error');
@@ -816,9 +730,6 @@
             const previewElement = document.getElementById(`${currentEye}EyePreview`);
             previewElement.innerHTML = `<img src="${imageDataUrl}" class="captured-image" alt="${currentEye} eye">`;
             document.getElementById(`${currentEye}EyeContainer`).classList.add('captured');
-            
-            // Show clear button
-            document.getElementById(`${currentEye}ClearBtn`).style.display = 'inline-block';
             
             // Check if both eyes captured
             if (capturedImages.left && capturedImages.right) {
@@ -866,21 +777,6 @@
                     { name: 'Digestive System', status: 'Needs Support', notes: 'Shows signs of stress' },
                     { name: 'Lymphatic System', status: 'Mild Congestion', notes: 'Minor congestion patterns' },
                     { name: 'Nervous System', status: 'Mild Stress', notes: 'Stress rings visible' }
-                ],
-                stress_indicators: {
-                    level: 'Moderate',
-                    areas: ['Digestive', 'Nervous'],
-                    notes: 'Stress rings present in zones 2-3'
-                },
-                toxicity_markers: {
-                    level: 'Low',
-                    areas: ['Lymphatic'],
-                    notes: 'Minor congestion patterns observed'
-                },
-                genetic_predispositions: [
-                    'Digestive sensitivity',
-                    'Stress response tendency',
-                    'Lymphatic congestion potential'
                 ]
             };
             
@@ -915,7 +811,7 @@
             }, 1500);
         }
         
-        // Save iris assessment - FIXED to match database structure
+        // Save iris assessment
         async function saveIrisAssessment() {
             if (!selectedPatient) {
                 showAlert('No patient selected for assessment', 'error');
@@ -926,44 +822,46 @@
             const clinicId = authData.clinicId || sessionStorage.getItem('currentClinicId') || selectedPatient.clinic_id;
             
             try {
-                // Prepare data matching the database columns
-                const irisAssessmentData = {
-                    patient_id: selectedPatient.id,
+                const irisData = {
                     clinic_id: clinicId,
-                    health_assessment_id: healthAssessmentId, // Link to health assessment if available
-                    left_eye_images: [capturedImages.left], // Store as array
-                    right_eye_images: [capturedImages.right], // Store as array
-                    constitutional_type: analysisResults.constitutional_type,
-                    organ_analysis: analysisResults.organs,
-                    stress_indicators: analysisResults.stress_indicators,
-                    toxicity_markers: analysisResults.toxicity_markers,
-                    genetic_predispositions: analysisResults.genetic_predispositions,
-                    assessment_type: document.getElementById('analysisType').value,
-                    status: 'completed',
-                    created_at: new Date().toISOString(),
-                    updated_at: new Date().toISOString()
+                    left_eye_image: capturedImages.left,
+                    right_eye_image: capturedImages.right,
+                    iris_data: {
+                        constitutional_analysis: analysisResults,
+                        captured_images: capturedImages,
+                        analysis_type: document.getElementById('analysisType').value,
+                        analysis_date: new Date().toISOString()
+                    }
                 };
                 
-                // Save to database
-                const { data, error } = await supabase
-                    .from('iris_assessments')
-                    .insert([irisAssessmentData])
-                    .select()
-                    .single();
+                // Complete iris assessment using workflow manager
+                const assessment = await workflowManager.completeIrisAssessment(selectedPatient.id, irisData);
                 
-                if (error) throw error;
-                
-                // Update workflow status to iris_assessment_completed
-                await workflowManager.updateStage(selectedPatient.id, workflowStages.IRIS_ASSESSMENT_COMPLETED);
-                
-                updateProgress(5);
-                showCompletionScreen();
-                
-                // Automatically navigate to report generation after 3 seconds
-                setTimeout(() => {
-                    showAlert('Navigating to report generation...', 'info');
-                    generateComprehensiveReport();
-                }, 3000);
+                if (assessment) {
+                    updateProgress(5);
+                    showCompletionScreen();
+                } else {
+                    // Fallback: save directly if workflow manager fails
+                    const { data, error } = await supabase
+                        .from('iris_assessments')
+                        .insert([{
+                            patient_id: selectedPatient.id,
+                            clinic_id: clinicId,
+                            left_eye_image: capturedImages.left,
+                            right_eye_image: capturedImages.right,
+                            constitutional_type: analysisResults.constitutional_type,
+                            health_patterns: analysisResults.patterns,
+                            analysis_notes: 'IRIS assessment completed',
+                            iris_data: irisData.iris_data,
+                            completed_at: new Date().toISOString()
+                        }])
+                        .select();
+                    
+                    if (error) throw error;
+                    
+                    updateProgress(5);
+                    showCompletionScreen();
+                }
                 
             } catch (error) {
                 console.error('Error saving assessment:', error);
@@ -999,23 +897,30 @@
                     </ul>
                 </div>
                 
-                <div style="background: #d1fae5; border-left: 4px solid #10b981; padding: 15px; margin: 20px 0; border-radius: 8px;">
-                    <strong>✓ Success:</strong> IRIS assessment completed. System will now generate comprehensive report combining both assessments.
+                <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0; border-radius: 8px;">
+                    <strong>Note:</strong> This iris assessment data will be combined with the health assessment to generate comprehensive therapy recommendations.
                 </div>
             `;
             
             document.getElementById('reportPreview').innerHTML = reportContent;
             
-            showAlert('IRIS assessment completed successfully! Preparing to generate comprehensive report...', 'success');
+            showAlert('IRIS assessment completed successfully!', 'success');
+            
+            // Store assessment data for post-assessment workflow
+            sessionStorage.setItem('lastAssessedPatientId', selectedPatient.id);
+            sessionStorage.setItem('lastAssessmentId', Date.now().toString());
+            sessionStorage.setItem('assessmentType', 'IRIS Assessment');
+            
+            // Automatically redirect to post-assessment workflow after 2 seconds
+            setTimeout(() => {
+                window.location.href = `post-assessment-workflow.html?patientId=${selectedPatient.id}&assessmentId=${sessionStorage.getItem('lastAssessmentId')}`;
+            }, 2000);
         }
         
         // Navigation functions
         window.generateComprehensiveReport = async function() {
             if (selectedPatient) {
-                // Update workflow to report generation stage
-                await workflowManager.updateStage(selectedPatient.id, workflowStages.REPORT_PENDING);
-                // Navigate to report generator
-                window.location.href = `report-generator.html?patient=${selectedPatient.id}`;
+                await workflowManager.generateReport(selectedPatient.id);
             } else {
                 showAlert('Patient data not available', 'error');
             }
@@ -1049,9 +954,6 @@
         window.stopCamera = stopCamera;
         window.setCurrentEye = setCurrentEye;
         window.captureIris = captureIris;
-        window.triggerUpload = triggerUpload;
-        window.handleImageUpload = handleImageUpload;
-        window.clearImage = clearImage;
     </script>
 </body>
 </html>
