@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Clinic Dashboard - Celloxen Wellness Platform</title>
+    
+    <!-- REQUIRED: Supabase CDN - Must be first -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
     <style>
         * {
             margin: 0;
@@ -156,15 +160,6 @@
             font-size: 28px;
         }
         
-        /* Patient Journey Pipeline */
-        .journey-pipeline {
-            background: white;
-            border-radius: 16px;
-            padding: 25px;
-            margin-bottom: 30px;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-        }
-        
         /* Clinic Statistics Dashboard */
         .stats-dashboard {
             background: white;
@@ -238,89 +233,6 @@
             letter-spacing: 0.5px;
         }
         
-        
-        .pipeline-header {
-            font-size: 18px;
-            font-weight: 600;
-            color: #1e293b;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .pipeline-stages {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            overflow-x: auto;
-            padding: 10px 0;
-        }
-        
-        .pipeline-stage {
-            text-align: center;
-            flex: 1;
-            min-width: 120px;
-            cursor: pointer;
-            transition: all 0.3s;
-            position: relative;
-        }
-        
-        .pipeline-stage:not(:last-child)::after {
-            content: '→';
-            position: absolute;
-            right: -15px;
-            top: 35%;
-            color: #d1d5db;
-            font-size: 20px;
-        }
-        
-        .pipeline-stage:hover .stage-circle {
-            transform: scale(1.1);
-        }
-        
-        .stage-circle {
-            width: 70px;
-            height: 70px;
-            background: #f3f4f6;
-            border: 3px solid #e5e7eb;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 10px;
-            font-size: 24px;
-            font-weight: 700;
-            color: #6b7280;
-            transition: all 0.3s;
-            position: relative;
-        }
-        
-        .pipeline-stage.active .stage-circle {
-            background: linear-gradient(135deg, #10b981, #059669);
-            color: white;
-            border-color: #10b981;
-            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
-        }
-        
-        .pipeline-stage.has-patients .stage-circle {
-            border-color: #3b82f6;
-            color: #3b82f6;
-        }
-        
-        .stage-name {
-            font-size: 13px;
-            color: #475569;
-            font-weight: 600;
-            margin-top: 8px;
-        }
-        
-        .stage-sublabel {
-            font-size: 11px;
-            color: #9ca3af;
-            margin-top: 2px;
-        }
-        
         /* Main Content Grid */
         .main-content-grid {
             display: grid;
@@ -335,7 +247,7 @@
             }
         }
         
-        /* Today's Priority Card */
+        /* Priority Card */
         .priority-card {
             background: white;
             border-radius: 12px;
@@ -492,7 +404,7 @@
             color: #6b7280;
         }
         
-        /* Today's Schedule Widget */
+        /* Schedule Widget */
         .schedule-widget {
             background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
             border-radius: 10px;
@@ -724,34 +636,34 @@
                         <span class="module-count">Start registration</span>
                     </a>
                     
-                    <a href="health-assessments-viewer.html" class="module-btn">
+                    <a href="patient-management.html" class="module-btn">
+                        <span class="module-icon">👥</span>
+                        <span class="module-name">Patient List</span>
+                        <span class="module-count">All patients</span>
+                    </a>
+                    
+                    <a href="health-assessment.html" class="module-btn">
                         <span class="module-icon">📝</span>
-                        <span class="module-name">Health Assessments</span>
-                        <span class="module-count">View all records</span>
+                        <span class="module-name">Health Assessment</span>
+                        <span class="module-count">Start assessment</span>
                     </a>
                     
-                    <a href="iris-assessments-viewer.html" class="module-btn">
+                    <a href="iris-assessment.html" class="module-btn">
                         <span class="module-icon">👁️</span>
-                        <span class="module-name">IRIS Analyses</span>
-                        <span class="module-count">View all records</span>
+                        <span class="module-name">IRIS Assessment</span>
+                        <span class="module-count">Start analysis</span>
                     </a>
                     
-                    <a href="medical-reports.html" class="module-btn">
+                    <a href="report-generator.html" class="module-btn">
                         <span class="module-icon">📊</span>
-                        <span class="module-name">Diagnostic Reports</span>
-                        <span class="module-count">View all reports</span>
+                        <span class="module-name">Generate Report</span>
+                        <span class="module-count">Diagnosis report</span>
                     </a>
                     
-                    <a href="treatment-plans-viewer.html" class="module-btn">
+                    <a href="treatment-planning.html" class="module-btn">
                         <span class="module-icon">📅</span>
-                        <span class="module-name">Treatment Plans</span>
-                        <span class="module-count">Active plans</span>
-                    </a>
-                    
-                    <a href="therapy-sessions-viewer.html" class="module-btn">
-                        <span class="module-icon">✅</span>
-                        <span class="module-name">Session History</span>
-                        <span class="module-count">Completed sessions</span>
+                        <span class="module-name">Treatment Planning</span>
+                        <span class="module-count">Create plan</span>
                     </a>
                 </div>
             </div>
@@ -763,94 +675,99 @@
                     <span>Clinical Operations</span>
                 </h3>
                 <div class="module-grid">
-                    <a href="patient-management-enhanced.html" class="module-btn">
-                        <span class="module-icon">👥</span>
-                        <span class="module-name">All Patients</span>
-                        <span class="module-count">Search & manage</span>
-                    </a>
-                    
                     <a href="appointments-management.html" class="module-btn">
                         <span class="module-icon">📆</span>
                         <span class="module-name">Appointments</span>
                         <span class="module-count">Calendar view</span>
                     </a>
                     
-                    <a href="therapy-session-recorder.html" class="module-btn">
-                        <span class="module-icon">✨</span>
-                        <span class="module-name">Record Session</span>
-                        <span class="module-count">Log therapy delivery</span>
-                    </a>
-                    
-                    <a href="treatment-progress.html" class="module-btn">
+                    <a href="treatment-schedule.html" class="module-btn">
                         <span class="module-icon">⚡</span>
-                        <span class="module-name">Today's Treatments</span>
-                        <span class="module-count">Deliver therapy</span>
+                        <span class="module-name">Treatment Schedule</span>
+                        <span class="module-count">Schedule sessions</span>
                     </a>
                     
-                    <a href="supplements-management.html" class="module-btn">
+                    <a href="therapies-bank.html" class="module-btn">
                         <span class="module-icon">💊</span>
-                        <span class="module-name">Supplements</span>
-                        <span class="module-count">Protocols</span>
+                        <span class="module-name">Therapy Bank</span>
+                        <span class="module-count">All protocols</span>
                     </a>
                     
-                    <a href="treatment-interface.html" class="module-btn">
-                        <span class="module-icon">🔧</span>
-                        <span class="module-name">Therapy Settings</span>
-                        <span class="module-count">Configure protocols</span>
-                    </a>
-                    
-                    <a href="knowledge-base.html" class="module-btn">
-                        <span class="module-icon">📚</span>
-                        <span class="module-name">Knowledge Base</span>
-                        <span class="module-count">Resources</span>
-                    </a>
-                </div>
-            </div>
-            
-            <!-- Administration -->
-            <div class="category-section">
-                <h3 class="category-title">
-                    <span>⚙️</span>
-                    <span>Administration</span>
-                </h3>
-                <div class="module-grid">
-                    <a href="billing-management.html" class="module-btn">
-                        <span class="module-icon">💰</span>
-                        <span class="module-name">Billing</span>
-                        <span class="module-count">Invoices & payments</span>
-                    </a>
-                    
-                    <a href="analytics-dashboard.html" class="module-btn">
-                        <span class="module-icon">📊</span>
-                        <span class="module-name">Analytics</span>
-                        <span class="module-count">Clinic metrics</span>
-                    </a>
-                    
-                    <a href="clinic-settings.html" class="module-btn">
-                        <span class="module-icon">⚙️</span>
-                        <span class="module-name">Settings</span>
-                        <span class="module-count">Clinic configuration</span>
-                    </a>
-                    
-                    <a href="staff-management.html" class="module-btn">
-                        <span class="module-icon">👤</span>
-                        <span class="module-name">Staff Management</span>
-                        <span class="module-count">Users & roles</span>
+                    <a href="medical-reports.html" class="module-btn">
+                        <span class="module-icon">📄</span>
+                        <span class="module-name">Medical Reports</span>
+                        <span class="module-count">View reports</span>
                     </a>
                 </div>
             </div>
         </div>
     </div>
 
-    <script type="module">
-        import { supabase } from './supabase-config.js';
+    <!-- Supabase Config Script -->
+    <script>
+        // Inline Supabase configuration to avoid import issues
+        const SUPABASE_URL = 'https://defifwzgazqlrigwumqn.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlZmlmd3pnYXpxbHJpZ3d1bXFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzExMDY0OTAsImV4cCI6MjA0NjY4MjQ5MH0.DknLuqU8P7K5B8qLLxTWDh-HBMKzPnVzIKCqNLLVHCE';
+        
+        // Initialize Supabase client
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        console.log('Supabase client initialized');
+    </script>
+
+    <!-- Main Dashboard Script -->
+    <script>
+        // Global functions for button clicks
+        function startNewJourney() {
+            window.location.href = 'patient-registration.html';
+        }
+        
+        function continueAssessments() {
+            const firstIncomplete = document.querySelector('.priority-item');
+            if (firstIncomplete) {
+                firstIncomplete.click();
+            } else {
+                alert('No incomplete assessments found');
+            }
+        }
+        
+        function deliverTreatments() {
+            window.location.href = 'treatment-schedule.html';
+        }
+        
+        function viewAllReports() {
+            window.location.href = 'report-generator.html';
+        }
+        
+        function navigateTo(page) {
+            window.location.href = page;
+        }
+        
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('celloxen_auth');
+                sessionStorage.clear();
+                window.location.href = 'unified-login.html';
+            }
+        }
+        
+        // Continue patient assessment
+        async function continuePatientAssessment(patientId, stage) {
+            sessionStorage.setItem('currentPatientId', patientId);
+            
+            if (stage === 'health_assessment') {
+                window.location.href = `health-assessment.html?patientId=${patientId}`;
+            } else if (stage === 'iris_assessment') {
+                window.location.href = `iris-assessment.html?patientId=${patientId}`;
+            } else {
+                window.location.href = `patient-management.html?patientId=${patientId}`;
+            }
+        }
         
         // Initialize dashboard
         document.addEventListener('DOMContentLoaded', async function() {
             const authenticated = await checkAuthentication();
             if (authenticated) {
                 await loadDashboardData();
-                await loadWorkflowStats();
                 await loadIncompleteAssessments();
                 await loadTodaySchedule();
             }
@@ -865,16 +782,6 @@
             }
             
             const auth = JSON.parse(authData);
-            
-            // Check if clinic user or super admin accessing clinic
-            const isClinicUser = ['clinic', 'clinic_admin'].includes(auth.userType);
-            const isSuperAdminInClinicMode = auth.userType === 'super_admin' && sessionStorage.getItem('superAdminMode') === 'true';
-            
-            if (!isClinicUser && !isSuperAdminInClinicMode) {
-                alert('Access denied. Clinic privileges required.');
-                window.location.href = 'unified-login.html';
-                return false;
-            }
             
             // Set clinic info
             document.getElementById('userName').textContent = auth.username || 'Clinic Administrator';
@@ -929,34 +836,48 @@
                     
                 document.getElementById('totalPatients').textContent = totalPatientsCount || 0;
                 
-                // Active patients (in treatment)
+                // Active patients
                 const { count: activeCount } = await supabase
-                    .from('patient_workflow_status')
+                    .from('treatment_plans')
                     .select('*', { count: 'exact', head: true })
                     .eq('clinic_id', clinicId)
-                    .eq('current_stage', 'in_treatment');
+                    .eq('status', 'active');
                     
                 document.getElementById('activePatients').textContent = activeCount || 0;
                 
-                // Pending assessments
-                const { count: pendingCount } = await supabase
-                    .from('patient_workflow_status')
-                    .select('*', { count: 'exact', head: true })
-                    .eq('clinic_id', clinicId)
-                    .in('current_stage', ['health_assessment', 'iris_assessment']);
-                    
-                document.getElementById('pendingAssessments').textContent = pendingCount || 0;
-                document.getElementById('pendingAssessments2').textContent = pendingCount || 0;
-                document.getElementById('pendingCount').textContent = `${pendingCount || 0} incomplete`;
+                // Pending assessments - count patients without both assessments
+                const { data: patients } = await supabase
+                    .from('patients')
+                    .select('id')
+                    .eq('clinic_id', clinicId);
                 
-                // Active therapies (unique therapy types being delivered)
-                const { count: activeTherapiesCount } = await supabase
-                    .from('patient_workflow_status')
-                    .select('*', { count: 'exact', head: true })
-                    .eq('clinic_id', clinicId)
-                    .in('current_stage', ['in_treatment', 'treatment_planning']);
-                    
-                document.getElementById('activeTherapies').textContent = activeTherapiesCount || 0;
+                let pendingCount = 0;
+                if (patients) {
+                    for (const patient of patients) {
+                        const { data: healthAssessment } = await supabase
+                            .from('health_assessments')
+                            .select('id')
+                            .eq('patient_id', patient.id)
+                            .single();
+                        
+                        const { data: irisAssessment } = await supabase
+                            .from('iris_assessments')
+                            .select('id')
+                            .eq('patient_id', patient.id)
+                            .single();
+                        
+                        if (!healthAssessment || !irisAssessment) {
+                            pendingCount++;
+                        }
+                    }
+                }
+                
+                document.getElementById('pendingAssessments').textContent = pendingCount;
+                document.getElementById('pendingAssessments2').textContent = pendingCount;
+                document.getElementById('pendingCount').textContent = `${pendingCount} incomplete`;
+                
+                // Active therapies
+                document.getElementById('activeTherapies').textContent = activeCount || 0;
                 
                 // Completed this week
                 const weekStart = new Date();
@@ -970,7 +891,7 @@
                     
                 document.getElementById('completedThisWeek').textContent = weekCompletedCount || 0;
                 
-                // Monthly growth calculation
+                // Monthly growth
                 const lastMonth = new Date();
                 lastMonth.setMonth(lastMonth.getMonth() - 1);
                 const { count: lastMonthPatients } = await supabase
@@ -985,87 +906,8 @@
                 }
                 document.getElementById('monthlyGrowth').textContent = growth > 0 ? `+${growth}%` : `${growth}%`;
                 
-                // Completed today
-                const todayStart = new Date(today).toISOString();
-                const { count: completedCount } = await supabase
-                    .from('therapy_sessions')
-                    .select('*', { count: 'exact', head: true })
-                    .eq('clinic_id', clinicId)
-                    .eq('status', 'completed')
-                    .gte('created_at', todayStart);
-                    
-                console.log('Completed today:', completedCount || 0);
-                
             } catch (error) {
                 console.error('Error loading dashboard data:', error);
-            }
-        }
-        
-        // Fixed loadWorkflowStats function
-        async function loadWorkflowStats() {
-            try {
-                const authData = localStorage.getItem('celloxen_auth');
-                if (!authData) return;
-                
-                const auth = JSON.parse(authData);
-                const clinicId = auth.clinicId || sessionStorage.getItem('currentClinicId');
-                
-                if (!clinicId) return;
-                
-                // Get basic patient count
-                const { data: patients, error } = await supabase
-                    .from('patients')
-                    .select('id')
-                    .eq('clinic_id', clinicId);
-                
-                if (error) {
-                    console.error('Error loading patients:', error);
-                    return;
-                }
-                
-                const stats = {
-                    registered: patients ? patients.length : 0,
-                    health_assessment: 0,
-                    iris_assessment: 0,
-                    report_generation: 0,
-                    treatment_planning: 0
-                };
-                
-                // If we have patients, get more detailed stats
-                if (patients && patients.length > 0) {
-                    const patientIds = patients.map(p => p.id);
-                    
-                    // Count assessments and reports
-                    try {
-                        const { count: healthCount } = await supabase
-                            .from('health_assessments')
-                            .select('*', { count: 'exact', head: true })
-                            .in('patient_id', patientIds);
-                        stats.health_assessment = healthCount || 0;
-                        
-                        const { count: irisCount } = await supabase
-                            .from('iris_assessments')
-                            .select('*', { count: 'exact', head: true })
-                            .in('patient_id', patientIds);
-                        stats.iris_assessment = irisCount || 0;
-                        
-                    } catch (err) {
-                        console.log('Error loading assessment counts:', err);
-                    }
-                }
-                
-                console.log('Workflow stats loaded:', stats);
-                
-                // Update total patients display if needed
-                const totalEl = document.getElementById('totalPatients');
-                if (totalEl && !totalEl.textContent || totalEl.textContent === '0') {
-                    totalEl.textContent = stats.registered;
-                }
-                
-                return stats;
-                
-            } catch (error) {
-                console.error('Error loading workflow stats:', error);
             }
         }
         
@@ -1081,13 +923,13 @@
             }
             
             try {
-                // Get patients who haven't completed assessments
+                // Get recent patients
                 const { data: patients } = await supabase
                     .from('patients')
                     .select('*')
                     .eq('clinic_id', clinicId)
                     .order('created_at', { ascending: false })
-                    .limit(5);
+                    .limit(10);
                 
                 if (!patients || patients.length === 0) {
                     incompleteList.innerHTML = `
@@ -1103,7 +945,7 @@
                 let incompleteTasks = [];
                 
                 for (const patient of patients) {
-                    // Check if health assessment exists
+                    // Check health assessment
                     const { data: healthAssessment } = await supabase
                         .from('health_assessments')
                         .select('id')
@@ -1116,10 +958,11 @@
                             stage: 'health_assessment',
                             label: 'Health Assessment'
                         });
+                        if (incompleteTasks.length >= 5) break;
                         continue;
                     }
                     
-                    // Check if iris assessment exists
+                    // Check iris assessment
                     const { data: irisAssessment } = await supabase
                         .from('iris_assessments')
                         .select('id')
@@ -1132,6 +975,7 @@
                             stage: 'iris_assessment',
                             label: 'IRIS Assessment'
                         });
+                        if (incompleteTasks.length >= 5) break;
                     }
                 }
                 
@@ -1146,7 +990,7 @@
                 }
                 
                 // Display incomplete tasks
-                incompleteList.innerHTML = incompleteTasks.slice(0, 5).map(task => `
+                incompleteList.innerHTML = incompleteTasks.map(task => `
                     <div class="priority-item" onclick="continuePatientAssessment(${task.patient.id}, '${task.stage}')">
                         <div class="priority-info">
                             <div class="priority-title">
@@ -1218,80 +1062,9 @@
             }
         }
         
-        // Format stage name
-        function formatStage(stage) {
-            if (!stage) return '';
-            return stage.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-        }
-        
-        // Navigate to stage-specific view
-        window.navigateToStage = function(stage) {
-            const stagePages = {
-                'registration': 'patient-registration.html',
-                'health_assessment': 'health-assessment.html',
-                'iris_assessment': 'iris-assessment.html',
-                'report_generation': 'report-generator.html',
-                'treatment_planning': 'treatment-planning.html',
-                'in_treatment': 'treatment-progress.html',
-                'completed': 'therapy-sessions-viewer.html'
-            };
-            
-            const page = stagePages[stage];
-            if (page) {
-                window.location.href = page;
-            }
-        };
-        
-        // Navigation functions
-        window.startNewJourney = function() {
-            window.location.href = 'patient-registration.html';
-        };
-        
-        window.continueAssessments = function() {
-            const firstIncomplete = document.querySelector('.priority-item');
-            if (firstIncomplete) {
-                firstIncomplete.click();
-            } else {
-                alert('No incomplete assessments found');
-            }
-        };
-        
-        window.continuePatientAssessment = async function(patientId, stage) {
-            sessionStorage.setItem('currentPatientId', patientId);
-            
-            if (stage === 'health_assessment') {
-                window.location.href = `health-assessment.html?patientId=${patientId}`;
-            } else if (stage === 'iris_assessment') {
-                window.location.href = `iris-assessment.html?patientId=${patientId}`;
-            } else {
-                window.location.href = `patient-management.html?patientId=${patientId}`;
-            }
-        };
-        
-        window.deliverTreatments = function() {
-            window.location.href = 'treatment-progress.html';
-        };
-        
-        window.viewAllReports = function() {
-            window.location.href = 'report-generator.html';
-        };
-        
-        window.navigateTo = function(page) {
-            window.location.href = page;
-        };
-        
-        window.logout = function() {
-            if (confirm('Are you sure you want to logout?')) {
-                localStorage.removeItem('celloxen_auth');
-                sessionStorage.clear();
-                window.location.href = 'unified-login.html';
-            }
-        };
-        
         // Auto-refresh every 2 minutes
         setInterval(async () => {
             await loadDashboardData();
-            await loadWorkflowStats();
             await loadIncompleteAssessments();
             await loadTodaySchedule();
         }, 120000);
