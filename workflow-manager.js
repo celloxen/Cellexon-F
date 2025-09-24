@@ -227,17 +227,22 @@ class WorkflowManager {
 }
 
 // Create singleton instance
-let workflowManagerInstance = null;
+const workflowManager = new WorkflowManager();
 
+// Export as NAMED export (this is what patient-registration.html expects)
+export { workflowManager };
+
+// Also export as default for backwards compatibility
+export default workflowManager;
+
+// Also export the getter function
 export function getWorkflowManager() {
-    if (!workflowManagerInstance) {
-        workflowManagerInstance = new WorkflowManager();
-    }
-    return workflowManagerInstance;
+    return workflowManager;
 }
 
-// Export default instance
-const workflowManager = getWorkflowManager();
-export default workflowManager;
+// Make available globally for non-module scripts
+if (typeof window !== 'undefined') {
+    window.workflowManager = workflowManager;
+}
 
 console.log('Workflow Manager loaded successfully');
