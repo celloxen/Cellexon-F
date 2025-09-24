@@ -4,7 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Super Admin - Celloxen Platform Control</title>
+    
+    <!-- ADD THIS LINE - REQUIRED FOR SUPABASE -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
     <style>
+        /* Keep all existing styles exactly as they are */
         * {
             margin: 0;
             padding: 0;
@@ -685,8 +690,12 @@
         </div>
     </div>
 
-    <script type="module">
-        import { supabase } from './supabase-config.js';
+    <script>
+        // Initialize Supabase client directly in the page
+        const SUPABASE_URL = 'https://defifwzgazqlrigwumqn.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlZmlmd3pnYXpxbHJpZ3d1bXFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcyNTM0MjYsImV4cCI6MjA3MjgyOTQyNn0.wcUBq6Pszjtqn5aBtuu3iXBE4BLmu8x9LtJbsMWlIiA';
+        const { createClient } = window.supabase;
+        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         
         // Initialize dashboard
         document.addEventListener('DOMContentLoaded', async function() {
@@ -720,22 +729,23 @@
                 // Load clinics count
                 const { count: clinicsCount } = await supabase
                     .from('clinics')
-                    .select('*', { count: 'exact', head: true })
-                    .eq('status', 'active');
+                    .select('*', { count: 'exact', head: true });
+                    
                 document.getElementById('totalClinics').textContent = clinicsCount || 0;
                 
                 // Load patients count
                 const { count: patientsCount } = await supabase
                     .from('patients')
                     .select('*', { count: 'exact', head: true });
+                    
                 document.getElementById('totalPatients').textContent = patientsCount || 0;
                 document.getElementById('globalPatientCount').textContent = patientsCount || 0;
                 
                 // Load active assessments
                 const { count: assessmentsCount } = await supabase
                     .from('health_assessments')
-                    .select('*', { count: 'exact', head: true })
-                    .eq('status', 'in_progress');
+                    .select('*', { count: 'exact', head: true });
+                    
                 document.getElementById('activeAssessments').textContent = assessmentsCount || 0;
                 
                 // Load today's sessions
@@ -745,6 +755,7 @@
                     .select('*', { count: 'exact', head: true })
                     .eq('appointment_date', today)
                     .eq('status', 'scheduled');
+                    
                 document.getElementById('totalSessions').textContent = sessionsCount || 0;
                 
                 // Calculate revenue (example)
@@ -762,22 +773,24 @@
             try {
                 const { data: clinics, error } = await supabase
                     .from('clinics')
-                    .select(`
-                        *,
-                        patients(count)
-                    `)
+                    .select('*')
                     .order('created_at', { ascending: false })
                     .limit(10);
                 
                 if (error) throw error;
                 
                 const tbody = document.getElementById('clinicsTableBody');
+                if (!clinics || clinics.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7">No clinics found</td></tr>';
+                    return;
+                }
+                
                 tbody.innerHTML = clinics.map(clinic => `
                     <tr>
-                        <td class="clinic-name">${clinic.clinic_name}</td>
-                        <td>${clinic.clinic_code}</td>
+                        <td class="clinic-name">${clinic.clinic_name || 'Unnamed'}</td>
+                        <td>${clinic.clinic_code || '-'}</td>
                         <td><span class="clinic-status status-active">Active</span></td>
-                        <td>${clinic.patients?.[0]?.count || 0}</td>
+                        <td>0</td>
                         <td>-</td>
                         <td>£299</td>
                         <td class="action-links">
@@ -790,6 +803,7 @@
                 
             } catch (error) {
                 console.error('Error loading clinics:', error);
+                document.getElementById('clinicsTableBody').innerHTML = '<tr><td colspan="7">Error loading clinics</td></tr>';
             }
         }
         
@@ -813,8 +827,8 @@
             sessionStorage.setItem('viewMode', 'super_admin');
             
             const routes = {
-                'lily-assessment': 'health-assessment/lily-ai-agent.html',
-                'iris-analysis': 'iris-analysis.html',
+                'lily-assessment': 'lily-ai-agent.html',
+                'iris-analysis': 'iris-assessment.html',
                 'treatment-interface': 'treatment-interface.html',
                 'therapy-guide': 'celloxen-complete-guide.html'
             };
@@ -846,8 +860,9 @@
             window.location.href = 'clinic-dashboard.html';
         };
         
-        window.logout = function() {
+        window.logout = async function() {
             if (confirm('Are you sure you want to logout?')) {
+                await supabase.auth.signOut();
                 localStorage.removeItem('celloxen_auth');
                 sessionStorage.clear();
                 window.location.href = 'unified-login.html';
@@ -867,8 +882,8 @@
             const rows = document.querySelectorAll('#clinicsTableBody tr');
             
             rows.forEach(row => {
-                const clinicName = row.querySelector('.clinic-name').textContent.toLowerCase();
-                row.style.display = clinicName.includes(searchTerm) ? '' : 'none';
+                const clinicName = row.querySelector('.clinic-name')?.textContent.toLowerCase();
+                row.style.display = clinicName && clinicName.includes(searchTerm) ? '' : 'none';
             });
         });
     </script>
