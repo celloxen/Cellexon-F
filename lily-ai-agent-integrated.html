@@ -427,13 +427,33 @@
                 this.initialQuestions = this.getInitialScreeningQuestions();
                 this.targetedQuestions = [];
                 
-                // Wait for supabase before initializing
-                this.initWhenReady();
+                console.log('Lily constructor complete, starting initialization...');
+                // Start initialization
+                this.startInitialization();
             }
             
-            async initWhenReady() {
-                await supabaseReady;  // Wait for supabase to be ready
-                await this.init();
+            async startInitialization() {
+                try {
+                    console.log('Waiting for supabase...');
+                    await supabaseReady;
+                    console.log('Supabase ready, initializing Lily...');
+                    
+                    // Load patient data if available
+                    if (this.patientId) {
+                        console.log('Loading patient data for ID:', this.patientId);
+                        await this.loadPatientData();
+                    }
+                    
+                    // Show greeting and enable input
+                    await this.showGreeting();
+                    this.enableInput();
+                    console.log('Lily initialization complete');
+                } catch (error) {
+                    console.error('Error during Lily initialization:', error);
+                    // Still try to show greeting even if there's an error
+                    await this.showGreeting();
+                    this.enableInput();
+                }
             }
             
             generateSessionId() {
@@ -650,20 +670,8 @@
                 ];
             }
             
-            async init() {
-                // Load patient data if available
-                if (this.patientId) {
-                    await this.loadPatientData();
-                }
-                await this.showGreeting();
-                this.enableInput();
-            }
-            
             async loadPatientData() {
                 try {
-                    // Ensure supabase is ready
-                    await supabaseReady;
-                    
                     if (!this.patientId) {
                         console.log('No patient ID available');
                         return;
@@ -678,6 +686,9 @@
                     if (!error && data) {
                         this.patientData = data;
                         this.sessionData.patientId = data.id;
+                        console.log('Patient data loaded successfully');
+                    } else if (error) {
+                        console.log('Could not load patient data:', error.message);
                     }
                 } catch (error) {
                     console.error('Error loading patient:', error);
@@ -1260,19 +1271,25 @@ Shall we proceed with the preliminary health assessment?`, 'lily', ['Yes, procee
             }
         }
         
-        // Initialize Lily
-        let lily;
+        // Initialize Lily when DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, creating Lily instance...');
+            window.lily = new LilyHealthConsultant();
+        });
         
+        // Also handle window.onload as backup
         window.onload = function() {
-            lily = new LilyHealthConsultant();
-            window.lily = lily; // Make globally accessible for button clicks
+            if (!window.lily) {
+                console.log('Window loaded, creating Lily instance (backup)...');
+                window.lily = new LilyHealthConsultant();
+            }
         };
         
         function sendMessage() {
             const input = document.getElementById('userInput');
             const message = input.value.trim();
             if (message) {
-                lily.processUserInput(message);
+                window.lily.processUserInput(message);
                 input.value = '';
             }
         }
