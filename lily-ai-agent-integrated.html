@@ -409,7 +409,7 @@
     </div>
 
     <script type="module">
-        import { supabase } from './supabase-config.js';
+        import { supabase, supabaseReady } from './supabase-config.js';
         import { workflowManager, workflowStages } from './workflow-manager.js';
         
         class LilyHealthConsultant {
@@ -427,7 +427,13 @@
                 this.initialQuestions = this.getInitialScreeningQuestions();
                 this.targetedQuestions = [];
                 
-                this.init();
+                // Wait for supabase before initializing
+                this.initWhenReady();
+            }
+            
+            async initWhenReady() {
+                await supabaseReady;  // Wait for supabase to be ready
+                await this.init();
             }
             
             generateSessionId() {
@@ -655,6 +661,14 @@
             
             async loadPatientData() {
                 try {
+                    // Ensure supabase is ready
+                    await supabaseReady;
+                    
+                    if (!this.patientId) {
+                        console.log('No patient ID available');
+                        return;
+                    }
+                    
                     const { data, error } = await supabase
                         .from('patients')
                         .select('*')
@@ -667,6 +681,7 @@
                     }
                 } catch (error) {
                     console.error('Error loading patient:', error);
+                    // Continue without patient data
                 }
             }
             
