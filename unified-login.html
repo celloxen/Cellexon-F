@@ -6,6 +6,7 @@
     <title>Login - Celloxen Health Platform</title>
     
     <style>
+        /* Keep all existing styles - no changes needed */
         * {
             margin: 0;
             padding: 0;
@@ -241,8 +242,8 @@
         
         <form id="loginForm">
             <div class="form-group">
-                <label class="form-label" for="username">Username</label>
-                <input type="text" class="form-input" id="username" name="username" placeholder="Enter your username" required>
+                <label class="form-label" for="email">Email</label>
+                <input type="email" class="form-input" id="email" name="email" placeholder="Enter your email" required>
             </div>
             
             <div class="form-group">
@@ -260,29 +261,23 @@
         </div>
     </div>
 
-    <!-- Updated to Supabase v2 for consistency -->
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
         
-        // Initialize Supabase with the CORRECT ANON KEY (not service_role)
+        // Initialize Supabase
         const supabaseUrl = 'https://defifwzgazqlrigwumqn.supabase.co';
         const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlZmlmd3pnYXpxbHJpZ3d1bXFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcyNTM0MjYsImV4cCI6MjA3MjgyOTQyNn0.wcUBq6Pszjtqn5aBtuu3iXBE4BLmu8x9LtJbsMWlIiA';
         
         const supabase = createClient(supabaseUrl, supabaseAnonKey);
-        console.log('Supabase client initialized successfully');
+        console.log('Supabase client initialized');
         
-        // Check for login messages from other pages
+        // Clear any existing auth data on login page load
         document.addEventListener('DOMContentLoaded', function() {
-            const message = localStorage.getItem('celloxen_login_message');
-            if (message) {
-                showAlert(message, 'info');
-                localStorage.removeItem('celloxen_login_message');
-            }
-            
-            // Clear any existing auth data if user lands on login page
             localStorage.removeItem('celloxen_auth');
-            localStorage.removeItem('celloxen_session');
             sessionStorage.clear();
+            
+            // Sign out from Supabase Auth
+            supabase.auth.signOut();
         });
         
         // Handle login form submission
@@ -292,13 +287,13 @@
         });
         
         async function handleLogin() {
-            const username = document.getElementById('username').value.trim();
+            const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
             const loginBtn = document.getElementById('loginBtn');
             const loginBtnText = document.getElementById('loginBtnText');
             
-            if (!username || !password) {
-                showAlert('Please enter both username and password', 'error');
+            if (!email || !password) {
+                showAlert('Please enter both email and password', 'error');
                 return;
             }
             
@@ -307,114 +302,96 @@
             loginBtnText.innerHTML = '<span class="loading"></span>Signing In...';
             
             try {
-                // First, check super_admin_users table
-                let userType = null;
-                let authResult = null;
+                // Use Supabase Auth to sign in
+                const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+                    email: email,
+                    password: password
+                });
                 
-                // Check super admin table first
-                const { data: superAdminData, error: superAdminError } = await supabase
-                    .from('super_admin_users')
-                    .select('*')
-                    .eq('username', username)
-                    .eq('password_hash', password)
+                if (authError) {
+                    showAlert('Invalid email or password', 'error');
+                    return;
+                }
+                
+                if (!authData.user) {
+                    showAlert('Authentication failed. Please try again.', 'error');
+                    return;
+                }
+                
+                // Get user role from user_roles table
+                const { data: roleData, error: roleError } = await supabase
+                    .from('user_roles')
+                    .select('role, clinic_id')
+                    .eq('auth_id', authData.user.id)
                     .single();
                 
-                if (superAdminData && !superAdminError) {
-                    // Found in super admin table
-                    userType = 'super_admin';
-                    authResult = {
-                        success: true,
-                        user: superAdminData,
-                        permissions: ['all'],
-                        message: 'Super admin login successful'
-                    };
-                    
-                    // Update last login
-                    await supabase
+                if (roleError || !roleData) {
+                    showAlert('User role not found. Please contact administrator.', 'error');
+                    await supabase.auth.signOut();
+                    return;
+                }
+                
+                // Get additional user data based on role
+                let userData = null;
+                let userType = roleData.role;
+                
+                if (roleData.role === 'super_admin') {
+                    const { data: adminData } = await supabase
                         .from('super_admin_users')
-                        .update({ last_login: new Date().toISOString() })
-                        .eq('username', username);
-                } else {
-                    // Not a super admin, check clinics table
-                    const { data: clinicData, error: clinicError } = await supabase
+                        .select('*')
+                        .eq('auth_id', authData.user.id)
+                        .single();
+                    userData = adminData;
+                } else if (roleData.role === 'clinic_admin') {
+                    const { data: clinicData } = await supabase
                         .from('clinics')
                         .select('*')
-                        .eq('username', username)
-                        .eq('password_hash', password)
+                        .eq('auth_id', authData.user.id)
                         .single();
-                    
-                    if (clinicData && !clinicError) {
-                        // Found in clinics table
-                        userType = 'clinic';
-                        authResult = {
-                            success: true,
-                            user: clinicData,
-                            clinicId: clinicData.id,
-                            clinicCode: clinicData.clinic_code,
-                            permissions: ['clinic'],
-                            message: 'Clinic login successful'
-                        };
-                    } else {
-                        // Not found in either table
-                        authResult = {
-                            success: false,
-                            message: 'Invalid username or password'
-                        };
-                    }
+                    userData = clinicData;
                 }
                 
-                if (authResult.success) {
-                    // Store authentication data
-                    const authData = {
-                        username: username,
-                        userType: userType,
-                        clinicId: authResult.clinicId || null,
-                        clinicCode: authResult.clinicCode || null,
-                        permissions: authResult.permissions || [],
-                        loginTime: new Date().toISOString(),
-                        lastActivity: new Date().toISOString(),
-                        sessionId: generateSessionId(),
-                        user: authResult.user
-                    };
-                    
-                    // Store in both localStorage AND sessionStorage for redundancy
-                    localStorage.setItem('celloxen_auth', JSON.stringify(authData));
-                    sessionStorage.setItem('celloxen_auth', JSON.stringify(authData));
-                    sessionStorage.setItem('userRole', userType);
-                    sessionStorage.setItem('username', username);
-                    
-                    if (userType === 'clinic') {
-                        sessionStorage.setItem('clinicId', authResult.clinicId);
-                        sessionStorage.setItem('clinicCode', authResult.clinicCode);
-                    }
-                    
-                    showAlert('Login successful! Redirecting...', 'success');
-                    
-                    // Redirect based on user type
-                    setTimeout(() => {
-                        if (userType === 'super_admin') {
-                            window.location.href = 'super-admin-dashboard.html';
-                        } else {
-                            window.location.href = 'clinic-dashboard.html';
-                        }
-                    }, 1000);
-                    
-                } else {
-                    showAlert(authResult.message || 'Invalid username or password', 'error');
+                // Store authentication data
+                const sessionData = {
+                    userId: authData.user.id,
+                    email: authData.user.email,
+                    userType: userType,
+                    clinicId: roleData.clinic_id,
+                    username: userData?.username || email.split('@')[0],
+                    clinicCode: userData?.clinic_code || null,
+                    permissions: userType === 'super_admin' ? ['all'] : ['clinic'],
+                    loginTime: new Date().toISOString(),
+                    sessionId: authData.session.access_token
+                };
+                
+                // Store session data
+                localStorage.setItem('celloxen_auth', JSON.stringify(sessionData));
+                sessionStorage.setItem('userRole', userType);
+                sessionStorage.setItem('userId', authData.user.id);
+                
+                if (roleData.clinic_id) {
+                    sessionStorage.setItem('clinicId', roleData.clinic_id);
                 }
+                
+                showAlert('Login successful! Redirecting...', 'success');
+                
+                // Redirect based on user role
+                setTimeout(() => {
+                    if (userType === 'super_admin') {
+                        window.location.href = 'super-admin-dashboard.html';
+                    } else {
+                        window.location.href = 'clinic-dashboard.html';
+                    }
+                }, 1000);
                 
             } catch (error) {
-                console.error('Celloxen Login Error:', error);
+                console.error('Login Error:', error);
                 showAlert('Login failed. Please try again.', 'error');
             } finally {
                 // Reset button state
                 loginBtn.disabled = false;
                 loginBtnText.textContent = 'Sign In';
             }
-        }
-        
-        function generateSessionId() {
-            return 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
         }
         
         window.showAlert = function(message, type) {
@@ -431,8 +408,19 @@
             }, 5000);
         }
         
-        window.forgotPassword = function() {
-            showAlert('Password reset functionality coming soon. Please contact support.', 'info');
+        window.forgotPassword = async function() {
+            const email = document.getElementById('email').value;
+            if (!email) {
+                showAlert('Please enter your email address first', 'info');
+                return;
+            }
+            
+            const { error } = await supabase.auth.resetPasswordForEmail(email);
+            if (!error) {
+                showAlert('Password reset email sent. Please check your inbox.', 'success');
+            } else {
+                showAlert('Error sending password reset email.', 'error');
+            }
         }
     </script>
 </body>
