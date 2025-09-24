@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Patient Registration - Celloxen Platform</title>
+    
+    <!-- REQUIRED: Load Supabase CDN BEFORE any module imports -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
     <style>
         * {
             margin: 0;
@@ -173,13 +177,19 @@
         .success-icon {
             font-size: 24px;
         }
+        
+        @media (max-width: 640px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="header">
         <div class="container" style="display: flex; justify-content: space-between; align-items: center;">
             <h1 style="font-size: 20px;">Patient Registration</h1>
-            <a href="patient-management-enhanced.html" style="color: white; text-decoration: none;">← Back</a>
+            <a href="clinic-dashboard.html" style="color: white; text-decoration: none;">← Back to Dashboard</a>
         </div>
     </div>
 
@@ -242,7 +252,7 @@
                 
                 <div class="form-actions">
                     <button type="submit" class="btn btn-primary">Register Patient</button>
-                    <button type="button" class="btn btn-secondary" onclick="window.location.href='patient-management-enhanced.html'">Cancel</button>
+                    <button type="button" class="btn btn-secondary" onclick="window.location.href='clinic-dashboard.html'">Cancel</button>
                 </div>
             </form>
         </div>
@@ -292,12 +302,22 @@
             <div class="form-actions">
                 <button class="btn btn-primary" onclick="continueToAssessment()">Continue to Health Assessment</button>
                 <button class="btn btn-secondary" onclick="editDetails()">Edit Details</button>
-                <button class="btn btn-secondary" onclick="window.location.href='patient-management-enhanced.html'">Back to Patients</button>
+                <button class="btn btn-secondary" onclick="window.location.href='clinic-dashboard.html'">Back to Dashboard</button>
             </div>
         </div>
     </div>
 
     <script type="module">
+        // Wait for Supabase to be available
+        await new Promise(resolve => {
+            const checkSupabase = setInterval(() => {
+                if (window.supabase) {
+                    clearInterval(checkSupabase);
+                    resolve();
+                }
+            }, 50);
+        });
+
         import { supabase } from './supabase-config.js';
         import { workflowManager } from './workflow-manager.js';
         
@@ -315,6 +335,7 @@
             
             if (!clinicId) {
                 alert('No clinic ID found. Please log in again.');
+                window.location.href = 'unified-login.html';
                 return;
             }
             
