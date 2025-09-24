@@ -844,7 +844,6 @@
 
     <script type="module">
         import { supabase } from './supabase-config.js';
-        import { workflowManager } from './workflow-manager.js';
         
         // Initialize dashboard
         document.addEventListener('DOMContentLoaded', async function() {
@@ -986,7 +985,7 @@
                 }
                 document.getElementById('monthlyGrowth').textContent = growth > 0 ? `+${growth}%` : `${growth}%`;
                 
-                // Completed today - update completedThisWeek instead since completedToday was removed
+                // Completed today
                 const todayStart = new Date(today).toISOString();
                 const { count: completedCount } = await supabase
                     .from('therapy_sessions')
@@ -995,8 +994,6 @@
                     .eq('status', 'completed')
                     .gte('created_at', todayStart);
                     
-                // Update today's completed count in the weekly element if needed
-                // or just log it since we removed the completedToday element
                 console.log('Completed today:', completedCount || 0);
                 
             } catch (error) {
@@ -1004,22 +1001,68 @@
             }
         }
         
-        // Load workflow statistics
+        // Fixed loadWorkflowStats function
         async function loadWorkflowStats() {
             try {
-                const stats = await workflowManager.getWorkflowStats();
+                const authData = localStorage.getItem('celloxen_auth');
+                if (!authData) return;
                 
-                // We removed the pipeline, so no need to update those elements
-                // Just log the stats for debugging if needed
+                const auth = JSON.parse(authData);
+                const clinicId = auth.clinicId || sessionStorage.getItem('currentClinicId');
+                
+                if (!clinicId) return;
+                
+                // Get basic patient count
+                const { data: patients, error } = await supabase
+                    .from('patients')
+                    .select('id')
+                    .eq('clinic_id', clinicId);
+                
+                if (error) {
+                    console.error('Error loading patients:', error);
+                    return;
+                }
+                
+                const stats = {
+                    registered: patients ? patients.length : 0,
+                    health_assessment: 0,
+                    iris_assessment: 0,
+                    report_generation: 0,
+                    treatment_planning: 0
+                };
+                
+                // If we have patients, get more detailed stats
+                if (patients && patients.length > 0) {
+                    const patientIds = patients.map(p => p.id);
+                    
+                    // Count assessments and reports
+                    try {
+                        const { count: healthCount } = await supabase
+                            .from('health_assessments')
+                            .select('*', { count: 'exact', head: true })
+                            .in('patient_id', patientIds);
+                        stats.health_assessment = healthCount || 0;
+                        
+                        const { count: irisCount } = await supabase
+                            .from('iris_assessments')
+                            .select('*', { count: 'exact', head: true })
+                            .in('patient_id', patientIds);
+                        stats.iris_assessment = irisCount || 0;
+                        
+                    } catch (err) {
+                        console.log('Error loading assessment counts:', err);
+                    }
+                }
+                
                 console.log('Workflow stats loaded:', stats);
                 
-                // We could update other relevant stats here if needed
-                // For example, update pending assessments count
-                const pendingCount = (stats.health_assessment || 0) + (stats.iris_assessment || 0);
-                const pendingElement = document.getElementById('pendingAssessments');
-                if (pendingElement) {
-                    pendingElement.textContent = pendingCount;
+                // Update total patients display if needed
+                const totalEl = document.getElementById('totalPatients');
+                if (totalEl && !totalEl.textContent || totalEl.textContent === '0') {
+                    totalEl.textContent = stats.registered;
                 }
+                
+                return stats;
                 
             } catch (error) {
                 console.error('Error loading workflow stats:', error);
@@ -1029,36 +1072,94 @@
         // Load incomplete assessments
         async function loadIncompleteAssessments() {
             const incompleteList = document.getElementById('incompleteList');
+            const authData = JSON.parse(localStorage.getItem('celloxen_auth'));
+            const clinicId = authData.clinicId || sessionStorage.getItem('currentClinicId');
+            
+            if (!clinicId) {
+                incompleteList.innerHTML = '<p>No clinic selected</p>';
+                return;
+            }
             
             try {
-                const assessments = await workflowManager.getIncompleteAssessments();
+                // Get patients who haven't completed assessments
+                const { data: patients } = await supabase
+                    .from('patients')
+                    .select('*')
+                    .eq('clinic_id', clinicId)
+                    .order('created_at', { ascending: false })
+                    .limit(5);
                 
-                if (assessments.length === 0) {
+                if (!patients || patients.length === 0) {
                     incompleteList.innerHTML = `
                         <div class="empty-state">
                             <div class="empty-state-icon">✅</div>
-                            <p>No incomplete assessments</p>
+                            <p>No pending tasks</p>
                         </div>
                     `;
                     return;
                 }
                 
-                // Show first 5 incomplete assessments
-                const topAssessments = assessments.slice(0, 5);
+                // Check which patients have incomplete assessments
+                let incompleteTasks = [];
                 
-                incompleteList.innerHTML = topAssessments.map(assessment => `
-                    <div class="priority-item" onclick="continuePatientAssessment(${assessment.patient_id})">
+                for (const patient of patients) {
+                    // Check if health assessment exists
+                    const { data: healthAssessment } = await supabase
+                        .from('health_assessments')
+                        .select('id')
+                        .eq('patient_id', patient.id)
+                        .single();
+                    
+                    if (!healthAssessment) {
+                        incompleteTasks.push({
+                            patient: patient,
+                            stage: 'health_assessment',
+                            label: 'Health Assessment'
+                        });
+                        continue;
+                    }
+                    
+                    // Check if iris assessment exists
+                    const { data: irisAssessment } = await supabase
+                        .from('iris_assessments')
+                        .select('id')
+                        .eq('patient_id', patient.id)
+                        .single();
+                    
+                    if (!irisAssessment) {
+                        incompleteTasks.push({
+                            patient: patient,
+                            stage: 'iris_assessment',
+                            label: 'IRIS Assessment'
+                        });
+                    }
+                }
+                
+                if (incompleteTasks.length === 0) {
+                    incompleteList.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">✅</div>
+                            <p>All assessments complete</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Display incomplete tasks
+                incompleteList.innerHTML = incompleteTasks.slice(0, 5).map(task => `
+                    <div class="priority-item" onclick="continuePatientAssessment(${task.patient.id}, '${task.stage}')">
                         <div class="priority-info">
                             <div class="priority-title">
-                                ${assessment.patients?.first_name || ''} ${assessment.patients?.last_name || ''}
+                                ${task.patient.first_name} ${task.patient.last_name}
                             </div>
                             <div class="priority-detail">
-                                Stage: <span class="stage-badge">${formatStage(assessment.current_stage)}</span>
+                                Pending: <span class="stage-badge">${task.label}</span>
                             </div>
                         </div>
                         <button class="priority-action">Continue</button>
                     </div>
                 `).join('');
+                
             } catch (error) {
                 console.error('Error loading incomplete assessments:', error);
                 incompleteList.innerHTML = '<p>Error loading assessments</p>';
@@ -1127,10 +1228,10 @@
         window.navigateToStage = function(stage) {
             const stagePages = {
                 'registration': 'patient-registration.html',
-                'health_assessment': 'lily-ai-agent-integrated.html',
-                'iris_assessment': 'iris-assessment-integrated.html',
+                'health_assessment': 'health-assessment.html',
+                'iris_assessment': 'iris-assessment.html',
                 'report_generation': 'report-generator.html',
-                'treatment_planning': 'treatment-schedule.html',
+                'treatment_planning': 'treatment-planning.html',
                 'in_treatment': 'treatment-progress.html',
                 'completed': 'therapy-sessions-viewer.html'
             };
@@ -1155,8 +1256,16 @@
             }
         };
         
-        window.continuePatientAssessment = async function(patientId) {
-            await workflowManager.continueAssessment(patientId);
+        window.continuePatientAssessment = async function(patientId, stage) {
+            sessionStorage.setItem('currentPatientId', patientId);
+            
+            if (stage === 'health_assessment') {
+                window.location.href = `health-assessment.html?patientId=${patientId}`;
+            } else if (stage === 'iris_assessment') {
+                window.location.href = `iris-assessment.html?patientId=${patientId}`;
+            } else {
+                window.location.href = `patient-management.html?patientId=${patientId}`;
+            }
         };
         
         window.deliverTreatments = function() {
