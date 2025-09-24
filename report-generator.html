@@ -131,23 +131,29 @@
             margin-bottom: 30px;
         }
         
-        .report-header {
+        .card-header {
             border-bottom: 2px solid #f1f5f9;
             padding-bottom: 20px;
             margin-bottom: 25px;
+        }
+        
+        .card-title {
+            font-size: 22px;
+            font-weight: 600;
+            color: #1e293b;
         }
         
         .patient-info {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 20px;
-            margin-top: 15px;
+            margin-bottom: 30px;
         }
         
         .info-item {
-            padding: 10px;
-            background: #f8fafc;
-            border-radius: 8px;
+            padding: 15px;
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            border-radius: 12px;
         }
         
         .info-label {
@@ -164,177 +170,166 @@
             margin-top: 5px;
         }
         
-        .diagnosis-section {
+        .section-container {
             margin: 30px 0;
         }
         
-        .section-title {
-            font-size: 20px;
-            font-weight: 600;
-            color: #1e293b;
+        .section-header {
+            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+            padding: 15px 20px;
+            border-radius: 10px;
             margin-bottom: 20px;
             display: flex;
             align-items: center;
             gap: 10px;
         }
         
-        .health-domain {
-            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 15px;
-            border-left: 4px solid #1e3a8a;
+        .section-icon {
+            font-size: 24px;
         }
         
-        .domain-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-        
-        .domain-name {
+        .section-title {
             font-size: 18px;
             font-weight: 600;
             color: #1e293b;
         }
         
-        .domain-score {
-            padding: 6px 12px;
+        .finding-card {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid #1e3a8a;
+            transition: all 0.3s ease;
+        }
+        
+        .finding-card:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .finding-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .finding-title {
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .severity-badge {
+            padding: 4px 12px;
             border-radius: 20px;
-            font-size: 14px;
+            font-size: 12px;
             font-weight: 600;
         }
         
-        .score-excellent {
+        .severity-mild {
             background: #d1fae5;
             color: #065f46;
         }
         
-        .score-good {
+        .severity-moderate {
             background: #fef3c7;
             color: #92400e;
         }
         
-        .score-concern {
+        .severity-severe {
             background: #fee2e2;
             color: #991b1b;
         }
         
-        .iris-findings {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-        }
-        
-        .iris-card {
-            background: white;
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
-            padding: 20px;
-        }
-        
-        .iris-card h4 {
+        .finding-details {
             color: #475569;
-            margin-bottom: 15px;
-            font-size: 16px;
+            font-size: 14px;
+            line-height: 1.6;
         }
         
-        .therapy-selection {
-            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
-            border-radius: 16px;
+        .therapy-recommendation {
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+            border-radius: 15px;
             padding: 25px;
             margin-top: 30px;
         }
         
-        .therapy-grid {
+        .therapy-list {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
             gap: 15px;
             margin-top: 20px;
         }
         
-        .therapy-option {
+        .therapy-item {
             background: white;
-            border: 2px solid #e2e8f0;
+            padding: 20px;
             border-radius: 12px;
-            padding: 15px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-        }
-        
-        .therapy-option:hover {
-            border-color: #1e3a8a;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(30, 58, 138, 0.15);
-        }
-        
-        .therapy-option.selected {
-            border-color: #10b981;
-            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
-        }
-        
-        .therapy-option.selected::after {
-            content: '✓';
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            width: 24px;
-            height: 24px;
-            background: #10b981;
-            color: white;
-            border-radius: 50%;
+            border: 2px solid #10b981;
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            justify-content: center;
-            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .therapy-item:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 24px rgba(16, 185, 129, 0.2);
+        }
+        
+        .therapy-info {
+            flex: 1;
         }
         
         .therapy-name {
+            font-size: 16px;
             font-weight: 600;
             color: #1e293b;
-            margin-bottom: 8px;
+            margin-bottom: 5px;
         }
         
         .therapy-description {
             font-size: 14px;
             color: #64748b;
-            margin-bottom: 10px;
         }
         
-        .therapy-indication {
-            font-size: 12px;
-            color: #10b981;
-            font-weight: 500;
+        .match-score {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 10px;
+            font-weight: 600;
+            min-width: 60px;
+            text-align: center;
         }
         
         .action-buttons {
             display: flex;
             gap: 15px;
-            justify-content: center;
             margin-top: 30px;
+            padding-top: 30px;
+            border-top: 2px solid #f1f5f9;
         }
         
         .btn {
             padding: 12px 24px;
-            border-radius: 8px;
-            font-size: 16px;
+            border-radius: 10px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
             border: none;
+            font-size: 16px;
         }
         
         .btn-primary {
             background: linear-gradient(135deg, #10b981, #059669);
             color: white;
+            flex: 1;
         }
         
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
         }
         
         .btn-secondary {
@@ -346,9 +341,53 @@
             background: #d1d5db;
         }
         
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
+        .btn-email {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+        }
+        
+        .btn-email:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+        }
+        
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .loading-overlay.active {
+            display: flex;
+        }
+        
+        .loading-content {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f4f6;
+            border-top: 4px solid #1e3a8a;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
         
         .alert {
@@ -360,46 +399,31 @@
             gap: 10px;
         }
         
-        .alert-info {
-            background: linear-gradient(135deg, #fef3c7, #fde68a);
-            color: #92400e;
-            border-left: 4px solid #f59e0b;
-        }
-        
         .alert-success {
             background: linear-gradient(135deg, #d1fae5, #a7f3d0);
             color: #065f46;
             border-left: 4px solid #10b981;
         }
         
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: #64748b;
+        .alert-warning {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            color: #92400e;
+            border-left: 4px solid #f59e0b;
         }
         
-        .spinner {
-            border: 3px solid #f3f4f6;
-            border-top: 3px solid #1e3a8a;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 20px auto;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .email-status {
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            margin: 20px 0;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-            text-align: center;
+        @media print {
+            body {
+                background: white;
+            }
+            
+            .header, .action-buttons, .back-btn {
+                display: none;
+            }
+            
+            .report-card {
+                box-shadow: none;
+                page-break-inside: avoid;
+            }
         }
     </style>
 </head>
@@ -408,7 +432,7 @@
         <div class="header-content">
             <div>
                 <h1>Comprehensive Diagnosis Report</h1>
-                <p style="color: #cbd5e1; margin-top: 5px;">Combined Health & IRIS Assessment Results</p>
+                <p style="color: #cbd5e1; margin-top: 5px;">Complete health assessment and treatment recommendations</p>
             </div>
             <a href="clinic-dashboard.html" class="back-btn">← Back to Dashboard</a>
         </div>
@@ -432,7 +456,7 @@
                 </div>
                 <div class="progress-step">
                     <div class="progress-circle">4</div>
-                    <div>Email Report</div>
+                    <div>Therapy Selection</div>
                 </div>
                 <div class="progress-step">
                     <div class="progress-circle">5</div>
@@ -441,103 +465,311 @@
             </div>
         </div>
         
-        <!-- Loading State -->
-        <div id="loadingState" class="report-card">
-            <div class="loading">
-                <div class="spinner"></div>
-                <h3>Generating Comprehensive Report...</h3>
-                <p>Combining health assessment and IRIS analysis data</p>
+        <!-- Patient Information -->
+        <div class="report-card">
+            <div class="card-header">
+                <h2 class="card-title">Patient Information</h2>
+            </div>
+            <div class="patient-info" id="patientInfo">
+                <!-- Patient info will be populated here -->
             </div>
         </div>
         
-        <!-- Email Status -->
-        <div id="emailStatus" class="email-status" style="display: none;">
-            <h3>📧 Report Email Status</h3>
-            <p id="emailMessage">Preparing to send report...</p>
+        <!-- Health Assessment Summary -->
+        <div class="report-card">
+            <div class="card-header">
+                <h2 class="card-title">Health Assessment Summary</h2>
+            </div>
+            
+            <div class="section-container">
+                <div class="section-header">
+                    <span class="section-icon">🩺</span>
+                    <h3 class="section-title">Chief Complaints</h3>
+                </div>
+                <div id="chiefComplaints">
+                    <!-- Complaints will be populated here -->
+                </div>
+            </div>
+            
+            <div class="section-container">
+                <div class="section-header">
+                    <span class="section-icon">💊</span>
+                    <h3 class="section-title">Current Medications</h3>
+                </div>
+                <div id="currentMedications">
+                    <!-- Medications will be populated here -->
+                </div>
+            </div>
+            
+            <div class="section-container">
+                <div class="section-header">
+                    <span class="section-icon">🔬</span>
+                    <h3 class="section-title">Key Findings</h3>
+                </div>
+                <div id="keyFindings">
+                    <!-- Findings will be populated here -->
+                </div>
+            </div>
         </div>
         
-        <!-- Report Content (Initially Hidden) -->
-        <div id="reportContent" style="display: none;">
-            <!-- Patient Information -->
-            <div class="report-card">
-                <div class="report-header">
-                    <h2>Patient Information</h2>
+        <!-- IRIS Assessment Results -->
+        <div class="report-card">
+            <div class="card-header">
+                <h2 class="card-title">IRIS Constitutional Assessment</h2>
+            </div>
+            
+            <div class="section-container">
+                <div class="section-header">
+                    <span class="section-icon">👁️</span>
+                    <h3 class="section-title">Constitutional Findings</h3>
                 </div>
-                <div class="patient-info" id="patientInfo">
-                    <!-- Patient details will be populated here -->
+                <div id="constitutionalFindings">
+                    <!-- Constitutional findings will be populated here -->
                 </div>
             </div>
             
-            <!-- Health Assessment Results -->
-            <div class="report-card">
-                <div class="section-title">
-                    <span>📋</span>
-                    <span>Health Assessment Findings</span>
+            <div class="section-container">
+                <div class="section-header">
+                    <span class="section-icon">🔍</span>
+                    <h3 class="section-title">Organ System Analysis</h3>
                 </div>
-                <div id="healthDomains">
-                    <!-- Health domain results will be populated here -->
-                </div>
-            </div>
-            
-            <!-- IRIS Analysis Results -->
-            <div class="report-card">
-                <div class="section-title">
-                    <span>👁️</span>
-                    <span>IRIS Analysis Results</span>
-                </div>
-                <div class="iris-findings" id="irisFindings">
-                    <!-- IRIS findings will be populated here -->
+                <div id="organAnalysis">
+                    <!-- Organ analysis will be populated here -->
                 </div>
             </div>
-            
-            <!-- Combined Diagnosis -->
-            <div class="report-card">
-                <div class="section-title">
-                    <span>🔬</span>
-                    <span>Combined Diagnosis & Recommendations</span>
-                </div>
-                <div id="combinedDiagnosis">
-                    <!-- Combined diagnosis will be populated here -->
-                </div>
+        </div>
+        
+        <!-- Therapy Recommendations -->
+        <div class="report-card">
+            <div class="card-header">
+                <h2 class="card-title">Recommended Therapy Protocols</h2>
             </div>
             
-            <!-- Therapy Selection -->
-            <div class="report-card">
-                <div class="section-title">
-                    <span>💊</span>
-                    <span>Recommended Therapies</span>
-                </div>
-                <div class="alert alert-info">
-                    The following therapies have been automatically recommended based on the assessment findings.
-                </div>
-                <div class="therapy-selection">
-                    <h3>Recommended Therapy Protocol</h3>
-                    <div class="therapy-grid" id="therapyGrid">
-                        <!-- Therapy recommendations will be populated here -->
+            <div class="therapy-recommendation">
+                <div class="alert alert-success">
+                    <span style="font-size: 24px;">✨</span>
+                    <div>
+                        <strong>Personalized Treatment Plan Generated</strong>
+                        <p style="margin-top: 5px;">Based on your comprehensive assessment, the following therapies are recommended.</p>
                     </div>
                 </div>
                 
-                <div class="action-buttons">
-                    <button class="btn btn-secondary" onclick="viewFullReport()">View Full Report</button>
-                    <button class="btn btn-primary" id="proceedBtn" onclick="proceedToTreatmentPlan()">
-                        Proceed to Treatment Plan →
-                    </button>
+                <div class="therapy-list" id="therapyList">
+                    <!-- Therapy recommendations will be populated here -->
                 </div>
             </div>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="report-card">
+            <div class="action-buttons">
+                <button class="btn btn-secondary" onclick="printReport()">🖨️ Print Report</button>
+                <button class="btn btn-email" onclick="emailReport()">📧 Email to Patient</button>
+                <button class="btn btn-primary" onclick="proceedToTherapySelection()">
+                    Continue to Therapy Selection →
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <h3>Generating Comprehensive Report...</h3>
+            <p style="color: #64748b; margin-top: 10px;">Analyzing assessment data</p>
         </div>
     </div>
     
     <script type="module">
         import { supabase } from './supabase-config.js';
-        import { workflowManager } from './workflow-manager.js';
-        import { TherapyRecommendationEngine } from './therapy-recommendations-engine.js';
+        import { sendReportEmail } from './email-sender.js';
         
         let patientData = null;
         let healthAssessment = null;
         let irisAssessment = null;
+        let reportData = null;
         let recommendedTherapies = [];
-        let reportData = {};
-        let reportId = null;
+        
+        // IRIS Assessment Compatibility Functions
+        function normalizeIrisAssessmentData(assessmentData) {
+            const normalized = {
+                id: assessmentData.id,
+                patient_id: assessmentData.patient_id,
+                clinic_id: assessmentData.clinic_id,
+                created_at: assessmentData.created_at,
+                organ_analysis: [],
+                constitutional_findings: {},
+                iris_signs: [],
+                recommendations: []
+            };
+            
+            // Convert new assessment format to expected format
+            if (assessmentData.assessment_data) {
+                const data = typeof assessmentData.assessment_data === 'string' 
+                    ? JSON.parse(assessmentData.assessment_data) 
+                    : assessmentData.assessment_data;
+                    
+                normalized.constitutional_findings = data.findings || {};
+                normalized.organ_analysis = convertFindingsToOrganAnalysis(data.findings);
+                
+            } else if (assessmentData.constitution_type) {
+                // If data is stored in individual columns
+                normalized.constitutional_findings = {
+                    constitution_type: assessmentData.constitution_type,
+                    fiber_density: assessmentData.fiber_density,
+                    pupil_size: assessmentData.pupil_size,
+                    collarette_position: assessmentData.collarette_position,
+                    lacunae: assessmentData.lacunae,
+                    stress_rings: assessmentData.stress_rings,
+                    clinical_notes: assessmentData.clinical_notes
+                };
+                
+                normalized.organ_analysis = convertFindingsToOrganAnalysis(normalized.constitutional_findings);
+            }
+            
+            normalized.iris_signs = generateIrisSigns(normalized.constitutional_findings);
+            
+            if (assessmentData.images) {
+                normalized.images = assessmentData.images;
+            }
+            
+            return normalized;
+        }
+        
+        function convertFindingsToOrganAnalysis(findings) {
+            const organAnalysis = [];
+            
+            if (findings.constitution_type) {
+                switch(findings.constitution_type) {
+                    case 'neurogenic':
+                        organAnalysis.push({
+                            organ: 'Nervous System',
+                            findings: ['High nervous system sensitivity', 'Stress response tendencies'],
+                            severity: 'moderate',
+                            location: 'Both eyes'
+                        });
+                        break;
+                    case 'polyglandular':
+                        organAnalysis.push({
+                            organ: 'Endocrine System',
+                            findings: ['Glandular imbalances', 'Hormonal fluctuations'],
+                            severity: 'moderate',
+                            location: 'Both eyes'
+                        });
+                        break;
+                    case 'connective_tissue':
+                        organAnalysis.push({
+                            organ: 'Connective Tissue',
+                            findings: ['Connective tissue weakness', 'Structural support needs'],
+                            severity: 'moderate',
+                            location: 'Both eyes'
+                        });
+                        break;
+                    case 'lymphatic':
+                        organAnalysis.push({
+                            organ: 'Lymphatic System',
+                            findings: ['Lymphatic congestion tendency', 'Immune system support needed'],
+                            severity: 'moderate',
+                            location: 'Both eyes'
+                        });
+                        break;
+                    case 'biliary':
+                        organAnalysis.push({
+                            organ: 'Hepatobiliary System',
+                            findings: ['Liver/gallbladder support needed', 'Digestive weakness'],
+                            severity: 'moderate',
+                            location: 'Both eyes'
+                        });
+                        break;
+                }
+            }
+            
+            if (findings.fiber_density) {
+                switch(findings.fiber_density) {
+                    case 'loose':
+                    case 'very_loose':
+                        organAnalysis.push({
+                            organ: 'Constitutional Strength',
+                            findings: ['Weak constitutional fibers', 'Need for constitutional support'],
+                            severity: findings.fiber_density === 'very_loose' ? 'severe' : 'moderate',
+                            location: 'Both eyes'
+                        });
+                        break;
+                    case 'tight':
+                        organAnalysis.push({
+                            organ: 'Constitutional Strength',
+                            findings: ['Strong constitutional fibers', 'Good inherent vitality'],
+                            severity: 'mild',
+                            location: 'Both eyes'
+                        });
+                        break;
+                }
+            }
+            
+            if (findings.stress_rings && findings.stress_rings !== 'none') {
+                const severity = findings.stress_rings === 'severe' ? 'severe' : 
+                                findings.stress_rings === 'moderate' ? 'moderate' : 'mild';
+                organAnalysis.push({
+                    organ: 'Stress Response System',
+                    findings: ['Chronic stress patterns', 'Nervous tension rings'],
+                    severity: severity,
+                    location: 'Peripheral zones'
+                });
+            }
+            
+            if (findings.lacunae && findings.lacunae !== 'none') {
+                const severity = findings.lacunae === 'many' ? 'moderate' : 'mild';
+                organAnalysis.push({
+                    organ: 'Tissue Integrity',
+                    findings: ['Tissue weakness signs', 'Genetic predisposition markers'],
+                    severity: severity,
+                    location: 'Various zones'
+                });
+            }
+            
+            // Ensure we always return at least one analysis
+            if (organAnalysis.length === 0) {
+                organAnalysis.push({
+                    organ: 'General Constitution',
+                    findings: ['Constitutional assessment completed'],
+                    severity: 'mild',
+                    location: 'Both eyes'
+                });
+            }
+            
+            return organAnalysis;
+        }
+        
+        function generateIrisSigns(findings) {
+            const signs = [];
+            
+            if (findings.constitution_type) {
+                signs.push({
+                    sign: 'Constitutional Type',
+                    description: `${findings.constitution_type} constitution identified`,
+                    significance: 'Indicates primary constitutional tendencies'
+                });
+            }
+            
+            if (findings.fiber_density) {
+                signs.push({
+                    sign: 'Fiber Density',
+                    description: `${findings.fiber_density} fiber pattern observed`,
+                    significance: 'Indicates inherent constitutional strength'
+                });
+            }
+            
+            if (findings.stress_rings && findings.stress_rings !== 'none') {
+                signs.push({
+                    sign: 'Stress Rings',
+                    description: `${findings.stress_rings} stress rings detected`,
+                    significance: 'Indicates nervous system tension'
+                });
+            }
+            
+            return signs;
+        }
         
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', async function() {
@@ -545,58 +777,65 @@
             const patientId = urlParams.get('patientId') || sessionStorage.getItem('currentPatientId');
             
             if (!patientId) {
-                alert('No patient selected. Redirecting to dashboard.');
-                window.location.href = 'clinic-dashboard.html';
+                alert('No patient selected. Redirecting to patient selection.');
+                window.location.href = 'patient-management.html';
                 return;
             }
             
-            // Start automatic report generation
             await generateComprehensiveReport(patientId);
         });
         
         async function generateComprehensiveReport(patientId) {
             try {
-                // Step 1: Load all assessment data
-                await loadAssessmentData(patientId);
+                showLoading(true);
                 
-                // Step 2: Generate therapy recommendations
-                await generateTherapyRecommendations();
+                // Load patient data
+                patientData = await loadPatientData(patientId);
                 
-                // Step 3: Save report to database
-                await saveReport();
+                // Load health assessment
+                healthAssessment = await loadHealthAssessment(patientId);
                 
-                // Step 4: Display report
+                // Load IRIS assessment with normalization
+                const rawIrisData = await loadIrisAssessment(patientId);
+                irisAssessment = rawIrisData ? normalizeIrisAssessmentData(rawIrisData) : null;
+                
+                // Generate therapy recommendations
+                const recommendations = await generateTherapyRecommendations(
+                    patientData, 
+                    healthAssessment, 
+                    irisAssessment
+                );
+                
+                recommendedTherapies = recommendations.therapies || [];
+                
+                // Display the report
                 displayReport();
                 
-                // Step 5: Send email automatically
-                await sendReportEmail();
+                // Save report to database
+                await saveReport();
                 
-                // Step 6: Update workflow status
-                await updateWorkflowStatus();
+                showLoading(false);
                 
             } catch (error) {
                 console.error('Error generating report:', error);
-                document.getElementById('loadingState').innerHTML = `
-                    <div class="alert alert-error">
-                        Error generating report: ${error.message}
-                    </div>
-                `;
+                showLoading(false);
+                alert('Error generating report. Please try again.');
             }
         }
         
-        async function loadAssessmentData(patientId) {
-            // Load patient data
-            const { data: patient, error: patientError } = await supabase
+        async function loadPatientData(patientId) {
+            const { data, error } = await supabase
                 .from('patients')
                 .select('*')
                 .eq('id', patientId)
                 .single();
             
-            if (patientError) throw patientError;
-            patientData = patient;
-            
-            // Load health assessment
-            const { data: health, error: healthError } = await supabase
+            if (error) throw error;
+            return data;
+        }
+        
+        async function loadHealthAssessment(patientId) {
+            const { data, error } = await supabase
                 .from('health_assessments')
                 .select('*')
                 .eq('patient_id', patientId)
@@ -604,93 +843,81 @@
                 .limit(1)
                 .single();
             
-            if (!healthError) healthAssessment = health;
-            
-            // Load IRIS assessment
-            const { data: iris, error: irisError } = await supabase
-                .from('iris_assessments')
-                .select('*')
-                .eq('patient_id', patientId)
-                .order('created_at', { ascending: false })
-                .limit(1)
-                .single();
-            
-            if (!irisError) irisAssessment = iris;
-            
-            // Ensure both assessments exist
-            if (!healthAssessment || !irisAssessment) {
-                throw new Error('Both health and IRIS assessments must be completed before generating report');
+            return data || {};
+        }
+        
+        async function loadIrisAssessment(patientId) {
+            try {
+                // Try to load from session first
+                let irisData = sessionStorage.getItem('irisAssessmentData');
+                if (irisData) {
+                    return JSON.parse(irisData);
+                }
+                
+                // Load from database
+                const { data, error } = await supabase
+                    .from('iris_assessments')
+                    .select('*')
+                    .eq('patient_id', patientId)
+                    .order('created_at', { ascending: false })
+                    .limit(1)
+                    .single();
+                
+                if (error) {
+                    console.warn('No IRIS assessment found:', error);
+                    return null;
+                }
+                
+                return data;
+                
+            } catch (error) {
+                console.error('Error loading IRIS assessment:', error);
+                return null;
             }
         }
         
-        async function generateTherapyRecommendations() {
-            const engine = new TherapyRecommendationEngine();
-            recommendedTherapies = await engine.generateRecommendations(
-                healthAssessment,
-                irisAssessment
-            );
-        }
-        
-        async function saveReport() {
-            const authData = JSON.parse(localStorage.getItem('celloxen_auth') || '{}');
-            const clinicId = authData.clinicId || sessionStorage.getItem('currentClinicId');
-            
-            reportData = {
-                patient_id: patientData.id,
-                clinic_id: clinicId,
-                report_type: 'comprehensive_diagnostic',
-                report_title: `Comprehensive Health Assessment Report - ${patientData.first_name} ${patientData.last_name}`,
-                report_data: {
-                    patient_info: {
-                        name: `${patientData.first_name} ${patientData.last_name}`,
-                        patient_id: patientData.patient_id,
-                        age: calculateAge(patientData.date_of_birth),
-                        gender: patientData.gender
-                    },
-                    health_assessment: healthAssessment,
-                    iris_assessment: irisAssessment,
-                    therapy_recommendations: recommendedTherapies
-                },
-                recommendations: recommendedTherapies.map(t => t.name),
-                therapies_recommended: recommendedTherapies.map(t => t.id),
-                created_at: new Date().toISOString()
-            };
-            
-            const { data, error } = await supabase
-                .from('medical_reports')
-                .insert([reportData])
-                .select()
-                .single();
-            
-            if (error) throw error;
-            reportId = data.id;
+        async function generateTherapyRecommendations(patient, health, iris) {
+            try {
+                // Import the recommendation engine dynamically
+                const { TherapyRecommendationEngine } = await import('./therapy-recommendations-engine.js');
+                
+                const engine = new TherapyRecommendationEngine();
+                const recommendations = engine.generateRecommendations(patient, health, iris);
+                
+                return {
+                    therapies: recommendations.recommendedTherapies || [],
+                    scores: recommendations.matchScores || {},
+                    reasoning: recommendations.reasoning || ''
+                };
+                
+            } catch (error) {
+                console.error('Error generating recommendations:', error);
+                // Return default recommendations
+                return {
+                    therapies: ['001', '301', '501'],
+                    scores: { '001': 0.5, '301': 0.5, '501': 0.5 },
+                    reasoning: 'Default wellness recommendations'
+                };
+            }
         }
         
         function displayReport() {
-            // Hide loading, show content
-            document.getElementById('loadingState').style.display = 'none';
-            document.getElementById('reportContent').style.display = 'block';
-            
-            // Populate patient information
+            // Display patient information
             displayPatientInfo();
             
-            // Display health assessment results
-            displayHealthAssessment();
+            // Display health assessment summary
+            displayHealthSummary();
             
-            // Display IRIS analysis results
-            displayIrisAnalysis();
-            
-            // Generate combined diagnosis
-            displayCombinedDiagnosis();
+            // Display IRIS findings
+            displayIrisFindings();
             
             // Display therapy recommendations
             displayTherapyRecommendations();
         }
         
         function displayPatientInfo() {
-            const patientInfoDiv = document.getElementById('patientInfo');
-            
-            patientInfoDiv.innerHTML = `
+            const container = document.getElementById('patientInfo');
+            container.innerHTML = `
                 <div class="info-item">
                     <div class="info-label">Patient Name</div>
                     <div class="info-value">${patientData.first_name} ${patientData.last_name}</div>
@@ -700,193 +927,200 @@
                     <div class="info-value">${patientData.patient_id}</div>
                 </div>
                 <div class="info-item">
-                    <div class="info-label">Age</div>
-                    <div class="info-value">${calculateAge(patientData.date_of_birth)} years</div>
+                    <div class="info-label">Age/Gender</div>
+                    <div class="info-value">${calculateAge(patientData.date_of_birth)} years / ${patientData.gender || 'N/A'}</div>
                 </div>
                 <div class="info-item">
-                    <div class="info-label">Gender</div>
-                    <div class="info-value">${patientData.gender || 'Not specified'}</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Assessment Date</div>
+                    <div class="info-label">Report Date</div>
                     <div class="info-value">${new Date().toLocaleDateString('en-GB')}</div>
                 </div>
-                <div class="info-item">
-                    <div class="info-label">Report ID</div>
-                    <div class="info-value">RPT-${reportId || Date.now()}</div>
-                </div>
             `;
         }
         
-        function displayHealthAssessment() {
-            const healthDomainsDiv = document.getElementById('healthDomains');
+        function displayHealthSummary() {
+            // Chief Complaints
+            const complaintsDiv = document.getElementById('chiefComplaints');
+            const complaints = healthAssessment.chief_complaint || 'No complaints recorded';
+            complaintsDiv.innerHTML = `
+                <div class="finding-card">
+                    <div class="finding-details">${complaints}</div>
+                </div>
+            `;
             
-            if (!healthAssessment || !healthAssessment.scores) {
-                healthDomainsDiv.innerHTML = '<p>No health assessment data available</p>';
-                return;
-            }
+            // Current Medications
+            const medicationsDiv = document.getElementById('currentMedications');
+            const medications = healthAssessment.current_medications || 'None';
+            medicationsDiv.innerHTML = `
+                <div class="finding-card">
+                    <div class="finding-details">${medications}</div>
+                </div>
+            `;
             
-            const scores = healthAssessment.scores;
-            let domainsHtml = '';
+            // Key Findings
+            const findingsDiv = document.getElementById('keyFindings');
+            let findingsHtml = '';
             
-            for (const [domain, score] of Object.entries(scores)) {
-                const wellness = 100 - score;
-                const status = score < 30 ? 'score-excellent' : score < 70 ? 'score-good' : 'score-concern';
-                const statusText = score < 30 ? 'Excellent' : score < 70 ? 'Needs Attention' : 'Significant Concern';
-                
-                domainsHtml += `
-                    <div class="health-domain">
-                        <div class="domain-header">
-                            <div class="domain-name">${formatDomain(domain)}</div>
-                            <div class="domain-score ${status}">${statusText} (${wellness}% wellness)</div>
+            if (healthAssessment.lifestyle_habits) {
+                findingsHtml += `
+                    <div class="finding-card">
+                        <div class="finding-header">
+                            <div class="finding-title">Lifestyle Factors</div>
                         </div>
-                        <div style="font-size: 14px; color: #64748b;">
-                            Score: ${score}/100
-                        </div>
+                        <div class="finding-details">${healthAssessment.lifestyle_habits}</div>
                     </div>
                 `;
             }
             
-            healthDomainsDiv.innerHTML = domainsHtml;
+            if (healthAssessment.symptoms_duration) {
+                findingsHtml += `
+                    <div class="finding-card">
+                        <div class="finding-header">
+                            <div class="finding-title">Symptom Duration</div>
+                        </div>
+                        <div class="finding-details">${healthAssessment.symptoms_duration}</div>
+                    </div>
+                `;
+            }
+            
+            findingsDiv.innerHTML = findingsHtml || '<p style="color: #64748b;">No additional findings recorded</p>';
         }
         
-        function displayIrisAnalysis() {
-            const irisFindingsDiv = document.getElementById('irisFindings');
-            
+        function displayIrisFindings() {
             if (!irisAssessment) {
-                irisFindingsDiv.innerHTML = '<p>No IRIS assessment data available</p>';
+                document.getElementById('constitutionalFindings').innerHTML = 
+                    '<p style="color: #64748b;">IRIS assessment not completed</p>';
+                document.getElementById('organAnalysis').innerHTML = 
+                    '<p style="color: #64748b;">No organ analysis available</p>';
                 return;
             }
             
-            let irisHtml = `
-                <div class="iris-card">
-                    <h4>Constitutional Type</h4>
-                    <p><strong>Type:</strong> ${irisAssessment.constitutional_type || 'Not determined'}</p>
-                </div>
-            `;
+            // Constitutional Findings
+            const constitutionalDiv = document.getElementById('constitutionalFindings');
+            let constitutionalHtml = '';
             
-            if (irisAssessment.organ_analysis) {
-                irisHtml += `
-                    <div class="iris-card">
-                        <h4>Organ System Analysis</h4>
-                        ${irisAssessment.organ_analysis.map(organ => `
-                            <p style="margin: 8px 0;">
-                                <strong>${organ.name}:</strong> ${organ.status}
-                            </p>
-                        `).join('')}
-                    </div>
-                `;
+            if (irisAssessment.constitutional_findings) {
+                const findings = irisAssessment.constitutional_findings;
+                
+                if (findings.constitution_type) {
+                    constitutionalHtml += `
+                        <div class="finding-card">
+                            <div class="finding-header">
+                                <div class="finding-title">Constitutional Type</div>
+                                <span class="severity-badge severity-mild">${findings.constitution_type}</span>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                if (findings.fiber_density) {
+                    constitutionalHtml += `
+                        <div class="finding-card">
+                            <div class="finding-header">
+                                <div class="finding-title">Fiber Density</div>
+                                <span class="severity-badge severity-mild">${findings.fiber_density}</span>
+                            </div>
+                        </div>
+                    `;
+                }
             }
             
-            irisFindingsDiv.innerHTML = irisHtml;
-        }
-        
-        function displayCombinedDiagnosis() {
-            const diagnosisDiv = document.getElementById('combinedDiagnosis');
-            const primaryConcerns = healthAssessment?.primary_concerns || [];
-            const secondaryConcerns = healthAssessment?.secondary_concerns || [];
+            constitutionalDiv.innerHTML = constitutionalHtml || '<p style="color: #64748b;">No constitutional findings</p>';
             
-            let diagnosisHtml = `
-                <div style="background: linear-gradient(135deg, #f0f9ff, #e0f2fe); border-radius: 12px; padding: 20px;">
-                    <h3 style="color: #1e293b; margin-bottom: 15px;">Comprehensive Diagnosis</h3>
-            `;
+            // Organ Analysis
+            const organDiv = document.getElementById('organAnalysis');
+            let organHtml = '';
             
-            if (primaryConcerns.length > 0) {
-                diagnosisHtml += `
-                    <p><strong>Primary Concerns:</strong></p>
-                    <ul style="margin: 10px 0 20px 20px;">
-                        ${primaryConcerns.map(concern => `<li>${concern}</li>`).join('')}
-                    </ul>
-                `;
+            if (irisAssessment.organ_analysis && irisAssessment.organ_analysis.length > 0) {
+                irisAssessment.organ_analysis.forEach(analysis => {
+                    const severityClass = `severity-${analysis.severity || 'mild'}`;
+                    organHtml += `
+                        <div class="finding-card">
+                            <div class="finding-header">
+                                <div class="finding-title">${analysis.organ}</div>
+                                <span class="severity-badge ${severityClass}">${analysis.severity || 'mild'}</span>
+                            </div>
+                            <div class="finding-details">
+                                ${analysis.findings.join(', ')}
+                            </div>
+                        </div>
+                    `;
+                });
             }
             
-            diagnosisHtml += `
-                <div class="alert alert-success" style="margin-top: 20px;">
-                    <strong>Report Generated:</strong> A comprehensive diagnostic report has been generated 
-                    with personalized therapy recommendations based on the combined assessment findings.
-                </div>
-            </div>
-            `;
-            
-            diagnosisDiv.innerHTML = diagnosisHtml;
+            organDiv.innerHTML = organHtml || '<p style="color: #64748b;">No organ analysis available</p>';
         }
         
         function displayTherapyRecommendations() {
-            const therapyGrid = document.getElementById('therapyGrid');
+            const container = document.getElementById('therapyList');
             
-            let therapyHtml = '';
-            recommendedTherapies.forEach(therapy => {
-                therapyHtml += `
-                    <div class="therapy-option selected">
-                        <div class="therapy-name">${therapy.name}</div>
-                        <div class="therapy-description">${therapy.description}</div>
-                        <div class="therapy-indication">
-                            Priority: ${therapy.priority} | Code: ${therapy.code}
+            if (!recommendedTherapies || recommendedTherapies.length === 0) {
+                container.innerHTML = '<p style="color: #64748b;">No therapy recommendations generated</p>';
+                return;
+            }
+            
+            let html = '';
+            recommendedTherapies.forEach(therapyCode => {
+                html += `
+                    <div class="therapy-item">
+                        <div class="therapy-info">
+                            <div class="therapy-name">Therapy Protocol ${therapyCode}</div>
+                            <div class="therapy-description">Recommended based on assessment findings</div>
                         </div>
+                        <div class="match-score">Match</div>
                     </div>
                 `;
             });
             
-            therapyGrid.innerHTML = therapyHtml;
+            container.innerHTML = html;
         }
         
-        async function sendReportEmail() {
-            const emailStatusDiv = document.getElementById('emailStatus');
-            const emailMessage = document.getElementById('emailMessage');
-            
-            emailStatusDiv.style.display = 'block';
-            emailMessage.textContent = 'Sending report to patient email...';
-            
+        async function saveReport() {
             try {
-                // Simulate email sending (in production, use actual email service)
-                await new Promise(resolve => setTimeout(resolve, 2000));
+                reportData = {
+                    patient_id: patientData.id,
+                    clinic_id: patientData.clinic_id,
+                    report_type: 'comprehensive',
+                    health_assessment_id: healthAssessment?.id,
+                    iris_assessment_id: irisAssessment?.id,
+                    findings_summary: {
+                        chief_complaints: healthAssessment?.chief_complaint,
+                        iris_findings: irisAssessment?.constitutional_findings,
+                        organ_analysis: irisAssessment?.organ_analysis
+                    },
+                    recommended_therapies: recommendedTherapies,
+                    created_at: new Date().toISOString()
+                };
                 
-                // Log email sent
-                await supabase
-                    .from('email_logs')
-                    .insert([{
-                        patient_id: patientData.id,
-                        email_type: 'comprehensive_report',
-                        email_to: patientData.email,
-                        report_id: reportId,
-                        sent_at: new Date().toISOString()
-                    }]);
+                const { data, error } = await supabase
+                    .from('diagnosis_reports')
+                    .insert([reportData])
+                    .select()
+                    .single();
                 
-                emailMessage.innerHTML = `
-                    <span style="color: #10b981;">✓ Report successfully sent to ${patientData.email || 'patient email'}</span>
-                `;
+                if (error) throw error;
                 
-                // Update progress
-                document.querySelector('.progress-step:nth-child(4)').classList.add('completed');
-                document.querySelector('.progress-step:nth-child(5)').classList.add('active');
+                reportData.id = data.id;
+                sessionStorage.setItem('reportId', data.id);
+                sessionStorage.setItem('reportGenerated', 'true');
                 
             } catch (error) {
-                emailMessage.innerHTML = `
-                    <span style="color: #ef4444;">⚠ Email could not be sent. Report saved for manual sending.</span>
-                `;
+                console.error('Error saving report:', error);
             }
         }
         
-        async function updateWorkflowStatus() {
-            await workflowManager.updateStage(patientData.id, 'report_generation');
-            
-            // Store therapy recommendations for treatment planning
-            sessionStorage.setItem('recommendedTherapies', JSON.stringify(recommendedTherapies));
-            sessionStorage.setItem('reportId', reportId);
+        function showLoading(show) {
+            const overlay = document.getElementById('loadingOverlay');
+            if (show) {
+                overlay.classList.add('active');
+            } else {
+                overlay.classList.remove('active');
+            }
         }
         
-        window.proceedToTreatmentPlan = function() {
-            window.location.href = `treatment-planning.html?patientId=${patientData.id}&reportId=${reportId}`;
-        };
-        
-        window.viewFullReport = function() {
-            window.location.href = `medical-reports.html?reportId=${reportId}`;
-        };
-        
         function calculateAge(dateOfBirth) {
-            if (!dateOfBirth) return 'Unknown';
-            const birthDate = new Date(dateOfBirth);
+            if (!dateOfBirth) return 'N/A';
             const today = new Date();
+            const birthDate = new Date(dateOfBirth);
             let age = today.getFullYear() - birthDate.getFullYear();
             const monthDiff = today.getMonth() - birthDate.getMonth();
             if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
@@ -895,19 +1129,40 @@
             return age;
         }
         
-        function formatDomain(domain) {
-            const formats = {
-                sleep: 'Sleep Quality',
-                stress: 'Stress Management',
-                cardiovascular: 'Cardiovascular Health',
-                joint: 'Joint Health',
-                digestive: 'Digestive Wellness',
-                kidney: 'Kidney Function',
-                energy: 'Energy Levels',
-                metabolic: 'Metabolic Health'
-            };
-            return formats[domain] || domain;
-        }
+        // Action button functions
+        window.printReport = function() {
+            window.print();
+        };
+        
+        window.emailReport = async function() {
+            try {
+                showLoading(true);
+                
+                // Generate PDF content
+                const pdfContent = document.querySelector('.container').innerHTML;
+                const pdfBlob = new Blob([pdfContent], { type: 'application/pdf' });
+                
+                // Send email
+                await sendReportEmail(pdfBlob, patientData.email, `${patientData.first_name} ${patientData.last_name}`);
+                
+                showLoading(false);
+                alert('Report emailed successfully!');
+                
+            } catch (error) {
+                console.error('Error emailing report:', error);
+                showLoading(false);
+                alert('Error sending email. Please try again.');
+            }
+        };
+        
+        window.proceedToTherapySelection = function() {
+            // Save recommended therapies to session
+            sessionStorage.setItem('recommendedTherapies', JSON.stringify(recommendedTherapies));
+            sessionStorage.setItem('reportCompleted', 'true');
+            
+            // Navigate to therapy selection
+            window.location.href = `treatment-planning.html?patientId=${patientData.id}`;
+        };
     </script>
 </body>
 </html>
