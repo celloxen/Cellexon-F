@@ -840,7 +840,7 @@
             }
         }
         
-        // Load patient data - FIXED with proper Supabase initialization
+        // Load patient data
         async function loadPatientData(patientId) {
             try {
                 // Ensure Supabase is ready
@@ -871,7 +871,106 @@
             }
         }
         
-        // Image handling functions
+        // Calculate age function
+        function calculateAge(dateOfBirth) {
+            if (!dateOfBirth) return 'N/A';
+            const today = new Date();
+            const birthDate = new Date(dateOfBirth);
+            let age = today.getFullYear() - birthDate.getFullYear();
+            const monthDiff = today.getMonth() - birthDate.getMonth();
+            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                age--;
+            }
+            return age;
+        }
+        
+        // Process image function
+        async function processImage(imageFile, side) {
+            try {
+                const imageUrl = URL.createObjectURL(imageFile);
+                
+                const uploadArea = document.getElementById(`${side}IrisArea`);
+                uploadArea.classList.add('has-image');
+                uploadArea.innerHTML = `<img src="${imageUrl}" class="uploaded-image" alt="${side} iris">`;
+                
+                document.getElementById(`${side}IrisControls`).classList.remove('hidden');
+                
+                irisImages[side] = {
+                    file: imageFile,
+                    url: imageUrl,
+                    uploaded: false
+                };
+                
+                // Try to upload to storage, but don't block if it fails
+                uploadImageToStorage(imageFile, side).catch(err => {
+                    console.warn('Storage upload failed, will retry on save:', err);
+                });
+                
+            } catch (error) {
+                console.error('Error processing image:', error);
+                alert('Error processing image. Please try again.');
+            }
+        }
+        
+        // Upload image to storage
+        async function uploadImageToStorage(file, side) {
+            try {
+                await supabaseReady;
+                
+                const fileName = `iris_${currentPatient.id}_${side}_${Date.now()}.jpg`;
+                const filePath = `iris-images/${currentPatient.id}/${fileName}`;
+                
+                const { data, error } = await supabase.storage
+                    .from('medical-images')
+                    .upload(filePath, file, {
+                        contentType: 'image/jpeg',
+                        upsert: true
+                    });
+                
+                if (error) {
+                    // If storage bucket doesn't exist, continue anyway
+                    console.warn('Storage upload failed:', error);
+                    return;
+                }
+                
+                const { data: { publicUrl } } = supabase.storage
+                    .from('medical-images')
+                    .getPublicUrl(filePath);
+                
+                irisImages[side].uploaded = true;
+                irisImages[side].storagePath = filePath;
+                irisImages[side].publicUrl = publicUrl;
+                
+                console.log(`${side} iris image uploaded successfully`);
+                
+            } catch (error) {
+                console.warn('Storage error (non-critical):', error);
+            }
+        }
+        
+        // Collect assessment data - THIS MUST BE INSIDE THE MODULE
+        function collectAssessmentData() {
+            return {
+                patient_id: currentPatient.id,
+                patient_name: `${currentPatient.first_name} ${currentPatient.last_name}`,
+                assessment_date: new Date().toISOString(),
+                findings: {
+                    constitution_type: document.getElementById('constitutionType').value,
+                    fiber_density: document.getElementById('fiberDensity').value,
+                    pupil_size: document.getElementById('pupilSize').value,
+                    collarette_position: document.getElementById('collarettePosition').value,
+                    lacunae: document.getElementById('lacunae').value,
+                    stress_rings: document.getElementById('stressRings').value,
+                    clinical_notes: document.getElementById('clinicalNotes').value
+                },
+                images: {
+                    left: irisImages.left ? 'captured' : null,
+                    right: irisImages.right ? 'captured' : null
+                }
+            };
+        }
+        
+        // Image handling functions - EXPOSE TO GLOBAL SCOPE
         window.openImageOptions = function(side) {
             currentIrisSide = side;
             
@@ -973,68 +1072,6 @@
             }
         };
         
-        async function processImage(imageFile, side) {
-            try {
-                const imageUrl = URL.createObjectURL(imageFile);
-                
-                const uploadArea = document.getElementById(`${side}IrisArea`);
-                uploadArea.classList.add('has-image');
-                uploadArea.innerHTML = `<img src="${imageUrl}" class="uploaded-image" alt="${side} iris">`;
-                
-                document.getElementById(`${side}IrisControls`).classList.remove('hidden');
-                
-                irisImages[side] = {
-                    file: imageFile,
-                    url: imageUrl,
-                    uploaded: false
-                };
-                
-                // Try to upload to storage, but don't block if it fails
-                uploadImageToStorage(imageFile, side).catch(err => {
-                    console.warn('Storage upload failed, will retry on save:', err);
-                });
-                
-            } catch (error) {
-                console.error('Error processing image:', error);
-                alert('Error processing image. Please try again.');
-            }
-        }
-        
-        async function uploadImageToStorage(file, side) {
-            try {
-                await supabaseReady;
-                
-                const fileName = `iris_${currentPatient.id}_${side}_${Date.now()}.jpg`;
-                const filePath = `iris-images/${currentPatient.id}/${fileName}`;
-                
-                const { data, error } = await supabase.storage
-                    .from('medical-images')
-                    .upload(filePath, file, {
-                        contentType: 'image/jpeg',
-                        upsert: true
-                    });
-                
-                if (error) {
-                    // If storage bucket doesn't exist, continue anyway
-                    console.warn('Storage upload failed:', error);
-                    return;
-                }
-                
-                const { data: { publicUrl } } = supabase.storage
-                    .from('medical-images')
-                    .getPublicUrl(filePath);
-                
-                irisImages[side].uploaded = true;
-                irisImages[side].storagePath = filePath;
-                irisImages[side].publicUrl = publicUrl;
-                
-                console.log(`${side} iris image uploaded successfully`);
-                
-            } catch (error) {
-                console.warn('Storage error (non-critical):', error);
-            }
-        }
-        
         window.retakeImage = function(side) {
             deleteImage(side);
             openImageOptions(side);
@@ -1078,7 +1115,7 @@
             }
         };
         
-        // Complete assessment function
+        // Complete assessment function - FIXED WITH PROPER ERROR HANDLING
         window.completeAssessment = async function() {
             const assessmentData = collectAssessmentData();
             
@@ -1114,7 +1151,22 @@
                     .select()
                     .single();
                 
-                if (error) throw error;
+                if (error) {
+                    console.error('Detailed error:', error);
+                    console.error('Error code:', error.code);
+                    console.error('Error message:', error.message);
+                    console.error('Error details:', error.details);
+                    console.error('Error hint:', error.hint);
+                    
+                    let errorMessage = 'Error saving assessment:\n';
+                    if (error.code) errorMessage += `Code: ${error.code}\n`;
+                    if (error.message) errorMessage += `Message: ${error.message}\n`;
+                    if (error.details) errorMessage += `Details: ${error.details}\n`;
+                    if (error.hint) errorMessage += `Hint: ${error.hint}`;
+                    
+                    alert(errorMessage);
+                    throw error;
+                }
                 
                 // Store in session for report generation
                 sessionStorage.setItem('irisAssessmentId', data.id);
@@ -1129,31 +1181,9 @@
                 document.getElementById('successModal').classList.add('active');
                 
             } catch (error) {
-                console.error('Error completing assessment:', error);
-                alert('Error saving assessment: ' + (error.message || 'Unknown error'));
+                console.error('Error completing assessment - full details:', error);
             }
         };
-        
-        function collectAssessmentData() {
-            return {
-                patient_id: currentPatient.id,
-                patient_name: `${currentPatient.first_name} ${currentPatient.last_name}`,
-                assessment_date: new Date().toISOString(),
-                findings: {
-                    constitution_type: document.getElementById('constitutionType').value,
-                    fiber_density: document.getElementById('fiberDensity').value,
-                    pupil_size: document.getElementById('pupilSize').value,
-                    collarette_position: document.getElementById('collarettePosition').value,
-                    lacunae: document.getElementById('lacunae').value,
-                    stress_rings: document.getElementById('stressRings').value,
-                    clinical_notes: document.getElementById('clinicalNotes').value
-                },
-                images: {
-                    left: irisImages.left ? 'captured' : null,
-                    right: irisImages.right ? 'captured' : null
-                }
-            };
-        }
         
         window.viewReport = function() {
             window.location.href = `medical-reports.html?patientId=${currentPatient.id}`;
@@ -1162,18 +1192,6 @@
         window.proceedToNext = function() {
             window.location.href = `report-generator.html?patientId=${currentPatient.id}&autoGenerate=true`;
         };
-        
-        function calculateAge(dateOfBirth) {
-            if (!dateOfBirth) return 'N/A';
-            const today = new Date();
-            const birthDate = new Date(dateOfBirth);
-            let age = today.getFullYear() - birthDate.getFullYear();
-            const monthDiff = today.getMonth() - birthDate.getMonth();
-            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-                age--;
-            }
-            return age;
-        }
     </script>
 </body>
 </html>
