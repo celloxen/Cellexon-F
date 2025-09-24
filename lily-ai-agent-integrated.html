@@ -750,7 +750,7 @@
                     if (options) {
                         const optionsHtml = options.map((opt, idx) => {
                             const optText = typeof opt === 'string' ? opt : opt.text;
-                            return `<div class="choice-button" onclick="lily.selectChoice(${idx})">${optText}</div>`;
+                            return `<div class="choice-button" onclick="window.lily.selectChoice(${idx})">${optText}</div>`;
                         }).join('');
                         
                         messageContent += `<div class="multiple-choice">${optionsHtml}</div>`;
@@ -1146,13 +1146,13 @@ Shall we proceed with the preliminary health assessment?`, 'lily', ['Yes, procee
                 
                 const actionButtons = `
                     <div class="action-buttons">
-                        <button class="btn-action btn-action-primary" onclick="lily.handleCompletionOptions('Continue to Iris Assessment')">
+                        <button class="btn-action btn-action-primary" onclick="window.lily.handleCompletionOptions('Continue to Iris Assessment')">
                             Continue to IRIS Assessment →
                         </button>
-                        <button class="btn-action btn-action-secondary" onclick="lily.handleCompletionOptions('View Preliminary Report')">
+                        <button class="btn-action btn-action-secondary" onclick="window.lily.handleCompletionOptions('View Preliminary Report')">
                             View Preliminary Report
                         </button>
-                        <button class="btn-action btn-action-secondary" onclick="lily.handleCompletionOptions('Return to Dashboard')">
+                        <button class="btn-action btn-action-secondary" onclick="window.lily.handleCompletionOptions('Return to Dashboard')">
                             Return to Dashboard
                         </button>
                     </div>
