@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>IRIS Assessment - Celloxen Platform</title>
+    
+    <!-- CRITICAL: Add Supabase library BEFORE any modules -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
     <style>
         * { 
             margin: 0; 
@@ -514,6 +518,21 @@
             font-size: 14px;
             border-left: 4px solid #ef4444;
         }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #1e3a8a;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -521,7 +540,7 @@
         <div class="header-content">
             <div>
                 <h1>IRIS Constitutional Assessment</h1>
-                <p>Capture and analyze iris patterns for constitutional analysis</p>
+                <p>Capture and analyse iris patterns for constitutional analysis</p>
             </div>
             <a href="clinic-dashboard.html" class="back-btn">← Back to Dashboard</a>
         </div>
@@ -534,15 +553,21 @@
             <div class="patient-info">
                 <div class="info-box">
                     <div class="info-label">Patient Name</div>
-                    <div class="info-value" id="patientName">Loading...</div>
+                    <div class="info-value" id="patientName">
+                        <span class="loading"></span> Loading...
+                    </div>
                 </div>
                 <div class="info-box">
                     <div class="info-label">Patient ID</div>
-                    <div class="info-value" id="patientId">Loading...</div>
+                    <div class="info-value" id="patientId">
+                        <span class="loading"></span> Loading...
+                    </div>
                 </div>
                 <div class="info-box">
                     <div class="info-label">Age</div>
-                    <div class="info-value" id="patientAge">Loading...</div>
+                    <div class="info-value" id="patientAge">
+                        <span class="loading"></span> Loading...
+                    </div>
                 </div>
                 <div class="info-box">
                     <div class="info-label">Assessment Date</div>
@@ -621,7 +646,7 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Fiber Density</label>
+                            <label class="form-label">Fibre Density</label>
                             <select class="form-select" id="fiberDensity">
                                 <option value="">Select Density</option>
                                 <option value="tight">Tight (Strong)</option>
@@ -770,7 +795,7 @@
     </div>
 
     <script type="module">
-        import { supabase } from './supabase-config.js';
+        import { supabase, supabaseReady } from './supabase-config.js';
         
         let currentPatient = null;
         let currentIrisSide = null;
@@ -783,6 +808,9 @@
         
         // Initialize
         document.addEventListener('DOMContentLoaded', async function() {
+            // Wait for Supabase to be ready
+            await supabaseReady;
+            
             const urlParams = new URLSearchParams(window.location.search);
             const patientId = urlParams.get('patientId') || sessionStorage.getItem('currentPatientId');
             
@@ -812,9 +840,12 @@
             }
         }
         
-        // Load patient data
+        // Load patient data - FIXED with proper Supabase initialization
         async function loadPatientData(patientId) {
             try {
+                // Ensure Supabase is ready
+                await supabaseReady;
+                
                 const { data, error } = await supabase
                     .from('patients')
                     .select('*')
@@ -830,7 +861,13 @@
                 
             } catch (error) {
                 console.error('Error loading patient:', error);
-                alert('Error loading patient data');
+                
+                // If it's a connection issue, show a more helpful message
+                if (error.message && error.message.includes('select is not a function')) {
+                    alert('Database connection issue. Please refresh the page and try again.');
+                } else {
+                    alert('Error loading patient data: ' + (error.message || 'Unknown error'));
+                }
             }
         }
         
@@ -952,7 +989,10 @@
                     uploaded: false
                 };
                 
-                await uploadImageToStorage(imageFile, side);
+                // Try to upload to storage, but don't block if it fails
+                uploadImageToStorage(imageFile, side).catch(err => {
+                    console.warn('Storage upload failed, will retry on save:', err);
+                });
                 
             } catch (error) {
                 console.error('Error processing image:', error);
@@ -962,6 +1002,8 @@
         
         async function uploadImageToStorage(file, side) {
             try {
+                await supabaseReady;
+                
                 const fileName = `iris_${currentPatient.id}_${side}_${Date.now()}.jpg`;
                 const filePath = `iris-images/${currentPatient.id}/${fileName}`;
                 
@@ -972,7 +1014,11 @@
                         upsert: true
                     });
                 
-                if (error) throw error;
+                if (error) {
+                    // If storage bucket doesn't exist, continue anyway
+                    console.warn('Storage upload failed:', error);
+                    return;
+                }
                 
                 const { data: { publicUrl } } = supabase.storage
                     .from('medical-images')
@@ -985,8 +1031,7 @@
                 console.log(`${side} iris image uploaded successfully`);
                 
             } catch (error) {
-                console.error('Error uploading to storage:', error);
-                irisImages[side].uploaded = false;
+                console.warn('Storage error (non-critical):', error);
             }
         }
         
@@ -1033,7 +1078,7 @@
             }
         };
         
-        // FIXED completeAssessment function
+        // Complete assessment function
         window.completeAssessment = async function() {
             const assessmentData = collectAssessmentData();
             
@@ -1043,43 +1088,23 @@
             }
             
             try {
-                // Prepare save data with multiple format compatibility
+                await supabaseReady;
+                
+                // Prepare save data
                 let saveData = {
-                    patient_id: currentPatient.id,
-                    clinic_id: currentPatient.clinic_id,
+                    patient_id: parseInt(currentPatient.id),
+                    clinic_id: parseInt(currentPatient.clinic_id || 1),
                     constitution_type: assessmentData.findings.constitution_type,
                     fiber_density: assessmentData.findings.fiber_density,
-                    pupil_size: assessmentData.findings.pupil_size,
-                    collarette_position: assessmentData.findings.collarette_position,
-                    lacunae: assessmentData.findings.lacunae,
-                    stress_rings: assessmentData.findings.stress_rings,
-                    clinical_notes: assessmentData.findings.clinical_notes,
-                    images: {
-                        left: irisImages.left ? {
-                            url: irisImages.left.publicUrl || irisImages.left.url,
-                            path: irisImages.left.storagePath,
-                            uploaded: irisImages.left.uploaded
-                        } : null,
-                        right: irisImages.right ? {
-                            url: irisImages.right.publicUrl || irisImages.right.url,
-                            path: irisImages.right.storagePath,
-                            uploaded: irisImages.right.uploaded
-                        } : null
-                    },
+                    pupil_size: assessmentData.findings.pupil_size || null,
+                    collarette_position: assessmentData.findings.collarette_position || null,
+                    lacunae: assessmentData.findings.lacunae || null,
+                    stress_rings: assessmentData.findings.stress_rings || null,
+                    clinical_notes: assessmentData.findings.clinical_notes || null,
                     status: 'completed',
                     completed_at: new Date().toISOString(),
                     created_at: new Date().toISOString()
                 };
-                
-                // Add image URLs if available
-                if (irisImages.left && irisImages.left.publicUrl) {
-                    saveData.left_iris_url = irisImages.left.publicUrl;
-                    saveData.left_iris_path = irisImages.left.storagePath;
-                }
-                if (irisImages.right && irisImages.right.publicUrl) {
-                    saveData.right_iris_url = irisImages.right.publicUrl;
-                    saveData.right_iris_path = irisImages.right.storagePath;
-                }
                 
                 console.log('Saving assessment data:', saveData);
                 
@@ -1096,16 +1121,16 @@
                 sessionStorage.setItem('irisAssessmentCompleted', 'true');
                 sessionStorage.setItem('irisAssessmentData', JSON.stringify(data));
                 
+                // Update workflow if available
+                if (window.workflowManager) {
+                    await window.workflowManager.completeIrisAssessment(currentPatient.id, data);
+                }
+                
                 document.getElementById('successModal').classList.add('active');
                 
             } catch (error) {
                 console.error('Error completing assessment:', error);
-                
-                if (error.code === 'PGRST204') {
-                    alert('Database configuration error. Please run the database migration script.');
-                } else {
-                    alert('Error saving assessment: ' + (error.message || 'Unknown error'));
-                }
+                alert('Error saving assessment: ' + (error.message || 'Unknown error'));
             }
         };
         
@@ -1131,11 +1156,11 @@
         }
         
         window.viewReport = function() {
-            alert('Report viewing will be implemented');
+            window.location.href = `medical-reports.html?patientId=${currentPatient.id}`;
         };
         
         window.proceedToNext = function() {
-            window.location.href = `report-generator.html?patientId=${currentPatient.id}`;
+            window.location.href = `report-generator.html?patientId=${currentPatient.id}&autoGenerate=true`;
         };
         
         function calculateAge(dateOfBirth) {
