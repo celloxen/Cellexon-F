@@ -80,11 +80,11 @@ class WorkflowManager {
             switch(currentStage) {
                 case 'registered':
                     // Step 3: Go to Lily AI Health Assessment
-                    window.location.href = `lily-ai-agent-integrated-fixed.html?patientId=${patientId}`;
+                    window.location.href = `lily-ai-agent-integrated.html?patientId=${patientId}`;
                     break;
                 case 'health_assessment':
                     // Step 4: Go to IRIS Assessment
-                    window.location.href = `iris-assessment-integrated-fixed.html?patientId=${patientId}`;
+                    window.location.href = `iris-assessment-integrated.html?patientId=${patientId}`;
                     break;
                 case 'iris_assessment':
                     // Step 5: Go to Report Generation
@@ -105,12 +105,12 @@ class WorkflowManager {
                     break;
                 default:
                     // Default to Lily AI
-                    window.location.href = `lily-ai-agent-integrated-fixed.html?patientId=${patientId}`;
+                    window.location.href = `lily-ai-agent-integrated.html?patientId=${patientId}`;
             }
         } catch (error) {
             console.error('Error continuing assessment:', error);
             // Default to Lily AI assessment
-            window.location.href = `lily-ai-agent-integrated-fixed.html?patientId=${patientId}`;
+            window.location.href = `lily-ai-agent-integrated.html?patientId=${patientId}`;
         }
     }
 
@@ -180,7 +180,7 @@ class WorkflowManager {
                 await this.updateStage(patientId, 'health_assessment');
                 // Auto-redirect to IRIS assessment
                 setTimeout(() => {
-                    window.location.href = `iris-assessment-integrated-fixed.html?patientId=${patientId}`;
+                    window.location.href = `iris-assessment-integrated.html?patientId=${patientId}`;
                 }, 1500);
             }
             
@@ -448,8 +448,8 @@ class WorkflowManager {
     navigateToStage(patientId, stage) {
         const routes = {
             'registered': `patient-registration.html?id=${patientId}`,
-            'health_assessment': `lily-ai-agent-integrated-fixed.html?patientId=${patientId}`,
-            'iris_assessment': `iris-assessment-integrated-fixed.html?patientId=${patientId}`,
+            'health_assessment': `lily-ai-agent-integrated.html?patientId=${patientId}`,
+            'iris_assessment': `iris-assessment-integrated.html?patientId=${patientId}`,
             'report_generation': `report-generator.html?patientId=${patientId}`,
             'treatment_planning': `treatment-planning-enhanced.html?patientId=${patientId}`,
             'treatment_scheduling': `treatment-scheduler-auto.html?patientId=${patientId}`,
@@ -496,7 +496,9 @@ class WorkflowManager {
         const birthDate = new Date(dateOfBirth);
         let age = today.getFullYear() - birthDate.getFullYear();
         const monthDiff = today.getMonth() - birthDate.getMonth();
-        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+        if (monthDiff === 0 && today.getDate() < birthDate.getDate()) {
+            age--;
+        } else if (monthDiff < 0) {
             age--;
         }
         return age;
