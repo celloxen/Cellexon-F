@@ -261,13 +261,13 @@
         }
         
         .btn {
-            padding: 12px 24px;
+            padding: 12px 28px;
             border-radius: 10px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
             border: none;
             font-size: 16px;
+            transition: all 0.3s ease;
         }
         
         .btn-primary {
@@ -276,7 +276,7 @@
             flex: 1;
         }
         
-        .btn-primary:hover {
+        .btn-primary:hover:not(:disabled) {
             transform: translateY(-2px);
             box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
         }
@@ -529,7 +529,7 @@
     </div>
     
     <script>
-        // Initialize Supabase client
+        // Initialize Supabase client with correct credentials
         const SUPABASE_URL = 'https://defifwzgazqlrigwumqn.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlZmlmd3pnYXpxbHJpZ3d1bXFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg3NDU5NzIsImV4cCI6MjA3NDMyMTk3Mn0.fJhK76BZ1_HQa0p-2m6-5cLjPqp0SqBBOlwE7bJAUyg';
         
@@ -581,7 +581,7 @@
             } catch (error) {
                 console.error('Error generating report:', error);
                 showLoading(false);
-                alert('Error generating report: ' + error.message);
+                alert('Error generating report: ' + (error.message || 'Unknown error'));
             }
         }
         
@@ -794,7 +794,7 @@
             const container = document.getElementById('systemAnalysis');
             let html = '';
             
-            // Check for Claude analysis data
+            // Check for AI analysis data (Gemini results)
             if (irisAssessment.claude_analysis) {
                 const analysis = irisAssessment.claude_analysis;
                 
