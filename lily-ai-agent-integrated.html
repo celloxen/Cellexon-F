@@ -4,7 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lily Health Consultant - Celloxen Platform</title>
+    
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
     <style>
         * {
             margin: 0;
@@ -165,197 +168,50 @@
             font-style: italic;
         }
         
-        .dots {
-            display: flex;
-            gap: 4px;
-        }
-        
-        .dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #92400e;
-            animation: bounce 1.4s ease-in-out infinite;
-        }
-        
+        .dots { display: flex; gap: 4px; }
+        .dot { width: 8px; height: 8px; border-radius: 50%; background: #92400e; animation: bounce 1.4s ease-in-out infinite; }
         .dot:nth-child(1) { animation-delay: -0.32s; }
         .dot:nth-child(2) { animation-delay: -0.16s; }
         .dot:nth-child(3) { animation-delay: 0; }
+        @keyframes bounce { 0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; } 40% { transform: scale(1.2); opacity: 1; } }
         
-        @keyframes bounce {
-            0%, 80%, 100% { 
-                transform: scale(0.8);
-                opacity: 0.5;
-            }
-            40% { 
-                transform: scale(1.2);
-                opacity: 1;
-            }
-        }
+        .multiple-choice { margin-top: 15px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+        .choice-button { background: white; border: 2px solid #e2e8f0; padding: 12px 16px; border-radius: 12px; cursor: pointer; transition: all 0.3s ease; text-align: left; font-size: 0.9rem; }
+        .choice-button:hover { border-color: #1e3a8a; background: linear-gradient(135deg, #ffffff, #f8fafc); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(30, 58, 138, 0.15); }
         
-        .multiple-choice {
-            margin-top: 15px;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 10px;
-        }
+        .question-progress { background: #e2e8f0; height: 4px; border-radius: 2px; margin: 10px 0; overflow: hidden; }
+        .question-progress-bar { background: linear-gradient(90deg, #10b981, #059669); height: 100%; border-radius: 2px; transition: width 0.8s ease; }
         
-        .choice-button {
-            background: white;
-            border: 2px solid #e2e8f0;
-            padding: 12px 16px;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-align: left;
-            font-size: 0.9rem;
-        }
+        .report-section { background: white; border-radius: 12px; padding: 20px; margin: 15px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .report-header { background: linear-gradient(135deg, #1e3a8a, #1e40af); color: white; padding: 20px; border-radius: 12px 12px 0 0; text-align: center; }
+        .domain-score { background: #f0f9ff; border-left: 4px solid #0284c7; padding: 12px; margin: 10px 0; border-radius: 8px; }
         
-        .choice-button:hover {
-            border-color: #1e3a8a;
-            background: linear-gradient(135deg, #ffffff, #f8fafc);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(30, 58, 138, 0.15);
-        }
-        
-        .question-progress {
-            background: #e2e8f0;
-            height: 4px;
-            border-radius: 2px;
-            margin: 10px 0;
-            overflow: hidden;
-        }
-        
-        .question-progress-bar {
-            background: linear-gradient(90deg, #10b981, #059669);
-            height: 100%;
-            border-radius: 2px;
-            transition: width 0.8s ease;
-        }
-        
-        .report-section {
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            margin: 15px 0;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        }
-        
-        .report-header {
-            background: linear-gradient(135deg, #1e3a8a, #1e40af);
-            color: white;
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        
-        .domain-score {
-            background: #f0f9ff;
-            border-left: 4px solid #0284c7;
-            padding: 12px;
-            margin: 10px 0;
-            border-radius: 8px;
-        }
-        
-        .action-buttons {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-            margin-top: 25px;
-        }
-        
-        .btn-action {
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: none;
-        }
-        
-        .btn-action-primary {
-            background: linear-gradient(135deg, #10b981, #059669);
-            color: white;
-        }
-        
-        .btn-action-secondary {
-            background: #e5e7eb;
-            color: #374151;
-        }
-        
-        .input-area {
-            padding: 20px 25px;
-            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-            border-top: 1px solid #e2e8f0;
-        }
-        
-        .input-container {
-            display: flex;
-            gap: 12px;
-            max-width: 800px;
-            margin: 0 auto;
-            align-items: center;
-        }
-        
-        .input-field {
-            flex: 1;
-            padding: 14px 20px;
-            border: 2px solid #e2e8f0;
-            border-radius: 30px;
-            outline: none;
-            font-size: 16px;
-            background: white;
-            transition: all 0.3s ease;
-        }
-        
-        .input-field:focus {
-            border-color: #1e3a8a;
-            box-shadow: 0 0 0 4px rgba(30, 58, 138, 0.1);
-        }
-        
-        .input-field:disabled {
-            background: #f1f5f9;
-            color: #9ca3af;
-            cursor: not-allowed;
-        }
-        
-        .send-button {
-            background: linear-gradient(135deg, #1e3a8a, #1e40af);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 48px;
-            height: 48px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 12px rgba(30, 58, 138, 0.3);
-        }
-        
-        .send-button:hover:not(:disabled) {
-            transform: translateY(-2px) scale(1.05);
-            box-shadow: 0 6px 20px rgba(30, 58, 138, 0.4);
-        }
-        
-        .send-button:disabled {
-            background: linear-gradient(135deg, #9ca3af, #6b7280);
-            cursor: not-allowed;
-            box-shadow: none;
-        }
+        .action-buttons { display: flex; gap: 15px; justify-content: center; margin-top: 25px; flex-wrap: wrap; }
+        .btn-action { padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; border: none; display: flex; align-items: center; gap: 8px; }
+        .btn-action-primary { background: linear-gradient(135deg, #10b981, #059669); color: white; }
+        .btn-action-secondary { background: #e5e7eb; color: #374151; }
+        .btn-action:disabled { background: #9ca3af; cursor: not-allowed; }
 
-        @keyframes slideIn {
-            from { 
-                opacity: 0; 
-                transform: translateY(20px); 
-            }
-            to { 
-                opacity: 1; 
-                transform: translateY(0); 
-            }
+        .input-area { padding: 20px 25px; background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%); border-top: 1px solid #e2e8f0; }
+        .input-container { display: flex; gap: 12px; max-width: 800px; margin: 0 auto; align-items: center; }
+        .input-field { flex: 1; padding: 14px 20px; border: 2px solid #e2e8f0; border-radius: 30px; outline: none; font-size: 16px; background: white; transition: all 0.3s ease; }
+        .input-field:focus { border-color: #1e3a8a; box-shadow: 0 0 0 4px rgba(30, 58, 138, 0.1); }
+        .input-field:disabled { background: #f1f5f9; color: #9ca3af; cursor: not-allowed; }
+        
+        .send-button { background: linear-gradient(135deg, #1e3a8a, #1e40af); color: white; border: none; border-radius: 50%; width: 48px; height: 48px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(30, 58, 138, 0.3); }
+        .send-button:hover:not(:disabled) { transform: translateY(-2px) scale(1.05); box-shadow: 0 6px 20px rgba(30, 58, 138, 0.4); }
+        .send-button:disabled { background: linear-gradient(135deg, #9ca3af, #6b7280); cursor: not-allowed; box-shadow: none; }
+
+        @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        @media print {
+            body { background: white; }
+            .header, .input-area, .session-info, .chat-card .chat-header { display: none; }
+            .chat-card { box-shadow: none; height: auto; }
+            .chat-messages { padding: 0; }
+            .message-wrapper { display: none; }
+            .lily-message .report-section { display: block; }
+            .report-section .action-buttons { display: none; }
         }
     </style>
 </head>
@@ -409,10 +265,17 @@
         </div>
     </div>
 
-    <script type="module">
-        import { supabase, supabaseReady } from './supabase-config.js';
-        import { workflowManager, workflowStages } from './workflow-manager.js';
+    <script>
+    // --- START OF SCRIPT ---
+    (function() {
+        // --- 1. SUPABASE & APP CONFIGURATION ---
+        const SUPABASE_URL = 'https://defifwzgazqlrigwumqn.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlZmlmd3pnYXpxbHJpZ3d1bXFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcyNTM0MjYsImV4cCI6MjA3MjgyOTQyNn0.wcUBq6Pszjtqn5aBtuu3iXBE4BLmu8x9LtJbsMWlIiA';
         
+        const { createClient } = window.supabase;
+        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // --- 2. LILY AI AGENT CLASS ---
         class LilyHealthConsultant {
             constructor() {
                 this.sessionId = this.generateSessionId();
@@ -421,887 +284,292 @@
                 this.responses = [];
                 this.domainScores = {};
                 this.currentQuestionIndex = 0;
-                this.patientId = sessionStorage.getItem('currentPatientId');
+                this.patientId = new URLSearchParams(window.location.search).get('patientId') || sessionStorage.getItem('currentPatientId');
                 this.patientData = null;
-                
-                // Assessment questions
                 this.initialQuestions = this.getInitialScreeningQuestions();
-                this.targetedQuestions = [];
                 
-                console.log('Lily constructor complete, starting initialization...');
-                // Start initialization
                 this.startInitialization();
             }
-            
+
             async startInitialization() {
-                try {
-                    console.log('Waiting for supabase...');
-                    await supabaseReady;
-                    console.log('Supabase ready, initializing Lily...');
-                    
-                    // Load patient data if available
-                    if (this.patientId) {
-                        console.log('Loading patient data for ID:', this.patientId);
-                        await this.loadPatientData();
-                    }
-                    
-                    // Show greeting and enable input
-                    await this.showGreeting();
-                    this.enableInput();
-                    console.log('Lily initialization complete');
-                } catch (error) {
-                    console.error('Error during Lily initialization:', error);
-                    // Still try to show greeting even if there's an error
-                    await this.showGreeting();
-                    this.enableInput();
-                }
+                if (this.patientId) await this.loadPatientData();
+                await this.showGreeting();
+                this.enableInput();
             }
-            
+
             generateSessionId() {
-                const sessionId = `LILY-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+                const sessionId = `LILY-${Date.now()}`;
                 document.getElementById('sessionId').textContent = sessionId;
                 return sessionId;
             }
-            
+
             getInitialScreeningQuestions() {
                 return [
-                    // Sleep domain questions
-                    {
-                        id: 'sleep1',
-                        text: 'How would you rate the quality of your sleep?',
-                        domain: 'sleep',
-                        weight: 1.0,
-                        options: [
-                            { text: 'Excellent - I wake refreshed', score: 0 },
-                            { text: 'Good - Usually satisfactory', score: 25 },
-                            { text: 'Fair - Sometimes problematic', score: 50 },
-                            { text: 'Poor - Frequently disrupted', score: 75 },
-                            { text: 'Very poor - Chronic issues', score: 100 }
-                        ]
-                    },
-                    {
-                        id: 'sleep2',
-                        text: 'How long does it typically take you to fall asleep?',
-                        domain: 'sleep',
-                        weight: 0.8,
-                        options: [
-                            { text: 'Less than 15 minutes', score: 0 },
-                            { text: '15-30 minutes', score: 25 },
-                            { text: '30-45 minutes', score: 50 },
-                            { text: '45-60 minutes', score: 75 },
-                            { text: 'More than 60 minutes', score: 100 }
-                        ]
-                    },
-                    {
-                        id: 'sleep3',
-                        text: 'How often do you wake during the night?',
-                        domain: 'sleep',
-                        weight: 0.9,
-                        options: [
-                            { text: 'Rarely or never', score: 0 },
-                            { text: 'Once occasionally', score: 25 },
-                            { text: '1-2 times regularly', score: 50 },
-                            { text: '3-4 times', score: 75 },
-                            { text: 'More than 4 times', score: 100 }
-                        ]
-                    },
-                    // Stress domain questions
-                    {
-                        id: 'stress1',
-                        text: 'How would you describe your current stress levels?',
-                        domain: 'stress',
-                        weight: 1.0,
-                        options: [
-                            { text: 'Very low - I feel calm', score: 0 },
-                            { text: 'Low - Manageable', score: 25 },
-                            { text: 'Moderate - Sometimes challenging', score: 50 },
-                            { text: 'High - Often overwhelming', score: 75 },
-                            { text: 'Very high - Constant pressure', score: 100 }
-                        ]
-                    },
-                    {
-                        id: 'stress2',
-                        text: 'Do you experience physical symptoms of stress?',
-                        domain: 'stress',
-                        weight: 0.9,
-                        options: [
-                            { text: 'Never', score: 0 },
-                            { text: 'Rarely', score: 25 },
-                            { text: 'Sometimes', score: 50 },
-                            { text: 'Often', score: 75 },
-                            { text: 'Constantly', score: 100 }
-                        ]
-                    },
-                    {
-                        id: 'stress3',
-                        text: 'How well do you manage daily pressures?',
-                        domain: 'stress',
-                        weight: 0.8,
-                        options: [
-                            { text: 'Very well - I stay balanced', score: 0 },
-                            { text: 'Well - Usually cope', score: 25 },
-                            { text: 'Adequately - Some struggles', score: 50 },
-                            { text: 'Poorly - Often overwhelmed', score: 75 },
-                            { text: 'Very poorly - Cannot cope', score: 100 }
-                        ]
-                    },
-                    // Cardiovascular domain questions
-                    {
-                        id: 'cardio1',
-                        text: 'How is your energy during physical activity?',
-                        domain: 'cardiovascular',
-                        weight: 1.0,
-                        options: [
-                            { text: 'Excellent - High stamina', score: 0 },
-                            { text: 'Good - Adequate energy', score: 25 },
-                            { text: 'Fair - Some limitations', score: 50 },
-                            { text: 'Poor - Easily tired', score: 75 },
-                            { text: 'Very poor - Minimal activity', score: 100 }
-                        ]
-                    },
-                    {
-                        id: 'cardio2',
-                        text: 'Do you experience shortness of breath?',
-                        domain: 'cardiovascular',
-                        weight: 0.9,
-                        options: [
-                            { text: 'Never', score: 0 },
-                            { text: 'Only with intense exercise', score: 25 },
-                            { text: 'With moderate activity', score: 50 },
-                            { text: 'With mild activity', score: 75 },
-                            { text: 'Even at rest', score: 100 }
-                        ]
-                    },
-                    // Joint domain questions
-                    {
-                        id: 'joint1',
-                        text: 'Do you experience joint discomfort?',
-                        domain: 'joint',
-                        weight: 1.0,
-                        options: [
-                            { text: 'Never', score: 0 },
-                            { text: 'Rarely', score: 25 },
-                            { text: 'Sometimes', score: 50 },
-                            { text: 'Often', score: 75 },
-                            { text: 'Constantly', score: 100 }
-                        ]
-                    },
-                    {
-                        id: 'joint2',
-                        text: 'Does joint stiffness affect your morning routine?',
-                        domain: 'joint',
-                        weight: 0.8,
-                        options: [
-                            { text: 'No stiffness', score: 0 },
-                            { text: 'Minimal - resolves quickly', score: 25 },
-                            { text: 'Moderate - 15-30 minutes', score: 50 },
-                            { text: 'Significant - 30-60 minutes', score: 75 },
-                            { text: 'Severe - over 60 minutes', score: 100 }
-                        ]
-                    },
-                    // Digestive domain questions
-                    {
-                        id: 'digestive1',
-                        text: 'How comfortable is your digestion after meals?',
-                        domain: 'digestive',
-                        weight: 1.0,
-                        options: [
-                            { text: 'Very comfortable', score: 0 },
-                            { text: 'Usually comfortable', score: 25 },
-                            { text: 'Sometimes uncomfortable', score: 50 },
-                            { text: 'Often uncomfortable', score: 75 },
-                            { text: 'Always problematic', score: 100 }
-                        ]
-                    },
-                    {
-                        id: 'digestive2',
-                        text: 'Do you experience bloating or gas?',
-                        domain: 'digestive',
-                        weight: 0.8,
-                        options: [
-                            { text: 'Never', score: 0 },
-                            { text: 'Rarely', score: 25 },
-                            { text: 'Sometimes', score: 50 },
-                            { text: 'Often', score: 75 },
-                            { text: 'Daily', score: 100 }
-                        ]
-                    },
-                    // Kidney domain questions
-                    {
-                        id: 'kidney1',
-                        text: 'Do you experience fluid retention or swelling?',
-                        domain: 'kidney',
-                        weight: 1.0,
-                        options: [
-                            { text: 'Never', score: 0 },
-                            { text: 'Rarely', score: 25 },
-                            { text: 'Sometimes', score: 50 },
-                            { text: 'Often', score: 75 },
-                            { text: 'Constantly', score: 100 }
-                        ]
-                    },
-                    // Energy domain questions
-                    {
-                        id: 'energy1',
-                        text: 'How would you describe your daily energy levels?',
-                        domain: 'energy',
-                        weight: 1.0,
-                        options: [
-                            { text: 'Excellent - Sustained vitality', score: 0 },
-                            { text: 'Good - Adequate energy', score: 25 },
-                            { text: 'Fair - Some fatigue', score: 50 },
-                            { text: 'Poor - Often tired', score: 75 },
-                            { text: 'Very poor - Exhausted', score: 100 }
-                        ]
-                    },
-                    // Metabolic domain questions
-                    {
-                        id: 'metabolic1',
-                        text: 'How stable are your energy levels after meals?',
-                        domain: 'metabolic',
-                        weight: 1.0,
-                        options: [
-                            { text: 'Very stable', score: 0 },
-                            { text: 'Mostly stable', score: 25 },
-                            { text: 'Some fluctuations', score: 50 },
-                            { text: 'Significant crashes', score: 75 },
-                            { text: 'Severe instability', score: 100 }
-                        ]
-                    }
+                    { id: 'sleep1', text: 'How would you rate the quality of your sleep?', domain: 'sleep', weight: 1.0, options: [{ text: 'Excellent', score: 0 }, { text: 'Good', score: 25 }, { text: 'Fair', score: 50 }, { text: 'Poor', score: 75 }, { text: 'Very poor', score: 100 }] },
+                    { id: 'stress1', text: 'How would you describe your current stress levels?', domain: 'stress', weight: 1.0, options: [{ text: 'Very low', score: 0 }, { text: 'Low', score: 25 }, { text: 'Moderate', score: 50 }, { text: 'High', score: 75 }, { text: 'Very high', score: 100 }] },
+                    { id: 'cardio1', text: 'How is your energy during physical activity?', domain: 'cardiovascular', weight: 1.0, options: [{ text: 'Excellent', score: 0 }, { text: 'Good', score: 25 }, { text: 'Fair', score: 50 }, { text: 'Poor', score: 75 }, { text: 'Very poor', score: 100 }] },
+                    { id: 'joint1', text: 'Do you experience joint discomfort?', domain: 'joint', weight: 1.0, options: [{ text: 'Never', score: 0 }, { text: 'Rarely', score: 25 }, { text: 'Sometimes', score: 50 }, { text: 'Often', score: 75 }, { text: 'Constantly', score: 100 }] },
+                    { id: 'digestive1', text: 'How comfortable is your digestion after meals?', domain: 'digestive', weight: 1.0, options: [{ text: 'Very comfortable', score: 0 }, { text: 'Usually comfortable', score: 25 }, { text: 'Sometimes uncomfortable', score: 50 }, { text: 'Often uncomfortable', score: 75 }, { text: 'Always problematic', score: 100 }] },
                 ];
             }
-            
+
             async loadPatientData() {
                 try {
-                    if (!this.patientId) {
-                        console.log('No patient ID available');
-                        return;
-                    }
-                    
-                    const { data, error } = await supabase
-                        .from('patients')
-                        .select('*')
-                        .eq('id', this.patientId)
-                        .single();
-                    
-                    if (!error && data) {
-                        this.patientData = data;
-                        this.sessionData.patientId = data.id;
-                        console.log('Patient data loaded successfully');
-                    } else if (error) {
-                        console.log('Could not load patient data:', error.message);
-                    }
+                    const { data, error } = await supabase.from('patients').select('*').eq('id', this.patientId).single();
+                    if (error) throw error;
+                    this.patientData = data;
                 } catch (error) {
                     console.error('Error loading patient:', error);
-                    // Continue without patient data
                 }
             }
             
             async showGreeting() {
-                const hour = new Date().getHours();
-                let greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
-                
-                await this.addMessage(`${greeting}! I am Lily, your Celloxen Health Consultant. I'm here to conduct a preliminary health assessment to understand your wellness needs.`, 'lily');
-                await this.delay(4000);
-                
+                let greeting = "Good morning";
                 if (this.patientData) {
-                    // If patient data is available, use it
                     this.sessionData.patientName = `${this.patientData.first_name} ${this.patientData.last_name}`;
-                    this.sessionData.patientAge = this.calculateAge(this.patientData.date_of_birth);
-                    this.sessionData.patientGender = this.patientData.gender || 'Not specified';
-                    
-                    await this.addMessage(`I see we're conducting this assessment for ${this.sessionData.patientName}. May I have your name as the practitioner conducting this assessment?`, 'lily');
+                    await this.addMessage(`${greeting}! I am Lily. I'm here to conduct a health assessment for ${this.sessionData.patientName}. Shall we begin?`, 'lily', ['Yes, begin', 'Cancel']);
+                    this.currentStep = 'confirmation';
                 } else {
-                    await this.addMessage("May I have your name as the practitioner conducting this assessment?", 'lily');
+                    await this.addMessage(`${greeting}! I am Lily. What is the full name of the patient for this assessment?`, 'lily');
                 }
             }
-            
-            calculateAge(dateOfBirth) {
-                if (!dateOfBirth) return 'Unknown';
-                const birthDate = new Date(dateOfBirth);
-                const today = new Date();
-                let age = today.getFullYear() - birthDate.getFullYear();
-                const monthDiff = today.getMonth() - birthDate.getMonth();
-                if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-                    age--;
-                }
-                return age;
-            }
-            
+
             async addMessage(text, sender, options = null) {
                 const messagesContainer = document.getElementById('chatMessages');
                 const messageWrapper = document.createElement('div');
                 messageWrapper.className = `message-wrapper ${sender}-wrapper`;
                 
-                if (sender === 'processing') {
-                    messageWrapper.innerHTML = `
-                        <div class="processing">
-                            <span>Lily is analysing your responses...</span>
-                            <div class="dots">
-                                <div class="dot"></div>
-                                <div class="dot"></div>
-                                <div class="dot"></div>
-                            </div>
-                        </div>
-                    `;
-                } else {
-                    let messageContent = text;
-                    
-                    if (options) {
-                        const optionsHtml = options.map((opt, idx) => {
-                            const optText = typeof opt === 'string' ? opt : opt.text;
-                            return `<div class="choice-button" onclick="window.lily.selectChoice(${idx})">${optText}</div>`;
-                        }).join('');
-                        
-                        messageContent += `<div class="multiple-choice">${optionsHtml}</div>`;
-                    }
-                    
-                    messageWrapper.innerHTML = `
-                        <div class="message ${sender}-message">
-                            ${messageContent}
-                        </div>
-                    `;
+                let messageContent = text;
+                if (options) {
+                    const optionsHtml = options.map((opt, idx) => `<div class="choice-button" onclick="window.lily.selectChoice(${idx})">${opt}</div>`).join('');
+                    messageContent += `<div class="multiple-choice">${optionsHtml}</div>`;
                 }
                 
+                messageWrapper.innerHTML = `<div class="message ${sender}-message">${messageContent}</div>`;
                 messagesContainer.appendChild(messageWrapper);
                 messagesContainer.scrollTop = messagesContainer.scrollHeight;
-                
                 return messageWrapper;
             }
-            
+
             async processUserInput(input) {
                 await this.addMessage(input, 'user');
                 this.disableInput();
                 
                 const processingMsg = await this.addMessage('', 'processing');
-                await this.delay(3000);
+                await this.delay(1500);
                 processingMsg.remove();
                 
                 switch(this.currentStep) {
                     case 'greeting':
-                        await this.handlePractitionerName(input);
-                        break;
-                    case 'patient_name':
-                        await this.handlePatientName(input);
-                        break;
-                    case 'patient_age':
-                        await this.handlePatientAge(input);
-                        break;
-                    case 'patient_gender':
-                        this.sessionData.patientGender = input;
-                        await this.confirmDetails();
-                        break;
-                    case 'confirmation':
-                        await this.handleConfirmation(input);
-                        break;
-                    case 'complete':
-                        await this.handleCompletionOptions(input);
+                        this.sessionData.patientName = input;
+                        await this.addMessage(`Thank you. Shall we proceed with the assessment for ${this.sessionData.patientName}?`, 'lily', ['Yes, proceed', 'No, cancel']);
+                        this.currentStep = 'confirmation';
                         break;
                 }
-                
                 this.enableInput();
             }
-            
+
             async selectChoice(index) {
                 this.disableInput();
-                
-                if (this.currentStep === 'patient_gender') {
-                    const genders = ['Male', 'Female', 'Prefer not to say'];
-                    await this.processUserInput(genders[index]);
+                if (this.currentStep === 'confirmation') {
+                    const options = ['Yes, begin', 'Cancel'];
+                    const choice = options[index];
+                    await this.addMessage(choice, 'user');
+                    if (choice === 'Yes, begin') await this.startAssessment();
+                    else await this.addMessage("Assessment cancelled.", 'lily');
                 } else if (this.currentStep === 'assessment') {
                     const question = this.initialQuestions[this.currentQuestionIndex];
-                    const selectedOption = question.options[index];
-                    await this.handleAssessmentResponse(selectedOption);
-                } else if (this.currentStep === 'targeted') {
-                    const question = this.targetedQuestions[this.currentQuestionIndex];
-                    const selectedOption = question.options[index];
-                    await this.handleTargetedResponse(selectedOption);
-                } else if (this.currentStep === 'confirmation') {
-                    const options = ['Yes, proceed', 'No, cancel'];
-                    await this.processUserInput(options[index]);
-                } else if (this.currentStep === 'complete') {
-                    const options = ['Continue to Iris Assessment', 'View Preliminary Report', 'Return to Dashboard'];
-                    await this.handleCompletionOptions(options[index]);
+                    await this.handleAssessmentResponse(question.options[index]);
                 }
             }
-            
-            async handlePractitionerName(name) {
-                this.sessionData.practitionerName = name;
-                
-                if (this.patientData) {
-                    // Skip to confirmation if patient data is already loaded
-                    await this.confirmDetails();
-                } else {
-                    await this.addMessage(`Thank you, ${name}. Now, may I have the patient's full name?`, 'lily');
-                    this.currentStep = 'patient_name';
-                }
-            }
-            
-            async handlePatientName(name) {
-                this.sessionData.patientName = name;
-                await this.addMessage(`Thank you. What is ${name}'s age?`, 'lily');
-                this.currentStep = 'patient_age';
-            }
-            
-            async handlePatientAge(age) {
-                const ageNum = parseInt(age);
-                if (isNaN(ageNum) || ageNum < 1 || ageNum > 120) {
-                    await this.addMessage("Please provide a valid age between 1 and 120.", 'lily');
-                    return;
-                }
-                
-                this.sessionData.patientAge = ageNum;
-                await this.addMessage("What is the patient's gender?", 'lily', ['Male', 'Female', 'Prefer not to say']);
-                this.currentStep = 'patient_gender';
-            }
-            
-            async confirmDetails() {
-                await this.addMessage(`Perfect. Let me confirm the details:
 
-- Practitioner: ${this.sessionData.practitionerName}
-- Patient: ${this.sessionData.patientName}  
-- Age: ${this.sessionData.patientAge}
-- Gender: ${this.sessionData.patientGender}
-
-Shall we proceed with the preliminary health assessment?`, 'lily', ['Yes, proceed', 'No, cancel']);
-                
-                this.currentStep = 'confirmation';
-            }
-            
-            async handleConfirmation(response) {
-                if (response.includes('Yes')) {
-                    await this.startAssessment();
-                } else {
-                    await this.addMessage("Assessment cancelled. Thank you for your time.", 'lily');
-                    this.disableInput();
-                }
-            }
-            
             async startAssessment() {
-                await this.addMessage(`Excellent! I'll now conduct a preliminary health assessment for ${this.sessionData.patientName}.`, 'lily');
-                await this.delay(3500);
-                await this.addMessage("I'll ask 15 initial screening questions to understand the primary health concerns. Please answer based on the patient's current condition.", 'lily');
-                await this.delay(3500);
-                
-                this.currentQuestionIndex = 0;
                 this.currentStep = 'assessment';
+                await this.addMessage("Great. Let's begin with a few questions to understand the primary health concerns.", 'lily');
                 await this.askNextQuestion();
             }
-            
+
             async askNextQuestion() {
-                await this.delay(1500); // Increased delay between questions
-                const questions = this.initialQuestions;
-                if (this.currentQuestionIndex < questions.length) {
-                    const question = questions[this.currentQuestionIndex];
-                    const questionNumber = this.currentQuestionIndex + 1;
-                    const totalQuestions = questions.length;
-                    
-                    const progressPercentage = (questionNumber / totalQuestions) * 100;
-                    
-                    const progressHtml = `
-                        <div class="question-progress">
-                            <div class="question-progress-bar" style="width: ${progressPercentage}%"></div>
-                        </div>
-                        Question ${questionNumber} of ${totalQuestions}: ${question.text}
-                    `;
-                    
-                    const options = question.options.map(opt => opt.text);
-                    await this.addMessage(progressHtml, 'lily', options);
+                await this.delay(1000);
+                if (this.currentQuestionIndex < this.initialQuestions.length) {
+                    const question = this.initialQuestions[this.currentQuestionIndex];
+                    const progress = ((this.currentQuestionIndex + 1) / this.initialQuestions.length) * 100;
+                    const progressHtml = `<div class="question-progress"><div class="question-progress-bar" style="width: ${progress}%"></div></div>Question ${this.currentQuestionIndex + 1}: ${question.text}`;
+                    await this.addMessage(progressHtml, 'lily', question.options);
                 } else {
-                    await this.completeInitialAssessment();
+                    await this.generateFullReport();
                 }
             }
-            
-            async handleAssessmentResponse(response) {
+
+            async handleAssessmentResponse(selectedOption) {
                 const question = this.initialQuestions[this.currentQuestionIndex];
-                
-                let selectedOption = question.options.find(opt => opt.text === response.text || opt.text === response);
-                if (!selectedOption && typeof response === 'object') {
-                    selectedOption = response;
-                }
-                
-                this.responses.push({
-                    question: question.text,
-                    response: selectedOption.text,
-                    domain: question.domain,
-                    score: selectedOption.score,
-                    weightedScore: selectedOption.score * question.weight
-                });
-                
-                if (!this.domainScores[question.domain]) {
-                    this.domainScores[question.domain] = {
-                        totalScore: 0,
-                        totalWeight: 0,
-                        responses: 0
-                    };
-                }
-                
-                this.domainScores[question.domain].totalScore += selectedOption.score * question.weight;
-                this.domainScores[question.domain].totalWeight += question.weight;
-                this.domainScores[question.domain].responses++;
-                
-                // Add user's selected response to chat
                 await this.addMessage(selectedOption.text, 'user');
+
+                this.responses.push({ question: question.text, response: selectedOption.text, score: selectedOption.score });
+                
+                if (!this.domainScores[question.domain]) this.domainScores[question.domain] = { totalScore: 0, count: 0 };
+                this.domainScores[question.domain].totalScore += selectedOption.score;
+                this.domainScores[question.domain].count++;
                 
                 this.currentQuestionIndex++;
                 await this.askNextQuestion();
             }
-            
-            async completeInitialAssessment() {
-                await this.addMessage("Initial assessment complete! Let me analyse these responses...", 'lily');
-                
+
+            // MODIFIED: Generates full report directly
+            async generateFullReport() {
+                await this.addMessage("Assessment complete! Generating your health report...", 'lily');
                 const processingMsg = await this.addMessage('', 'processing');
-                await this.delay(5000);
-                processingMsg.remove();
-                
-                // Calculate final domain scores
-                const finalScores = {};
-                for (const [domain, data] of Object.entries(this.domainScores)) {
-                    finalScores[domain] = Math.round(data.totalScore / data.totalWeight);
-                }
-                
-                // Sort domains by score (highest concern first)
-                const sortedDomains = Object.entries(finalScores)
-                    .sort((a, b) => b[1] - a[1])
-                    .filter(([domain, score]) => score > 30);
-                
-                // Generate targeted questions based on top concerns
-                await this.generateTargetedQuestions(sortedDomains.slice(0, 3));
-                
-                // Display initial findings
-                let findingsMessage = `Initial Assessment Findings for ${this.sessionData.patientName}:\n\n`;
-                
-                for (const [domain, score] of Object.entries(finalScores)) {
-                    const status = score < 30 ? '✅ Excellent' : 
-                                 score < 50 ? '🟡 Good' : 
-                                 score < 70 ? '🟠 Needs attention' : '🔴 Significant concern';
-                    findingsMessage += `${this.formatDomain(domain)}: ${status} (${100-score}% wellness)\n`;
-                }
-                
-                await this.addMessage(findingsMessage, 'lily');
                 await this.delay(3000);
-                
-                if (this.targetedQuestions.length > 0) {
-                    await this.addMessage(`Based on these findings, I need to ask ${this.targetedQuestions.length} targeted questions to complete the assessment.`, 'lily');
-                    await this.delay(2500);
-                    
-                    this.currentQuestionIndex = 0;
-                    this.currentStep = 'targeted';
-                    await this.askTargetedQuestion();
-                } else {
-                    await this.generatePreliminaryReport();
-                }
-            }
-            
-            async generateTargetedQuestions(topDomains) {
-                this.targetedQuestions = [];
-                
-                for (const [domain, score] of topDomains) {
-                    if (domain === 'sleep' && score > 50) {
-                        this.targetedQuestions.push({
-                            text: 'What is the main sleep challenge?',
-                            domain: 'sleep',
-                            weight: 1.2,
-                            options: [
-                                { text: 'Falling asleep', score: 100 },
-                                { text: 'Staying asleep', score: 80 },
-                                { text: 'Early waking', score: 60 },
-                                { text: 'Non-restorative sleep', score: 70 }
-                            ]
-                        });
-                    }
-                    
-                    if (domain === 'stress' && score > 50) {
-                        this.targetedQuestions.push({
-                            text: 'What is the primary source of stress?',
-                            domain: 'stress',
-                            weight: 1.2,
-                            options: [
-                                { text: 'Work/career', score: 80 },
-                                { text: 'Personal relationships', score: 70 },
-                                { text: 'Health concerns', score: 90 },
-                                { text: 'Financial pressures', score: 75 }
-                            ]
-                        });
-                    }
-                    
-                    if (domain === 'joint' && score > 50) {
-                        this.targetedQuestions.push({
-                            text: 'Which joints are most affected?',
-                            domain: 'joint',
-                            weight: 1.0,
-                            options: [
-                                { text: 'Large joints (knees, hips)', score: 90 },
-                                { text: 'Small joints (fingers, toes)', score: 80 },
-                                { text: 'Spine', score: 85 },
-                                { text: 'Multiple areas', score: 100 }
-                            ]
-                        });
-                    }
-                }
-            }
-            
-            async askTargetedQuestion() {
-                if (this.currentQuestionIndex < this.targetedQuestions.length) {
-                    const question = this.targetedQuestions[this.currentQuestionIndex];
-                    const questionNumber = this.currentQuestionIndex + 1;
-                    
-                    const progressPercentage = (questionNumber / this.targetedQuestions.length) * 100;
-                    
-                    const progressHtml = `
-                        <div class="question-progress">
-                            <div class="question-progress-bar" style="width: ${progressPercentage}%"></div>
-                        </div>
-                        Targeted Question ${questionNumber} of ${this.targetedQuestions.length}: ${question.text}
-                    `;
-                    
-                    const options = question.options.map(opt => opt.text);
-                    await this.addMessage(progressHtml, 'lily', options);
-                } else {
-                    await this.generatePreliminaryReport();
-                }
-            }
-            
-            async handleTargetedResponse(response) {
-                const question = this.targetedQuestions[this.currentQuestionIndex];
-                
-                let selectedOption = question.options.find(opt => opt.text === response.text || opt.text === response);
-                if (!selectedOption && typeof response === 'object') {
-                    selectedOption = response;
-                }
-                
-                this.domainScores[question.domain].totalScore += selectedOption.score * question.weight;
-                this.domainScores[question.domain].totalWeight += question.weight;
-                
-                // Add user's selected response to chat
-                await this.addMessage(selectedOption.text, 'user');
-                
-                this.currentQuestionIndex++;
-                await this.askTargetedQuestion();
-            }
-            
-            async generatePreliminaryReport() {
-                await this.addMessage("Assessment complete! Generating your preliminary health report...", 'lily');
-                
-                const processingMsg = await this.addMessage('', 'processing');
-                await this.delay(4000);
                 processingMsg.remove();
-                
-                // Recalculate final scores
+
                 const finalScores = {};
-                for (const [domain, data] of Object.entries(this.domainScores)) {
-                    finalScores[domain] = Math.round(data.totalScore / data.totalWeight);
+                for (const domain in this.domainScores) {
+                    finalScores[domain] = Math.round(this.domainScores[domain].totalScore / this.domainScores[domain].count);
                 }
+                const primaryConcerns = Object.entries(finalScores).filter(([d, s]) => s >= 75).map(([d]) => this.formatDomain(d));
+                const secondaryConcerns = Object.entries(finalScores).filter(([d, s]) => s >= 50 && s < 75).map(([d]) => this.formatDomain(d));
                 
-                // Identify primary concerns
-                const primaryConcerns = Object.entries(finalScores)
-                    .filter(([domain, score]) => score > 70)
-                    .map(([domain]) => this.formatDomain(domain));
-                
-                const secondaryConcerns = Object.entries(finalScores)
-                    .filter(([domain, score]) => score > 50 && score <= 70)
-                    .map(([domain]) => this.formatDomain(domain));
-                
-                const areasOfWellness = Object.entries(finalScores)
-                    .filter(([domain, score]) => score <= 30)
-                    .map(([domain]) => this.formatDomain(domain));
-                
-                // Display report
                 const reportHtml = `
-                    <div class="report-section">
-                        <div class="report-header">
-                            <h2>Preliminary Health Assessment Report</h2>
-                            <p>Patient: ${this.sessionData.patientName} | Age: ${this.sessionData.patientAge}</p>
-                            <p>Assessment Date: ${new Date().toLocaleDateString()}</p>
-                        </div>
-                        
-                        <h3 style="color: #1e293b; margin: 20px 0;">Domain Scores</h3>
-                        ${Object.entries(finalScores).map(([domain, score]) => `
-                            <div class="domain-score">
-                                <strong>${this.formatDomain(domain)}:</strong> ${100-score}% wellness
-                                <span style="float: right; color: ${score < 30 ? '#10b981' : score < 70 ? '#f59e0b' : '#ef4444'}">
-                                    ${score < 30 ? 'Excellent' : score < 50 ? 'Good' : score < 70 ? 'Needs Attention' : 'Significant Concern'}
-                                </span>
-                            </div>
-                        `).join('')}
-                        
+                    <div class="report-section" id="finalReportContent">
+                        <div class="report-header"><h2>Health Assessment Report</h2><p>Patient: ${this.sessionData.patientName}</p></div>
+                        <h3 style="color: #1e293b; margin: 20px 0;">Domain Scores (Wellness %)</h3>
+                        ${Object.entries(finalScores).map(([domain, score]) => `<div class="domain-score"><strong>${this.formatDomain(domain)}:</strong> ${100-score}%</div>`).join('')}
                         <h3 style="color: #1e293b; margin: 20px 0 10px;">Summary</h3>
-                        <p><strong>Primary Concerns:</strong> ${primaryConcerns.length ? primaryConcerns.join(', ') : 'None identified'}</p>
-                        <p><strong>Secondary Concerns:</strong> ${secondaryConcerns.length ? secondaryConcerns.join(', ') : 'None identified'}</p>
-                        <p><strong>Areas of Wellness:</strong> ${areasOfWellness.length ? areasOfWellness.join(', ') : 'None identified'}</p>
-                        
-                        <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0; border-radius: 8px;">
-                            <strong>Note:</strong> This preliminary assessment requires iris analysis for complete evaluation and therapy recommendations.
-                        </div>
+                        <p><strong>Primary Concerns:</strong> ${primaryConcerns.length ? primaryConcerns.join(', ') : 'None'}</p>
+                        <p><strong>Secondary Concerns:</strong> ${secondaryConcerns.length ? secondaryConcerns.join(', ') : 'None'}</p>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn-action btn-action-secondary" onclick="window.lily.printReport()">🖨️ Print Report</button>
+                        <button class="btn-action btn-action-primary" id="emailBtn" onclick="window.lily.emailReport()">📧 Email Report</button>
+                        <button class="btn-action btn-action-primary" id="saveBtn" onclick="window.lily.saveReport()">💾 Save to Database</button>
                     </div>
                 `;
                 
                 await this.addMessage(reportHtml, 'lily');
-                
-                // Save assessment to database
-                await this.saveAssessmentData(finalScores, primaryConcerns, secondaryConcerns);
-                
-                // Show completion options (NO email button per workflow)
-                await this.addMessage("Assessment complete! What would you like to do next?", 'lily');
-                
-                const actionButtons = `
-                    <div class="action-buttons">
-                        <button class="btn-action btn-action-primary" onclick="window.lily.handleCompletionOptions('Continue to Iris Assessment')">
-                            Continue to IRIS Assessment →
-                        </button>
-                        <button class="btn-action btn-action-secondary" onclick="window.lily.handleCompletionOptions('View Preliminary Report')">
-                            View Preliminary Report
-                        </button>
-                        <button class="btn-action btn-action-secondary" onclick="window.lily.handleCompletionOptions('Return to Dashboard')">
-                            Return to Dashboard
-                        </button>
-                    </div>
-                `;
-                
-                await this.addMessage(actionButtons, 'lily');
-                this.currentStep = 'complete';
+                await this.saveAssessmentData(finalScores, primaryConcerns, secondaryConcerns); // Auto-save
+                this.disableInput();
             }
-            
+
             async saveAssessmentData(scores, primaryConcerns, secondaryConcerns) {
-                if (!this.patientId) {
-                    console.log('No patient ID available for saving');
-                    return;
-                }
-                
-                const authData = JSON.parse(localStorage.getItem('celloxen_auth') || '{}');
-                const clinicId = authData.clinicId || sessionStorage.getItem('currentClinicId');
-                
-                // Store assessment data in session storage for email/report generation
-                const assessmentData = {
+                if (!this.patientId) return;
+                const saveData = {
                     patient_id: this.patientId,
-                    clinic_id: clinicId,
-                    assessment_type: 'initial',
-                    questions: this.initialQuestions,
+                    clinic_id: this.patientData.clinic_id,
+                    assessment_type: 'lily_standalone',
                     answers: this.responses,
                     scores: scores,
-                    overall_score: Math.round(Object.values(scores).reduce((a, b) => a + b, 0) / Object.keys(scores).length),
                     primary_concerns: primaryConcerns,
                     secondary_concerns: secondaryConcerns,
                     practitioner_name: this.sessionData.practitionerName,
-                    created_at: new Date().toISOString()
                 };
-                
-                // Save to session storage first (always works)
-                sessionStorage.setItem('lastHealthAssessment', JSON.stringify(assessmentData));
-                sessionStorage.setItem('lastAssessedPatientId', this.patientId);
-                sessionStorage.setItem('lastAssessmentId', Date.now().toString());
-                sessionStorage.setItem('assessmentType', 'Health Assessment');
                 
                 try {
-                    // Try to save to database
-                    const { data, error } = await supabase
-                        .from('health_assessments')
-                        .insert(assessmentData)
-                        .select()
-                        .single();
-                    
-                    if (error) {
-                        console.log('Database save skipped:', error.message);
-                        // Continue anyway - data is in session storage
-                    } else {
-                        console.log('Assessment saved to database');
-                    }
-                    
-                    // Update workflow status
-                    if (window.workflowManager) {
-                        await window.workflowManager.updateStage(this.patientId, 'health_assessment');
-                    }
-                    
-                    console.log('Assessment process complete');
+                    const { error } = await supabase.from('health_assessments').insert(saveData);
+                    if (error) throw error;
+                    document.getElementById('saveBtn').textContent = '✓ Saved';
+                    document.getElementById('saveBtn').disabled = true;
                 } catch (error) {
-                    console.log('Using local storage only:', error.message);
-                    // Data is already saved to session storage, so workflow can continue
+                    console.error('Error saving assessment:', error);
+                    alert("Error saving report to the database.");
+                }
+            }
+
+            async emailReport() {
+                if (!this.patientData || !this.patientData.email) {
+                    alert("Patient email is not available.");
+                    return;
+                }
+                const emailBtn = document.getElementById('emailBtn');
+                emailBtn.textContent = 'Sending...';
+                emailBtn.disabled = true;
+
+                try {
+                    const reportElement = document.getElementById('finalReportContent');
+                    const pdfBlob = await html2pdf().from(reportElement).output('blob');
+                    
+                    const success = await this.sendEmailWithPDF(pdfBlob, this.patientData.email, this.sessionData.patientName);
+                    if(success) {
+                        emailBtn.textContent = '✓ Sent';
+                    } else {
+                        emailBtn.textContent = 'Email Failed';
+                    }
+                } catch(e) {
+                    console.error("Email failed", e);
+                    emailBtn.textContent = 'Email Failed';
                 }
             }
             
-            async handleCompletionOptions(option) {
-                switch(option) {
-                    case 'Continue to Iris Assessment':
-                        if (this.patientId) {
-                            // Update workflow and redirect to IRIS assessment
-                            sessionStorage.setItem('currentPatientId', this.patientId);
-                            if (window.workflowManager) {
-                                await window.workflowManager.updateStage(this.patientId, 'iris_assessment');
-                            }
-                            window.location.href = `iris-assessment-integrated.html?patientId=${this.patientId}`;
-                        } else {
-                            window.location.href = 'iris-assessment-integrated.html';
-                        }
-                        break;
-                    case 'View Preliminary Report':
-                        window.print();
-                        break;
-                    case 'Return to Dashboard':
-                        window.location.href = 'clinic-dashboard.html';
-                        break;
+            async sendEmailWithPDF(pdfBlob, patientEmail, patientName) {
+                // This is a simplified version of the logic from email-sender.js
+                try {
+                    const reader = new FileReader();
+                    const base64Promise = new Promise(resolve => {
+                        reader.onloadend = () => resolve(reader.result.split(',')[1]);
+                        reader.readAsDataURL(pdfBlob);
+                    });
+                    const pdfBase64 = await base64Promise;
+
+                    const emailData = {
+                        to: patientEmail,
+                        from: 'Celloxen Health <health@celloxen.com>',
+                        subject: `Health Assessment Report - ${patientName}`,
+                        html: `<p>Dear ${patientName},</p><p>Please find your health assessment report attached.</p>`,
+                        attachments: [{ filename: `Health_Report.pdf`, content: pdfBase64, type: 'application/pdf' }]
+                    };
+
+                    const response = await fetch('https://defifwzgazqlrigwumqn.supabase.co/functions/v1/send-email', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
+                        body: JSON.stringify(emailData)
+                    });
+                    
+                    return response.ok;
+                } catch (error) {
+                    console.error('Error in sendEmailWithPDF:', error);
+                    return false;
                 }
             }
             
+            printReport() {
+                window.print();
+            }
+
             formatDomain(domain) {
-                const formats = {
-                    sleep: 'Sleep Quality',
-                    stress: 'Stress Management',
-                    cardiovascular: 'Cardiovascular Health',
-                    joint: 'Joint Health',
-                    digestive: 'Digestive Wellness',
-                    kidney: 'Kidney Function',
-                    energy: 'Energy Levels',
-                    metabolic: 'Metabolic Health'
-                };
-                return formats[domain] || domain;
+                return domain.charAt(0).toUpperCase() + domain.slice(1);
             }
-            
+
             delay(ms) {
                 return new Promise(resolve => setTimeout(resolve, ms));
             }
-            
+
             enableInput() {
                 document.getElementById('userInput').disabled = false;
                 document.getElementById('sendButton').disabled = false;
                 document.getElementById('userInput').focus();
             }
-            
+
             disableInput() {
                 document.getElementById('userInput').disabled = true;
                 document.getElementById('sendButton').disabled = true;
             }
         }
-        
-        // Initialize Lily when DOM is ready
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM loaded, creating Lily instance...');
-            window.lily = new LilyHealthConsultant();
-        });
-        
-        // Also handle window.onload as backup
-        window.onload = function() {
-            if (!window.lily) {
-                console.log('Window loaded, creating Lily instance (backup)...');
-                window.lily = new LilyHealthConsultant();
-            }
-        };
-        
-        function sendMessage() {
+
+        // --- 3. GLOBAL FUNCTIONS & INITIALIZATION ---
+        window.lily = new LilyHealthConsultant();
+
+        window.sendMessage = function() {
             const input = document.getElementById('userInput');
-            const message = input.value.trim();
-            if (message) {
-                window.lily.processUserInput(message);
+            if (input.value.trim()) {
+                window.lily.processUserInput(input.value.trim());
                 input.value = '';
             }
         }
-        
-        window.sendMessage = sendMessage;
-        
-        document.getElementById('userInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                sendMessage();
-            }
+        document.getElementById('userInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
         });
+
+    })();
+    // --- END OF SCRIPT ---
     </script>
 </body>
 </html>
