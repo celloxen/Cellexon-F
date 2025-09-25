@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Patient Registration - Celloxen Platform</title>
     
-    <!-- REQUIRED: Load Supabase CDN BEFORE any module imports -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <style>
@@ -24,12 +23,41 @@
         .header {
             background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
             color: white;
-            padding: 15px 0;
+            padding: 20px 0;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
         
+        .header-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+        }
+        
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: background 0.3s;
+        }
+        
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
         .container {
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto;
             padding: 30px 20px;
         }
@@ -37,8 +65,8 @@
         .registration-card {
             background: white;
             border-radius: 12px;
-            padding: 30px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            padding: 30px 40px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
         }
         
         .card-header {
@@ -58,12 +86,24 @@
             color: #6b7280;
             font-size: 14px;
         }
+
+        .form-section {
+            margin-bottom: 30px;
+        }
+        
+        .form-section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e5e7eb;
+        }
         
         .form-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-bottom: 20px;
+            gap: 25px;
         }
         
         .form-group {
@@ -72,22 +112,24 @@
         
         .form-label {
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
             font-weight: 500;
-            color: #374151;
+            color: #4b5563;
             font-size: 14px;
         }
         
-        .required {
+        .form-label .required {
             color: #ef4444;
+            font-weight: bold;
         }
         
         .form-input {
             width: 100%;
-            padding: 10px;
+            padding: 12px 15px;
             border: 2px solid #e5e7eb;
             border-radius: 8px;
-            font-size: 14px;
+            font-size: 15px;
+            transition: border-color 0.3s;
         }
         
         .form-input:focus {
@@ -97,15 +139,17 @@
         
         .form-actions {
             display: flex;
-            gap: 10px;
+            gap: 15px;
             margin-top: 30px;
+            border-top: 1px solid #e5e7eb;
+            padding-top: 25px;
         }
         
         .btn {
-            flex: 1;
-            padding: 12px;
+            padding: 12px 24px;
             border-radius: 8px;
-            font-weight: 500;
+            font-size: 16px;
+            font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
             border: none;
@@ -120,6 +164,13 @@
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
         }
+
+        .btn-primary:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
         
         .btn-secondary {
             background: #e5e7eb;
@@ -133,13 +184,26 @@
         /* Confirmation Screen */
         .confirmation-screen {
             display: none;
+            text-align: center;
         }
         
+        .success-icon {
+            font-size: 48px;
+            width: 80px;
+            height: 80px;
+            line-height: 80px;
+            background: #dcfce7;
+            color: #166534;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+        }
+
         .patient-summary {
             background: #f9fafb;
             padding: 20px;
             border-radius: 8px;
-            margin-bottom: 20px;
+            margin: 30px 0;
+            text-align: left;
         }
         
         .summary-row {
@@ -161,21 +225,7 @@
         .summary-value {
             color: #1f2937;
             flex: 1;
-        }
-        
-        .success-message {
-            background: #d1fae5;
-            color: #065f46;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .success-icon {
-            font-size: 24px;
+            font-weight: 500;
         }
         
         @media (max-width: 640px) {
@@ -187,105 +237,100 @@
 </head>
 <body>
     <div class="header">
-        <div class="container" style="display: flex; justify-content: space-between; align-items: center;">
-            <h1 style="font-size: 20px;">Patient Registration</h1>
-            <a href="clinic-dashboard.html" style="color: white; text-decoration: none;">← Back to Dashboard</a>
+        <div class="header-container">
+            <h1>Patient Registration</h1>
+            <a href="clinic-dashboard.html" class="back-btn">← Back to Dashboard</a>
         </div>
     </div>
 
     <div class="container">
-        <!-- Registration Form -->
         <div id="registrationForm" class="registration-card">
             <div class="card-header">
-                <h2 class="card-title">Register New Patient</h2>
-                <p class="card-subtitle">Enter patient details to begin their wellness journey</p>
+                <h2 class="card-title">New Patient Registration</h2>
+                <p class="card-subtitle">Enter the patient's details below to begin their wellness journey.</p>
             </div>
             
             <form id="patientForm">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">First Name <span class="required">*</span></label>
-                        <input type="text" class="form-input" id="firstName" required>
+                <div class="form-section">
+                    <h3 class="form-section-title">Personal Details</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">First Name <span class="required">*</span></label>
+                            <input type="text" class="form-input" id="firstName" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Last Name <span class="required">*</span></label>
+                            <input type="text" class="form-input" id="lastName" required>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Last Name <span class="required">*</span></label>
-                        <input type="text" class="form-input" id="lastName" required>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Date of Birth <span class="required">*</span></label>
+                            <input type="date" class="form-input" id="dob" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Gender</label>
+                            <select class="form-input" id="gender">
+                                <option value="">Select Gender</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3 class="form-section-title">Contact Information</h3>
+                     <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Email <span class="required">*</span></label>
+                            <input type="email" class="form-input" id="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Phone</label>
+                            <input type="tel" class="form-input" id="phone" placeholder="e.g., 07123 456789">
+                        </div>
+                    </div>
+                     <div class="form-group">
+                        <label class="form-label">Address</label>
+                        <input type="text" class="form-input" id="address" placeholder="e.g., 123 Wellness Street, London, W1A 1AA">
                     </div>
                 </div>
                 
-                <div class="form-row">
+                <div class="form-section">
+                    <h3 class="form-section-title">Medical Notes</h3>
                     <div class="form-group">
-                        <label class="form-label">Date of Birth <span class="required">*</span></label>
-                        <input type="date" class="form-input" id="dob" required>
+                        <label class="form-label">Initial Medical History Notes (Optional)</label>
+                        <textarea class="form-input" id="medicalHistory" rows="4" placeholder="Enter any known conditions, allergies, or current medications."></textarea>
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Gender <span class="required">*</span></label>
-                        <select class="form-input" id="gender" required>
-                            <option value="">Select Gender</option>
-                            <option value="Male">Male</option>
-                            <option value="Female">Female</option>
-                            <option value="Other">Other</option>
-                        </select>
-                    </div>
-                </div>
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">Email</label>
-                        <input type="email" class="form-input" id="email">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Phone <span class="required">*</span></label>
-                        <input type="tel" class="form-input" id="phone" required>
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Address</label>
-                    <input type="text" class="form-input" id="address">
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Medical History Notes</label>
-                    <textarea class="form-input" id="medicalHistory" rows="3"></textarea>
                 </div>
                 
                 <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">Register Patient</button>
+                    <button type="submit" class="btn btn-primary" id="submitBtn">Register Patient</button>
                     <button type="button" class="btn btn-secondary" onclick="window.location.href='clinic-dashboard.html'">Cancel</button>
                 </div>
             </form>
         </div>
 
-        <!-- Confirmation Screen -->
         <div id="confirmationScreen" class="registration-card confirmation-screen">
-            <div class="card-header">
-                <h2 class="card-title">Patient Registration Successful</h2>
-                <p class="card-subtitle">Review patient details and continue to health assessment</p>
-            </div>
-            
-            <div class="success-message">
-                <span class="success-icon">✓</span>
-                <div>
-                    <strong>Registration Complete!</strong><br>
-                    Patient ID: <span id="confirmPatientId"></span>
-                </div>
+            <div class="success-icon">✓</div>
+            <div class="card-header" style="border-bottom: none;">
+                <h2 class="card-title">Patient Registered Successfully</h2>
+                <p class="card-subtitle">The patient has been added to your clinic's records.</p>
             </div>
             
             <div class="patient-summary">
                 <div class="summary-row">
+                    <div class="summary-label">Patient ID:</div>
+                    <div class="summary-value" id="confirmPatientId"></div>
+                </div>
+                <div class="summary-row">
                     <div class="summary-label">Name:</div>
                     <div class="summary-value" id="confirmName"></div>
                 </div>
-                <div class="summary-row">
-                    <div class="summary-label">Date of Birth:</div>
-                    <div class="summary-value" id="confirmDob"></div>
-                </div>
-                <div class="summary-row">
-                    <div class="summary-label">Gender:</div>
-                    <div class="summary-value" id="confirmGender"></div>
-                </div>
-                <div class="summary-row">
+                 <div class="summary-row">
                     <div class="summary-label">Email:</div>
                     <div class="summary-value" id="confirmEmail"></div>
                 </div>
@@ -293,116 +338,68 @@
                     <div class="summary-label">Phone:</div>
                     <div class="summary-value" id="confirmPhone"></div>
                 </div>
-                <div class="summary-row">
-                    <div class="summary-label">Address:</div>
-                    <div class="summary-value" id="confirmAddress"></div>
-                </div>
             </div>
             
             <div class="form-actions">
-                <button class="btn btn-primary" onclick="continueToAssessment()">Continue to Health Assessment</button>
-                <button class="btn btn-secondary" onclick="editDetails()">Edit Details</button>
-                <button class="btn btn-secondary" onclick="window.location.href='clinic-dashboard.html'">Back to Dashboard</button>
+                <button class="btn btn-primary" onclick="window.location.href='clinic-dashboard.html'">Return to Dashboard</button>
             </div>
         </div>
     </div>
 
-    <script type="module">
-        // Wait for Supabase to be available
-        await new Promise(resolve => {
-            const checkSupabase = setInterval(() => {
-                if (window.supabase) {
-                    clearInterval(checkSupabase);
-                    resolve();
-                }
-            }, 50);
-        });
+    <script>
+        // --- START OF SCRIPT ---
+        // This is a self-contained script. No external JS files are needed.
 
-        import { supabase } from './supabase-config.js';
-        import { workflowManager } from './workflow-manager.js';
+        // 1. SUPABASE CONFIGURATION
+        const SUPABASE_URL = 'https://defifwzgazqlrigwumqn.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlZmlmd3pnYXpxbHJpZ3d1bXFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcyNTM0MjYsImV4cCI6MjA3MjgyOTQyNn0.wcUBq6Pszjtqn5aBtuu3iXBE4BLmu8x9LtJbsMWlIiA';
         
-        let registeredPatientId = null;
-        let registeredPatientData = null;
-        
-        document.getElementById('patientForm').addEventListener('submit', async (e) => {
+        const { createClient } = window.supabase;
+        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // 2. DOM ELEMENTS & STATE
+        const patientForm = document.getElementById('patientForm');
+        const submitBtn = document.getElementById('submitBtn');
+        let currentClinicId = null;
+
+        // 3. EVENT LISTENERS
+        patientForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             await registerPatient();
         });
-        
-        async function registerPatient() {
-            const authData = JSON.parse(localStorage.getItem('celloxen_auth') || '{}');
-            const clinicId = authData.clinicId || sessionStorage.getItem('currentClinicId');
-            
-            if (!clinicId) {
-                alert('No clinic ID found. Please log in again.');
+
+        // 4. CORE FUNCTIONS
+        async function checkAuthentication() {
+            const authData = localStorage.getItem('celloxen_auth');
+            if (authData) {
+                currentClinicId = JSON.parse(authData).clinicId;
+            }
+            if (!currentClinicId) {
+                alert('Clinic information is missing. Please log in again.');
                 window.location.href = 'unified-login.html';
-                return;
+                return false;
             }
-            
-            // Get form values
-            const email = document.getElementById('email').value || null;
-            const phone = document.getElementById('phone').value;
-            const firstName = document.getElementById('firstName').value;
-            const lastName = document.getElementById('lastName').value;
-            
-            // Check for duplicate patient BEFORE creating
-            if (email || phone) {
-                try {
-                    let query = supabase
-                        .from('patients')
-                        .select('id, patient_id, first_name, last_name')
-                        .eq('clinic_id', clinicId);
-                    
-                    // Build OR condition for email and phone
-                    let conditions = [];
-                    if (email) conditions.push(`email.eq.${email}`);
-                    if (phone) conditions.push(`phone.eq.${phone}`);
-                    
-                    if (conditions.length > 0) {
-                        query = query.or(conditions.join(','));
-                        
-                        const { data: existingPatients } = await query;
-                        
-                        if (existingPatients && existingPatients.length > 0) {
-                            const existing = existingPatients[0];
-                            const message = `A patient already exists with this ${email ? 'email' : 'phone number'}:\n\n` +
-                                           `Name: ${existing.first_name} ${existing.last_name}\n` +
-                                           `Patient ID: ${existing.patient_id}\n\n` +
-                                           `Would you like to continue their assessment instead?`;
-                            
-                            if (confirm(message)) {
-                                // Use existing patient
-                                registeredPatientId = existing.id;
-                                sessionStorage.setItem('currentPatientId', existing.id);
-                                await workflowManager.continueAssessment(existing.id);
-                                return;
-                            } else {
-                                return; // Cancel registration
-                            }
-                        }
-                    }
-                } catch (error) {
-                    console.log('No duplicate found, proceeding with registration');
-                }
-            }
-            
-            // Create patient data
-            const patientData = {
-                clinic_id: clinicId,
-                first_name: firstName,
-                last_name: lastName,
-                date_of_birth: document.getElementById('dob').value,
-                gender: document.getElementById('gender').value,
-                email: email,
-                phone: phone,
-                address: document.getElementById('address').value || null,
-                medical_history: document.getElementById('medicalHistory').value || null,
-                patient_id: generatePatientId(),
-                created_at: new Date().toISOString()
-            };
-            
+            return true;
+        }
+
+        async function registerPatient() {
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Registering...';
+
             try {
-                // Register the patient
+                const patientData = {
+                    clinic_id: currentClinicId,
+                    first_name: document.getElementById('firstName').value.trim(),
+                    last_name: document.getElementById('lastName').value.trim(),
+                    date_of_birth: document.getElementById('dob').value,
+                    gender: document.getElementById('gender').value || null,
+                    email: document.getElementById('email').value.trim(),
+                    phone: document.getElementById('phone').value.trim() || null,
+                    address: document.getElementById('address').value.trim() || null,
+                    medical_history: document.getElementById('medicalHistory').value.trim() || null,
+                    patient_id: `CX${Date.now()}` // Generate a unique patient ID
+                };
+
                 const { data: newPatient, error } = await supabase
                     .from('patients')
                     .insert(patientData)
@@ -410,32 +407,22 @@
                     .single();
                 
                 if (error) {
-                    if (error.code === '23505') {
-                        alert('A patient with this email/phone already exists. Please use different contact information or find the existing patient.');
-                        return;
+                    if (error.code === '23505') { // Unique constraint violation
+                        throw new Error('A patient with this email or phone number already exists.');
                     }
                     throw error;
                 }
                 
-                registeredPatientId = newPatient.id;
-                registeredPatientData = newPatient;
-                
-                // Initialize workflow
-                await workflowManager.initializeWorkflow(newPatient.id);
-                
-                // Show confirmation
+                // If successful, show confirmation screen
                 showConfirmation(newPatient);
-                
+
             } catch (error) {
                 console.error('Error registering patient:', error);
-                alert('Error registering patient: ' + error.message);
+                alert('Error: ' + error.message);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Register Patient';
             }
-        }
-        
-        function generatePatientId() {
-            const timestamp = Date.now().toString(36).toUpperCase();
-            const random = Math.random().toString(36).substr(2, 5).toUpperCase();
-            return `CX${timestamp}${random}`;
         }
         
         function showConfirmation(patient) {
@@ -444,34 +431,12 @@
             
             document.getElementById('confirmPatientId').textContent = patient.patient_id;
             document.getElementById('confirmName').textContent = `${patient.first_name} ${patient.last_name}`;
-            document.getElementById('confirmDob').textContent = new Date(patient.date_of_birth).toLocaleDateString('en-GB');
-            document.getElementById('confirmGender').textContent = patient.gender;
-            document.getElementById('confirmEmail').textContent = patient.email || 'N/A';
-            document.getElementById('confirmPhone').textContent = patient.phone;
-            document.getElementById('confirmAddress').textContent = patient.address || 'N/A';
+            document.getElementById('confirmEmail').textContent = patient.email;
+            document.getElementById('confirmPhone').textContent = patient.phone || 'Not provided';
         }
         
-        window.continueToAssessment = async function() {
-            if (registeredPatientId) {
-                await workflowManager.continueAssessment(registeredPatientId);
-            }
-        };
-        
-        window.editDetails = function() {
-            document.getElementById('registrationForm').style.display = 'block';
-            document.getElementById('confirmationScreen').style.display = 'none';
-            
-            if (registeredPatientData) {
-                document.getElementById('firstName').value = registeredPatientData.first_name;
-                document.getElementById('lastName').value = registeredPatientData.last_name;
-                document.getElementById('dob').value = registeredPatientData.date_of_birth;
-                document.getElementById('gender').value = registeredPatientData.gender;
-                document.getElementById('email').value = registeredPatientData.email || '';
-                document.getElementById('phone').value = registeredPatientData.phone;
-                document.getElementById('address').value = registeredPatientData.address || '';
-                document.getElementById('medicalHistory').value = registeredPatientData.medical_history || '';
-            }
-        };
+        // 5. INITIALIZATION
+        document.addEventListener('DOMContentLoaded', checkAuthentication);
     </script>
 </body>
 </html>
