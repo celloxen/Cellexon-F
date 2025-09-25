@@ -548,18 +548,20 @@
                 if (data && data.length > 0) {
                     scheduleDiv.innerHTML = data.map(apt => {
                         if (!apt.patients) return ''; 
-                        return \`
+                        // **FIX IS HERE** The template literal was not properly formatted.
+                        return `
                         <div class="schedule-item">
-                            <span>\${apt.patients.first_name} \${apt.patients.last_name}</span>
-                            <span class="time-badge">\${apt.appointment_time.substring(0, 5)}</span>
+                            <span>${apt.patients.first_name} ${apt.patients.last_name}</span>
+                            <span class="time-badge">${apt.appointment_time.substring(0, 5)}</span>
                         </div>
-                    \`}).join('');
+                        `;
+                    }).join('');
                 } else {
                     scheduleDiv.innerHTML = '<div class="empty-state" style="padding: 10px 0;"><p>No appointments today</p></div>';
                 }
                 
             } catch (error) {
-                console.error('Error loading today\\'s schedule:', error);
+                console.error("Error loading today's schedule:", error);
             }
         }
 
