@@ -296,6 +296,15 @@
             margin-bottom: 20px;
             font-size: 14px;
         }
+
+        .compression-info {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            color: #64748b;
+            font-size: 12px;
+        }
         
         /* Action Buttons */
         .action-buttons {
@@ -584,7 +593,7 @@
             <h2>IRIS Image Capture</h2>
             <div class="iris-images-section">
                 <p style="color: #64748b; margin-bottom: 20px;">
-                    Capture high-quality images of both irises. Our AI will automatically analyse constitutional patterns, fibre density, pupil characteristics, and system health indicators.
+                    Capture high-quality images of both irises. Images will be automatically optimised for AI analysis and compressed to ensure compatibility with Claude API limits.
                 </p>
                 
                 <div class="iris-images-grid">
@@ -605,6 +614,9 @@
                             <button class="control-btn btn-replace" onclick="retakeImage('left')">📷 Replace</button>
                             <button class="control-btn btn-delete" onclick="deleteImage('left')">🗑️ Delete</button>
                         </div>
+                        <div class="compression-info hidden" id="leftCompressionInfo">
+                            <small>Image optimised for AI analysis</small>
+                        </div>
                     </div>
                     
                     <!-- Right Iris -->
@@ -624,13 +636,16 @@
                             <button class="control-btn btn-replace" onclick="retakeImage('right')">📷 Replace</button>
                             <button class="control-btn btn-delete" onclick="deleteImage('right')">🗑️ Delete</button>
                         </div>
+                        <div class="compression-info hidden" id="rightCompressionInfo">
+                            <small>Image optimised for AI analysis</small>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Analysis Status -->
                 <div class="analysis-status" id="analysisStatus" style="display: none;">
                     <h3>🤖 Ready for AI Analysis</h3>
-                    <p>Both iris images captured successfully. Click below to start automated constitutional analysis.</p>
+                    <p>Both iris images captured and optimised. Click below to start automated constitutional analysis.</p>
                     <div style="background: white; padding: 15px; border-radius: 10px; margin-top: 15px;">
                         <p style="color: #1e293b; font-weight: 600; margin-bottom: 10px;">AI will automatically determine:</p>
                         <ul style="text-align: left; color: #64748b; font-size: 14px; list-style: none; padding: 0;">
@@ -738,6 +753,39 @@
             right: null
         };
         
+        // Image compression function
+        function compressImageFile(file, maxWidth = 1500, quality = 0.8) {
+            return new Promise((resolve) => {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                const img = new Image();
+                
+                img.onload = () => {
+                    let { width, height } = img;
+                    
+                    // Calculate new dimensions while maintaining aspect ratio
+                    if (width > maxWidth || height > maxWidth) {
+                        if (width > height) {
+                            height = (height * maxWidth) / width;
+                            width = maxWidth;
+                        } else {
+                            width = (width * maxWidth) / height;
+                            height = maxWidth;
+                        }
+                    }
+                    
+                    canvas.width = width;
+                    canvas.height = height;
+                    ctx.drawImage(img, 0, 0, width, height);
+                    
+                    // Convert to compressed JPEG
+                    canvas.toBlob(resolve, 'image/jpeg', quality);
+                };
+                
+                img.src = URL.createObjectURL(file);
+            });
+        }
+        
         // Initialize
         document.addEventListener('DOMContentLoaded', async function() {
             await supabaseReady;
@@ -808,10 +856,21 @@
             return age;
         }
         
-        // Process image function
+        // Process image function with compression
         async function processImage(imageFile, side) {
             try {
-                const imageUrl = URL.createObjectURL(imageFile);
+                console.log(`Processing ${side} iris image...`);
+                console.log(`Original size: ${imageFile.size} bytes`);
+                
+                // Compress the image first
+                const compressedFile = await compressImageFile(imageFile, 1500, 0.8);
+                console.log(`Compressed size: ${compressedFile.size} bytes`);
+                
+                // Check if compression was successful
+                const compressionRatio = (imageFile.size - compressedFile.size) / imageFile.size;
+                console.log(`Compression ratio: ${(compressionRatio * 100).toFixed(1)}%`);
+                
+                const imageUrl = URL.createObjectURL(compressedFile);
                 
                 const uploadArea = document.getElementById(`${side}IrisArea`);
                 uploadArea.classList.add('has-image');
@@ -819,8 +878,20 @@
                 
                 document.getElementById(`${side}IrisControls`).classList.remove('hidden');
                 
+                // Show compression info
+                const compressionInfo = document.getElementById(`${side}CompressionInfo`);
+                compressionInfo.classList.remove('hidden');
+                compressionInfo.innerHTML = `
+                    <small>
+                        Original: ${(imageFile.size / 1024).toFixed(1)}KB → 
+                        Compressed: ${(compressedFile.size / 1024).toFixed(1)}KB 
+                        (${(compressionRatio * 100).toFixed(1)}% reduction)
+                    </small>
+                `;
+                
                 irisImages[side] = {
-                    file: imageFile,
+                    file: compressedFile,  // Use compressed file
+                    originalFile: imageFile,  // Keep reference to original
                     url: imageUrl
                 };
                 
@@ -844,6 +915,17 @@
                 completeBtn.disabled = false;
                 completeBtn.textContent = '🔬 Start AI Analysis & Generate Report';
                 analysisStatus.style.display = 'block';
+                
+                // Show combined compression info
+                const leftSize = (irisImages.left.file.size / 1024).toFixed(1);
+                const rightSize = (irisImages.right.file.size / 1024).toFixed(1);
+                const totalSize = (parseFloat(leftSize) + parseFloat(rightSize)).toFixed(1);
+                
+                analysisStatus.innerHTML = analysisStatus.innerHTML.replace(
+                    'Both iris images captured and optimised.',
+                    `Both iris images captured and optimised. Total size: ${totalSize}KB (under 5MB API limit).`
+                );
+                
             } else {
                 completeBtn.disabled = true;
                 completeBtn.textContent = 'Upload both iris images to begin analysis';
@@ -932,7 +1014,7 @@
             }
         };
         
-        window.captureImage = function() {
+        window.captureImage = async function() {
             const video = document.getElementById('camera-feed');
             const canvas = document.getElementById('camera-canvas');
             const context = canvas.getContext('2d');
@@ -983,6 +1065,7 @@
             `;
             
             document.getElementById(`${side}IrisControls`).classList.add('hidden');
+            document.getElementById(`${side}CompressionInfo`).classList.add('hidden');
             
             if (irisImages[side] && irisImages[side].url) {
                 URL.revokeObjectURL(irisImages[side].url);
@@ -1011,7 +1094,7 @@
             }
         };
         
-        // MAIN ANALYSIS FUNCTION - UPDATED TO USE EDGE FUNCTION
+        // MAIN ANALYSIS FUNCTION - WITH IMAGE COMPRESSION
         window.completeAssessment = async function() {
             if (!irisImages.left || !irisImages.right) {
                 alert('Please capture both iris images before analysis.');
@@ -1021,12 +1104,23 @@
             try {
                 // Show loading overlay
                 document.getElementById('loadingOverlay').classList.add('active');
-                document.getElementById('loadingText').textContent = 'Analysing iris patterns with AI...';
+                document.getElementById('loadingText').textContent = 'Optimising images and analysing patterns...';
                 document.getElementById('loadingSubtitle').textContent = 'This may take 30-45 seconds';
 
-                // Convert images to base64
+                // Convert compressed images to base64
                 const leftImageBase64 = await fileToBase64(irisImages.left.file);
                 const rightImageBase64 = await fileToBase64(irisImages.right.file);
+
+                // Verify image sizes are under 5MB limit
+                const leftSizeKB = (leftImageBase64.length * 0.75) / 1024; // base64 is ~33% larger
+                const rightSizeKB = (rightImageBase64.length * 0.75) / 1024;
+                
+                console.log(`Left image base64 size: ${leftSizeKB.toFixed(1)}KB`);
+                console.log(`Right image base64 size: ${rightSizeKB.toFixed(1)}KB`);
+                
+                if (leftSizeKB > 4000 || rightSizeKB > 4000) {
+                    throw new Error('Images are still too large after compression. Please try smaller images.');
+                }
 
                 // Get auth session for API call
                 const { data: { session } } = await supabase.auth.getSession();
