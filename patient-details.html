@@ -12,7 +12,7 @@
         .header { background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%); color: white; padding: 20px 0; }
         .header-container { max-width: 900px; margin: 0 auto; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; }
         .header h1 { font-size: 24px; }
-        .back-btn { background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 8px 20px; border-radius: 6px; text-decoration: none; }
+        .back-btn { background: rgba(255,255,255,0.2); border: 1px solid #fff3; color: white; padding: 8px 20px; border-radius: 6px; text-decoration: none; }
         .container { max-width: 900px; margin: 30px auto; padding: 0 20px; }
         .details-card { background: white; border-radius: 12px; padding: 30px 40px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
         .card-header { margin-bottom: 30px; padding-bottom: 20px; border-bottom: 2px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; }
@@ -21,7 +21,7 @@
         .form-section-title { font-size: 18px; font-weight: 600; margin-bottom: 20px; }
         .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
         .form-group { margin-bottom: 20px; }
-        .form-label { display: block; margin-bottom: 8px; font-weight: 500; color: #4b5563; }
+        .form-label { display: block; margin-bottom: 8px; font-weight: 500; }
         .form-input { width: 100%; padding: 12px 15px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 15px; }
         .form-input:read-only { background: #f9fafb; color: #6b7280; }
         .btn { padding: 12px 24px; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; border: none; }
@@ -31,27 +31,13 @@
     </style>
 </head>
 <body>
-    <div class="header">
-        <div class="header-container">
-            <h1 id="pageTitle">Patient Details</h1>
-            <a href="patient-management.html" class="back-btn">← Back to Patient List</a>
-        </div>
-    </div>
-
+    <div class="header"><div class="header-container"><h1 id="pageTitle">Patient Details</h1><a href="patient-management.html" class="back-btn">← Back to List</a></div></div>
     <div class="container">
         <div id="detailsCard" class="details-card">
             <div class="card-header">
-                <div>
-                    <h2 class="card-title" id="patientName">Loading...</h2>
-                    <p id="patientId" style="color: #6b7280;"></p>
-                </div>
-                <div>
-                    <button class="btn btn-secondary" id="editBtn" onclick="toggleEditMode(true)">Edit</button>
-                    <button class="btn btn-primary hidden" id="saveBtn" onclick="savePatientChanges()">Save Changes</button>
-                    <button class="btn btn-secondary hidden" id="cancelBtn" onclick="toggleEditMode(false)">Cancel</button>
-                </div>
+                <div><h2 class="card-title" id="patientName">Loading...</h2><p id="patientId" style="color: #6b7280;"></p></div>
+                <div><button class="btn btn-secondary" id="editBtn" onclick="toggleEditMode(true)">Edit</button><button class="btn btn-primary hidden" id="saveBtn">Save</button><button class="btn btn-secondary hidden" id="cancelBtn" onclick="toggleEditMode(false)">Cancel</button></div>
             </div>
-            
             <form id="patientForm">
                 <div class="form-section">
                     <h3 class="form-section-title">Personal Details</h3>
@@ -74,7 +60,7 @@
                 </div>
                 <div class="form-section">
                     <h3 class="form-section-title">Medical Notes</h3>
-                    <div class="form-group"><label class="form-label">Initial Medical History Notes</label><textarea class="form-input" id="medicalHistory" rows="4" readonly></textarea></div>
+                    <div class="form-group"><label class="form-label">Initial Notes</label><textarea class="form-input" id="medicalHistory" rows="4" readonly></textarea></div>
                 </div>
             </form>
         </div>
@@ -91,10 +77,8 @@
         async function loadPatientDetails() {
             const urlParams = new URLSearchParams(window.location.search);
             patientId = urlParams.get('id');
-            const isEditMode = urlParams.get('edit') === 'true';
-
             if (!patientId) {
-                document.getElementById('detailsCard').innerHTML = '<h1>Error: No Patient ID provided.</h1>';
+                document.getElementById('detailsCard').innerHTML = '<h1>Error: No Patient ID.</h1>';
                 return;
             }
 
@@ -103,8 +87,7 @@
                 if (error) throw error;
                 
                 document.getElementById('patientName').textContent = `${data.first_name} ${data.last_name}`;
-                document.getElementById('patientId').textContent = `Patient ID: ${data.patient_id}`;
-                
+                document.getElementById('patientId').textContent = `ID: ${data.patient_id}`;
                 document.getElementById('firstName').value = data.first_name;
                 document.getElementById('lastName').value = data.last_name;
                 document.getElementById('dob').value = data.date_of_birth;
@@ -114,27 +97,22 @@
                 document.getElementById('address').value = data.address;
                 document.getElementById('medicalHistory').value = data.medical_history;
 
-                if (isEditMode) {
-                    toggleEditMode(true);
-                }
+                if (urlParams.get('edit') === 'true') toggleEditMode(true);
 
             } catch (error) {
-                console.error('Error loading patient details:', error);
-                document.getElementById('detailsCard').innerHTML = `<h1>Error loading patient data: ${error.message}</h1>`;
+                document.getElementById('detailsCard').innerHTML = `<h1>Error: ${error.message}</h1>`;
             }
         }
 
-        window.toggleEditMode = function(edit) {
-            const inputs = document.querySelectorAll('.form-input');
-            inputs.forEach(input => input.readOnly = !edit);
-            
+        function toggleEditMode(edit) {
+            document.querySelectorAll('.form-input').forEach(input => input.readOnly = !edit);
             document.getElementById('editBtn').classList.toggle('hidden', edit);
             document.getElementById('saveBtn').classList.toggle('hidden', !edit);
             document.getElementById('cancelBtn').classList.toggle('hidden', !edit);
             document.getElementById('pageTitle').textContent = edit ? 'Edit Patient' : 'Patient Details';
         }
 
-        window.savePatientChanges = async function() {
+        async function savePatientChanges() {
             const updates = {
                 first_name: document.getElementById('firstName').value,
                 last_name: document.getElementById('lastName').value,
@@ -145,20 +123,18 @@
                 address: document.getElementById('address').value,
                 medical_history: document.getElementById('medicalHistory').value,
             };
-
             try {
                 const { error } = await supabase.from('patients').update(updates).eq('id', patientId);
                 if (error) throw error;
-                alert('Patient details updated successfully!');
+                alert('Patient details updated!');
                 toggleEditMode(false);
-                loadPatientDetails();
             } catch (error) {
-                console.error('Error saving patient changes:', error);
                 alert('Error: ' + error.message);
             }
         }
 
         document.addEventListener('DOMContentLoaded', loadPatientDetails);
+        document.getElementById('saveBtn').addEventListener('click', savePatientChanges);
     </script>
 </body>
 </html>
