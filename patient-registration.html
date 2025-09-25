@@ -8,231 +8,33 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
-            min-height: 100vh;
-        }
-        
-        .header {
-            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
-            color: white;
-            padding: 20px 0;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        
-        .header-container {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 0 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .header h1 {
-            font-size: 24px;
-        }
-        
-        .back-btn {
-            background: rgba(255,255,255,0.2);
-            border: 1px solid rgba(255,255,255,0.3);
-            color: white;
-            padding: 8px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-block;
-            transition: background 0.3s;
-        }
-        
-        .back-btn:hover {
-            background: rgba(255,255,255,0.3);
-        }
-        
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 30px 20px;
-        }
-        
-        .registration-card {
-            background: white;
-            border-radius: 12px;
-            padding: 30px 40px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-        }
-        
-        .card-header {
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 2px solid #e5e7eb;
-        }
-        
-        .card-title {
-            font-size: 24px;
-            font-weight: 600;
-            color: #1f2937;
-            margin-bottom: 5px;
-        }
-        
-        .card-subtitle {
-            color: #6b7280;
-            font-size: 14px;
-        }
-
-        .form-section {
-            margin-bottom: 30px;
-        }
-        
-        .form-section-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: #374151;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #e5e7eb;
-        }
-        
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 25px;
-        }
-        
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        .form-label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: #4b5563;
-            font-size: 14px;
-        }
-        
-        .form-label .required {
-            color: #ef4444;
-            font-weight: bold;
-        }
-        
-        .form-input {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e5e7eb;
-            border-radius: 8px;
-            font-size: 15px;
-            transition: border-color 0.3s;
-        }
-        
-        .form-input:focus {
-            outline: none;
-            border-color: #3b82f6;
-        }
-        
-        .form-actions {
-            display: flex;
-            gap: 15px;
-            margin-top: 30px;
-            border-top: 1px solid #e5e7eb;
-            padding-top: 25px;
-        }
-        
-        .btn {
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            border: none;
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-        }
-
-        .btn-primary:disabled {
-            background: #9ca3af;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-        
-        .btn-secondary {
-            background: #e5e7eb;
-            color: #374151;
-        }
-        
-        .btn-secondary:hover {
-            background: #d1d5db;
-        }
-        
-        /* Confirmation Screen */
-        .confirmation-screen {
-            display: none;
-            text-align: center;
-        }
-        
-        .success-icon {
-            font-size: 48px;
-            width: 80px;
-            height: 80px;
-            line-height: 80px;
-            background: #dcfce7;
-            color: #166534;
-            border-radius: 50%;
-            margin: 0 auto 20px;
-        }
-
-        .patient-summary {
-            background: #f9fafb;
-            padding: 20px;
-            border-radius: 8px;
-            margin: 30px 0;
-            text-align: left;
-        }
-        
-        .summary-row {
-            display: flex;
-            padding: 10px 0;
-            border-bottom: 1px solid #e5e7eb;
-        }
-        
-        .summary-row:last-child {
-            border-bottom: none;
-        }
-        
-        .summary-label {
-            font-weight: 500;
-            color: #6b7280;
-            width: 150px;
-        }
-        
-        .summary-value {
-            color: #1f2937;
-            flex: 1;
-            font-weight: 500;
-        }
-        
-        @media (max-width: 640px) {
-            .form-row {
-                grid-template-columns: 1fr;
-            }
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f5f7fa; }
+        .header { background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%); color: white; padding: 20px 0; }
+        .header-container { max-width: 900px; margin: 0 auto; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; }
+        .header h1 { font-size: 24px; }
+        .back-btn { background: rgba(255,255,255,0.2); border: 1px solid #fff3; color: white; padding: 8px 20px; border-radius: 6px; text-decoration: none; }
+        .container { max-width: 900px; margin: 30px auto; padding: 0 20px; }
+        .registration-card { background: white; border-radius: 12px; padding: 30px 40px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+        .card-header { margin-bottom: 30px; padding-bottom: 20px; border-bottom: 2px solid #e5e7eb; }
+        .card-title { font-size: 24px; font-weight: 600; }
+        .card-subtitle { color: #6b7280; font-size: 14px; }
+        .form-section-title { font-size: 18px; font-weight: 600; margin-bottom: 20px; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
+        .form-group { margin-bottom: 20px; }
+        .form-label { display: block; margin-bottom: 8px; font-weight: 500; }
+        .form-label .required { color: #ef4444; }
+        .form-input { width: 100%; padding: 12px 15px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 15px; }
+        .form-actions { display: flex; gap: 15px; margin-top: 30px; }
+        .btn { padding: 12px 24px; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; border: none; }
+        .btn-primary { background: #10b981; color: white; }
+        .btn-secondary { background: #e5e7eb; color: #374151; }
+        .confirmation-screen { display: none; text-align: center; }
+        .success-icon { font-size: 48px; width: 80px; height: 80px; line-height: 80px; background: #dcfce7; color: #166534; border-radius: 50%; margin: 0 auto 20px; }
+        .patient-summary { background: #f9fafb; padding: 20px; border-radius: 8px; margin: 30px 0; text-align: left; }
+        .summary-row { display: flex; padding: 10px 0; border-bottom: 1px solid #e5e7eb; }
+        .summary-label { font-weight: 500; color: #6b7280; width: 150px; }
+        .summary-value { font-weight: 500; }
     </style>
 </head>
 <body>
@@ -247,142 +49,61 @@
         <div id="registrationForm" class="registration-card">
             <div class="card-header">
                 <h2 class="card-title">New Patient Registration</h2>
-                <p class="card-subtitle">Enter the patient's details below to begin their wellness journey.</p>
+                <p class="card-subtitle">Enter details to begin the wellness journey.</p>
             </div>
-            
             <form id="patientForm">
                 <div class="form-section">
                     <h3 class="form-section-title">Personal Details</h3>
                     <div class="form-row">
-                        <div class="form-group">
-                            <label class="form-label">First Name <span class="required">*</span></label>
-                            <input type="text" class="form-input" id="firstName" required>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Last Name <span class="required">*</span></label>
-                            <input type="text" class="form-input" id="lastName" required>
-                        </div>
+                        <div class="form-group"><label class="form-label">First Name <span class="required">*</span></label><input type="text" class="form-input" id="firstName" required></div>
+                        <div class="form-group"><label class="form-label">Last Name <span class="required">*</span></label><input type="text" class="form-input" id="lastName" required></div>
                     </div>
-                    
                     <div class="form-row">
-                        <div class="form-group">
-                            <label class="form-label">Date of Birth <span class="required">*</span></label>
-                            <input type="date" class="form-input" id="dob" required>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Gender</label>
-                            <select class="form-input" id="gender">
-                                <option value="">Select Gender</option>
-                                <option value="Male">Male</option>
-                                <option value="Female">Female</option>
-                                <option value="Other">Other</option>
-                            </select>
-                        </div>
+                        <div class="form-group"><label class="form-label">Date of Birth <span class="required">*</span></label><input type="date" class="form-input" id="dob" required></div>
+                        <div class="form-group"><label class="form-label">Gender</label><select class="form-input" id="gender"><option value="">Select</option><option value="Male">Male</option><option value="Female">Female</option><option value="Other">Other</option></select></div>
                     </div>
                 </div>
-
                 <div class="form-section">
                     <h3 class="form-section-title">Contact Information</h3>
-                     <div class="form-row">
-                        <div class="form-group">
-                            <label class="form-label">Email <span class="required">*</span></label>
-                            <input type="email" class="form-input" id="email" required>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Phone</label>
-                            <input type="tel" class="form-input" id="phone" placeholder="e.g., 07123 456789">
-                        </div>
+                    <div class="form-row">
+                        <div class="form-group"><label class="form-label">Email <span class="required">*</span></label><input type="email" class="form-input" id="email" required></div>
+                        <div class="form-group"><label class="form-label">Phone</label><input type="tel" class="form-input" id="phone"></div>
                     </div>
-                     <div class="form-group">
-                        <label class="form-label">Address</label>
-                        <input type="text" class="form-input" id="address" placeholder="e.g., 123 Wellness Street, London, W1A 1AA">
-                    </div>
+                    <div class="form-group"><label class="form-label">Address</label><input type="text" class="form-input" id="address"></div>
                 </div>
-                
                 <div class="form-section">
                     <h3 class="form-section-title">Medical Notes</h3>
-                    <div class="form-group">
-                        <label class="form-label">Initial Medical History Notes (Optional)</label>
-                        <textarea class="form-input" id="medicalHistory" rows="4" placeholder="Enter any known conditions, allergies, or current medications."></textarea>
-                    </div>
+                    <div class="form-group"><label class="form-label">Initial Notes (Optional)</label><textarea class="form-input" id="medicalHistory" rows="4"></textarea></div>
                 </div>
-                
                 <div class="form-actions">
                     <button type="submit" class="btn btn-primary" id="submitBtn">Register Patient</button>
                     <button type="button" class="btn btn-secondary" onclick="window.location.href='clinic-dashboard.html'">Cancel</button>
                 </div>
             </form>
         </div>
-
         <div id="confirmationScreen" class="registration-card confirmation-screen">
             <div class="success-icon">✓</div>
-            <div class="card-header" style="border-bottom: none;">
-                <h2 class="card-title">Patient Registered Successfully</h2>
-                <p class="card-subtitle">The patient has been added to your clinic's records.</p>
-            </div>
-            
+            <div class="card-header" style="border-bottom: none;"><h2 class="card-title">Patient Registered Successfully</h2><p class="card-subtitle">The patient has been added to your records.</p></div>
             <div class="patient-summary">
-                <div class="summary-row">
-                    <div class="summary-label">Patient ID:</div>
-                    <div class="summary-value" id="confirmPatientId"></div>
-                </div>
-                <div class="summary-row">
-                    <div class="summary-label">Name:</div>
-                    <div class="summary-value" id="confirmName"></div>
-                </div>
-                 <div class="summary-row">
-                    <div class="summary-label">Email:</div>
-                    <div class="summary-value" id="confirmEmail"></div>
-                </div>
-                <div class="summary-row">
-                    <div class="summary-label">Phone:</div>
-                    <div class="summary-value" id="confirmPhone"></div>
-                </div>
+                <div class="summary-row"><div class="summary-label">Patient ID:</div><div class="summary-value" id="confirmPatientId"></div></div>
+                <div class="summary-row"><div class="summary-label">Name:</div><div class="summary-value" id="confirmName"></div></div>
+                <div class="summary-row"><div class="summary-label">Email:</div><div class="summary-value" id="confirmEmail"></div></div>
             </div>
-            
-            <div class="form-actions">
-                <button class="btn btn-primary" onclick="window.location.href='clinic-dashboard.html'">Return to Dashboard</button>
-            </div>
+            <div class="form-actions"><button class="btn btn-primary" onclick="window.location.href='clinic-dashboard.html'">Return to Dashboard</button></div>
         </div>
     </div>
 
     <script>
-        // --- START OF SCRIPT ---
-        // This is a self-contained script. No external JS files are needed.
-
-        // 1. SUPABASE CONFIGURATION
         const SUPABASE_URL = 'https://defifwzgazqlrigwumqn.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlZmlmd3pnYXpxbHJpZ3d1bXFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcyNTM0MjYsImV4cCI6MjA3MjgyOTQyNn0.wcUBq6Pszjtqn5aBtuu3iXBE4BLmu8x9LtJbsMWlIiA';
-        
         const { createClient } = window.supabase;
         const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // 2. DOM ELEMENTS & STATE
-        const patientForm = document.getElementById('patientForm');
-        const submitBtn = document.getElementById('submitBtn');
         let currentClinicId = null;
 
-        // 3. EVENT LISTENERS
-        patientForm.addEventListener('submit', async (e) => {
+        document.getElementById('patientForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            await registerPatient();
-        });
-
-        // 4. CORE FUNCTIONS
-        async function checkAuthentication() {
-            const authData = localStorage.getItem('celloxen_auth');
-            if (authData) {
-                currentClinicId = JSON.parse(authData).clinicId;
-            }
-            if (!currentClinicId) {
-                alert('Clinic information is missing. Please log in again.');
-                window.location.href = 'unified-login.html';
-                return false;
-            }
-            return true;
-        }
-
-        async function registerPatient() {
+            const submitBtn = document.getElementById('submitBtn');
             submitBtn.disabled = true;
             submitBtn.textContent = 'Registering...';
 
@@ -397,23 +118,12 @@
                     phone: document.getElementById('phone').value.trim() || null,
                     address: document.getElementById('address').value.trim() || null,
                     medical_history: document.getElementById('medicalHistory').value.trim() || null,
-                    patient_id: `CX${Date.now()}` // Generate a unique patient ID
+                    patient_id: `CX${Date.now()}`
                 };
 
-                const { data: newPatient, error } = await supabase
-                    .from('patients')
-                    .insert(patientData)
-                    .select()
-                    .single();
+                const { data: newPatient, error } = await supabase.from('patients').insert(patientData).select().single();
+                if (error) throw error;
                 
-                if (error) {
-                    if (error.code === '23505') { // Unique constraint violation
-                        throw new Error('A patient with this email or phone number already exists.');
-                    }
-                    throw error;
-                }
-                
-                // If successful, show confirmation screen
                 showConfirmation(newPatient);
 
             } catch (error) {
@@ -423,20 +133,26 @@
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Register Patient';
             }
-        }
+        });
         
         function showConfirmation(patient) {
             document.getElementById('registrationForm').style.display = 'none';
             document.getElementById('confirmationScreen').style.display = 'block';
-            
             document.getElementById('confirmPatientId').textContent = patient.patient_id;
             document.getElementById('confirmName').textContent = `${patient.first_name} ${patient.last_name}`;
             document.getElementById('confirmEmail').textContent = patient.email;
-            document.getElementById('confirmPhone').textContent = patient.phone || 'Not provided';
         }
         
-        // 5. INITIALIZATION
-        document.addEventListener('DOMContentLoaded', checkAuthentication);
+        document.addEventListener('DOMContentLoaded', () => {
+            const authData = localStorage.getItem('celloxen_auth');
+            if (authData) {
+                currentClinicId = JSON.parse(authData).clinicId;
+            }
+            if (!currentClinicId) {
+                alert('Authentication error. Please log in again.');
+                window.location.href = 'unified-login.html';
+            }
+        });
     </script>
 </body>
 </html>
