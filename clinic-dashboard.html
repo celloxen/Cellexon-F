@@ -8,7 +8,6 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <style>
-        /* Keep all existing styles exactly as they are - no changes */
         * {
             margin: 0;
             padding: 0;
@@ -88,76 +87,26 @@
             padding: 30px 20px;
         }
         
-        /* Primary Action Section */
-        .primary-action-section {
-            background: linear-gradient(135deg, #ffffff, #f8f9fa);
-            border-radius: 16px;
-            padding: 30px;
-            margin-bottom: 30px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-            border: 2px solid #10b981;
-        }
-        
-        .primary-action-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-        }
-        
-        .action-title {
-            font-size: 24px;
-            font-weight: 700;
-            color: #1e293b;
-        }
-        
-        .quick-stats {
-            display: flex;
-            gap: 30px;
-        }
-        
-        .quick-stat {
-            text-align: center;
-        }
-        
-        .quick-stat-value {
-            font-size: 28px;
-            font-weight: 700;
-            color: #10b981;
-        }
-        
-        .quick-stat-label {
-            font-size: 12px;
-            color: #6b7280;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        .start-journey-btn {
-            width: 100%;
+        /* NEW: Informational Banner */
+        .info-banner {
             background: linear-gradient(135deg, #10b981 0%, #059669 100%);
             color: white;
-            border: none;
-            border-radius: 12px;
-            padding: 20px;
-            font-size: 18px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
-            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+            border-radius: 16px;
+            padding: 25px 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            text-align: center;
         }
-        
-        .start-journey-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 25px rgba(16, 185, 129, 0.4);
+
+        .info-banner-title {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 10px;
         }
-        
-        .start-journey-icon {
-            font-size: 28px;
+
+        .info-banner-text {
+            font-size: 16px;
+            opacity: 0.9;
         }
         
         /* Clinic Statistics Dashboard */
@@ -232,108 +181,7 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
-        
-        /* Main Content Grid */
-        .main-content-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 25px;
-            margin-bottom: 30px;
-        }
-        
-        @media (max-width: 968px) {
-            .main-content-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-        
-        /* Priority Card */
-        .priority-card {
-            background: white;
-            border-radius: 12px;
-            padding: 25px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        }
-        
-        .card-header {
-            font-size: 18px;
-            font-weight: 600;
-            color: #1e293b;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #e5e7eb;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .priority-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-        
-        .priority-item {
-            padding: 15px;
-            background: linear-gradient(135deg, #f8f9fa, #f3f4f6);
-            border-radius: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: all 0.3s;
-            cursor: pointer;
-        }
-        
-        .priority-item:hover {
-            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
-            transform: translateX(5px);
-        }
-        
-        .priority-info {
-            flex: 1;
-        }
-        
-        .priority-title {
-            font-weight: 600;
-            color: #1e293b;
-            font-size: 14px;
-            margin-bottom: 4px;
-        }
-        
-        .priority-detail {
-            font-size: 12px;
-            color: #6b7280;
-        }
-        
-        .priority-action {
-            background: #10b981;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 13px;
-            font-weight: 500;
-            transition: all 0.3s;
-            min-width: 85px;
-            text-align: center;
-        }
-        
-        .priority-action:hover {
-            background: #059669;
-            transform: scale(1.05);
-        }
-        
-        .stage-badge {
-            display: inline-block;
-            background: #fef3c7;
-            color: #92400e;
-            padding: 3px 8px;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: 600;
-        }
-        
+
         /* Module Categories */
         .module-categories {
             margin-bottom: 30px;
@@ -404,12 +252,12 @@
             color: #6b7280;
         }
         
-        /* Schedule Widget */
+        /* Today's Schedule Widget (Moved) */
         .schedule-widget {
             background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
             border-radius: 10px;
             padding: 15px;
-            margin-top: 15px;
+            margin-top: 20px;
         }
         
         .schedule-header {
@@ -438,19 +286,12 @@
             font-weight: 600;
         }
         
-        /* Empty State */
         .empty-state {
             text-align: center;
             padding: 30px 20px;
             color: #9ca3af;
         }
         
-        .empty-state-icon {
-            font-size: 48px;
-            margin-bottom: 10px;
-        }
-        
-        /* Loading */
         .loading {
             text-align: center;
             padding: 20px;
@@ -473,29 +314,9 @@
     </div>
 
     <div class="container">
-        <div class="primary-action-section">
-            <div class="primary-action-header">
-                <h1 class="action-title">Patient Journey Management</h1>
-                <div class="quick-stats">
-                    <div class="quick-stat">
-                        <div class="quick-stat-value" id="activePatients">0</div>
-                        <div class="quick-stat-label">Active Patients</div>
-                    </div>
-                    <div class="quick-stat">
-                        <div class="quick-stat-value" id="todayAppointments">0</div>
-                        <div class="quick-stat-label">Today's Sessions</div>
-                    </div>
-                    <div class="quick-stat">
-                        <div class="quick-stat-value" id="pendingAssessments">0</div>
-                        <div class="quick-stat-label">Pending Tasks</div>
-                    </div>
-                </div>
-            </div>
-            <button class="start-journey-btn" onclick="startNewJourney()">
-                <span class="start-journey-icon">🚀</span>
-                <span>Start New Patient Journey</span>
-                <span style="font-size: 14px; opacity: 0.9;">Register → Assess → Plan → Treat</span>
-            </button>
+        <div class="info-banner">
+            <h1 class="info-banner-title">Patient Journey Workflow</h1>
+            <p class="info-banner-text">Register → Health Assessment → IRIS Assessment → Report → Treatment Plan</p>
         </div>
 
         <div class="stats-dashboard">
@@ -511,31 +332,20 @@
                         <div class="stat-label">Total Patients</div>
                     </div>
                 </div>
-                
                 <div class="stat-card">
                     <div class="stat-icon">📅</div>
                     <div class="stat-content">
-                        <div class="stat-value" id="todayAppointments2">0</div>
+                        <div class="stat-value" id="todayAppointments">0</div>
                         <div class="stat-label">Today's Appointments</div>
                     </div>
                 </div>
-                
                 <div class="stat-card">
                     <div class="stat-icon">⏳</div>
                     <div class="stat-content">
-                        <div class="stat-value" id="pendingAssessments2">0</div>
+                        <div class="stat-value" id="pendingAssessments">0</div>
                         <div class="stat-label">Pending Assessments</div>
                     </div>
                 </div>
-                
-                <div class="stat-card">
-                    <div class="stat-icon">💊</div>
-                    <div class="stat-content">
-                        <div class="stat-value" id="activeTherapies">0</div>
-                        <div class="stat-label">Active Therapies</div>
-                    </div>
-                </div>
-                
                 <div class="stat-card">
                     <div class="stat-icon">✅</div>
                     <div class="stat-content">
@@ -543,72 +353,12 @@
                         <div class="stat-label">Completed This Week</div>
                     </div>
                 </div>
-                
-                <div class="stat-card">
-                    <div class="stat-icon">📈</div>
-                    <div class="stat-content">
-                        <div class="stat-value" id="monthlyGrowth">0%</div>
-                        <div class="stat-label">Monthly Growth</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="main-content-grid">
-            <div class="priority-card">
-                <h3 class="card-header">
-                    <span>⚡</span>
-                    <span>Today's Priority Actions</span>
-                </h3>
-                <div class="priority-list" id="incompleteList">
-                    <div class="loading">Loading priority tasks...</div>
-                </div>
-                
-                <div class="schedule-widget">
-                    <div class="schedule-header">📅 Today's Treatment Schedule</div>
-                    <div id="todaySchedule">
-                        <div class="loading">Loading schedule...</div>
-                    </div>
-                </div>
             </div>
             
-            <div class="priority-card">
-                <h3 class="card-header">
-                    <span>🎯</span>
-                    <span>Quick Actions</span>
-                </h3>
-                <div class="priority-list">
-                    <div class="priority-item" onclick="continueAssessments()">
-                        <div class="priority-info">
-                            <div class="priority-title">Continue Assessments</div>
-                            <div class="priority-detail" id="pendingCount">0 incomplete</div>
-                        </div>
-                        <button class="priority-action" style="min-width: 80px;">Continue</button>
-                    </div>
-                    
-                    <div class="priority-item" onclick="deliverTreatments()">
-                        <div class="priority-info">
-                            <div class="priority-title">Deliver Treatments</div>
-                            <div class="priority-detail" id="treatmentCount">0 scheduled today</div>
-                        </div>
-                        <button class="priority-action" style="min-width: 80px;">View</button>
-                    </div>
-                    
-                    <div class="priority-item" onclick="viewAllReports()">
-                        <div class="priority-info">
-                            <div class="priority-title">Generate Reports</div>
-                            <div class="priority-detail">Diagnosis & treatment plans</div>
-                        </div>
-                        <button class="priority-action" style="min-width: 80px;">Open</button>
-                    </div>
-                    
-                    <div class="priority-item" onclick="navigateTo('appointments-management.html')">
-                        <div class="priority-info">
-                            <div class="priority-title">Schedule Appointments</div>
-                            <div class="priority-detail">Manage calendar</div>
-                        </div>
-                        <button class="priority-action" style="min-width: 80px;">Schedule</button>
-                    </div>
+            <div class="schedule-widget">
+                <div class="schedule-header">📅 Today's Treatment Schedule</div>
+                <div id="todaySchedule">
+                    <div class="loading">Loading schedule...</div>
                 </div>
             </div>
         </div>
@@ -626,7 +376,7 @@
                         <span class="module-count">Start registration</span>
                     </a>
                     
-                    <a href="patient-management.html" class="module-btn">
+                    <a href="patient-management-enhanced.html" class="module-btn">
                         <span class="module-icon">👥</span>
                         <span class="module-name">Patient List</span>
                         <span class="module-count">All patients</span>
@@ -707,31 +457,6 @@
         let currentClinicId = null;
 
         // 3. GLOBAL NAVIGATION FUNCTIONS
-        window.startNewJourney = function() {
-            window.location.href = 'patient-registration.html';
-        }
-        
-        window.continueAssessments = function() {
-            const firstIncomplete = document.querySelector('.priority-item');
-            if (firstIncomplete) {
-                firstIncomplete.click();
-            } else {
-                alert('No incomplete assessments found');
-            }
-        }
-        
-        window.deliverTreatments = function() {
-            window.location.href = 'treatment-schedule.html';
-        }
-        
-        window.viewAllReports = function() {
-            window.location.href = 'medical-reports.html';
-        }
-        
-        window.navigateTo = function(page) {
-            window.location.href = page;
-        }
-        
         window.logout = async function() {
             if (confirm('Are you sure you want to logout?')) {
                 await supabase.auth.signOut();
@@ -741,24 +466,11 @@
             }
         }
         
-        window.continuePatientAssessment = function(patientId, stage) {
-            sessionStorage.setItem('currentPatientId', patientId);
-            
-            if (stage === 'health_assessment' || stage === 'registered') {
-                window.location.href = `lily-ai-agent-integrated.html?patientId=${patientId}`;
-            } else if (stage === 'iris_assessment') {
-                window.location.href = `iris-assessment-integrated.html?patientId=${patientId}`;
-            } else {
-                window.location.href = `patient-management-enhanced.html?patientId=${patientId}`;
-            }
-        }
-        
         // 4. INITIALIZATION
         document.addEventListener('DOMContentLoaded', async function() {
             const authenticated = await checkAuthentication();
             if (authenticated) {
                 await loadDashboardData();
-                await loadIncompleteAssessments();
                 await loadTodaySchedule();
             }
         });
@@ -810,72 +522,22 @@
                 const [
                     { count: appointmentsCount },
                     { count: totalPatientsCount },
-                    { count: activeTherapiesCount },
+                    { count: pendingAssessmentsCount },
                     { count: completedThisWeekCount }
                 ] = await Promise.all([
                     supabase.from('appointments').select('*', { count: 'exact', head: true }).eq('clinic_id', currentClinicId).eq('appointment_date', today).neq('status', 'cancelled'),
                     supabase.from('patients').select('*', { count: 'exact', head: true }).eq('clinic_id', currentClinicId),
-                    supabase.from('treatment_plans').select('*', { count: 'exact', head: true }).eq('clinic_id', currentClinicId).eq('status', 'active'),
+                    supabase.from('patient_workflow_status').select('*', { count: 'exact', head: true }).eq('clinic_id', currentClinicId).in('current_stage', ['registered', 'health_assessment', 'iris_assessment']),
                     supabase.from('therapy_sessions').select('*', { count: 'exact', head: true }).eq('clinic_id', currentClinicId).eq('status', 'completed').gte('created_at', weekStart.toISOString())
                 ]);
                 
                 document.getElementById('todayAppointments').textContent = appointmentsCount || 0;
-                document.getElementById('todayAppointments2').textContent = appointmentsCount || 0;
-                document.getElementById('treatmentCount').textContent = `${appointmentsCount || 0} scheduled today`;
                 document.getElementById('totalPatients').textContent = totalPatientsCount || 0;
-                document.getElementById('activePatients').textContent = totalPatientsCount || 0;
-                document.getElementById('activeTherapies').textContent = activeTherapiesCount || 0;
+                document.getElementById('pendingAssessments').textContent = pendingAssessmentsCount || 0;
                 document.getElementById('completedThisWeek').textContent = completedThisWeekCount || 0;
                 
             } catch (error) {
                 console.error('Error loading dashboard data:', error);
-            }
-        }
-        
-        async function loadIncompleteAssessments() {
-            if (!currentClinicId) return;
-            
-            try {
-                const { data, error } = await supabase
-                    .from('patient_workflow_status')
-                    .select(`
-                        patient_id,
-                        current_stage,
-                        patients (first_name, last_name, patient_id)
-                    `)
-                    .eq('clinic_id', currentClinicId)
-                    .in('current_stage', ['registered', 'health_assessment', 'iris_assessment']);
-                
-                if (error) throw error;
-                
-                const incompleteList = document.getElementById('incompleteList');
-                if (data && data.length > 0) {
-                    incompleteList.innerHTML = data.map(item => {
-                        if (!item.patients) return ''; // Skip if patient data is missing
-                        const stageText = item.current_stage.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-                        return `
-                            <div class="priority-item" onclick="continuePatientAssessment(${item.patient_id}, '${item.current_stage}')">
-                                <div class="priority-info">
-                                    <div class="priority-title">${item.patients.first_name} ${item.patients.last_name}</div>
-                                    <div class="priority-detail">
-                                        <span class="stage-badge">${stageText}</span>
-                                    </div>
-                                </div>
-                                <button class="priority-action">Continue</button>
-                            </div>
-                        `;
-                    }).join('');
-                } else {
-                    incompleteList.innerHTML = '<div class="empty-state"><p>No pending tasks</p></div>';
-                }
-                
-                const pendingCount = data ? data.length : 0;
-                document.getElementById('pendingAssessments').textContent = pendingCount;
-                document.getElementById('pendingAssessments2').textContent = pendingCount;
-                document.getElementById('pendingCount').textContent = `${pendingCount} incomplete`;
-                
-            } catch (error) {
-                console.error('Error loading incomplete assessments:', error);
             }
         }
         
@@ -919,7 +581,6 @@
         // 6. AUTO-REFRESH
         setInterval(async () => {
             await loadDashboardData();
-            await loadIncompleteAssessments();
             await loadTodaySchedule();
         }, 120000); // Refresh every 2 minutes
     </script>
