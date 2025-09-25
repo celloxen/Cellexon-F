@@ -245,13 +245,20 @@
             }
         };
 
-        async function loadClinicId() {
+        async function initializePage() {
             const authData = localStorage.getItem('celloxen_auth');
-            if (authData) currentClinicId = JSON.parse(authData).clinicId;
+            if (authData) {
+                currentClinicId = JSON.parse(authData).clinicId;
+            }
+            
             if (!currentClinicId) {
                 alert("Authentication error. Redirecting to login.");
                 window.location.href = 'unified-login.html';
+                return;
             }
+            
+            await loadPatients();
+            document.getElementById('searchInput').addEventListener('input', filterPatients);
         }
 
         async function loadPatients() {
@@ -268,8 +275,7 @@
                 displayPatients(allPatients);
             } catch (error) {
                 console.error('Error loading patients:', error);
-                document.getElementById('emptyState').style.display = 'block';
-                tbody.innerHTML = '';
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color: red;">Error: ${error.message}</td></tr>`;
             }
         }
 
@@ -327,11 +333,7 @@
             return (status || 'registered').replace(/_/g, ' ');
         }
 
-        document.addEventListener('DOMContentLoaded', async () => {
-            await loadClinicId();
-            await loadPatients();
-            document.getElementById('searchInput').addEventListener('input', filterPatients);
-        });
+        document.addEventListener('DOMContentLoaded', initializePage);
     </script>
 </body>
 </html>
