@@ -444,19 +444,14 @@
 
     <script>
         // --- START OF SCRIPT ---
-        // This is a self-contained script. No external JS files are needed.
-
-        // 1. SUPABASE CONFIGURATION
         const SUPABASE_URL = 'https://defifwzgazqlrigwumqn.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlZmlmd3pnYXpxbHJpZ3d1bXFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcyNTM0MjYsImV4cCI6MjA3MjgyOTQyNn0.wcUBq6Pszjtqn5aBtuu3iXBE4BLmu8x9LtJbsMWlIiA';
         
         const { createClient } = window.supabase;
         const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         
-        // 2. STATE VARIABLES
         let currentClinicId = null;
 
-        // 3. GLOBAL NAVIGATION FUNCTIONS
         window.logout = async function() {
             if (confirm('Are you sure you want to logout?')) {
                 await supabase.auth.signOut();
@@ -466,7 +461,6 @@
             }
         }
         
-        // 4. INITIALIZATION
         document.addEventListener('DOMContentLoaded', async function() {
             const authenticated = await checkAuthentication();
             if (authenticated) {
@@ -475,7 +469,6 @@
             }
         });
         
-        // 5. CORE FUNCTIONS
         async function checkAuthentication() {
             const authData = localStorage.getItem('celloxen_auth');
             if (!authData) {
@@ -562,7 +555,7 @@
                 const scheduleDiv = document.getElementById('todaySchedule');
                 if (data && data.length > 0) {
                     scheduleDiv.innerHTML = data.map(apt => {
-                        if (!apt.patients) return ''; // Skip if patient data is missing
+                        if (!apt.patients) return ''; 
                         return `
                         <div class="schedule-item">
                             <span>${apt.patients.first_name} ${apt.patients.last_name}</span>
@@ -578,7 +571,6 @@
             }
         }
         
-        // 6. AUTO-REFRESH
         setInterval(async () => {
             await loadDashboardData();
             await loadTodaySchedule();
