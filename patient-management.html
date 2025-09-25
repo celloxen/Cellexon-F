@@ -222,7 +222,7 @@
 
     <script>
         const SUPABASE_URL = 'https://defifwzgazqlrigwumqn.supabase.co';
-        const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY_HERE';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlZmlmd3pnYXpxbHJpZ3d1bXFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcyNTM0MjYsImV4cCI6MjA3MjgyOTQyNn0.wcUBq6Pszjtqn5aBtuu3iXBE4BLmu8x9LtJbsMWlIiA';
         const { createClient } = window.supabase;
         const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -230,14 +230,8 @@
         let currentClinicId = null;
 
         window.registerNewPatient = () => window.location.href = 'patient-registration.html';
-        
-        window.viewPatient = (patientId) => {
-            window.location.href = `patient-details.html?id=${patientId}`;
-        };
-        
-        window.editPatient = (patientId) => {
-            window.location.href = `patient-details.html?id=${patientId}&edit=true`;
-        };
+        window.viewPatient = (patientId) => window.location.href = `patient-details.html?id=${patientId}`;
+        window.editPatient = (patientId) => window.location.href = `patient-details.html?id=${patientId}&edit=true`;
 
         window.deletePatient = async (patientId) => {
             if (!confirm('Are you sure you want to permanently delete this patient?')) return;
@@ -254,7 +248,10 @@
         async function loadClinicId() {
             const authData = localStorage.getItem('celloxen_auth');
             if (authData) currentClinicId = JSON.parse(authData).clinicId;
-            if (!currentClinicId) window.location.href = 'unified-login.html';
+            if (!currentClinicId) {
+                alert("Authentication error. Redirecting to login.");
+                window.location.href = 'unified-login.html';
+            }
         }
 
         async function loadPatients() {
