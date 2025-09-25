@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Clinic Dashboard - Celloxen Wellness Platform</title>
     
-    <!-- REQUIRED: Supabase CDN - Must be first -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <style>
@@ -460,7 +459,6 @@
     </style>
 </head>
 <body>
-    <!-- Header -->
     <div class="header">
         <div class="header-container">
             <div class="logo-section">
@@ -474,9 +472,7 @@
         </div>
     </div>
 
-    <!-- Main Container -->
     <div class="container">
-        <!-- Primary Action Section -->
         <div class="primary-action-section">
             <div class="primary-action-header">
                 <h1 class="action-title">Patient Journey Management</h1>
@@ -502,7 +498,6 @@
             </button>
         </div>
 
-        <!-- Clinic Statistics Dashboard -->
         <div class="stats-dashboard">
             <h3 class="stats-header">
                 <span>📊</span>
@@ -559,9 +554,7 @@
             </div>
         </div>
 
-        <!-- Main Content Grid -->
         <div class="main-content-grid">
-            <!-- Today's Priority -->
             <div class="priority-card">
                 <h3 class="card-header">
                     <span>⚡</span>
@@ -571,7 +564,6 @@
                     <div class="loading">Loading priority tasks...</div>
                 </div>
                 
-                <!-- Today's Schedule Widget -->
                 <div class="schedule-widget">
                     <div class="schedule-header">📅 Today's Treatment Schedule</div>
                     <div id="todaySchedule">
@@ -580,7 +572,6 @@
                 </div>
             </div>
             
-            <!-- Quick Actions -->
             <div class="priority-card">
                 <h3 class="card-header">
                     <span>🎯</span>
@@ -622,9 +613,7 @@
             </div>
         </div>
 
-        <!-- Module Categories sections remain the same... -->
         <div class="module-categories">
-            <!-- Patient Journey Tools -->
             <div class="category-section">
                 <h3 class="category-title">
                     <span>📋</span>
@@ -637,19 +626,19 @@
                         <span class="module-count">Start registration</span>
                     </a>
                     
-                    <a href="patient-management.html" class="module-btn">
+                    <a href="patient-management-enhanced.html" class="module-btn">
                         <span class="module-icon">👥</span>
                         <span class="module-name">Patient List</span>
                         <span class="module-count">All patients</span>
                     </a>
                     
-                    <a href="health-assessment.html" class="module-btn">
-                        <span class="module-icon">📝</span>
-                        <span class="module-name">Health Assessment</span>
-                        <span class="module-count">Start assessment</span>
+                    <a href="lily-ai-agent-integrated.html" class="module-btn">
+                        <span class="module-icon">🤖</span>
+                        <span class="module-name">Lily AI Agent</span>
+                        <span class="module-count">Health assessment</span>
                     </a>
                     
-                    <a href="iris-assessment.html" class="module-btn">
+                    <a href="iris-assessment-integrated.html" class="module-btn">
                         <span class="module-icon">👁️</span>
                         <span class="module-name">IRIS Assessment</span>
                         <span class="module-count">Start analysis</span>
@@ -669,7 +658,6 @@
                 </div>
             </div>
             
-            <!-- Clinical Management -->
             <div class="category-section">
                 <h3 class="category-title">
                     <span>🏥</span>
@@ -705,38 +693,25 @@
     </div>
 
     <script>
-        // Initialize Supabase with authentication
+        // --- START OF SCRIPT ---
+        // This is a self-contained script. No external JS files are needed.
+
+        // 1. SUPABASE CONFIGURATION
         const SUPABASE_URL = 'https://defifwzgazqlrigwumqn.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlZmlmd3pnYXpxbHJpZ3d1bXFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcyNTM0MjYsImV4cCI6MjA3MjgyOTQyNn0.wcUBq6Pszjtqn5aBtuu3iXBE4BLmu8x9LtJbsMWlIiA';
         
         const { createClient } = window.supabase;
         const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         
-        // Restore authentication session
-        async function restoreSession() {
-            const authData = JSON.parse(localStorage.getItem('celloxen_auth') || '{}');
-            if (authData.sessionId) {
-                // Get the current session from Supabase
-                const { data: { session } } = await supabase.auth.getSession();
-                if (!session) {
-                    // Try to restore session using refresh token if available
-                    const { data: { user } } = await supabase.auth.getUser();
-                    if (!user) {
-                        // Session expired, redirect to login
-                        window.location.href = 'unified-login.html';
-                        return false;
-                    }
-                }
-            }
-            return true;
-        }
-        
-        // Global functions remain the same...
-        function startNewJourney() {
+        // 2. STATE VARIABLES
+        let currentClinicId = null;
+
+        // 3. GLOBAL NAVIGATION FUNCTIONS
+        window.startNewJourney = function() {
             window.location.href = 'patient-registration.html';
         }
         
-        function continueAssessments() {
+        window.continueAssessments = function() {
             const firstIncomplete = document.querySelector('.priority-item');
             if (firstIncomplete) {
                 firstIncomplete.click();
@@ -745,19 +720,19 @@
             }
         }
         
-        function deliverTreatments() {
+        window.deliverTreatments = function() {
             window.location.href = 'treatment-schedule.html';
         }
         
-        function viewAllReports() {
-            window.location.href = 'report-generator.html';
+        window.viewAllReports = function() {
+            window.location.href = 'medical-reports.html';
         }
         
-        function navigateTo(page) {
+        window.navigateTo = function(page) {
             window.location.href = page;
         }
         
-        async function logout() {
+        window.logout = async function() {
             if (confirm('Are you sure you want to logout?')) {
                 await supabase.auth.signOut();
                 localStorage.removeItem('celloxen_auth');
@@ -766,32 +741,29 @@
             }
         }
         
-        async function continuePatientAssessment(patientId, stage) {
+        window.continuePatientAssessment = function(patientId, stage) {
             sessionStorage.setItem('currentPatientId', patientId);
             
-            if (stage === 'health_assessment') {
-                window.location.href = `health-assessment.html?patientId=${patientId}`;
+            if (stage === 'health_assessment' || stage === 'registered') {
+                window.location.href = `lily-ai-agent-integrated.html?patientId=${patientId}`;
             } else if (stage === 'iris_assessment') {
-                window.location.href = `iris-assessment.html?patientId=${patientId}`;
+                window.location.href = `iris-assessment-integrated.html?patientId=${patientId}`;
             } else {
-                window.location.href = `patient-management.html?patientId=${patientId}`;
+                window.location.href = `patient-management-enhanced.html?patientId=${patientId}`;
             }
         }
         
-        // Initialize dashboard
+        // 4. INITIALIZATION
         document.addEventListener('DOMContentLoaded', async function() {
-            const sessionRestored = await restoreSession();
-            if (sessionRestored) {
-                const authenticated = await checkAuthentication();
-                if (authenticated) {
-                    await loadDashboardData();
-                    await loadIncompleteAssessments();
-                    await loadTodaySchedule();
-                }
+            const authenticated = await checkAuthentication();
+            if (authenticated) {
+                await loadDashboardData();
+                await loadIncompleteAssessments();
+                await loadTodaySchedule();
             }
         });
         
-        // Check authentication remains the same but simplified
+        // 5. CORE FUNCTIONS
         async function checkAuthentication() {
             const authData = localStorage.getItem('celloxen_auth');
             if (!authData) {
@@ -800,80 +772,156 @@
             }
             
             const auth = JSON.parse(authData);
+            currentClinicId = auth.clinicId;
             
-            // Set clinic info
+            if (!currentClinicId) {
+                alert('Clinic ID not found. Please log in again.');
+                window.location.href = 'unified-login.html';
+                return false;
+            }
+            
             document.getElementById('userName').textContent = auth.username || 'Clinic Administrator';
             
-            // Load clinic details
-            const clinicId = auth.clinicId || sessionStorage.getItem('currentClinicId');
-            if (clinicId) {
-                try {
-                    const { data: clinic } = await supabase
-                        .from('clinics')
-                        .select('clinic_name')
-                        .eq('id', clinicId)
-                        .single();
-                        
-                    if (clinic) {
-                        document.getElementById('clinicName').textContent = clinic.clinic_name;
-                    }
-                } catch (error) {
-                    console.error('Error loading clinic details:', error);
+            try {
+                const { data: clinic } = await supabase
+                    .from('clinics')
+                    .select('clinic_name')
+                    .eq('id', currentClinicId)
+                    .single();
+                    
+                if (clinic) {
+                    document.getElementById('clinicName').textContent = clinic.clinic_name;
                 }
+            } catch (error) {
+                console.error('Error loading clinic details:', error);
             }
             
             return true;
         }
         
-        // Load dashboard statistics - keep all existing functions
         async function loadDashboardData() {
-            const authData = JSON.parse(localStorage.getItem('celloxen_auth'));
-            const clinicId = authData.clinicId || sessionStorage.getItem('currentClinicId');
-            
-            if (!clinicId) return;
+            if (!currentClinicId) return;
             
             try {
-                // All existing dashboard loading code remains the same
                 const today = new Date().toISOString().split('T')[0];
-                const { count: appointmentsCount } = await supabase
-                    .from('appointments')
-                    .select('*', { count: 'exact', head: true })
-                    .eq('clinic_id', clinicId)
-                    .eq('appointment_date', today)
-                    .neq('status', 'cancelled');
-                    
+                const weekStart = new Date();
+                weekStart.setDate(weekStart.getDate() - 7);
+                
+                const [
+                    { count: appointmentsCount },
+                    { count: totalPatientsCount },
+                    { count: activeTherapiesCount },
+                    { count: completedThisWeekCount }
+                ] = await Promise.all([
+                    supabase.from('appointments').select('*', { count: 'exact', head: true }).eq('clinic_id', currentClinicId).eq('appointment_date', today).neq('status', 'cancelled'),
+                    supabase.from('patients').select('*', { count: 'exact', head: true }).eq('clinic_id', currentClinicId),
+                    supabase.from('treatment_plans').select('*', { count: 'exact', head: true }).eq('clinic_id', currentClinicId).eq('status', 'active'),
+                    supabase.from('therapy_sessions').select('*', { count: 'exact', head: true }).eq('clinic_id', currentClinicId).eq('status', 'completed').gte('created_at', weekStart.toISOString())
+                ]);
+                
                 document.getElementById('todayAppointments').textContent = appointmentsCount || 0;
                 document.getElementById('todayAppointments2').textContent = appointmentsCount || 0;
                 document.getElementById('treatmentCount').textContent = `${appointmentsCount || 0} scheduled today`;
-                
-                // Continue with all other existing queries...
-                const { count: totalPatientsCount } = await supabase
-                    .from('patients')
-                    .select('*', { count: 'exact', head: true })
-                    .eq('clinic_id', clinicId);
-                    
                 document.getElementById('totalPatients').textContent = totalPatientsCount || 0;
+                document.getElementById('activePatients').textContent = totalPatientsCount || 0;
+                document.getElementById('activeTherapies').textContent = activeTherapiesCount || 0;
+                document.getElementById('completedThisWeek').textContent = completedThisWeekCount || 0;
                 
             } catch (error) {
                 console.error('Error loading dashboard data:', error);
             }
         }
         
-        // Keep all other existing functions exactly as they are
         async function loadIncompleteAssessments() {
-            // Existing implementation remains the same
+            if (!currentClinicId) return;
+            
+            try {
+                const { data, error } = await supabase
+                    .from('patient_workflow_status')
+                    .select(`
+                        patient_id,
+                        current_stage,
+                        patients (first_name, last_name, patient_id)
+                    `)
+                    .eq('clinic_id', currentClinicId)
+                    .in('current_stage', ['registered', 'health_assessment', 'iris_assessment']);
+                
+                if (error) throw error;
+                
+                const incompleteList = document.getElementById('incompleteList');
+                if (data && data.length > 0) {
+                    incompleteList.innerHTML = data.map(item => {
+                        if (!item.patients) return ''; // Skip if patient data is missing
+                        const stageText = item.current_stage.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                        return `
+                            <div class="priority-item" onclick="continuePatientAssessment(${item.patient_id}, '${item.current_stage}')">
+                                <div class="priority-info">
+                                    <div class="priority-title">${item.patients.first_name} ${item.patients.last_name}</div>
+                                    <div class="priority-detail">
+                                        <span class="stage-badge">${stageText}</span>
+                                    </div>
+                                </div>
+                                <button class="priority-action">Continue</button>
+                            </div>
+                        `;
+                    }).join('');
+                } else {
+                    incompleteList.innerHTML = '<div class="empty-state"><p>No pending tasks</p></div>';
+                }
+                
+                const pendingCount = data ? data.length : 0;
+                document.getElementById('pendingAssessments').textContent = pendingCount;
+                document.getElementById('pendingAssessments2').textContent = pendingCount;
+                document.getElementById('pendingCount').textContent = `${pendingCount} incomplete`;
+                
+            } catch (error) {
+                console.error('Error loading incomplete assessments:', error);
+            }
         }
         
         async function loadTodaySchedule() {
-            // Existing implementation remains the same
+            if (!currentClinicId) return;
+            
+            try {
+                const today = new Date().toISOString().split('T')[0];
+                const { data, error } = await supabase
+                    .from('appointments')
+                    .select(`
+                        appointment_time,
+                        patients (first_name, last_name)
+                    `)
+                    .eq('clinic_id', currentClinicId)
+                    .eq('appointment_date', today)
+                    .eq('status', 'scheduled')
+                    .order('appointment_time');
+                
+                if (error) throw error;
+                
+                const scheduleDiv = document.getElementById('todaySchedule');
+                if (data && data.length > 0) {
+                    scheduleDiv.innerHTML = data.map(apt => {
+                        if (!apt.patients) return ''; // Skip if patient data is missing
+                        return `
+                        <div class="schedule-item">
+                            <span>${apt.patients.first_name} ${apt.patients.last_name}</span>
+                            <span class="time-badge">${apt.appointment_time.substring(0, 5)}</span>
+                        </div>
+                    `}).join('');
+                } else {
+                    scheduleDiv.innerHTML = '<div class="empty-state" style="padding: 10px 0;"><p>No appointments today</p></div>';
+                }
+                
+            } catch (error) {
+                console.error('Error loading today\'s schedule:', error);
+            }
         }
         
-        // Auto-refresh
+        // 6. AUTO-REFRESH
         setInterval(async () => {
             await loadDashboardData();
             await loadIncompleteAssessments();
             await loadTodaySchedule();
-        }, 120000);
+        }, 120000); // Refresh every 2 minutes
     </script>
 </body>
 </html>
