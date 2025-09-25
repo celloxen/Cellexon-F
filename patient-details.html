@@ -8,7 +8,8 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #f5f7fa; margin: 0; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f5f7fa; }
         .header { background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%); color: white; padding: 20px 0; }
         .header-container { max-width: 900px; margin: 0 auto; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; }
         .header h1 { font-size: 24px; }
@@ -17,124 +18,335 @@
         .details-card { background: white; border-radius: 12px; padding: 30px 40px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
         .card-header { margin-bottom: 30px; padding-bottom: 20px; border-bottom: 2px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; }
         .card-title { font-size: 24px; font-weight: 600; }
+        .patient-meta { color: #6b7280; font-size: 14px; margin-top: 5px; }
         .form-section { margin-bottom: 30px; }
-        .form-section-title { font-size: 18px; font-weight: 600; margin-bottom: 20px; }
+        .form-section-title { font-size: 18px; font-weight: 600; margin-bottom: 20px; color: #1e293b; }
         .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
         .form-group { margin-bottom: 20px; }
-        .form-label { display: block; margin-bottom: 8px; font-weight: 500; }
-        .form-input { width: 100%; padding: 12px 15px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 15px; }
-        .form-input:read-only { background: #f9fafb; color: #6b7280; }
-        .btn { padding: 12px 24px; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; border: none; }
+        .form-label { display: block; margin-bottom: 8px; font-weight: 500; color: #374151; }
+        .form-input, .form-textarea { width: 100%; padding: 12px 15px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 15px; font-family: 'Segoe UI', sans-serif; transition: all 0.3s; }
+        .form-input:focus, .form-textarea:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+        .form-input:read-only, .form-textarea:read-only { background: #f9fafb; color: #6b7280; cursor: not-allowed; }
+        .form-textarea { resize: vertical; min-height: 100px; }
+        .btn { padding: 12px 24px; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; border: none; transition: all 0.3s; }
         .btn-primary { background: #10b981; color: white; }
-        .btn-secondary { background: #e5e7eb; color: #374151; }
-        .hidden { display: none; }
+        .btn-primary:hover { background: #059669; }
+        .btn-secondary { background: #e5e7eb; color: #374151; margin-left: 10px; }
+        .btn-secondary:hover { background: #d1d5db; }
+        .btn-danger { background: #ef4444; color: white; }
+        .btn-danger:hover { background: #dc2626; }
+        .hidden { display: none !important; }
+        .action-buttons { display: flex; gap: 10px; }
+        .loading-state { text-align: center; padding: 60px 20px; color: #6b7280; }
+        .error-state { text-align: center; padding: 60px 20px; color: #ef4444; }
+        .success-message { background: #d1fae5; color: #065f46; padding: 12px 20px; border-radius: 8px; margin-bottom: 20px; display: none; }
+        .workflow-status { background: #f0f9ff; border-left: 4px solid #3b82f6; padding: 15px 20px; border-radius: 8px; margin-bottom: 20px; }
+        .workflow-title { font-weight: 600; color: #1e3a8a; margin-bottom: 8px; }
+        .workflow-stage { color: #0369a1; font-size: 14px; }
     </style>
 </head>
 <body>
-    <div class="header"><div class="header-container"><h1 id="pageTitle">Patient Details</h1><a href="patient-management.html" class="back-btn">← Back to List</a></div></div>
+    <div class="header">
+        <div class="header-container">
+            <h1 id="pageTitle">Patient Details</h1>
+            <a href="patient-management.html" class="back-btn">← Back to List</a>
+        </div>
+    </div>
+    
     <div class="container">
-        <div id="detailsCard" class="details-card">
-            <div class="card-header">
-                <div><h2 class="card-title" id="patientName">Loading...</h2><p id="patientId" style="color: #6b7280;"></p></div>
-                <div><button class="btn btn-secondary" id="editBtn" onclick="toggleEditMode(true)">Edit</button><button class="btn btn-primary hidden" id="saveBtn">Save</button><button class="btn btn-secondary hidden" id="cancelBtn" onclick="toggleEditMode(false)">Cancel</button></div>
+        <div id="successMessage" class="success-message">
+            Patient details updated successfully!
+        </div>
+        
+        <div id="loadingState" class="details-card">
+            <div class="loading-state">Loading patient details...</div>
+        </div>
+        
+        <div id="errorState" class="details-card hidden">
+            <div class="error-state">
+                <h2>Error Loading Patient</h2>
+                <p id="errorMessage"></p>
             </div>
+        </div>
+        
+        <div id="detailsCard" class="details-card hidden">
+            <div class="card-header">
+                <div>
+                    <h2 class="card-title" id="patientName">Loading...</h2>
+                    <div class="patient-meta">
+                        <span id="patientId"></span> • 
+                        <span id="registrationDate"></span>
+                    </div>
+                </div>
+                <div class="action-buttons">
+                    <button class="btn btn-secondary" id="editBtn" onclick="toggleEditMode(true)">Edit</button>
+                    <button class="btn btn-primary hidden" id="saveBtn" onclick="savePatientChanges()">Save Changes</button>
+                    <button class="btn btn-secondary hidden" id="cancelBtn" onclick="toggleEditMode(false)">Cancel</button>
+                </div>
+            </div>
+            
+            <div id="workflowStatus" class="workflow-status hidden">
+                <div class="workflow-title">Workflow Status</div>
+                <div class="workflow-stage" id="workflowStage">Not started</div>
+            </div>
+            
             <form id="patientForm">
                 <div class="form-section">
                     <h3 class="form-section-title">Personal Details</h3>
                     <div class="form-row">
-                        <div class="form-group"><label class="form-label">First Name</label><input type="text" class="form-input" id="firstName" readonly></div>
-                        <div class="form-group"><label class="form-label">Last Name</label><input type="text" class="form-input" id="lastName" readonly></div>
+                        <div class="form-group">
+                            <label class="form-label">First Name</label>
+                            <input type="text" class="form-input" id="firstName" readonly required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Last Name</label>
+                            <input type="text" class="form-input" id="lastName" readonly required>
+                        </div>
                     </div>
                     <div class="form-row">
-                        <div class="form-group"><label class="form-label">Date of Birth</label><input type="date" class="form-input" id="dob" readonly></div>
-                        <div class="form-group"><label class="form-label">Gender</label><input type="text" class="form-input" id="gender" readonly></div>
+                        <div class="form-group">
+                            <label class="form-label">Date of Birth</label>
+                            <input type="date" class="form-input" id="dob" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Gender</label>
+                            <select class="form-input" id="gender" disabled>
+                                <option value="">Not specified</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
+                
                 <div class="form-section">
                     <h3 class="form-section-title">Contact Information</h3>
                     <div class="form-row">
-                        <div class="form-group"><label class="form-label">Email</label><input type="email" class="form-input" id="email" readonly></div>
-                        <div class="form-group"><label class="form-label">Phone</label><input type="tel" class="form-input" id="phone" readonly></div>
+                        <div class="form-group">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-input" id="email" readonly required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Phone</label>
+                            <input type="tel" class="form-input" id="phone" readonly>
+                        </div>
                     </div>
-                    <div class="form-group"><label class="form-label">Address</label><input type="text" class="form-input" id="address" readonly></div>
+                    <div class="form-group">
+                        <label class="form-label">Address</label>
+                        <input type="text" class="form-input" id="address" readonly>
+                    </div>
                 </div>
+                
                 <div class="form-section">
-                    <h3 class="form-section-title">Medical Notes</h3>
-                    <div class="form-group"><label class="form-label">Initial Notes</label><textarea class="form-input" id="medicalHistory" rows="4" readonly></textarea></div>
+                    <h3 class="form-section-title">Medical Information</h3>
+                    <div class="form-group">
+                        <label class="form-label">Medical History & Notes</label>
+                        <textarea class="form-textarea" id="medicalHistory" readonly></textarea>
+                    </div>
                 </div>
             </form>
         </div>
     </div>
 
-    <script>
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+        
         const SUPABASE_URL = 'https://defifwzgazqlrigwumqn.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlZmlmd3pnYXpxbHJpZ3d1bXFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcyNTM0MjYsImV4cCI6MjA3MjgyOTQyNn0.wcUBq6Pszjtqn5aBtuu3iXBE4BLmu8x9LtJbsMWlIiA';
-        const { createClient } = window.supabase;
+        
         const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let patientId = null;
+        let currentPatientData = null;
 
         async function loadPatientDetails() {
             const urlParams = new URLSearchParams(window.location.search);
             patientId = urlParams.get('id');
+            
+            console.log('Loading patient with ID:', patientId);
+            
             if (!patientId) {
-                document.getElementById('detailsCard').innerHTML = '<h1>Error: No Patient ID.</h1>';
+                showError('No patient ID provided');
                 return;
             }
 
             try {
-                const { data, error } = await supabase.from('patients').select('*').eq('id', patientId).single();
+                // Load patient data
+                const { data: patient, error } = await supabase
+                    .from('patients')
+                    .select('*')
+                    .eq('id', patientId)
+                    .single();
+                
                 if (error) throw error;
                 
-                document.getElementById('patientName').textContent = `${data.first_name} ${data.last_name}`;
-                document.getElementById('patientId').textContent = `ID: ${data.patient_id}`;
-                document.getElementById('firstName').value = data.first_name;
-                document.getElementById('lastName').value = data.last_name;
-                document.getElementById('dob').value = data.date_of_birth;
-                document.getElementById('gender').value = data.gender;
-                document.getElementById('email').value = data.email;
-                document.getElementById('phone').value = data.phone;
-                document.getElementById('address').value = data.address;
-                document.getElementById('medicalHistory').value = data.medical_history;
-
-                if (urlParams.get('edit') === 'true') toggleEditMode(true);
-
+                if (!patient) {
+                    showError('Patient not found');
+                    return;
+                }
+                
+                currentPatientData = patient;
+                console.log('Patient loaded:', patient);
+                
+                // Load workflow status if available
+                try {
+                    const { data: workflowData } = await supabase
+                        .from('patient_workflow_status')
+                        .select('*')
+                        .eq('patient_id', patientId)
+                        .single();
+                    
+                    if (workflowData) {
+                        currentPatientData.workflow_status = workflowData;
+                    }
+                } catch (e) {
+                    console.log('No workflow status found');
+                }
+                
+                // Display patient data
+                displayPatientData(patient);
+                
+                // Check if we should enter edit mode
+                if (urlParams.get('edit') === 'true') {
+                    toggleEditMode(true);
+                }
+                
+                // Show the details card and hide loading
+                document.getElementById('loadingState').classList.add('hidden');
+                document.getElementById('detailsCard').classList.remove('hidden');
+                
             } catch (error) {
-                document.getElementById('detailsCard').innerHTML = `<h1>Error: ${error.message}</h1>`;
+                console.error('Error loading patient:', error);
+                showError('Error loading patient: ' + error.message);
             }
         }
 
-        function toggleEditMode(edit) {
-            document.querySelectorAll('.form-input').forEach(input => input.readOnly = !edit);
+        function displayPatientData(patient) {
+            // Update header
+            document.getElementById('patientName').textContent = `${patient.first_name} ${patient.last_name}`;
+            document.getElementById('patientId').textContent = `ID: ${patient.patient_id || 'N/A'}`;
+            
+            const regDate = new Date(patient.created_at).toLocaleDateString('en-GB', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric'
+            });
+            document.getElementById('registrationDate').textContent = `Registered: ${regDate}`;
+            
+            // Update form fields
+            document.getElementById('firstName').value = patient.first_name || '';
+            document.getElementById('lastName').value = patient.last_name || '';
+            document.getElementById('dob').value = patient.date_of_birth || '';
+            document.getElementById('gender').value = patient.gender || '';
+            document.getElementById('email').value = patient.email || '';
+            document.getElementById('phone').value = patient.phone || '';
+            document.getElementById('address').value = patient.address || '';
+            document.getElementById('medicalHistory').value = patient.medical_history || '';
+            
+            // Update workflow status if available
+            if (patient.workflow_status) {
+                const workflowDiv = document.getElementById('workflowStatus');
+                workflowDiv.classList.remove('hidden');
+                
+                const stage = patient.workflow_status.current_stage || 'registered';
+                const stageDisplay = stage.replace(/_/g, ' ').charAt(0).toUpperCase() + 
+                                   stage.replace(/_/g, ' ').slice(1);
+                document.getElementById('workflowStage').textContent = `Current Stage: ${stageDisplay}`;
+            }
+        }
+
+        function showError(message) {
+            document.getElementById('loadingState').classList.add('hidden');
+            document.getElementById('errorState').classList.remove('hidden');
+            document.getElementById('errorMessage').textContent = message;
+        }
+
+        window.toggleEditMode = function(edit) {
+            const inputs = document.querySelectorAll('.form-input, .form-textarea');
+            const selectElement = document.getElementById('gender');
+            
+            inputs.forEach(input => {
+                if (input.tagName !== 'SELECT') {
+                    input.readOnly = !edit;
+                }
+            });
+            
+            selectElement.disabled = !edit;
+            
             document.getElementById('editBtn').classList.toggle('hidden', edit);
             document.getElementById('saveBtn').classList.toggle('hidden', !edit);
             document.getElementById('cancelBtn').classList.toggle('hidden', !edit);
             document.getElementById('pageTitle').textContent = edit ? 'Edit Patient' : 'Patient Details';
-        }
-
-        async function savePatientChanges() {
-            const updates = {
-                first_name: document.getElementById('firstName').value,
-                last_name: document.getElementById('lastName').value,
-                date_of_birth: document.getElementById('dob').value,
-                gender: document.getElementById('gender').value,
-                email: document.getElementById('email').value,
-                phone: document.getElementById('phone').value,
-                address: document.getElementById('address').value,
-                medical_history: document.getElementById('medicalHistory').value,
-            };
-            try {
-                const { error } = await supabase.from('patients').update(updates).eq('id', patientId);
-                if (error) throw error;
-                alert('Patient details updated!');
-                toggleEditMode(false);
-            } catch (error) {
-                alert('Error: ' + error.message);
+            
+            // Hide success message when toggling
+            document.getElementById('successMessage').style.display = 'none';
+            
+            // If canceling, restore original data
+            if (!edit && currentPatientData) {
+                displayPatientData(currentPatientData);
             }
         }
 
-        document.addEventListener('DOMContentLoaded', loadPatientDetails);
-        document.getElementById('saveBtn').addEventListener('click', savePatientChanges);
+        window.savePatientChanges = async function() {
+            const saveBtn = document.getElementById('saveBtn');
+            saveBtn.disabled = true;
+            saveBtn.textContent = 'Saving...';
+            
+            const updates = {
+                first_name: document.getElementById('firstName').value.trim(),
+                last_name: document.getElementById('lastName').value.trim(),
+                date_of_birth: document.getElementById('dob').value || null,
+                gender: document.getElementById('gender').value || null,
+                email: document.getElementById('email').value.trim(),
+                phone: document.getElementById('phone').value.trim() || null,
+                address: document.getElementById('address').value.trim() || null,
+                medical_history: document.getElementById('medicalHistory').value.trim() || null,
+                updated_at: new Date().toISOString()
+            };
+            
+            try {
+                const { data, error } = await supabase
+                    .from('patients')
+                    .update(updates)
+                    .eq('id', patientId)
+                    .select()
+                    .single();
+                
+                if (error) throw error;
+                
+                currentPatientData = data;
+                displayPatientData(data);
+                
+                // Show success message
+                const successMsg = document.getElementById('successMessage');
+                successMsg.style.display = 'block';
+                setTimeout(() => {
+                    successMsg.style.display = 'none';
+                }, 3000);
+                
+                toggleEditMode(false);
+                
+            } catch (error) {
+                console.error('Save error:', error);
+                alert('Error saving changes: ' + error.message);
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.textContent = 'Save Changes';
+            }
+        }
+
+        // Initialize on DOM ready
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check authentication
+            const authData = localStorage.getItem('celloxen_auth');
+            if (!authData) {
+                window.location.href = 'unified-login.html';
+                return;
+            }
+            
+            loadPatientDetails();
+        });
     </script>
 </body>
 </html>
