@@ -556,21 +556,38 @@
     </div>
 
     <div class="container">
-        <!-- Patient Information Card -->
-        <div class="card">
+        <!-- Patient Selection Card -->
+        <div class="card" id="patientSelectionCard">
+            <h2>Select Patient for IRIS Assessment</h2>
+            <div style="max-width: 600px; margin: 0 auto;">
+                <div style="position: relative; margin-bottom: 20px;">
+                    <input type="text" id="patientSearch" placeholder="Search by name, ID, or email..." 
+                           style="width: 100%; padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 16px; transition: all 0.3s;">
+                    <div id="patientDropdown" style="position: absolute; top: 100%; left: 0; right: 0; background: white; border: 2px solid #e2e8f0; border-top: none; border-radius: 0 0 10px 10px; max-height: 300px; overflow-y: auto; display: none; z-index: 100; box-shadow: 0 10px 25px rgba(0,0,0,0.1);"></div>
+                </div>
+                <div id="selectedPatientPreview" style="display: none; padding: 20px; background: #f0f9ff; border-radius: 10px; margin-bottom: 20px;">
+                    <h3 style="color: #1e3a8a; margin-bottom: 10px;">Selected Patient</h3>
+                    <div id="selectedPatientDetails"></div>
+                    <button class="btn btn-primary" style="margin-top: 15px; width: 100%;" onclick="startAssessment()">Start IRIS Assessment</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Patient Information Card (Hidden Initially) -->
+        <div class="card" id="patientInfoCard" style="display: none;">
             <h2>Patient Information</h2>
             <div class="patient-info">
                 <div class="info-box">
                     <div class="info-label">Patient Name</div>
-                    <div class="info-value" id="patientName">Loading...</div>
+                    <div class="info-value" id="patientName">-</div>
                 </div>
                 <div class="info-box">
                     <div class="info-label">Patient ID</div>
-                    <div class="info-value" id="patientId">Loading...</div>
+                    <div class="info-value" id="patientId">-</div>
                 </div>
                 <div class="info-box">
                     <div class="info-label">Age</div>
-                    <div class="info-value" id="patientAge">Loading...</div>
+                    <div class="info-value" id="patientAge">-</div>
                 </div>
                 <div class="info-box">
                     <div class="info-label">Assessment Date</div>
@@ -579,8 +596,8 @@
             </div>
         </div>
 
-        <!-- IRIS Images Card -->
-        <div class="card">
+        <!-- IRIS Images Card (Hidden Initially) -->
+        <div class="card" id="irisImagesCard" style="display: none;">
             <h2>IRIS Image Capture</h2>
             <div class="iris-images-section">
                 <p style="color: #64748b; margin-bottom: 20px;">
@@ -737,6 +754,7 @@
         let currentIrisSide = null;
         let mediaStream = null;
         let availableCameras = [];
+        let clinicId = null;
         let irisImages = {
             left: null,
             right: null
@@ -744,21 +762,164 @@
         
         // Initialize
         document.addEventListener('DOMContentLoaded', async function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const patientId = urlParams.get('patientId') || sessionStorage.getItem('currentPatientId');
+            // Get auth data
+            const authDataString = localStorage.getItem('celloxen_auth');
             
-            if (!patientId) {
-                alert('No patient selected. Redirecting to patient selection.');
-                window.location.href = 'patient-management.html';
+            if (!authDataString) {
+                alert('Please log in to access this module.');
+                window.location.href = 'unified-login.html';
                 return;
             }
             
-            await loadPatientData(patientId);
+            const authData = JSON.parse(authDataString);
+            clinicId = authData.clinicId;
+            
+            // Setup patient search
+            setupPatientSearch();
+            
+            // Set assessment date
             document.getElementById('assessmentDate').textContent = new Date().toLocaleDateString('en-GB');
             
             // Check camera availability
             await checkCameraAvailability();
         });
+        
+        // Setup patient search functionality
+        function setupPatientSearch() {
+            const searchInput = document.getElementById('patientSearch');
+            const dropdown = document.getElementById('patientDropdown');
+            let searchTimeout;
+            
+            searchInput.addEventListener('input', (e) => {
+                clearTimeout(searchTimeout);
+                const searchTerm = e.target.value.trim();
+                if (searchTerm.length >= 2) {
+                    searchTimeout = setTimeout(() => searchPatients(searchTerm), 300);
+                } else {
+                    dropdown.style.display = 'none';
+                }
+            });
+            
+            searchInput.addEventListener('focus', () => {
+                searchInput.style.borderColor = '#1e3a8a';
+            });
+            
+            searchInput.addEventListener('blur', () => {
+                setTimeout(() => {
+                    searchInput.style.borderColor = '#e2e8f0';
+                    dropdown.style.display = 'none';
+                }, 200);
+            });
+        }
+        
+        // Search patients function
+        async function searchPatients(searchTerm) {
+            const dropdown = document.getElementById('patientDropdown');
+            
+            try {
+                const { data: patients, error } = await supabaseClient
+                    .from('patients')
+                    .select('*')
+                    .eq('clinic_id', clinicId)
+                    .or(`first_name.ilike.%${searchTerm}%,last_name.ilike.%${searchTerm}%,patient_id.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%`)
+                    .limit(10);
+                    
+                if (error) throw error;
+                
+                let html = '';
+                if (patients && patients.length > 0) {
+                    patients.forEach(patient => {
+                        const age = calculateAge(patient.date_of_birth);
+                        html += `
+                            <div onclick="selectPatient(${patient.id})" style="padding: 12px; cursor: pointer; border-bottom: 1px solid #f1f5f9; transition: all 0.2s;">
+                                <div style="font-weight: 600; color: #1e293b;">${patient.first_name} ${patient.last_name}</div>
+                                <div style="font-size: 12px; color: #64748b;">ID: ${patient.patient_id} | Age: ${age}</div>
+                            </div>
+                        `;
+                    });
+                } else {
+                    html = '<div style="padding: 12px; color: #64748b;">No patients found</div>';
+                }
+                
+                dropdown.innerHTML = html;
+                dropdown.style.display = 'block';
+                
+                // Add hover effect
+                dropdown.querySelectorAll('div[onclick]').forEach(item => {
+                    item.addEventListener('mouseenter', function() {
+                        this.style.backgroundColor = '#f0f9ff';
+                    });
+                    item.addEventListener('mouseleave', function() {
+                        this.style.backgroundColor = 'white';
+                    });
+                });
+                
+            } catch (error) {
+                console.error('Error searching patients:', error);
+                dropdown.innerHTML = '<div style="padding: 12px; color: #ef4444;">Error searching patients</div>';
+                dropdown.style.display = 'block';
+            }
+        }
+        
+        // Select patient function
+        window.selectPatient = async function(patientId) {
+            try {
+                const { data: patient, error } = await supabaseClient
+                    .from('patients')
+                    .select('*')
+                    .eq('id', patientId)
+                    .single();
+                    
+                if (error) throw error;
+                
+                currentPatient = patient;
+                const age = calculateAge(patient.date_of_birth);
+                
+                // Update search input
+                document.getElementById('patientSearch').value = `${patient.first_name} ${patient.last_name}`;
+                document.getElementById('patientDropdown').style.display = 'none';
+                
+                // Show selected patient preview
+                const preview = document.getElementById('selectedPatientPreview');
+                preview.style.display = 'block';
+                document.getElementById('selectedPatientDetails').innerHTML = `
+                    <div style="display: grid; gap: 10px;">
+                        <div><strong>Name:</strong> ${patient.first_name} ${patient.last_name}</div>
+                        <div><strong>Patient ID:</strong> ${patient.patient_id}</div>
+                        <div><strong>Age:</strong> ${age}</div>
+                        <div><strong>Email:</strong> ${patient.email || 'N/A'}</div>
+                    </div>
+                `;
+                
+            } catch (error) {
+                console.error('Error selecting patient:', error);
+                alert('Error selecting patient. Please try again.');
+            }
+        };
+        
+        // Start assessment function
+        window.startAssessment = function() {
+            if (!currentPatient) {
+                alert('Please select a patient first.');
+                return;
+            }
+            
+            // Hide patient selection card
+            document.getElementById('patientSelectionCard').style.display = 'none';
+            
+            // Show patient info card with selected patient data
+            const infoCard = document.getElementById('patientInfoCard');
+            infoCard.style.display = 'block';
+            document.getElementById('patientName').textContent = `${currentPatient.first_name} ${currentPatient.last_name}`;
+            document.getElementById('patientId').textContent = currentPatient.patient_id;
+            document.getElementById('patientAge').textContent = calculateAge(currentPatient.date_of_birth);
+            
+            // Show IRIS images card
+            document.getElementById('irisImagesCard').style.display = 'block';
+            
+            // Store patient ID in session for workflow continuity
+            sessionStorage.setItem('currentPatientId', currentPatient.id);
+        };
         
         // Check if camera is available
         async function checkCameraAvailability() {
@@ -770,41 +931,6 @@
                 }
             } catch (error) {
                 console.log('Camera enumeration not supported');
-            }
-        }
-        
-        // Load patient data
-        async function loadPatientData(patientId) {
-            try {
-                // Get auth data from localStorage
-                const authDataString = localStorage.getItem('celloxen_auth');
-                
-                if (!authDataString) {
-                    alert('Please log in to access this module.');
-                    window.location.href = 'unified-login.html';
-                    return;
-                }
-                
-                const authData = JSON.parse(authDataString);
-                const clinicId = authData.clinicId;
-                
-                const { data, error } = await supabaseClient
-                    .from('patients')
-                    .select('*')
-                    .eq('id', patientId)
-                    .eq('clinic_id', clinicId)
-                    .single();
-                
-                if (error) throw error;
-                
-                currentPatient = data;
-                document.getElementById('patientName').textContent = `${data.first_name} ${data.last_name}`;
-                document.getElementById('patientId').textContent = data.patient_id;
-                document.getElementById('patientAge').textContent = calculateAge(data.date_of_birth);
-                
-            } catch (error) {
-                console.error('Error loading patient:', error);
-                alert('Error loading patient data: ' + (error.message || 'Unknown error'));
             }
         }
         
@@ -1008,6 +1134,11 @@
         
         window.saveDraft = async function() {
             try {
+                if (!currentPatient) {
+                    alert('Please select a patient first.');
+                    return;
+                }
+                
                 const draftData = {
                     patient_id: currentPatient.id,
                     left_image: irisImages.left ? 'captured' : null,
@@ -1026,6 +1157,11 @@
         
         // MAIN ANALYSIS FUNCTION
         window.completeAssessment = async function() {
+            if (!currentPatient) {
+                alert('Please select a patient first.');
+                return;
+            }
+            
             if (!irisImages.left || !irisImages.right) {
                 alert('Please capture both iris images before analysis.');
                 return;
@@ -1041,65 +1177,93 @@
                 const leftImageBase64 = await fileToBase64(irisImages.left.file);
                 const rightImageBase64 = await fileToBase64(irisImages.right.file);
 
-                // Get auth data
-                const authDataString = localStorage.getItem('celloxen_auth');
-                const authData = JSON.parse(authDataString);
-                const clinicId = authData.clinicId;
-
                 // Save assessment to database
                 const { data: assessment, error: assessmentError } = await supabaseClient
                     .from('iris_assessments')
                     .insert({
                         clinic_id: clinicId,
                         patient_id: currentPatient.id,
+                        patient_name: `${currentPatient.first_name} ${currentPatient.last_name}`,
+                        patient_age: calculateAge(currentPatient.date_of_birth),
                         assessment_date: new Date().toISOString(),
                         left_iris_image: leftImageBase64,
                         right_iris_image: rightImageBase64,
-                        status: 'processing'
+                        status: 'in_progress'
                     })
                     .select()
                     .single();
 
-                if (assessmentError) throw assessmentError;
+                if (assessmentError) {
+                    console.error('Database error:', assessmentError);
+                    throw new Error(`Failed to save assessment: ${assessmentError.message}`);
+                }
 
                 // Simulate AI analysis (in real implementation, this would call your AI service)
                 await new Promise(resolve => setTimeout(resolve, 3000));
 
-                // Generate mock analysis results
+                // Generate mock analysis results in the format expected by report-generator.html
                 const analysisResults = {
-                    constitutional_type: 'Lymphatic',
-                    fiber_density: 'Medium-High',
-                    pupil_size: 'Normal',
-                    collarette_position: 'Balanced',
-                    lacunae_present: true,
-                    stress_rings: 2,
-                    system_analysis: {
-                        digestive: 'Good',
-                        nervous: 'Moderate stress indicators',
-                        circulatory: 'Good',
-                        immune: 'Strong',
-                        endocrine: 'Balanced',
-                        respiratory: 'Good',
-                        urinary: 'Normal'
+                    basic_findings: {
+                        constitutional_type: 'Lymphatic',
+                        fiber_density: 'Medium-High',
+                        pupil_size: 'Normal',
+                        collarette_position: 'Balanced',
+                        lacunae: 'Present - Moderate',
+                        stress_rings: '2 rings detected',
+                        clinical_notes: 'The iris analysis reveals a lymphatic constitutional type with moderate stress indicators. The fiber density suggests good overall vitality with some areas requiring support.'
                     },
-                    recommendations: [
-                        'Focus on stress management techniques',
-                        'Maintain lymphatic drainage support',
-                        'Consider digestive enzyme support',
-                        'Regular cardiovascular exercise recommended'
-                    ]
+                    recommendations: {
+                        nutritional: {
+                            foods_to_support: [
+                                'Include anti-inflammatory foods like turmeric and ginger',
+                                'Increase intake of leafy green vegetables',
+                                'Add fermented foods for digestive support',
+                                'Include omega-3 rich foods like wild salmon and walnuts'
+                            ]
+                        },
+                        supplements: {
+                            targeted: [
+                                'Magnesium glycinate (400mg daily) for stress support',
+                                'Vitamin B complex for nervous system health',
+                                'Probiotics for digestive balance',
+                                'Ashwagandha (500mg) for stress adaptation'
+                            ]
+                        },
+                        lifestyle: {
+                            stress_management: [
+                                'Practice daily meditation or breathing exercises',
+                                'Ensure 7-8 hours of quality sleep',
+                                'Regular lymphatic drainage massage',
+                                'Moderate exercise 3-4 times per week'
+                            ]
+                        }
+                    },
+                    system_analysis: {
+                        digestive: 'Good - Minor support needed',
+                        nervous: 'Moderate stress indicators present',
+                        circulatory: 'Good overall circulation',
+                        immune: 'Strong constitutional immunity',
+                        endocrine: 'Balanced',
+                        respiratory: 'Good capacity',
+                        urinary: 'Normal function'
+                    }
                 };
 
-                // Update assessment with results
+                // Update assessment with results - save in claude_analysis field as expected by report
                 const { error: updateError } = await supabaseClient
                     .from('iris_assessments')
                     .update({
                         status: 'completed',
-                        analysis_results: analysisResults
+                        claude_analysis: analysisResults,  // Save in the field expected by report-generator
+                        analysis_results: analysisResults.system_analysis,  // Keep backward compatibility
+                        completed_at: new Date().toISOString()
                     })
                     .eq('id', assessment.id);
 
-                if (updateError) throw updateError;
+                if (updateError) {
+                    console.error('Update error:', updateError);
+                    throw new Error(`Failed to update assessment: ${updateError.message}`);
+                }
 
                 // Store results for report generation
                 sessionStorage.setItem('irisAssessmentId', assessment.id);
@@ -1111,6 +1275,8 @@
 
                 // Show success modal
                 document.getElementById('successModal').classList.add('active');
+
+                console.log('Assessment saved successfully with ID:', assessment.id);
 
             } catch (error) {
                 console.error('Error completing assessment:', error);
@@ -1126,7 +1292,7 @@
         window.viewGeneratedReport = function() {
             const assessmentId = sessionStorage.getItem('irisAssessmentId');
             if (assessmentId) {
-                window.location.href = `iris-report.html?patientId=${currentPatient.id}&assessmentId=${assessmentId}`;
+                window.location.href = `report-generator.html?patientId=${currentPatient.id}&assessmentId=${assessmentId}`;
             } else {
                 alert('No assessment data found. Please complete the assessment first.');
             }
