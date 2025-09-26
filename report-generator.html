@@ -186,11 +186,6 @@
 </head>
 <body>
 
-    <div class="no-print">
-        <button class="action-btn" onclick="window.print()">🖨️ Print Report</button>
-        <button class="action-btn" onclick="sendEmail()">📧 Email Report</button>
-    </div>
-
     <div class="container" id="report-content">
         <div class="header">
             <div>
@@ -238,7 +233,16 @@
         
         <!-- Continue to IRIS Assessment Button -->
         <div class="continue-section no-print">
-            <h3 style="color: #1e3a8a; margin-bottom: 15px;">Continue Patient Assessment Workflow</h3>
+            <h3 style="color: #1e3a8a; margin-bottom: 15px;">Report Actions</h3>
+            <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin-bottom: 20px;">
+                <button class="action-btn" onclick="window.print()">
+                    🖨️ Print Report
+                </button>
+                <button class="action-btn" onclick="sendEmail()">
+                    📧 Email Report
+                </button>
+            </div>
+            <h3 style="color: #1e3a8a; margin-bottom: 15px; margin-top: 30px;">Continue Assessment Workflow</h3>
             <p style="color: #64748b; margin-bottom: 20px;">Start a new IRIS assessment for this patient or return to dashboard</p>
             <button class="continue-btn" onclick="continueToIrisAssessment()">
                 Start New IRIS Assessment →
