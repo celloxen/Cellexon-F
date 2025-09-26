@@ -118,21 +118,110 @@
         };
 
         window.deletePatient = async (id) => {
-            if (!confirm('Are you sure you want to delete this patient? This action cannot be undone.')) return;
+            if (!confirm('Are you sure you want to delete this patient? This will also delete all related assessments, invoices, and records. This action cannot be undone.')) return;
             
             try {
-                // First delete related records if they exist
-                await supabase.from('patient_workflow_status').delete().eq('patient_id', id);
+                console.log('Deleting patient and related records for patient ID:', id);
                 
-                // Then delete the patient
-                const { error } = await supabase.from('patients').delete().eq('id', id);
-                if (error) throw error;
+                // Delete all related records first to avoid foreign key constraints
+                // Order matters - delete dependent records before parent records
                 
-                alert('Patient deleted successfully');
+                // 1. Delete invoices
+                try {
+                    const { data: invoices, error: invoiceFetchError } = await supabase
+                        .from('invoices')
+                        .select('id')
+                        .eq('patient_id', id);
+                    
+                    if (invoices && invoices.length > 0) {
+                        const { error: invoiceDeleteError } = await supabase
+                            .from('invoices')
+                            .delete()
+                            .eq('patient_id', id);
+                        
+                        if (invoiceDeleteError) {
+                            console.error('Error deleting invoices:', invoiceDeleteError);
+                        } else {
+                            console.log(`Deleted ${invoices.length} invoices`);
+                        }
+                    }
+                } catch (e) {
+                    console.log('Error with invoices:', e);
+                }
+                
+                // 2. Delete patient workflow status (if exists)
+                try {
+                    const { error: workflowError } = await supabase
+                        .from('patient_workflow_status')
+                        .delete()
+                        .eq('patient_id', id);
+                    if (workflowError) console.log('No workflow records or error:', workflowError);
+                } catch (e) {
+                    console.log('Workflow table might not exist');
+                }
+                
+                // 3. Delete comprehensive assessments
+                try {
+                    const { data: assessments, error: fetchError } = await supabase
+                        .from('comprehensive_assessments')
+                        .select('id')
+                        .eq('patient_id', id);
+                    
+                    if (assessments && assessments.length > 0) {
+                        const { error: deleteError } = await supabase
+                            .from('comprehensive_assessments')
+                            .delete()
+                            .eq('patient_id', id);
+                        
+                        if (deleteError) {
+                            console.error('Error deleting comprehensive assessments:', deleteError);
+                        } else {
+                            console.log(`Deleted ${assessments.length} comprehensive assessments`);
+                        }
+                    }
+                } catch (e) {
+                    console.log('Error with comprehensive assessments:', e);
+                }
+                
+                // 4. Delete IRIS assessments
+                try {
+                    const { data: irisAssessments, error: irisFetchError } = await supabase
+                        .from('iris_assessments')
+                        .select('id')
+                        .eq('patient_id', id);
+                    
+                    if (irisAssessments && irisAssessments.length > 0) {
+                        const { error: irisDeleteError } = await supabase
+                            .from('iris_assessments')
+                            .delete()
+                            .eq('patient_id', id);
+                        
+                        if (irisDeleteError) {
+                            console.error('Error deleting IRIS assessments:', irisDeleteError);
+                        } else {
+                            console.log(`Deleted ${irisAssessments.length} IRIS assessments`);
+                        }
+                    }
+                } catch (e) {
+                    console.log('Error with IRIS assessments:', e);
+                }
+                
+                // 5. Finally delete the patient
+                const { error: patientError } = await supabase
+                    .from('patients')
+                    .delete()
+                    .eq('id', id);
+                
+                if (patientError) {
+                    throw new Error(`Failed to delete patient: ${patientError.message}`);
+                }
+                
+                alert('Patient and all related records deleted successfully');
                 await loadPatients();
+                
             } catch (e) {
                 console.error('Delete error:', e);
-                alert('Error deleting patient: ' + e.message);
+                alert('Error deleting patient: ' + e.message + '\n\nThis may be because the patient has records in other tables that need to be deleted first.');
             }
         };
 
