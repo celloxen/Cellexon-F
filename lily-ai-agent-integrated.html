@@ -359,9 +359,517 @@
                  sections: [ { subtitle: 'About a Specific Wound or Injury', questions: [ { id: 'q6-1', text: "I have a specific wound from surgery that is not healing as expected." }, { id: 'q6-2', text: "I am managing a diabetic foot ulcer." }, { id: 'q6-3', text: "I have a venous stasis ulcer on my lower leg." }, { id: 'q6-4', text: "I have a pressure sore (bedsore) that is slow to heal." }, { id: 'q6-5', text: "I have a burn that is in the recovery phase of healing." }, { id: 'q6-6', text: "The area around my wound looks pale or has poor colour." }, { id: 'q6-7', text: "My wound shows little sign of improvement from week to week." }, { id: 'q6-8', text: "The tissue forming in the wound does not look healthy or robust." }, { id: 'q6-9', text: "I am concerned about the risk of infection in a slow-healing wound." }, { id: 'q6-10', text: "I want to minimise scarring from a wound or surgery." }, { id: 'q6-11', text: "I have a minor skin injury that is taking an unusually long time to heal." } ] }, { subtitle: 'About Your General Healing & Tissue Health', questions: [ { id: 'q6-12', text: "I have noticed that I generally heal much more slowly than I used to." }, { id: 'q6-13', text: "I bruise very easily." }, { id: 'q6-14', text: "I am seeking support to prepare my body for an upcoming surgery." }, { id: 'q6-15', text: "I want to accelerate my recovery after a medical procedure." }, { id: 'q6-16', text: "My skin feels thin and fragile." } ] }, { subtitle: 'About Your General Circulation & Vascular Health', questions: [ { id: 'q6-17', text: "I believe my poor circulation is the main reason for my slow healing." }, { id: 'q6-18', text: "My legs often feel heavy, tired, or achy." }, { id: 'q6-19', text: "I experience significant swelling in my legs, ankles, or feet." }, { id: 'q6-20', text: "I have been diagnosed with venous insufficiency." }, { id: 'q6-21', text: "I have been diagnosed with lymphoedema." }, { id: 'q6-22', text: "I have had a Deep Vein Thrombosis (DVT) in the past and want to support my vascular health." }, { id: 'q6-23', text: "I have visible spider veins or varicose veins that are uncomfortable." }, { id: 'q6-24', text: "I am concerned about atherosclerosis or endothelial dysfunction." }, { id: 'q6-25', text: "I am looking to strengthen my blood vessels and improve their flexibility." }, { id: 'q6-26', text: "I suffer from cold hands and feet, indicating poor peripheral circulation." }, { id: 'q6-27', text: "My walking distance is limited by pain or heaviness in my legs." }, { id: 'q6-28', text: "I am seeking to improve my overall vascular health preventatively." }, { id: 'q6-29', text: "The skin on my lower legs is discoloured or has a different texture." }, { id: 'q6-30', text: "I want to improve blood flow to all my tissues for better overall health." }, { id: 'q6-31', text: "My circulation issues are related to diabetes." }, { id: 'q6-32', text: "I want to reduce the risk of future vascular problems." }, { id: 'q6-33', text: "I experience numbness or tingling in my extremities." }, { id: 'q6-34', text: "I want to reduce leg discomfort and swelling." }, { id: 'q6-35', text: "My job requires long periods of sitting or standing, which affects my leg circulation." }, { id: 'q6-36', text: "I am an athlete looking to improve circulation for better performance and recovery." } ] } ]
             }
         };
-        
-        // ... rest of the JavaScript in the file ...
-        
+
+        class AssessmentApp {
+            constructor() {
+                this.assessmentId = null;
+                this.patientId = null;
+                this.patientData = null;
+                this.clinicId = null;
+                this.practitionerName = '';
+                this.startTime = new Date();
+                this.currentStep = 0;
+                this.steps = ['patient-selection-step', 'step-1', 'step-2', 'step-3', 'step-4'];
+                this.assessmentData = {};
+
+                this.init();
+            }
+
+            async init() {
+                // Get auth data from either localStorage or sessionStorage
+                const authDataString = localStorage.getItem('celloxen_auth') || sessionStorage.getItem('celloxen_auth');
+
+                if (!authDataString) {
+                    alert('Authentication session not found. Please log in to access this module.');
+                    window.location.href = 'unified-login.html';
+                    return;
+                }
+                
+                const authData = JSON.parse(authDataString);
+
+                // Set the user's session for Supabase
+                if (authData.access_token && authData.refresh_token) {
+                    const { error } = await supabaseClient.auth.setSession({
+                        access_token: authData.access_token,
+                        refresh_token: authData.refresh_token,
+                    });
+                    if (error) {
+                        console.error("Failed to set Supabase session:", error);
+                        alert("Your session has expired or is invalid. Please log in again.");
+                        localStorage.removeItem('celloxen_auth');
+                        sessionStorage.removeItem('celloxen_auth');
+                        window.location.href = 'unified-login.html';
+                        return;
+                    }
+                } else {
+                    alert('Invalid authentication data. Please log in again.');
+                    window.location.href = 'unified-login.html';
+                    return;
+                }
+
+                this.clinicId = authData.user?.user_metadata?.clinic_id;
+                this.practitionerName = authData.user?.user_metadata?.full_name || 'Practitioner';
+                
+                if (!this.clinicId) {
+                    alert('Clinic ID not found in your profile. Please contact support.');
+                    return;
+                }
+
+                this.setupPatientSearch();
+                this.setupNavigation();
+                this.populateStaticQuestions();
+            }
+
+            setupPatientSearch() {
+                const searchInput = document.getElementById('patientSearch');
+                const dropdown = document.getElementById('patientDropdown');
+                let searchTimeout;
+
+                searchInput.addEventListener('input', (e) => {
+                    clearTimeout(searchTimeout);
+                    const searchTerm = e.target.value.trim();
+                    if (searchTerm.length >= 2) {
+                        searchTimeout = setTimeout(() => this.searchPatients(searchTerm), 300);
+                    } else {
+                        dropdown.classList.remove('show');
+                    }
+                });
+
+                document.addEventListener('click', (e) => {
+                    if (!e.target.closest('.patient-search-container')) {
+                        dropdown.classList.remove('show');
+                    }
+                });
+                
+                document.getElementById('startAssessmentBtn').addEventListener('click', () => this.startAssessment());
+
+                // Use event delegation for dropdown options
+                dropdown.addEventListener('click', (e) => {
+                    const option = e.target.closest('.patient-option');
+                    if(option) {
+                        this.selectPatient(option.dataset.id);
+                    }
+                });
+            }
+
+            async searchPatients(searchTerm) {
+                const dropdown = document.getElementById('patientDropdown');
+                try {
+                    const { data: patients, error } = await supabaseClient
+                        .from('patients')
+                        .select('*')
+                        .eq('clinic_id', this.clinicId)
+                        .or(`first_name.ilike.%${searchTerm}%,last_name.ilike.%${searchTerm}%,patient_id.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%`)
+                        .limit(10);
+                    if (error) throw error;
+                    
+                    let html = '';
+                    if(patients.length > 0) {
+                        html = patients.map(p => {
+                            const age = p.date_of_birth ? Math.floor((new Date() - new Date(p.date_of_birth)) / 31557600000) : 'N/A';
+                            return `<div class="patient-option" data-id="${p.id}">
+                                        <div>
+                                            <div class="patient-option-name">${p.first_name} ${p.last_name}</div>
+                                            <div class="patient-option-details">Age: ${age} | ${p.email || 'No email'}</div>
+                                        </div>
+                                    </div>`;
+                        }).join('');
+                    } else {
+                        html = `<div class="p-4 text-sm text-gray-500">No patients found.</div>`;
+                    }
+                    dropdown.innerHTML = html;
+                    dropdown.classList.add('show');
+
+                } catch (error) {
+                    console.error('Error searching patients:', error);
+                    this.showSaveIndicator('Error searching patients', 'error');
+                }
+            }
+            
+            async selectPatient(patientId) {
+                document.getElementById('patientDropdown').classList.remove('show');
+                try {
+                    const { data: patient, error } = await supabaseClient.from('patients').select('*').eq('id', patientId).single();
+                    if (error) throw error;
+
+                    this.patientId = patient.id;
+                    this.patientData = patient;
+
+                    const age = patient.date_of_birth ? Math.floor((new Date() - new Date(patient.date_of_birth)) / 31557600000) : 'N/A';
+                    
+                    document.getElementById('selectedPatientInfo').classList.remove('hidden');
+                    document.getElementById('selectedPatientDetails').innerHTML = `
+                        <p><strong>Name:</strong> ${patient.first_name} ${patient.last_name}</p>
+                        <p><strong>Age:</strong> ${age}</p>
+                    `;
+                    document.getElementById('patientSearch').value = `${patient.first_name} ${patient.last_name}`;
+                } catch (error) {
+                     console.error('Error fetching patient details:', error);
+                     this.showSaveIndicator('Error fetching patient details', 'error');
+                }
+            }
+
+            async startAssessment() {
+                if (!this.patientId) {
+                    alert('Please select a patient to begin.');
+                    return;
+                }
+                 try {
+                    const { data, error } = await supabaseClient
+                        .from('comprehensive_assessments')
+                        .insert({
+                            clinic_id: this.clinicId,
+                            patient_id: this.patientId,
+                            practitioner_name: this.practitionerName,
+                            patient_name: `${this.patientData.first_name} ${this.patientData.last_name}`,
+                            patient_age: this.patientData.date_of_birth ? Math.floor((new Date() - new Date(this.patientData.date_of_birth)) / 31557600000) : null,
+                            patient_gender: this.patientData.gender,
+                            status: 'in_progress'
+                        })
+                        .select()
+                        .single();
+
+                    if (error) throw error;
+                    this.assessmentId = data.id;
+                    
+                    this.changeStep(1);
+                    
+                } catch (error) {
+                    console.error('Error creating assessment record:', error);
+                    this.showSaveIndicator('Could not start assessment', 'error');
+                }
+            }
+            
+            populateStaticQuestions() {
+                const safetyContainer = document.getElementById('safety-questions');
+                safetyContainer.innerHTML = safetyQuestions.map((q, i) => `
+                    <div class="flex items-start p-2">
+                        <div class="flex-1 text-sm">${q}</div>
+                        <div class="flex items-center space-x-4 ml-4">
+                            <label><input type="radio" name="safety-${i}" value="no" class="h-4 w-4" checked> <span class="ml-1">No</span></label>
+                            <label><input type="radio" name="safety-${i}" value="yes" class="h-4 w-4"> <span class="ml-1">Yes</span></label>
+                        </div>
+                    </div>`).join('');
+
+                const aspectsContainer = document.getElementById('life-aspects-affected');
+                aspectsContainer.innerHTML = ['Work / Productivity', 'Mood / Emotional Well-being', 'Social Life / Relationships', 'Hobbies / Physical Activities'].map(aspect => `
+                    <label class="flex items-center"><input type="checkbox" class="h-4 w-4 rounded" value="${aspect}"> <span class="ml-2">${aspect}</span></label>
+                `).join('');
+
+                const concernsContainer = document.getElementById('primary-concerns');
+                concernsContainer.innerHTML = primaryConcerns.map(c => `
+                    <label class="flex items-center p-4 border rounded-lg hover:bg-slate-50 cursor-pointer">
+                        <input type="checkbox" id="${c.id}" name="primary-concern" value="${c.id}" class="h-5 w-5">
+                        <span class="ml-3 font-medium">${c.name}</span>
+                    </label>`).join('');
+            }
+            
+            setupNavigation() {
+                document.querySelectorAll('.next-btn').forEach(btn => btn.addEventListener('click', () => this.handleNext()));
+                document.querySelectorAll('.prev-btn').forEach(btn => btn.addEventListener('click', () => this.handlePrev()));
+                document.getElementById('generate-report').addEventListener('click', () => this.generateReport());
+            }
+
+            changeStep(stepIndex) {
+                document.getElementById(this.steps[this.currentStep]).classList.add('hidden');
+                document.getElementById(this.steps[this.currentStep]).classList.remove('step-visible');
+                document.getElementById(this.steps[this.currentStep]).classList.add('step-hidden');
+
+                this.currentStep = stepIndex;
+                
+                document.getElementById(this.steps[this.currentStep]).classList.remove('hidden');
+                setTimeout(() => {
+                    document.getElementById(this.steps[this.currentStep]).classList.remove('step-hidden');
+                    document.getElementById(this.steps[this.currentStep]).classList.add('step-visible');
+                }, 50);
+
+                if (this.currentStep > 0) {
+                     document.getElementById('patient-selection-step').classList.add('hidden');
+                     document.getElementById('assessment-form').classList.remove('hidden');
+                }
+            }
+
+            handleNext() {
+                if (!this.validateStep()) return;
+                this.collectStepData();
+                if(this.currentStep === 3) { 
+                    this.populateDeepDiveQuestions();
+                }
+                if (this.currentStep < this.steps.length - 1) {
+                    this.changeStep(this.currentStep + 1);
+                }
+            }
+
+            handlePrev() {
+                if (this.currentStep > 1) {
+                    this.collectStepData();
+                    this.changeStep(this.currentStep - 1);
+                }
+            }
+            
+            validateStep() {
+                if (this.currentStep === 1) { 
+                    let hasContraindication = false;
+                    document.querySelectorAll('#safety-questions input[value="yes"]:checked').forEach(() => {
+                        hasContraindication = true;
+                    });
+                    if (hasContraindication) {
+                        document.getElementById('contraindication-warning').classList.remove('hidden');
+                        return false;
+                    }
+                    document.getElementById('contraindication-warning').classList.add('hidden');
+                }
+                 if (this.currentStep === 3) {
+                    const selected = document.querySelectorAll('#primary-concerns input:checked').length;
+                    if (selected === 0) {
+                        alert('Please select at least one area of concern.');
+                        return false;
+                    }
+                }
+                return true;
+            }
+            
+            collectStepData() {
+                const stepId = this.steps[this.currentStep];
+                switch (stepId) {
+                    case 'step-1':
+                        this.assessmentData.safetyResponses = {};
+                        safetyQuestions.forEach((q, i) => {
+                            this.assessmentData.safetyResponses[`q${i}`] = document.querySelector(`input[name="safety-${i}"]:checked`).value;
+                        });
+                        break;
+                    case 'step-2':
+                        this.assessmentData.holisticSnapshot = {
+                            mainChallenge: document.getElementById('main-challenge-summary').value,
+                            lifeAspects: Array.from(document.querySelectorAll('#life-aspects-affected input:checked')).map(cb => cb.value)
+                        };
+                        break;
+                    case 'step-3':
+                        this.assessmentData.selectedThemes = Array.from(document.querySelectorAll('#primary-concerns input:checked')).map(cb => cb.value);
+                        break;
+                    case 'step-4':
+                        this.assessmentData.symptomResponses = {};
+                        document.querySelectorAll('#deep-dive-questionnaires input:checked').forEach(cb => {
+                             this.assessmentData.symptomResponses[cb.id] = cb.dataset.symptomText;
+                        });
+                        break;
+                }
+            }
+            
+            populateDeepDiveQuestions() {
+                const container = document.getElementById('deep-dive-questionnaires');
+                let html = '';
+                this.assessmentData.selectedThemes.forEach(themeId => {
+                    if (themeId === 'theme-7') return;
+                    const theme = questions[themeId];
+                    html += `<div class="space-y-6 p-6 bg-slate-50 rounded-lg border">
+                                <h3 class="text-xl font-semibold text-indigo-700">${theme.title}</h3>`;
+                    theme.sections.forEach(section => {
+                        html += `<div class="space-y-3">
+                                    <h4 class="font-semibold text-slate-800">${section.subtitle}</h4>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3">`;
+                        section.questions.forEach(q => {
+                            const isChecked = this.assessmentData.symptomResponses && this.assessmentData.symptomResponses[q.id];
+                            html += `<label class="flex items-start font-normal text-sm">
+                                        <input type="checkbox" data-symptom-text="${q.text}" id="${q.id}" class="h-4 w-4 rounded mt-1 mr-2" ${isChecked ? 'checked' : ''}>
+                                        <span>${q.text}</span>
+                                     </label>`;
+                        });
+                        html += `</div></div>`;
+                    });
+                    html += `</div>`;
+                });
+                container.innerHTML = html;
+            }
+
+            async generateReport() {
+                this.collectStepData();
+                this.showSaveIndicator('Generating Report...', 'saving');
+
+                if (this.assessmentData.selectedThemes.includes('theme-7')) {
+                    this.assessmentData.therapyScores = { '801': 5, '802': 3 };
+                } else {
+                    this.assessmentData.therapyScores = Object.entries(this.assessmentData.symptomResponses).reduce((scores, [qId, _]) => {
+                        const therapyCodes = symptomTaggingMatrix[qId];
+                        if (therapyCodes) {
+                            therapyCodes.forEach(code => {
+                                scores[code] = (scores[code] || 0) + 1;
+                            });
+                        }
+                        return scores;
+                    }, {});
+                }
+                
+                const reportHtml = this.buildReportHtml();
+                this.assessmentData.reportHtml = reportHtml;
+
+                try {
+                    const { error } = await supabaseClient
+                        .from('comprehensive_assessments')
+                        .update({
+                            status: 'completed',
+                            safety_responses: this.assessmentData.safetyResponses,
+                            holistic_snapshot: this.assessmentData.holisticSnapshot,
+                            selected_themes: this.assessmentData.selectedThemes,
+                            symptom_responses: this.assessmentData.symptomResponses,
+                            therapy_scores: this.assessmentData.therapyScores,
+                            report_html: this.assessmentData.reportHtml,
+                            completion_time_seconds: Math.floor((new Date() - this.startTime) / 1000)
+                        })
+                        .eq('id', this.assessmentId);
+
+                    if (error) throw error;
+                    this.showSaveIndicator('Report Saved Successfully!', 'saved');
+                } catch (error) {
+                    console.error('Error saving final report:', error);
+                    this.showSaveIndicator('Error saving report', 'error');
+                }
+
+                document.getElementById('assessment-form').classList.add('hidden');
+                document.getElementById('report-section').innerHTML = reportHtml;
+                document.getElementById('report-section').classList.remove('hidden');
+                window.scrollTo(0, 0);
+            }
+
+            buildReportHtml() {
+                const scores = this.assessmentData.therapyScores;
+                const sortedTherapies = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+                if (sortedTherapies.length === 0) {
+                    return `<div class="p-8 text-center">
+                                <h3 class="text-xl font-semibold">No Recommendations Available</h3>
+                                <p class="mt-2 text-slate-600">No symptoms were selected that correspond to a specific therapy. Please restart the assessment.</p>
+                                <button onclick="location.reload()" class="mt-6 bg-indigo-600 text-white font-semibold py-2 px-6 rounded-lg shadow-sm hover:bg-indigo-700">Start New Assessment</button>
+                           </div>`;
+                }
+
+                const primaryTherapyCode = sortedTherapies[0][0];
+                const primaryTherapy = therapyDetails[primaryTherapyCode];
+
+                const contributingFactors = {};
+                const allSelectedSymptoms = this.assessmentData.symptomResponses;
+                const symptomsByTherapy = {};
+
+                Object.entries(allSelectedSymptoms).forEach(([qId, qText]) => {
+                     const therapyCodes = symptomTaggingMatrix[qId];
+                     if(therapyCodes) {
+                         therapyCodes.forEach(code => {
+                            if(!symptomsByTherapy[code]) symptomsByTherapy[code] = [];
+                            symptomsByTherapy[code].push(qText);
+                         });
+                     }
+                });
+
+                sortedTherapies.slice(1).forEach(([code, score]) => {
+                    const therapy = therapyDetails[code];
+                    if (therapy.theme !== primaryTherapy.theme && score > 2) {
+                         if (!contributingFactors[therapy.theme]) contributingFactors[therapy.theme] = [];
+                        contributingFactors[therapy.theme].push(therapy.name);
+                    }
+                });
+                
+                const clientName = `${this.patientData.first_name} ${this.patientData.last_name}`;
+                const mainChallenge = this.assessmentData.holisticSnapshot.mainChallenge || 'The areas identified during the assessment.';
+                const lifeAspects = this.assessmentData.holisticSnapshot.lifeAspects.join(', ');
+
+                let summaryHtml = `<h3 class="text-xl font-semibold text-slate-800 border-b pb-3 mb-4">1. Summary of Your Assessment</h3>
+                               <p class="text-sm text-slate-600">Thank you for completing the wellness assessment. This report summarises our findings and provides a recommended action plan tailored to your specific needs. Our analysis indicates that your primary concern regarding <strong>${mainChallenge}</strong> is affecting several aspects of your life, including your ${lifeAspects}.</p>
+                               <p class="text-sm text-slate-600 mt-2">The key wellness areas identified from your answers are: <strong>${primaryTherapy.theme}</strong>${Object.keys(contributingFactors).length > 0 ? ' and its connection to <strong>' + Object.keys(contributingFactors).join(', ') + '</strong>' : ''}.</p>`;
+
+                let findingsHtml = `<div class="page-break"><h3 class="text-xl font-semibold text-slate-800 border-b pb-3 mb-4">2. A Deeper Look at Your Results</h3></div>
+                                    <div class="p-4 bg-indigo-50 border-l-4 border-indigo-500 rounded-r-lg">
+                                        <h4 class="font-semibold text-indigo-800">Primary Area of Imbalance: ${primaryTherapy.theme}</h4>
+                                        <p class="text-sm text-slate-600 mt-2">${themeExplanations[primaryTherapy.theme] || ''}</p>
+                                        <p class="text-sm text-slate-600 mt-2">Your answers that point to this being your primary area of imbalance include:</p>
+                                        <ul class="list-disc list-inside text-sm text-slate-600 mt-2 space-y-1">${(symptomsByTherapy[primaryTherapyCode] || []).map(s => `<li>${s}</li>`).join('')}</ul>
+                                    </div>`;
+
+                if (Object.keys(contributingFactors).length > 0) {
+                    findingsHtml += `<div class="mt-6 p-4 bg-amber-50 border-l-4 border-amber-500 rounded-r-lg">
+                                        <h4 class="font-semibold text-amber-800">Secondary Contributing Factors</h4>
+                                        <p class="text-sm text-slate-600 mt-2">Our holistic analysis reveals that your primary challenge with <strong>${primaryTherapy.theme}</strong> is likely having a ripple effect on other areas of your health. Your assessment highlighted the following connections:</p>`;
+                    Object.keys(contributingFactors).forEach(theme => {
+                        const relatedSymptoms = [];
+                        contributingFactors[theme].forEach(therapyName => {
+                            const tCode = Object.keys(therapyDetails).find(key => therapyDetails[key].name === therapyName);
+                            if(symptomsByTherapy[tCode]) relatedSymptoms.push(...symptomsByTherapy[tCode]);
+                        });
+                        findingsHtml += `<div class="mt-3"><p class="text-sm font-semibold text-slate-700">Connection to ${theme}:</p><ul class="list-disc list-inside text-sm text-slate-600 mt-1 space-y-1">${[...new Set(relatedSymptoms)].map(s => `<li>${s}</li>`).join('')}</ul></div>`;
+                    });
+                    findingsHtml += `</div>`;
+                }
+                
+                findingsHtml += `<div class="mt-6 p-4 bg-emerald-50 border-l-4 border-emerald-500 rounded-r-lg">
+                                    <h4 class="font-semibold text-emerald-800">The Holistic Picture: Your Personalised Narrative</h4>
+                                    <p class="text-sm text-slate-600 mt-2">Based on your assessment, a clear picture emerges: the imbalance in your <strong>${primaryTherapy.theme}</strong> appears to be the primary driver of your health challenges. This is not only creating the direct symptoms you feel, but is also creating a ripple effect, placing a significant strain on your ${Object.keys(contributingFactors).join(' and ').toLowerCase() || 'overall well-being'}. Our recommended plan is designed to address both the root cause and its effects, creating a more comprehensive and lasting improvement to your health.</p>
+                                 </div>`;
+            
+                let actionPlanHtml = `<div class="page-break"><h3 class="text-xl font-semibold text-slate-800 border-b pb-3 mb-4">3. Your Personalised Action Plan</h3></div>
+                                      <p class="text-sm text-slate-600 mb-4">Based on the comprehensive findings, we recommend beginning with the therapy that addresses your primary area of imbalance.</p>
+                                      <div class="mt-4 p-6 border rounded-lg shadow-sm bg-slate-50">
+                                        <p class="text-lg font-semibold text-indigo-700">Primary Recommended Therapy: ${primaryTherapy.name} (Code ${primaryTherapyCode})</p>
+                                        <div class="mt-4">
+                                            <h5 class="font-semibold text-slate-800">Why This Therapy is Recommended For You:</h5>
+                                            <p class="text-sm text-slate-600 mt-1">${primaryTherapy.rationale || ''}</p>
+                                        </div>
+                                        <div class="mt-4">
+                                            <h5 class="font-semibold text-slate-800">Your Anticipated Wellness Journey:</h5>
+                                            <div class="text-sm text-slate-600 mt-2 space-y-2">
+                                                <p><strong>Immediate Benefits (First 1-2 Weeks):</strong> ${primaryTherapy.benefitsTimeline.immediate}</p>
+                                                <p><strong>Short-Term Benefits (Weeks 2-4):</strong> ${primaryTherapy.benefitsTimeline.shortTerm}</p>
+                                                <p><strong>Medium-Term Benefits (Weeks 5-6):</strong> ${primaryTherapy.benefitsTimeline.mediumTerm}</p>
+                                                <p><strong>Long-Term Benefits (Weeks 7-8 and beyond):</strong> ${primaryTherapy.benefitsTimeline.longTerm}</p>
+                                            </div>
+                                        </div>
+                                      </div>
+                                      <h4 class="font-semibold text-base mt-6">Your Recommended Programme Details:</h4>
+                                      <table class="w-full mt-2 text-sm border">
+                                          <thead class="bg-slate-100"><tr><th class="p-2 text-left font-semibold">Therapy Programme</th><th class="p-2 text-left font-semibold">Details</th></tr></thead>
+                                          <tbody>
+                                             <tr class="border-t"><td class="p-2 font-medium">Recommended Therapy</td><td class="p-2"><strong>${primaryTherapy.name}</strong></td></tr>
+                                             <tr class="border-t bg-slate-50"><td class="p-2 font-medium">Session Length</td><td class="p-2">${primaryTherapy.sessionLength}</td></tr>
+                                             <tr class="border-t"><td class="p-2 font-medium">Frequency</td><td class="p-2">${primaryTherapy.frequency}</td></tr>
+                                             <tr class="border-t bg-slate-50"><td class="p-2 font-medium">Full Course</td><td class="p-2">${primaryTherapy.fullCourse}</td></tr>
+                                             <tr class="border-t"><td class="p-2 font-medium">Total Sessions</td><td class="p-2">${primaryTherapy.totalSessions}</td></tr>
+                                          </tbody>
+                                      </table>
+                                      <div class="mt-6"><h4 class="font-semibold text-base">Recommended Nutritional Support:</h4><ul class="list-disc list-inside text-sm text-slate-600 mt-2 space-y-1">${primaryTherapy.nutritionalSupport.map(s => `<li>${s}</li>`).join('')}</ul></div>
+                                      <div class="mt-6"><h4 class="font-semibold text-base">Practitioner's Notes & Lifestyle Suggestions:</h4><div class="mt-2 p-3 bg-slate-50 border rounded-md text-sm text-slate-600 min-h-[100px]"></div></div>`;
+
+                return `<div class="space-y-8">
+                            <h2 class="text-3xl font-bold text-center text-slate-900">Personalised Wellness Plan</h2>
+                            <div class="text-sm"><p><strong>Client Name:</strong> ${clientName}</p><p><strong>Practitioner Name:</strong> ${this.practitionerName}</p><p><strong>Date:</strong> ${new Date().toLocaleDateString('en-GB')}</p></div>
+                            <div>${summaryHtml}</div>
+                            <div>${findingsHtml}</div>
+                            <div>${actionPlanHtml}</div>
+                            <div class="page-break"><h3 class="text-xl font-semibold text-slate-800 border-b pb-3 mb-4">4. Your Journey to Wellness Starts Now</h3><p class="text-sm text-slate-600">Congratulations on taking this proactive first step toward improving your health. This personalised plan is your roadmap to achieving the benefits we've discussed—from immediate improvements in your day-to-day comfort to lasting changes in your overall vitality.</p></div>
+                            <div class="pt-6 border-t"><h3 class="text-base font-semibold">Important Notice & Disclaimer</h3><p class="text-xs text-slate-500 mt-2">The therapies offered at our clinic are designed to support general wellness and are not intended to diagnose, treat, cure, or prevent any disease or medical condition. The information and recommendations provided in this wellness plan are not a substitute for professional medical advice, diagnosis, or treatment from your General Practitioner (GP) or other qualified healthcare provider. We strongly encourage you to discuss this wellness plan with your GP before beginning any new therapy programme. Individual results may vary.</p></div>
+                        </div>
+                        <div class="text-center mt-8 no-print">
+                            <button onclick="window.print()" class="bg-gray-700 text-white font-semibold py-2 px-6 rounded-lg shadow-sm hover:bg-gray-800">Print Plan</button>
+                            <a href="assessment-tool-integrated.html" class="ml-4 bg-indigo-600 text-white font-semibold py-2 px-6 rounded-lg shadow-sm hover:bg-indigo-700">Start New Assessment</a>
+                        </div>`;
+            }
+
+            showSaveIndicator(message, type) {
+                const indicator = document.getElementById('saveIndicator');
+                const messageSpan = document.getElementById('saveMessage');
+                const spinner = document.getElementById('saveSpinner');
+                
+                indicator.className = `save-indicator ${type}`;
+                messageSpan.textContent = message;
+                
+                spinner.style.display = (type === 'saving') ? 'block' : 'none';
+
+                if (type !== 'saving') {
+                    setTimeout(() => {
+                        indicator.className = 'save-indicator';
+                    }, 3000);
+                }
+            }
+        }
+
+        // --- APP INITIALIZATION ---
+        window.app = new AssessmentApp();
     </script>
 </body>
 </html>
