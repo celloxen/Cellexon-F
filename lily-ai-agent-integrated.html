@@ -1,72 +1,1170 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-GB">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Patient Assessment History - Celloxen Platform</title>
+    <title>Celloxen Health - Comprehensive Wellness Assessment</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Your standard styles */
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-print-color-adjust: exact;
+        }
+        
+        /* Header Styles */
+        .header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+            color: white;
+            padding: 20px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+        
+        .module-name {
+            font-size: 16px;
+            opacity: 0.95;
+            border-left: 2px solid rgba(255,255,255,0.3);
+            padding-left: 20px;
+        }
+        
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 6px;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        /* Patient Search Styles */
+        .patient-search-container {
+            position: relative;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .patient-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-top: none;
+            border-radius: 0 0 12px 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 50;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            display: none;
+        }
+        
+        .patient-dropdown.show {
+            display: block;
+        }
+        
+        .patient-option {
+            padding: 12px 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-bottom: 1px solid #f3f4f6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .patient-option:hover {
+            background: #f0f9ff;
+        }
+        
+        .patient-option-info {
+            flex: 1;
+        }
+        
+        .patient-option-name {
+            font-weight: 600;
+            color: #1e293b;
+            font-size: 14px;
+        }
+        
+        .patient-option-details {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 2px;
+        }
+        
+        .patient-option-id {
+            background: #f3f4f6;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #4b5563;
+        }
+        
+        /* Section Navigation */
+        .section-nav {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin: 20px 0;
+        }
+        
+        .section-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #e5e7eb;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .section-dot.active {
+            background: #3b82f6;
+            width: 30px;
+            border-radius: 5px;
+        }
+        
+        .section-dot.completed {
+            background: #10b981;
+        }
+        
+        /* Transitions */
+        .fade-enter {
+            opacity: 0;
+            transform: translateX(20px);
+        }
+        
+        .fade-enter-active {
+            opacity: 1;
+            transform: translateX(0);
+            transition: all 0.5s ease;
+        }
+        
+        .fade-exit {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        
+        .fade-exit-active {
+            opacity: 0;
+            transform: translateX(-20px);
+            transition: all 0.5s ease;
+        }
+        
+        /* Progress Bar */
+        .progress-container {
+            width: 100%;
+            height: 6px;
+            background: #e5e7eb;
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6, #10b981);
+            transition: width 0.5s ease;
+            border-radius: 3px;
+        }
+        
+        /* Save Indicator */
+        .save-indicator {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            z-index: 1000;
+            display: none;
+            animation: slideUp 0.3s ease;
+        }
+        
+        @keyframes slideUp {
+            from {
+                transform: translateY(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .save-indicator.saving {
+            background: #fbbf24;
+            color: #78350f;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .save-indicator.saved {
+            background: #34d399;
+            color: #064e3b;
+            display: block;
+        }
+        
+        .save-indicator.error {
+            background: #f87171;
+            color: #7f1d1d;
+            display: block;
+        }
+        
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid transparent;
+            border-top-color: #78350f;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Print Styles */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #report-section, #report-section * {
+                visibility: visible;
+            }
+            #report-section {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .page-break {
+                page-break-before: always;
+            }
+        }
+        
+        /* Splash Screen */
+        .splash-screen {
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 60px 20px;
+        }
+        
+        .splash-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+        
+        .splash-subtitle {
+            color: #64748b;
+            font-size: 1.125rem;
+            text-align: center;
+            margin-bottom: 48px;
+        }
     </style>
 </head>
-<body>
-    <div class="container">
-        <h1>Assessment History</h1>
-        <div id="assessmentsList"></div>
+<body class="bg-slate-50 text-slate-800">
+    <!-- Header -->
+    <div class="header no-print">
+        <div class="header-container">
+            <div class="logo-section">
+                <div class="logo">CELLOXEN</div>
+                <div class="module-name">Comprehensive Wellness Assessment</div>
+            </div>
+            <a href="clinic-dashboard.html" class="back-btn">← Back to Dashboard</a>
+        </div>
+    </div>
+
+    <!-- Save Indicator -->
+    <div id="saveIndicator" class="save-indicator">
+        <div class="spinner" id="saveSpinner"></div>
+        <span id="saveMessage">Saving...</span>
+    </div>
+
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8">
+        <!-- Splash Screen with Patient Search -->
+        <div id="splash-screen" class="max-w-4xl mx-auto bg-white p-8 sm:p-10 rounded-2xl shadow-lg">
+            <div class="splash-screen">
+                <h1 class="splash-title">Begin Wellness Assessment</h1>
+                <p class="splash-subtitle">Start by selecting a patient or entering their details</p>
+                
+                <div class="patient-search-container w-full">
+                    <label class="block text-sm font-medium text-slate-700 mb-2">Search for Patient</label>
+                    <input 
+                        type="text" 
+                        id="patientSearch" 
+                        placeholder="Type patient name, ID, or email..."
+                        class="w-full px-4 py-3 text-lg border-2 border-slate-300 rounded-t-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-all"
+                        autocomplete="off"
+                    >
+                    <div id="patientDropdown" class="patient-dropdown"></div>
+                </div>
+                
+                <div class="mt-6 text-center">
+                    <button id="newPatientBtn" class="text-blue-600 hover:text-blue-700 font-medium">
+                        Or register a new patient →
+                    </button>
+                </div>
+                
+                <div id="selectedPatientInfo" class="mt-8 p-6 bg-blue-50 rounded-lg hidden">
+                    <h3 class="font-semibold text-blue-900 mb-2">Selected Patient</h3>
+                    <div id="selectedPatientDetails"></div>
+                    <button id="startAssessmentBtn" class="mt-4 w-full bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-blue-700 transition-all">
+                        Start Assessment
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Assessment Form -->
+        <div id="assessment-form" class="max-w-4xl mx-auto bg-white p-6 sm:p-8 rounded-2xl shadow-lg hidden">
+            <!-- Progress Bar -->
+            <div class="progress-container">
+                <div id="progressBar" class="progress-bar" style="width: 0%"></div>
+            </div>
+            
+            <!-- Section Navigation Dots -->
+            <div class="section-nav" id="sectionNav"></div>
+            
+            <!-- Dynamic Section Container -->
+            <div id="sectionContainer" class="mt-8">
+                <!-- Sections will be dynamically loaded here -->
+            </div>
+            
+            <!-- Navigation Buttons -->
+            <div class="flex justify-between mt-8">
+                <button id="prevBtn" class="bg-gray-500 text-white font-semibold py-2 px-6 rounded-lg hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                    ← Previous
+                </button>
+                <button id="nextBtn" class="bg-blue-600 text-white font-semibold py-2 px-6 rounded-lg hover:bg-blue-700">
+                    Next →
+                </button>
+            </div>
+        </div>
+
+        <!-- Report Section -->
+        <div id="report-section" class="max-w-4xl mx-auto bg-white p-8 sm:p-10 rounded-2xl shadow-lg mt-12 hidden">
+            <!-- Report content will be injected here -->
+        </div>
     </div>
 
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
         
+        // Initialize Supabase
         const SUPABASE_URL = 'https://defifwzgazqlrigwumqn.supabase.co';
-        const SUPABASE_ANON_KEY = 'your_key_here';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlZmlmd3pnYXpxbHJpZ3d1bXFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcyNTM0MjYsImV4cCI6MjA3MjgyOTQyNn0.wcUBq6Pszjtqn5aBtuu3iXBE4BLmu8x9LtJbsMWlIiA';
         const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        async function loadAssessments() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const patientId = urlParams.get('patientId');
-            
-            const { data, error } = await supabase
-                .from('comprehensive_assessments')
-                .select('*')
-                .eq('patient_id', patientId)
-                .order('created_at', { ascending: false });
-            
-            if (data) {
-                displayAssessments(data);
+        // Enhanced Assessment Class
+        class ComprehensiveAssessment {
+            constructor() {
+                this.assessmentId = null;
+                this.patientId = null;
+                this.patientData = null;
+                this.clinicId = null;
+                this.practitionerName = '';
+                this.startTime = new Date();
+                this.currentSectionIndex = 0;
+                this.sections = [];
+                this.assessmentData = {
+                    patientInfo: {},
+                    safetyResponses: {},
+                    holisticSnapshot: {},
+                    selectedThemes: [],
+                    symptomResponses: {},
+                    therapyScores: {},
+                    reportData: {}
+                };
+                
+                this.init();
             }
-        }
 
-        function displayAssessments(assessments) {
-            const container = document.getElementById('assessmentsList');
-            
-            assessments.forEach(assessment => {
-                const card = document.createElement('div');
-                card.className = 'assessment-card';
-                card.innerHTML = `
-                    <h3>Assessment from ${new Date(assessment.assessment_date).toLocaleDateString()}</h3>
-                    <p>Primary Therapy: ${assessment.primary_therapy_name}</p>
-                    <p>Status: ${assessment.status}</p>
-                    <button onclick="viewReport('${assessment.id}')">View Report</button>
+            async init() {
+                // Get auth data
+                const authData = localStorage.getItem('celloxen_auth');
+                if (!authData) {
+                    alert('Please log in to access this module');
+                    window.location.href = 'unified-login.html';
+                    return;
+                }
+                
+                const auth = JSON.parse(authData);
+                this.clinicId = auth.clinicId;
+                this.practitionerName = auth.username || 'Practitioner';
+                
+                // Initialize sections
+                this.initializeSections();
+                
+                // Setup patient search
+                this.setupPatientSearch();
+                
+                // Setup navigation
+                this.setupNavigation();
+                
+                // Load therapy data
+                this.loadTherapyData();
+            }
+
+            initializeSections() {
+                this.sections = [
+                    {
+                        id: 'safety',
+                        title: 'Safety Screening',
+                        subtitle: 'Important safety questions to ensure therapy suitability',
+                        completed: false
+                    },
+                    {
+                        id: 'holistic',
+                        title: 'Holistic Snapshot',
+                        subtitle: 'Understanding your overall wellness picture',
+                        completed: false
+                    },
+                    {
+                        id: 'concerns',
+                        title: 'Primary Concerns',
+                        subtitle: 'Select the main areas you want to address',
+                        completed: false
+                    },
+                    {
+                        id: 'symptoms',
+                        title: 'Detailed Assessment',
+                        subtitle: 'Specific questions about your selected concerns',
+                        completed: false
+                    }
+                ];
+            }
+
+            setupPatientSearch() {
+                const searchInput = document.getElementById('patientSearch');
+                const dropdown = document.getElementById('patientDropdown');
+                let searchTimeout;
+
+                searchInput.addEventListener('input', (e) => {
+                    clearTimeout(searchTimeout);
+                    const searchTerm = e.target.value.trim();
+                    
+                    if (searchTerm.length >= 2) {
+                        searchTimeout = setTimeout(() => {
+                            this.searchPatients(searchTerm);
+                        }, 300);
+                    } else {
+                        dropdown.classList.remove('show');
+                    }
+                });
+
+                // Close dropdown when clicking outside
+                document.addEventListener('click', (e) => {
+                    if (!e.target.closest('.patient-search-container')) {
+                        dropdown.classList.remove('show');
+                    }
+                });
+
+                // New patient button
+                document.getElementById('newPatientBtn').addEventListener('click', () => {
+                    this.showNewPatientForm();
+                });
+
+                // Start assessment button
+                document.getElementById('startAssessmentBtn').addEventListener('click', () => {
+                    this.startAssessment();
+                });
+            }
+
+            async searchPatients(searchTerm) {
+                const dropdown = document.getElementById('patientDropdown');
+                
+                try {
+                    const { data: patients, error } = await supabase
+                        .from('patients')
+                        .select('*')
+                        .eq('clinic_id', this.clinicId)
+                        .or(`first_name.ilike.%${searchTerm}%,last_name.ilike.%${searchTerm}%,patient_id.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%`)
+                        .limit(10);
+
+                    if (error) throw error;
+
+                    if (patients && patients.length > 0) {
+                        this.displayPatientDropdown(patients);
+                    } else {
+                        dropdown.innerHTML = `
+                            <div class="patient-option">
+                                <div class="patient-option-info">
+                                    <div class="patient-option-name">No patients found</div>
+                                    <div class="patient-option-details">Try a different search term</div>
+                                </div>
+                            </div>
+                        `;
+                        dropdown.classList.add('show');
+                    }
+                } catch (error) {
+                    console.error('Error searching patients:', error);
+                }
+            }
+
+            displayPatientDropdown(patients) {
+                const dropdown = document.getElementById('patientDropdown');
+                
+                dropdown.innerHTML = patients.map(patient => {
+                    const age = patient.date_of_birth ? 
+                        Math.floor((new Date() - new Date(patient.date_of_birth)) / (365.25 * 24 * 60 * 60 * 1000)) : 
+                        'N/A';
+                    
+                    return `
+                        <div class="patient-option" onclick="window.assessment.selectPatient(${patient.id})">
+                            <div class="patient-option-info">
+                                <div class="patient-option-name">${patient.first_name} ${patient.last_name}</div>
+                                <div class="patient-option-details">
+                                    Age: ${age} | Gender: ${patient.gender || 'N/A'} | ${patient.email || 'No email'}
+                                </div>
+                            </div>
+                            <div class="patient-option-id">${patient.patient_id || 'ID: N/A'}</div>
+                        </div>
+                    `;
+                }).join('');
+                
+                dropdown.classList.add('show');
+            }
+
+            async selectPatient(patientId) {
+                const dropdown = document.getElementById('patientDropdown');
+                dropdown.classList.remove('show');
+                
+                try {
+                    const { data: patient, error } = await supabase
+                        .from('patients')
+                        .select('*')
+                        .eq('id', patientId)
+                        .single();
+
+                    if (error) throw error;
+
+                    this.patientId = patient.id;
+                    this.patientData = patient;
+                    
+                    // Calculate age
+                    const age = patient.date_of_birth ? 
+                        Math.floor((new Date() - new Date(patient.date_of_birth)) / (365.25 * 24 * 60 * 60 * 1000)) : 
+                        'N/A';
+                    
+                    // Display selected patient
+                    document.getElementById('selectedPatientInfo').classList.remove('hidden');
+                    document.getElementById('selectedPatientDetails').innerHTML = `
+                        <p class="text-gray-700"><strong>Name:</strong> ${patient.first_name} ${patient.last_name}</p>
+                        <p class="text-gray-700"><strong>Age:</strong> ${age}</p>
+                        <p class="text-gray-700"><strong>Gender:</strong> ${patient.gender || 'Not specified'}</p>
+                        <p class="text-gray-700"><strong>ID:</strong> ${patient.patient_id || 'N/A'}</p>
+                    `;
+                    
+                    document.getElementById('patientSearch').value = `${patient.first_name} ${patient.last_name}`;
+                    
+                    // Store patient info for assessment
+                    this.assessmentData.patientInfo = {
+                        patient_name: `${patient.first_name} ${patient.last_name}`,
+                        patient_age: age,
+                        patient_gender: patient.gender || 'Not specified'
+                    };
+                    
+                } catch (error) {
+                    console.error('Error selecting patient:', error);
+                    this.showSaveIndicator('Error selecting patient', 'error');
+                }
+            }
+
+            showNewPatientForm() {
+                // For now, redirect to patient registration
+                // In future, you could show an inline form
+                window.location.href = 'patient-registration.html?returnTo=assessment';
+            }
+
+            async startAssessment() {
+                if (!this.patientId) {
+                    alert('Please select a patient first');
+                    return;
+                }
+                
+                // Hide splash screen, show assessment form
+                document.getElementById('splash-screen').classList.add('hidden');
+                document.getElementById('assessment-form').classList.remove('hidden');
+                
+                // Create assessment record
+                await this.createAssessmentRecord();
+                
+                // Initialize section navigation
+                this.initializeSectionNav();
+                
+                // Load first section
+                this.loadSection(0);
+                
+                // Start auto-save
+                this.startAutoSave();
+            }
+
+            initializeSectionNav() {
+                const nav = document.getElementById('sectionNav');
+                nav.innerHTML = this.sections.map((section, index) => 
+                    `<div class="section-dot ${index === 0 ? 'active' : ''}" data-index="${index}"></div>`
+                ).join('');
+            }
+
+            setupNavigation() {
+                const prevBtn = document.getElementById('prevBtn');
+                const nextBtn = document.getElementById('nextBtn');
+                
+                prevBtn?.addEventListener('click', () => this.previousSection());
+                nextBtn?.addEventListener('click', () => this.nextSection());
+            }
+
+            loadSection(index) {
+                const section = this.sections[index];
+                const container = document.getElementById('sectionContainer');
+                
+                // Update progress
+                const progress = ((index + 1) / this.sections.length) * 100;
+                document.getElementById('progressBar').style.width = `${progress}%`;
+                
+                // Update nav dots
+                document.querySelectorAll('.section-dot').forEach((dot, i) => {
+                    dot.classList.toggle('active', i === index);
+                    dot.classList.toggle('completed', i < index);
+                });
+                
+                // Update navigation buttons
+                document.getElementById('prevBtn').disabled = index === 0;
+                document.getElementById('nextBtn').textContent = 
+                    index === this.sections.length - 1 ? 'Generate Report' : 'Next →';
+                
+                // Load section content
+                container.innerHTML = this.getSectionHTML(section);
+                
+                // Apply fade-in animation
+                container.style.opacity = '0';
+                setTimeout(() => {
+                    container.style.transition = 'opacity 0.5s ease';
+                    container.style.opacity = '1';
+                }, 50);
+                
+                this.currentSectionIndex = index;
+            }
+
+            getSectionHTML(section) {
+                switch(section.id) {
+                    case 'safety':
+                        return this.getSafetyHTML();
+                    case 'holistic':
+                        return this.getHolisticHTML();
+                    case 'concerns':
+                        return this.getConcernsHTML();
+                    case 'symptoms':
+                        return this.getSymptomsHTML();
+                    default:
+                        return '';
+                }
+            }
+
+            getSafetyHTML() {
+                const questions = [
+                    "Do you have a pacemaker or any other implanted electronic device?",
+                    "Are you currently in the first trimester of pregnancy?",
+                    "Are you currently undergoing active cancer treatment?",
+                    "Do you have a diagnosed severe arrhythmia?",
+                    "Have you had a stroke or heart attack within the last six weeks?"
+                ];
+                
+                return `
+                    <div class="space-y-6">
+                        <div>
+                            <h2 class="text-2xl font-semibold text-slate-800">${this.sections[0].title}</h2>
+                            <p class="text-slate-600 mt-2">${this.sections[0].subtitle}</p>
+                        </div>
+                        
+                        <div class="space-y-4 mt-6">
+                            ${questions.map((q, i) => `
+                                <div class="flex items-start p-4 bg-slate-50 rounded-lg">
+                                    <div class="flex-1 text-sm">${i + 1}. ${q}</div>
+                                    <div class="flex items-center space-x-4 ml-4">
+                                        <label class="flex items-center cursor-pointer">
+                                            <input type="radio" name="safety-${i}" value="no" class="h-4 w-4 text-green-600" checked>
+                                            <span class="ml-2 text-sm">No</span>
+                                        </label>
+                                        <label class="flex items-center cursor-pointer">
+                                            <input type="radio" name="safety-${i}" value="yes" class="h-4 w-4 text-red-600">
+                                            <span class="ml-2 text-sm">Yes</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        
+                        <div id="contraindication-warning" class="hidden mt-4 p-4 bg-red-100 border-l-4 border-red-500 text-red-700">
+                            <p class="font-bold">⚠️ Therapy Cannot Proceed</p>
+                            <p>The client has indicated a contraindication. Please advise them to consult their GP.</p>
+                        </div>
+                    </div>
                 `;
-                container.appendChild(card);
-            });
-        }
+            }
 
-        window.viewReport = async function(assessmentId) {
-            const { data } = await supabase
-                .from('comprehensive_assessments')
-                .select('report_html')
-                .eq('id', assessmentId)
-                .single();
-            
-            if (data && data.report_html) {
-                const reportWindow = window.open('', '_blank');
-                reportWindow.document.write(data.report_html);
+            getHolisticHTML() {
+                return `
+                    <div class="space-y-6">
+                        <div>
+                            <h2 class="text-2xl font-semibold text-slate-800">${this.sections[1].title}</h2>
+                            <p class="text-slate-600 mt-2">${this.sections[1].subtitle}</p>
+                        </div>
+                        
+                        <div class="space-y-6 mt-6">
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-2">
+                                    What is the main health challenge you're hoping we can support?
+                                </label>
+                                <textarea 
+                                    id="main-challenge" 
+                                    rows="3" 
+                                    class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    placeholder="Describe your main health concern..."
+                                ></textarea>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-2">
+                                        Energy Level (1-10)
+                                    </label>
+                                    <input type="range" id="energy-level" min="1" max="10" value="5" 
+                                        class="w-full" oninput="this.nextElementSibling.textContent = this.value">
+                                    <output class="block text-center mt-1 font-semibold text-blue-600">5</output>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-2">
+                                        Sleep Quality (1-10)
+                                    </label>
+                                    <input type="range" id="sleep-quality" min="1" max="10" value="5" 
+                                        class="w-full" oninput="this.nextElementSibling.textContent = this.value">
+                                    <output class="block text-center mt-1 font-semibold text-blue-600">5</output>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-2">
+                                        Stress Level (1-10)
+                                    </label>
+                                    <input type="range" id="stress-level" min="1" max="10" value="5" 
+                                        class="w-full" oninput="this.nextElementSibling.textContent = this.value">
+                                    <output class="block text-center mt-1 font-semibold text-blue-600">5</output>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-2">
+                                        Digestive Comfort (1-10)
+                                    </label>
+                                    <input type="range" id="digestive-comfort" min="1" max="10" value="5" 
+                                        class="w-full" oninput="this.nextElementSibling.textContent = this.value">
+                                    <output class="block text-center mt-1 font-semibold text-blue-600">5</output>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-2">
+                                    Which aspects of life are most affected?
+                                </label>
+                                <div class="space-y-2">
+                                    ${['Work/Productivity', 'Mood/Emotional Well-being', 'Social Life/Relationships', 'Hobbies/Physical Activities'].map(aspect => `
+                                        <label class="flex items-center p-3 bg-slate-50 rounded-lg cursor-pointer hover:bg-slate-100">
+                                            <input type="checkbox" value="${aspect}" class="h-4 w-4 text-blue-600 mr-3">
+                                            <span class="text-sm">${aspect}</span>
+                                        </label>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            getConcernsHTML() {
+                const concerns = [
+                    'Sleep, Stress & Anxiety',
+                    'Cardiovascular & Circulation',
+                    'Kidney & Urinary Wellness',
+                    'Joint Pain & Arthritis Relief',
+                    'Digestive & Energy Wellness',
+                    'Circulation & Healing Support',
+                    'Comprehensive Preventative Wellness'
+                ];
+                
+                return `
+                    <div class="space-y-6">
+                        <div>
+                            <h2 class="text-2xl font-semibold text-slate-800">${this.sections[2].title}</h2>
+                            <p class="text-slate-600 mt-2">${this.sections[2].subtitle}</p>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                            ${concerns.map((concern, i) => `
+                                <label class="flex items-center p-4 border-2 border-slate-200 rounded-lg hover:bg-slate-50 cursor-pointer transition-all">
+                                    <input type="checkbox" value="theme-${i + 1}" name="primary-concern" 
+                                        class="h-5 w-5 text-blue-600 mr-3">
+                                    <span class="text-sm font-medium">${concern}</span>
+                                </label>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            getSymptomsHTML() {
+                // This will be dynamically populated based on selected concerns
+                return `
+                    <div class="space-y-6">
+                        <div>
+                            <h2 class="text-2xl font-semibold text-slate-800">${this.sections[3].title}</h2>
+                            <p class="text-slate-600 mt-2">Please select all symptoms that apply to your condition</p>
+                        </div>
+                        
+                        <div id="symptoms-container" class="space-y-6 mt-6">
+                            <!-- Symptoms will be dynamically loaded based on selected concerns -->
+                        </div>
+                    </div>
+                `;
+            }
+
+            async previousSection() {
+                if (this.currentSectionIndex > 0) {
+                    await this.saveCurrentSection();
+                    this.loadSection(this.currentSectionIndex - 1);
+                }
+            }
+
+            async nextSection() {
+                // Validate current section
+                if (!this.validateCurrentSection()) {
+                    return;
+                }
+                
+                await this.saveCurrentSection();
+                
+                if (this.currentSectionIndex < this.sections.length - 1) {
+                    // Special handling for symptoms section
+                    if (this.sections[this.currentSectionIndex + 1].id === 'symptoms') {
+                        await this.loadSymptomsForConcerns();
+                    }
+                    this.loadSection(this.currentSectionIndex + 1);
+                } else {
+                    // Generate report
+                    await this.generateReport();
+                }
+            }
+
+            validateCurrentSection() {
+                const section = this.sections[this.currentSectionIndex];
+                
+                // Check for contraindications in safety section
+                if (section.id === 'safety') {
+                    let hasContraindication = false;
+                    document.querySelectorAll('input[type="radio"]:checked').forEach(radio => {
+                        if (radio.value === 'yes') {
+                            hasContraindication = true;
+                        }
+                    });
+                    
+                    if (hasContraindication) {
+                        document.getElementById('contraindication-warning')?.classList.remove('hidden');
+                        return false;
+                    }
+                }
+                
+                // Validate concerns selection
+                if (section.id === 'concerns') {
+                    const selected = document.querySelectorAll('input[name="primary-concern"]:checked');
+                    if (selected.length === 0) {
+                        alert('Please select at least one area of concern');
+                        return false;
+                    }
+                }
+                
+                return true;
+            }
+
+            async saveCurrentSection() {
+                await this.saveProgress();
+                this.sections[this.currentSectionIndex].completed = true;
+            }
+
+            async loadSymptomsForConcerns() {
+                // Load symptoms based on selected concerns
+                // This would load the appropriate questionnaires from your therapy data
+                // For now, using a simplified version
+                
+                const container = document.getElementById('symptoms-container');
+                if (!container) return;
+                
+                const selectedConcerns = Array.from(
+                    document.querySelectorAll('input[name="primary-concern"]:checked')
+                ).map(cb => cb.value);
+                
+                // This would be populated from your comprehensive symptoms data
+                // Simplified for demonstration
+                container.innerHTML = `
+                    <div class="bg-blue-50 p-4 rounded-lg">
+                        <p class="text-sm text-blue-800">
+                            Detailed symptom questionnaires will appear here based on your selected concerns.
+                        </p>
+                    </div>
+                `;
+            }
+
+            async createAssessmentRecord() {
+                try {
+                    const { data, error } = await supabase
+                        .from('comprehensive_assessments')
+                        .insert({
+                            clinic_id: this.clinicId,
+                            patient_id: this.patientId,
+                            practitioner_name: this.practitionerName,
+                            patient_name: this.assessmentData.patientInfo.patient_name,
+                            patient_age: this.assessmentData.patientInfo.patient_age,
+                            patient_gender: this.assessmentData.patientInfo.patient_gender,
+                            status: 'in_progress'
+                        })
+                        .select()
+                        .single();
+                    
+                    if (error) throw error;
+                    
+                    this.assessmentId = data.id;
+                    console.log('Assessment created:', this.assessmentId);
+                    
+                } catch (error) {
+                    console.error('Error creating assessment:', error);
+                    this.showSaveIndicator('Error creating assessment', 'error');
+                }
+            }
+
+            startAutoSave() {
+                // Auto-save every 30 seconds
+                setInterval(() => {
+                    if (this.assessmentId) {
+                        this.saveProgress();
+                    }
+                }, 30000);
+            }
+
+            async saveProgress() {
+                if (!this.assessmentId) return;
+                
+                this.showSaveIndicator('Saving...', 'saving');
+                
+                // Collect data based on current section
+                this.collectSectionData();
+                
+                try {
+                    const { error } = await supabase
+                        .from('comprehensive_assessments')
+                        .update({
+                            ...this.assessmentData,
+                            updated_at: new Date().toISOString()
+                        })
+                        .eq('id', this.assessmentId);
+                    
+                    if (error) throw error;
+                    
+                    this.showSaveIndicator('Saved', 'saved');
+                    
+                } catch (error) {
+                    console.error('Error saving:', error);
+                    this.showSaveIndicator('Error saving', 'error');
+                }
+            }
+
+            collectSectionData() {
+                const section = this.sections[this.currentSectionIndex];
+                
+                switch(section.id) {
+                    case 'safety':
+                        const safetyResponses = {};
+                        document.querySelectorAll('input[type="radio"]:checked').forEach((radio, i) => {
+                            safetyResponses[`q${i}`] = radio.value;
+                        });
+                        this.assessmentData.safetyResponses = safetyResponses;
+                        break;
+                        
+                    case 'holistic':
+                        this.assessmentData.holisticSnapshot = {
+                            mainChallenge: document.getElementById('main-challenge')?.value,
+                            energyLevel: document.getElementById('energy-level')?.value,
+                            sleepQuality: document.getElementById('sleep-quality')?.value,
+                            stressLevel: document.getElementById('stress-level')?.value,
+                            digestiveComfort: document.getElementById('digestive-comfort')?.value,
+                            lifeAspects: Array.from(
+                                document.querySelectorAll('input[type="checkbox"]:checked')
+                            ).map(cb => cb.value)
+                        };
+                        break;
+                        
+                    case 'concerns':
+                        this.assessmentData.selectedThemes = Array.from(
+                            document.querySelectorAll('input[name="primary-concern"]:checked')
+                        ).map(cb => cb.value);
+                        break;
+                }
+            }
+
+            async generateReport() {
+                // Show loading
+                this.showSaveIndicator('Generating report...', 'saving');
+                
+                // Hide assessment form, show report
+                document.getElementById('assessment-form').classList.add('hidden');
+                document.getElementById('report-section').classList.remove('hidden');
+                
+                // Generate report HTML with patient details
+                const reportHTML = this.createReportHTML();
+                document.getElementById('report-section').innerHTML = reportHTML;
+                
+                // Save complete assessment
+                await this.saveCompleteAssessment(reportHTML);
+                
+                window.scrollTo(0, 0);
+            }
+
+            createReportHTML() {
+                const date = new Date().toLocaleDateString('en-GB');
+                
+                return `
+                    <div class="space-y-8">
+                        <h2 class="text-3xl font-bold text-center text-slate-900">Personalised Wellness Plan</h2>
+                        
+                        <div class="bg-gray-50 p-6 rounded-lg">
+                            <h3 class="text-lg font-semibold mb-4">Patient Information</h3>
+                            <div class="grid grid-cols-2 gap-4 text-sm">
+                                <div><strong>Name:</strong> ${this.assessmentData.patientInfo.patient_name}</div>
+                                <div><strong>Age:</strong> ${this.assessmentData.patientInfo.patient_age}</div>
+                                <div><strong>Gender:</strong> ${this.assessmentData.patientInfo.patient_gender}</div>
+                                <div><strong>Assessment Date:</strong> ${date}</div>
+                                <div><strong>Practitioner:</strong> ${this.practitionerName}</div>
+                                <div><strong>Clinic ID:</strong> ${this.clinicId}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-blue-50 p-6 rounded-lg">
+                            <h3 class="text-lg font-semibold mb-4">Assessment Summary</h3>
+                            <p class="text-sm text-gray-700">
+                                <strong>Main Health Challenge:</strong> ${this.assessmentData.holisticSnapshot.mainChallenge || 'Not specified'}
+                            </p>
+                            <div class="grid grid-cols-2 gap-4 mt-4 text-sm">
+                                <div><strong>Energy Level:</strong> ${this.assessmentData.holisticSnapshot.energyLevel}/10</div>
+                                <div><strong>Sleep Quality:</strong> ${this.assessmentData.holisticSnapshot.sleepQuality}/10</div>
+                                <div><strong>Stress Level:</strong> ${this.assessmentData.holisticSnapshot.stressLevel}/10</div>
+                                <div><strong>Digestive Comfort:</strong> ${this.assessmentData.holisticSnapshot.digestiveComfort}/10</div>
+                            </div>
+                        </div>
+                        
+                        <div class="text-center mt-8 no-print">
+                            <button onclick="window.print()" class="bg-gray-700 text-white font-semibold py-2 px-6 rounded-lg hover:bg-gray-800 mr-3">
+                                Print Report
+                            </button>
+                            <button onclick="location.reload()" class="bg-blue-600 text-white font-semibold py-2 px-6 rounded-lg hover:bg-blue-700">
+                                New Assessment
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            async saveCompleteAssessment(reportHTML) {
+                if (!this.assessmentId) return;
+                
+                try {
+                    const { error } = await supabase
+                        .from('comprehensive_assessments')
+                        .update({
+                            report_html: reportHTML,
+                            status: 'completed',
+                            completion_time: Math.round((new Date() - this.startTime) / 1000),
+                            updated_at: new Date().toISOString()
+                        })
+                        .eq('id', this.assessmentId);
+                    
+                    if (error) throw error;
+                    
+                    this.showSaveIndicator('Assessment completed!', 'saved');
+                    
+                } catch (error) {
+                    console.error('Error saving report:', error);
+                    this.showSaveIndicator('Error saving report', 'error');
+                }
+            }
+
+            showSaveIndicator(message, type) {
+                const indicator = document.getElementById('saveIndicator');
+                const messageSpan = document.getElementById('saveMessage');
+                const spinner = document.getElementById('saveSpinner');
+                
+                indicator.className = `save-indicator ${type}`;
+                messageSpan.textContent = message;
+                
+                if (type === 'saving') {
+                    spinner.style.display = 'block';
+                } else {
+                    spinner.style.display = 'none';
+                    setTimeout(() => {
+                        indicator.className = 'save-indicator';
+                    }, 3000);
+                }
+            }
+
+            loadTherapyData() {
+                // Load your therapy details and questions data
+                // This would include all the therapy codes, descriptions, etc.
+                // For now, keeping it minimal for the example
             }
         }
 
-        loadAssessments();
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            window.assessment = new ComprehensiveAssessment();
+        });
     </script>
 </body>
 </html>
