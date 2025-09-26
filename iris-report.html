@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IRIS Assessment Report - Celloxen Platform</title>
+    
+    <!-- Supabase library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <style>
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+        }
+        
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            color: #1f2937;
+        }
+        
+        .header { 
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+            color: white;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+        }
+        
+        .header p {
+            color: #cbd5e1;
+            margin-top: 5px;
+            font-size: 14px;
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .header-btn {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .header-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white; }
+            .report-container { box-shadow: none; }
+        }
+        
+        .report-container {
+            max-width: 1200px;
+            margin: 30px auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+        
+        .report-header {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .report-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .report-subtitle {
+            color: #cbd5e1;
+            font-size: 16px;
+        }
+        
+        .patient-info-bar {
+            background: #f8fafc;
+            padding: 20px 40px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .info-item {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .info-label {
+            font-size: 12px;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+        
+        .info-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .report-content {
+            padding: 40px;
+        }
+        
+        .section {
+            margin-bottom: 40px;
+        }
+        
+        .section-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #1e3a8a;
+        }
+        
+        .iris-images-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .iris-card {
+            border: 2px solid #e2e8f0;
+            border-radius: 15px;
+            overflow: hidden;
+            background: #f8fafc;
+        }
+        
+        .iris-card-header {
+            background: linear-gradient(135deg, #1e3a8a, #1e40af);
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 18px;
+        }
+        
+        .iris-image-container {
+            padding: 20px;
+            text-align: center;
+            background: #000;
+        }
+        
+        .iris-image {
+            max-width: 100%;
+            height: 300px;
+            object-fit: contain;
+            border-radius: 10px;
+        }
+        
+        .analysis-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .analysis-card {
+            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 4px solid #1e3a8a;
+        }
+        
+        .analysis-label {
+            font-size: 14px;
+            color: #64748b;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        .analysis-value {
+            font-size: 18px;
+            color: #1e293b;
+            font-weight: 700;
+        }
+        
+        .system-analysis-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .system-card {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .system-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        
+        .system-name {
+            font-size: 14px;
+            color: #64748b;
+            margin-bottom: 8px;
+        }
+        
+        .system-status {
+            font-size: 16px;
+            font-weight: 700;
+            padding: 5px 10px;
+            border-radius: 6px;
+        }
+        
+        .status-good {
+            background: #d1fae5;
+            color: #064e3b;
+        }
+        
+        .status-moderate {
+            background: #fed7aa;
+            color: #7c2d12;
+        }
+        
+        .status-attention {
+            background: #fee2e2;
+            color: #7f1d1d;
+        }
+        
+        .recommendations-section {
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+            padding: 25px;
+            border-radius: 15px;
+            margin-top: 20px;
+        }
+        
+        .recommendations-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #166534;
+            margin-bottom: 15px;
+        }
+        
+        .recommendation-list {
+            list-style: none;
+        }
+        
+        .recommendation-item {
+            padding: 12px;
+            margin-bottom: 10px;
+            background: white;
+            border-radius: 8px;
+            border-left: 4px solid #22c55e;
+            display: flex;
+            align-items: center;
+        }
+        
+        .recommendation-icon {
+            color: #22c55e;
+            margin-right: 12px;
+            font-size: 20px;
+        }
+        
+        .footer-section {
+            background: #f8fafc;
+            padding: 30px 40px;
+            border-top: 2px solid #e2e8f0;
+            margin-top: 40px;
+        }
+        
+        .footer-content {
+            text-align: center;
+            color: #64748b;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+        
+        .btn {
+            padding: 12px 28px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #1e3a8a, #1e40af);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(30, 58, 138, 0.3);
+        }
+        
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #374151;
+        }
+        
+        .btn-secondary:hover {
+            background: #d1d5db;
+        }
+        
+        .loading-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 400px;
+        }
+        
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 6px solid #f3f3f3;
+            border-top: 6px solid #1e3a8a;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="header no-print">
+        <div class="header-content">
+            <div>
+                <h1>IRIS Constitutional Assessment Report</h1>
+                <p>AI-Powered Iris Analysis Results</p>
+            </div>
+            <div class="header-actions">
+                <button class="header-btn" onclick="window.print()">🖨️ Print Report</button>
+                <a href="clinic-dashboard.html" class="header-btn">← Back to Dashboard</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="report-container" id="reportContainer">
+        <div class="loading-container" id="loadingContainer">
+            <div class="loading-spinner"></div>
+        </div>
+        
+        <div id="reportContent" style="display: none;">
+            <div class="report-header">
+                <h1 class="report-title">IRIS Constitutional Analysis Report</h1>
+                <p class="report-subtitle">Comprehensive Biometric Assessment Results</p>
+            </div>
+            
+            <div class="patient-info-bar">
+                <div class="info-item">
+                    <span class="info-label">Patient Name</span>
+                    <span class="info-value" id="patientName">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Patient ID</span>
+                    <span class="info-value" id="patientId">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Age</span>
+                    <span class="info-value" id="patientAge">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Assessment Date</span>
+                    <span class="info-value" id="assessmentDate">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Report ID</span>
+                    <span class="info-value" id="assessmentId">-</span>
+                </div>
+            </div>
+            
+            <div class="report-content">
+                <!-- Iris Images Section -->
+                <div class="section">
+                    <h2 class="section-title">Iris Images</h2>
+                    <div class="iris-images-section">
+                        <div class="iris-card">
+                            <div class="iris-card-header">Left Iris</div>
+                            <div class="iris-image-container">
+                                <img id="leftIrisImage" class="iris-image" alt="Left Iris">
+                            </div>
+                        </div>
+                        <div class="iris-card">
+                            <div class="iris-card-header">Right Iris</div>
+                            <div class="iris-image-container">
+                                <img id="rightIrisImage" class="iris-image" alt="Right Iris">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Constitutional Analysis -->
+                <div class="section">
+                    <h2 class="section-title">Constitutional Analysis</h2>
+                    <div class="analysis-grid">
+                        <div class="analysis-card">
+                            <div class="analysis-label">Constitutional Type</div>
+                            <div class="analysis-value" id="constitutionalType">-</div>
+                        </div>
+                        <div class="analysis-card">
+                            <div class="analysis-label">Fiber Density</div>
+                            <div class="analysis-value" id="fiberDensity">-</div>
+                        </div>
+                        <div class="analysis-card">
+                            <div class="analysis-label">Pupil Size</div>
+                            <div class="analysis-value" id="pupilSize">-</div>
+                        </div>
+                        <div class="analysis-card">
+                            <div class="analysis-label">Collarette Position</div>
+                            <div class="analysis-value" id="collarettePosition">-</div>
+                        </div>
+                        <div class="analysis-card">
+                            <div class="analysis-label">Lacunae Present</div>
+                            <div class="analysis-value" id="lacunaePresent">-</div>
+                        </div>
+                        <div class="analysis-card">
+                            <div class="analysis-label">Stress Rings</div>
+                            <div class="analysis-value" id="stressRings">-</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- System Analysis -->
+                <div class="section">
+                    <h2 class="section-title">7-System Health Analysis</h2>
+                    <div class="system-analysis-grid" id="systemAnalysisGrid">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+                
+                <!-- Recommendations -->
+                <div class="section">
+                    <h2 class="section-title">Health Recommendations</h2>
+                    <div class="recommendations-section">
+                        <div class="recommendations-title">Personalized Action Plan</div>
+                        <ul class="recommendation-list" id="recommendationsList">
+                            <!-- Populated dynamically -->
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="action-buttons no-print">
+                    <button class="btn btn-secondary" onclick="window.print()">Print Report</button>
+                    <a href="iris-assessment-integrated.html" class="btn btn-primary">New Assessment</a>
+                </div>
+            </div>
+            
+            <div class="footer-section">
+                <div class="footer-content">
+                    <p><strong>Disclaimer:</strong> This IRIS assessment is for informational purposes only and should not replace professional medical advice. 
+                    The analysis provided is based on traditional iridology principles combined with modern AI technology. 
+                    Please consult with qualified healthcare professionals for medical diagnosis and treatment.</p>
+                    <p style="margin-top: 15px;">© 2025 Celloxen Health Platform - IRIS Constitutional Assessment Report</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Supabase configuration
+        const SUPABASE_URL = 'https://defifwzgazqlrigwumqn.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlZmlmd3pnYXpxbHJpZ3d1bXFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcyNTM0MjYsImV4cCI6MjA3MjgyOTQyNn0.wcUBq6Pszjtqn5aBtuu3iXBE4BLmu8x9LtJbsMWlIiA';
+        const { createClient } = supabase;
+        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const patientId = urlParams.get('patientId');
+            const assessmentId = urlParams.get('assessmentId');
+            
+            if (!patientId || !assessmentId) {
+                alert('Missing patient or assessment information.');
+                window.location.href = 'iris-assessment-integrated.html';
+                return;
+            }
+            
+            await loadReport(patientId, assessmentId);
+        });
+        
+        async function loadReport(patientId, assessmentId) {
+            try {
+                // Load assessment data
+                const { data: assessment, error: assessmentError } = await supabaseClient
+                    .from('iris_assessments')
+                    .select('*')
+                    .eq('id', assessmentId)
+                    .eq('patient_id', patientId)
+                    .single();
+                
+                if (assessmentError) throw assessmentError;
+                
+                // Load patient data
+                const { data: patient, error: patientError } = await supabaseClient
+                    .from('patients')
+                    .select('*')
+                    .eq('id', patientId)
+                    .single();
+                
+                if (patientError) throw patientError;
+                
+                // Display the report
+                displayReport(assessment, patient);
+                
+            } catch (error) {
+                console.error('Error loading report:', error);
+                alert('Error loading report. Please try again.');
+                window.location.href = 'iris-assessment-integrated.html';
+            }
+        }
+        
+        function displayReport(assessment, patient) {
+            // Hide loading, show content
+            document.getElementById('loadingContainer').style.display = 'none';
+            document.getElementById('reportContent').style.display = 'block';
+            
+            // Patient Information
+            document.getElementById('patientName').textContent = assessment.patient_name || `${patient.first_name} ${patient.last_name}`;
+            document.getElementById('patientId').textContent = patient.patient_id;
+            document.getElementById('patientAge').textContent = assessment.patient_age || calculateAge(patient.date_of_birth);
+            document.getElementById('assessmentDate').textContent = new Date(assessment.assessment_date || assessment.created_at).toLocaleDateString('en-GB');
+            document.getElementById('assessmentId').textContent = `#${assessment.id}`;
+            
+            // Display Iris Images
+            if (assessment.left_iris_image) {
+                document.getElementById('leftIrisImage').src = 'data:image/jpeg;base64,' + assessment.left_iris_image;
+            }
+            if (assessment.right_iris_image) {
+                document.getElementById('rightIrisImage').src = 'data:image/jpeg;base64,' + assessment.right_iris_image;
+            }
+            
+            // Display Analysis Results
+            const results = assessment.analysis_results || {};
+            
+            // Constitutional Analysis
+            document.getElementById('constitutionalType').textContent = results.constitutional_type || 'Pending Analysis';
+            document.getElementById('fiberDensity').textContent = results.fiber_density || 'Pending Analysis';
+            document.getElementById('pupilSize').textContent = results.pupil_size || 'Pending Analysis';
+            document.getElementById('collarettePosition').textContent = results.collarette_position || 'Pending Analysis';
+            document.getElementById('lacunaePresent').textContent = results.lacunae_present ? 'Yes' : 'No';
+            document.getElementById('stressRings').textContent = results.stress_rings || '0';
+            
+            // System Analysis
+            const systemAnalysis = results.system_analysis || {};
+            const systemGrid = document.getElementById('systemAnalysisGrid');
+            systemGrid.innerHTML = '';
+            
+            const systems = {
+                'Digestive': systemAnalysis.digestive || 'Not Assessed',
+                'Nervous': systemAnalysis.nervous || 'Not Assessed',
+                'Circulatory': systemAnalysis.circulatory || 'Not Assessed',
+                'Immune': systemAnalysis.immune || 'Not Assessed',
+                'Endocrine': systemAnalysis.endocrine || 'Not Assessed',
+                'Respiratory': systemAnalysis.respiratory || 'Not Assessed',
+                'Urinary': systemAnalysis.urinary || 'Not Assessed'
+            };
+            
+            Object.entries(systems).forEach(([name, status]) => {
+                const statusClass = getStatusClass(status);
+                systemGrid.innerHTML += `
+                    <div class="system-card">
+                        <div class="system-name">${name} System</div>
+                        <div class="system-status ${statusClass}">${status}</div>
+                    </div>
+                `;
+            });
+            
+            // Recommendations
+            const recommendations = results.recommendations || [];
+            const recommendationsList = document.getElementById('recommendationsList');
+            recommendationsList.innerHTML = '';
+            
+            if (recommendations.length > 0) {
+                recommendations.forEach(rec => {
+                    recommendationsList.innerHTML += `
+                        <li class="recommendation-item">
+                            <span class="recommendation-icon">✓</span>
+                            <span>${rec}</span>
+                        </li>
+                    `;
+                });
+            } else {
+                recommendationsList.innerHTML = `
+                    <li class="recommendation-item">
+                        <span class="recommendation-icon">ℹ️</span>
+                        <span>Complete AI analysis pending. Recommendations will be generated after full assessment.</span>
+                    </li>
+                `;
+            }
+        }
+        
+        function calculateAge(dateOfBirth) {
+            if (!dateOfBirth) return 'N/A';
+            const today = new Date();
+            const birthDate = new Date(dateOfBirth);
+            let age = today.getFullYear() - birthDate.getFullYear();
+            const monthDiff = today.getMonth() - birthDate.getMonth();
+            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                age--;
+            }
+            return age;
+        }
+        
+        function getStatusClass(status) {
+            const lowerStatus = status.toLowerCase();
+            if (lowerStatus.includes('good') || lowerStatus.includes('strong') || lowerStatus.includes('balanced')) {
+                return 'status-good';
+            } else if (lowerStatus.includes('moderate') || lowerStatus.includes('normal')) {
+                return 'status-moderate';
+            } else {
+                return 'status-attention';
+            }
+        }
+    </script>
+</body>
+</html>
