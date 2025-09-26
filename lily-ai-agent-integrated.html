@@ -316,7 +316,7 @@
             '403': { theme: 'Joint Pain & Arthritis Relief', name: "Joint Mobility Therapy", rationale: "Your concerns about stiffness, reduced flexibility, and difficulty with daily movements are the key indicators for this therapy. It works by supporting the flexibility of connective tissues and improving joint lubrication, helping you regain your natural freedom of movement.", benefitsTimeline: { immediate: "Easier initiation of movement and a reduced feeling of stiffness.", shortTerm: "A measurable increase in flexibility and better comfort in daily movements.", mediumTerm: "Significant improvement in your range of motion and functional gains.", longTerm: "Restored mobility and maintained flexibility for an active life." }, sessionLength: "45 minutes", frequency: "3 sessions per week", fullCourse: "8-12 weeks", totalSessions: "24-36 sessions", nutritionalSupport: ["Collagen Peptides (10g)", "Vitamin C (1000mg)", "Hyaluronic Acid (100mg)"] },
             '501': { theme: 'Circulation & Healing Support', name: "Wound Healing Therapy", rationale: "This therapy is recommended based on your answers concerning slow-healing wounds. By enhancing circulation and stimulating cellular energy directly at the site, it creates the ideal conditions for your body's own repair mechanisms to work faster and more effectively.", benefitsTimeline: { immediate: "Improved appearance of the healing area and greater comfort.", shortTerm: "Visible healing progress and healthy new tissue development.", mediumTerm: "Significant advancement in healing and strong tissue formation.", longTerm: "Complete healing with minimal scarring and restored tissue integrity." }, sessionLength: "45 minutes", frequency: "3-4 sessions per week", fullCourse: "12 weeks or until healed", totalSessions: "36-48 sessions", nutritionalSupport: ["Vitamin C (1000mg)", "Zinc (25mg)", "L-Arginine (1000mg)"] },
             '502': { theme: 'Circulation & Healing Support', name: "Vascular Health Therapy", rationale: "Your symptoms of leg heaviness, swelling, and other circulation-related issues indicate a need to support your vascular system directly. This therapy helps improve the flexibility and strength of your blood vessels, promoting better blood flow and reducing the discomfort associated with venous insufficiency.", benefitsTimeline: { immediate: "Improved circulation sensation and greater comfort in your legs.", shortTerm: "Better walking comfort and reduced leg heaviness and swelling.", mediumTerm: "Significant improvement in circulation and better exercise tolerance.", longTerm: "Maintained vascular health and optimal vessel function." }, sessionLength: "40 minutes", frequency: "2-3 sessions per week", fullCourse: "10-12 weeks", totalSessions: "20-36 sessions", nutritionalSupport: ["Grape Seed Extract (150mg)", "Rutin (500mg)", "Resveratrol (250mg)"] },
-            '601': { theme: 'Digestive & Energy Wellness', name: "Digestive Balance Therapy", rationale: "Your answers highlighting bloating, irregular bowel patterns, and post-meal discomfort suggest an imbalance in your digestive rhythm. This therapy helps to regulate gut motility and support your body’s natural digestive processes, leading to improved comfort and better nutrient absorption.", benefitsTimeline: { immediate: "Reduced bloating and greater comfort after meals.", shortTerm: "More regular elimination patterns and reduced gas discomfort.", mediumTerm: "Normalised digestive function and significantly improved comfort.", longTerm: "Sustained digestive comfort and optimal gut wellness." }, sessionLength: "40 minutes", frequency: "2 sessions per week", fullCourse: "8 weeks", totalSessions: "16 sessions", nutritionalSupport: ["Probiotic Blend (50 billion CFU)", "Digestive Enzymes", "L-Glutamine (5g)"] },
+            '601': { theme: 'Digestive & Energy Wellness', name: "Digestive Balance Therapy", rationale: "Your answers highlighting bloating, irregular bowel patterns, and post-meal discomfort suggest an imbalance in your digestive rhythm. This therapy helps to regulate gut motility and support your body's natural digestive processes, leading to improved comfort and better nutrient absorption.", benefitsTimeline: { immediate: "Reduced bloating and greater comfort after meals.", shortTerm: "More regular elimination patterns and reduced gas discomfort.", mediumTerm: "Normalised digestive function and significantly improved comfort.", longTerm: "Sustained digestive comfort and optimal gut wellness." }, sessionLength: "40 minutes", frequency: "2 sessions per week", fullCourse: "8 weeks", totalSessions: "16 sessions", nutritionalSupport: ["Probiotic Blend (50 billion CFU)", "Digestive Enzymes", "L-Glutamine (5g)"] },
             '602': { theme: 'Digestive & Energy Wellness', name: "Energy Boost Therapy", rationale: "The pattern of chronic fatigue, brain fog, and energy crashes you described points to depleted cellular energy. This therapy works by supporting your body's fundamental energy production systems, helping you to build sustainable, natural vitality without relying on stimulants.", benefitsTimeline: { immediate: "An immediate energy boost and improved mental clarity after sessions.", shortTerm: "Sustained daily energy, better morning vitality, and reduced need for caffeine.", mediumTerm: "Significantly increased stamina and restoration of normal activity levels.", longTerm: "Sustained energy restoration and a return to full, active engagement in life." }, sessionLength: "40 minutes", frequency: "2-3 sessions per week", fullCourse: "8 weeks", totalSessions: "16-24 sessions", nutritionalSupport: ["B12 (1000mcg)", "CoQ10 (100mg)", "Adaptogenic Blend (Ashwagandha, Rhodiola)"] },
             '703': { theme: 'Digestive & Energy Wellness', name: "Skin Health Therapy", rationale: "This therapy is indicated by your desire to improve skin health from a foundational level. It works by enhancing circulation and supporting natural collagen production, addressing the internal factors that create radiant, healthy, and resilient skin, rather than just treating the surface.", benefitsTimeline: { immediate: "A feeling of better skin hydration and improved comfort.", shortTerm: "Improved skin texture, a clearer complexion, and reduced sensitivity.", mediumTerm: "Significant texture improvement, better skin tone, and enhanced radiance.", longTerm: "Sustained skin health and a natural, radiant appearance." }, sessionLength: "40 minutes", frequency: "2 sessions per week", fullCourse: "8 weeks", totalSessions: "16 sessions", nutritionalSupport: ["Collagen Peptides (10g)", "Biotin (5000mcg)", "Evening Primrose Oil (1000mg)"] },
             '801': { theme: 'Comprehensive Wellness', name: "Total Wellness Package", rationale: "This package is the ultimate choice for proactive, preventative wellness. It addresses all major body systems in every session, creating a powerful synergistic effect that enhances energy, improves resilience, and supports long-term vitality. It is ideal for those seeking to optimise their overall health.", benefitsTimeline: { immediate: "Deep relaxation combined with a feeling of energy renewal.", shortTerm: "Increased vitality, better stress management, and improved digestion.", mediumTerm: "Optimal energy levels, excellent quality sleep, and strong resilience.", longTerm: "A comprehensive wellness transformation with youthful vitality and optimal function." }, sessionLength: "60 minutes", frequency: "1-2 sessions per week", fullCourse: "8-16 weeks", totalSessions: "8-32 sessions", nutritionalSupport: ["Comprehensive Multivitamin", "Omega-3 (2000mg)", "Probiotic (50 billion CFU)"] },
@@ -376,44 +376,28 @@
             }
 
             async init() {
-                // Get auth data from either localStorage or sessionStorage
-                const authDataString = localStorage.getItem('celloxen_auth') || sessionStorage.getItem('celloxen_auth');
+                // Get auth data from localStorage - matching your platform's structure
+                const authDataString = localStorage.getItem('celloxen_auth');
 
                 if (!authDataString) {
-                    alert('Authentication session not found. Please log in to access this module.');
+                    alert('Please log in to access this module.');
                     window.location.href = 'unified-login.html';
                     return;
                 }
                 
                 const authData = JSON.parse(authDataString);
 
-                // Set the user's session for Supabase
-                if (authData.access_token && authData.refresh_token) {
-                    const { error } = await supabaseClient.auth.setSession({
-                        access_token: authData.access_token,
-                        refresh_token: authData.refresh_token,
-                    });
-                    if (error) {
-                        console.error("Failed to set Supabase session:", error);
-                        alert("Your session has expired or is invalid. Please log in again.");
-                        localStorage.removeItem('celloxen_auth');
-                        sessionStorage.removeItem('celloxen_auth');
-                        window.location.href = 'unified-login.html';
-                        return;
-                    }
-                } else {
-                    alert('Invalid authentication data. Please log in again.');
+                // Use the correct field names from your auth structure
+                this.clinicId = authData.clinicId;
+                this.practitionerName = authData.username || 'Practitioner';
+                
+                if (!this.clinicId) {
+                    alert('Clinic ID not found. Please log in again.');
                     window.location.href = 'unified-login.html';
                     return;
                 }
 
-                this.clinicId = authData.user?.user_metadata?.clinic_id;
-                this.practitionerName = authData.user?.user_metadata?.full_name || 'Practitioner';
-                
-                if (!this.clinicId) {
-                    alert('Clinic ID not found in your profile. Please contact support.');
-                    return;
-                }
+                console.log('Initialized with clinic ID:', this.clinicId, 'Practitioner:', this.practitionerName);
 
                 this.setupPatientSearch();
                 this.setupNavigation();
@@ -464,7 +448,7 @@
                     if (error) throw error;
                     
                     let html = '';
-                    if(patients.length > 0) {
+                    if(patients && patients.length > 0) {
                         html = patients.map(p => {
                             const age = p.date_of_birth ? Math.floor((new Date() - new Date(p.date_of_birth)) / 31557600000) : 'N/A';
                             return `<div class="patient-option" data-id="${p.id}">
@@ -846,7 +830,7 @@
                         </div>
                         <div class="text-center mt-8 no-print">
                             <button onclick="window.print()" class="bg-gray-700 text-white font-semibold py-2 px-6 rounded-lg shadow-sm hover:bg-gray-800">Print Plan</button>
-                            <a href="assessment-tool-integrated.html" class="ml-4 bg-indigo-600 text-white font-semibold py-2 px-6 rounded-lg shadow-sm hover:bg-indigo-700">Start New Assessment</a>
+                            <a href="lily-ai-agent-integrated.html" class="ml-4 bg-indigo-600 text-white font-semibold py-2 px-6 rounded-lg shadow-sm hover:bg-indigo-700">Start New Assessment</a>
                         </div>`;
             }
 
@@ -873,4 +857,3 @@
     </script>
 </body>
 </html>
-
