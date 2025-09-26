@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Celloxen Health - Comprehensive Wellness Assessment</title>
+    <title>Celloxen Health - Wellness Assessment Tool</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -14,249 +13,6 @@
             font-family: 'Inter', sans-serif;
             -webkit-print-color-adjust: exact;
         }
-        
-        /* Header Styles */
-        .header {
-            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
-            color: white;
-            padding: 20px 0;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        
-        .header-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 0 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .logo-section {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-        
-        .logo {
-            font-size: 24px;
-            font-weight: bold;
-            letter-spacing: 1px;
-        }
-        
-        .module-name {
-            font-size: 16px;
-            opacity: 0.95;
-            border-left: 2px solid rgba(255,255,255,0.3);
-            padding-left: 20px;
-        }
-        
-        .back-btn {
-            background: rgba(255,255,255,0.2);
-            border: 1px solid rgba(255,255,255,0.3);
-            color: white;
-            padding: 8px 20px;
-            border-radius: 6px;
-            text-decoration: none;
-            transition: all 0.3s;
-        }
-        
-        .back-btn:hover {
-            background: rgba(255,255,255,0.3);
-        }
-        
-        /* Patient Search Styles */
-        .patient-search-container {
-            position: relative;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-        
-        .patient-dropdown {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background: white;
-            border: 1px solid #e5e7eb;
-            border-top: none;
-            border-radius: 0 0 12px 12px;
-            max-height: 300px;
-            overflow-y: auto;
-            z-index: 50;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            display: none;
-        }
-        
-        .patient-dropdown.show {
-            display: block;
-        }
-        
-        .patient-option {
-            padding: 12px 20px;
-            cursor: pointer;
-            transition: all 0.2s;
-            border-bottom: 1px solid #f3f4f6;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .patient-option:hover {
-            background: #f0f9ff;
-        }
-        
-        .patient-option-info {
-            flex: 1;
-        }
-        
-        .patient-option-name {
-            font-weight: 600;
-            color: #1e293b;
-            font-size: 14px;
-        }
-        
-        .patient-option-details {
-            font-size: 12px;
-            color: #6b7280;
-            margin-top: 2px;
-        }
-        
-        .patient-option-id {
-            background: #f3f4f6;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: 600;
-            color: #4b5563;
-        }
-        
-        /* Section Navigation */
-        .section-nav {
-            display: flex;
-            justify-content: center;
-            gap: 8px;
-            margin: 20px 0;
-        }
-        
-        .section-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: #e5e7eb;
-            transition: all 0.3s;
-            cursor: pointer;
-        }
-        
-        .section-dot.active {
-            background: #3b82f6;
-            width: 30px;
-            border-radius: 5px;
-        }
-        
-        .section-dot.completed {
-            background: #10b981;
-        }
-        
-        /* Transitions */
-        .fade-enter {
-            opacity: 0;
-            transform: translateX(20px);
-        }
-        
-        .fade-enter-active {
-            opacity: 1;
-            transform: translateX(0);
-            transition: all 0.5s ease;
-        }
-        
-        .fade-exit {
-            opacity: 1;
-            transform: translateX(0);
-        }
-        
-        .fade-exit-active {
-            opacity: 0;
-            transform: translateX(-20px);
-            transition: all 0.5s ease;
-        }
-        
-        /* Progress Bar */
-        .progress-container {
-            width: 100%;
-            height: 6px;
-            background: #e5e7eb;
-            border-radius: 3px;
-            overflow: hidden;
-            margin: 20px 0;
-        }
-        
-        .progress-bar {
-            height: 100%;
-            background: linear-gradient(90deg, #3b82f6, #10b981);
-            transition: width 0.5s ease;
-            border-radius: 3px;
-        }
-        
-        /* Save Indicator */
-        .save-indicator {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            padding: 12px 20px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 500;
-            z-index: 1000;
-            display: none;
-            animation: slideUp 0.3s ease;
-        }
-        
-        @keyframes slideUp {
-            from {
-                transform: translateY(100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-        
-        .save-indicator.saving {
-            background: #fbbf24;
-            color: #78350f;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .save-indicator.saved {
-            background: #34d399;
-            color: #064e3b;
-            display: block;
-        }
-        
-        .save-indicator.error {
-            background: #f87171;
-            color: #7f1d1d;
-            display: block;
-        }
-        
-        .spinner {
-            width: 16px;
-            height: 16px;
-            border: 2px solid transparent;
-            border-top-color: #78350f;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        
-        /* Print Styles */
         @media print {
             body * {
                 visibility: hidden;
@@ -269,902 +25,761 @@
                 left: 0;
                 top: 0;
                 width: 100%;
+                box-shadow: none;
+                border: none;
+                margin-top: 0;
             }
             .no-print {
-                display: none !important;
+                display: none;
             }
             .page-break {
                 page-break-before: always;
             }
         }
-        
-        /* Splash Screen */
-        .splash-screen {
-            min-height: 400px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 60px 20px;
+        .step-transition {
+            transition: opacity 0.5s ease-in-out, max-height 0.5s ease-in-out;
         }
-        
-        .splash-title {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: #1e293b;
-            margin-bottom: 16px;
-            text-align: center;
+        .step-hidden {
+            opacity: 0;
+            max-height: 0;
+            overflow: hidden;
+            pointer-events: none;
         }
-        
-        .splash-subtitle {
-            color: #64748b;
-            font-size: 1.125rem;
-            text-align: center;
-            margin-bottom: 48px;
+        .step-visible {
+            opacity: 1;
+            max-height: 15000px; /* Increased for longer questionnaires */
         }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800">
-    <!-- Header -->
-    <div class="header no-print">
-        <div class="header-container">
-            <div class="logo-section">
-                <div class="logo">CELLOXEN</div>
-                <div class="module-name">Comprehensive Wellness Assessment</div>
-            </div>
-            <a href="clinic-dashboard.html" class="back-btn">← Back to Dashboard</a>
-        </div>
-    </div>
-
-    <!-- Save Indicator -->
-    <div id="saveIndicator" class="save-indicator">
-        <div class="spinner" id="saveSpinner"></div>
-        <span id="saveMessage">Saving...</span>
-    </div>
 
     <div class="container mx-auto p-4 sm:p-6 lg:p-8">
-        <!-- Splash Screen with Patient Search -->
-        <div id="splash-screen" class="max-w-4xl mx-auto bg-white p-8 sm:p-10 rounded-2xl shadow-lg">
-            <div class="splash-screen">
-                <h1 class="splash-title">Begin Wellness Assessment</h1>
-                <p class="splash-subtitle">Start by selecting a patient or entering their details</p>
-                
-                <div class="patient-search-container w-full">
-                    <label class="block text-sm font-medium text-slate-700 mb-2">Search for Patient</label>
-                    <input 
-                        type="text" 
-                        id="patientSearch" 
-                        placeholder="Type patient name, ID, or email..."
-                        class="w-full px-4 py-3 text-lg border-2 border-slate-300 rounded-t-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-all"
-                        autocomplete="off"
-                    >
-                    <div id="patientDropdown" class="patient-dropdown"></div>
+        <header class="text-center mb-8 no-print">
+            <h1 class="text-3xl sm:text-4xl font-bold text-slate-900">Wellness Assessment & Reporting Tool</h1>
+            <p class="text-slate-600 mt-2">A guided system for creating personalised wellness plans.</p>
+        </header>
+
+        <div class="max-w-4xl mx-auto bg-white p-6 sm:p-8 rounded-2xl shadow-lg space-y-8 no-print" id="assessment-form">
+
+            <!-- Step 1: Patient Details & Safety -->
+            <div id="step-1" class="step-transition step-visible space-y-6">
+                <h2 class="text-2xl font-semibold border-b pb-3">Step 1: Patient Details & Safety Screening</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label for="fullName" class="block text-sm font-medium text-slate-700">Full Name</label>
+                        <input type="text" id="fullName" class="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                    </div>
+                    <div>
+                        <label for="age" class="block text-sm font-medium text-slate-700">Age</label>
+                        <input type="number" id="age" class="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                    </div>
+                    <div>
+                        <label for="gender" class="block text-sm font-medium text-slate-700">Gender</label>
+                        <select id="gender" class="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                            <option>Female</option>
+                            <option>Male</option>
+                            <option>Prefer not to say</option>
+                        </select>
+                    </div>
                 </div>
-                
-                <div class="mt-6 text-center">
-                    <button id="newPatientBtn" class="text-blue-600 hover:text-blue-700 font-medium">
-                        Or register a new patient →
-                    </button>
+                <div>
+                    <h3 class="text-lg font-semibold text-red-700">Mandatory Safety Screening</h3>
+                    <div id="safety-questions" class="space-y-3 mt-4">
+                        <!-- Safety questions will be injected here by JS -->
+                    </div>
+                    <div id="contraindication-warning" class="hidden mt-4 p-4 bg-red-100 border-l-4 border-red-500 text-red-700">
+                        <p class="font-bold">Therapy Cannot Proceed</p>
+                        <p>The client has indicated a contraindication. Do not proceed with the assessment. Advise the client to consult their GP.</p>
+                    </div>
                 </div>
-                
-                <div id="selectedPatientInfo" class="mt-8 p-6 bg-blue-50 rounded-lg hidden">
-                    <h3 class="font-semibold text-blue-900 mb-2">Selected Patient</h3>
-                    <div id="selectedPatientDetails"></div>
-                    <button id="startAssessmentBtn" class="mt-4 w-full bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-blue-700 transition-all">
-                        Start Assessment
-                    </button>
+                <div class="text-right">
+                    <button id="next-step-1" class="bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">Next Step</button>
+                </div>
+            </div>
+
+            <!-- Step 2: Holistic Snapshot -->
+            <div id="step-2" class="step-transition step-hidden space-y-6">
+                <h2 class="text-2xl font-semibold border-b pb-3">Step 2: The Holistic Snapshot</h2>
+                <div class="space-y-4">
+                     <div>
+                        <label class="block text-sm font-medium text-slate-700">1. In your own words, what is the main health challenge you're hoping we can support you with today?</label>
+                        <textarea id="main-challenge-summary" rows="2" class="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700">2. On a scale of 1 (very poor) to 10 (excellent), how would you rate your overall energy level on a typical day?</label>
+                        <input type="range" min="1" max="10" value="5" class="w-full mt-2" oninput="this.nextElementSibling.value = this.value"><output class="ml-2 font-semibold">5</output>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700">3. On a scale of 1-10, how would you rate your sleep quality?</label>
+                         <input type="range" min="1" max="10" value="5" class="w-full mt-2" oninput="this.nextElementSibling.value = this.value"><output class="ml-2 font-semibold">5</output>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700">4. On a scale of 1-10, how would you rate your current stress level?</label>
+                         <input type="range" min="1" max="10" value="5" class="w-full mt-2" oninput="this.nextElementSibling.value = this.value"><output class="ml-2 font-semibold">5</output>
+                    </div>
+                     <div>
+                        <label class="block text-sm font-medium text-slate-700">5. On a scale of 1-10, how would you rate your digestive comfort?</label>
+                         <input type="range" min="1" max="10" value="5" class="w-full mt-2" oninput="this.nextElementSibling.value = this.value"><output class="ml-2 font-semibold">5</output>
+                    </div>
+
+                    <div>
+                         <label class="block text-sm font-medium text-slate-700">6. Which of these aspects of your life is most affected by your health challenge?</label>
+                         <div id="life-aspects-affected" class="mt-2 space-y-2">
+                            <label class="flex items-center"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-2" value="Work / Productivity"> Work / Productivity</label>
+                            <label class="flex items-center"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-2" value="Mood / Emotional Well-being"> Mood / Emotional Well-being</label>
+                            <label class="flex items-center"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-2" value="Social Life / Relationships"> Social Life / Relationships</label>
+                            <label class="flex items-center"><input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-2" value="Hobbies / Physical Activities"> Hobbies / Physical Activities</label>
+                         </div>
+                    </div>
+                </div>
+                 <div class="text-right">
+                    <button id="next-step-2" class="bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">Next Step</button>
+                </div>
+            </div>
+
+            <!-- Step 3: Primary Concern(s) -->
+            <div id="step-3" class="step-transition step-hidden space-y-6">
+                <h2 class="text-2xl font-semibold border-b pb-3">Step 3: Pinpoint the Primary Concern(s)</h2>
+                <p>Please select the main area(s) of your health you would like to focus on. This will determine the next set of questions.</p>
+                <div id="primary-concerns" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <!-- Primary concerns will be injected here by JS -->
+                </div>
+                 <div class="text-right">
+                    <button id="next-step-3" class="bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">Next Step</button>
+                </div>
+            </div>
+
+            <!-- Step 4: Deep-Dive Questionnaires -->
+            <div id="step-4" class="step-transition step-hidden space-y-8">
+                 <h2 class="text-2xl font-semibold border-b pb-3">Step 4: Deep-Dive Diagnostic</h2>
+                 <p>Please tick all the statements that apply to your current experience in the selected area(s).</p>
+                 <div id="deep-dive-questionnaires" class="space-y-8">
+                    <!-- Deep dive questionnaires will be injected here and shown/hidden based on step 3 selections -->
+                </div>
+                <div class="text-right">
+                    <button id="generate-report" class="bg-emerald-600 text-white font-semibold py-3 px-6 rounded-lg shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 text-lg">Generate Wellness Plan</button>
                 </div>
             </div>
         </div>
 
-        <!-- Assessment Form -->
-        <div id="assessment-form" class="max-w-4xl mx-auto bg-white p-6 sm:p-8 rounded-2xl shadow-lg hidden">
-            <!-- Progress Bar -->
-            <div class="progress-container">
-                <div id="progressBar" class="progress-bar" style="width: 0%"></div>
-            </div>
-            
-            <!-- Section Navigation Dots -->
-            <div class="section-nav" id="sectionNav"></div>
-            
-            <!-- Dynamic Section Container -->
-            <div id="sectionContainer" class="mt-8">
-                <!-- Sections will be dynamically loaded here -->
-            </div>
-            
-            <!-- Navigation Buttons -->
-            <div class="flex justify-between mt-8">
-                <button id="prevBtn" class="bg-gray-500 text-white font-semibold py-2 px-6 rounded-lg hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-                    ← Previous
-                </button>
-                <button id="nextBtn" class="bg-blue-600 text-white font-semibold py-2 px-6 rounded-lg hover:bg-blue-700">
-                    Next →
-                </button>
-            </div>
-        </div>
-
-        <!-- Report Section -->
+        <!-- Final Report Section -->
         <div id="report-section" class="max-w-4xl mx-auto bg-white p-8 sm:p-10 rounded-2xl shadow-lg mt-12 hidden">
-            <!-- Report content will be injected here -->
+             <!-- Report content will be injected here -->
         </div>
+
     </div>
 
-    <script type="module">
-        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // --- DATA SETUP ---
+
+        const therapyDetails = {
+            // NOTE: 'rationale' and 'benefitsTimeline' have been added to enrich the report.
+            '100': { 
+                theme: 'Digestive & Energy Wellness', 
+                name: "Blood Sugar Balance Therapy", 
+                description: "This therapy is designed to support healthy glucose metabolism and metabolic balance.",
+                rationale: "Your answers related to energy crashes, sugar cravings, and metabolic concerns suggest that stabilising your body's blood sugar is a key priority. This therapy helps improve how your cells use glucose for fuel, leading to more consistent energy levels and reduced cravings.",
+                benefitsTimeline: {
+                    immediate: "More stable energy, reduced cravings, and better appetite control.",
+                    shortTerm: "Improved morning energy, better daily glucose patterns, and reduced energy swings.",
+                    mediumTerm: "Better metabolic markers, improved cellular health, and better body composition.",
+                    longTerm: "Sustained metabolic balance, optimal glucose patterns, and enhanced long-term wellness."
+                },
+                sessionLength: "45 minutes", frequency: "3 times weekly, then 2", fullCourse: "10-12 weeks", totalSessions: "25-36 sessions", nutritionalSupport: ["Chromium Picolinate (200mcg)", "Alpha Lipoic Acid (600mg)", "Cinnamon Extract (1000mg)"] 
+            },
+            '101': { 
+                theme: 'Sleep, Stress & Anxiety', 
+                name: "Deep Sleep Renewal Therapy",
+                description: "This therapy is designed to help restore your body's natural ability to achieve restful, rejuvenating sleep.",
+                rationale: "Your responses show a clear pattern of difficulty falling asleep and staying asleep. This therapy is specifically designed to calm the overactive mind and physical restlessness that prevent sleep onset, helping to re-establish your body's natural sleep-wake rhythm.",
+                benefitsTimeline: {
+                    immediate: "Greater relaxation at bedtime, calmer mind, and reduced physical restlessness.",
+                    shortTerm: "Falling asleep more easily, fewer night-time disturbances, and feeling more refreshed upon waking.",
+                    mediumTerm: "Deeper, more satisfying rest and developing a consistent sleep schedule.",
+                    longTerm: "Sustainable natural sleep patterns, consistent quality rest, and restored sleep confidence."
+                },
+                sessionLength: "45 minutes", frequency: "2-3 sessions per week", fullCourse: "8 weeks", totalSessions: "16-24 sessions", nutritionalSupport: ["Magnesium Glycinate (400mg)", "L-Theanine (200mg)", "Ashwagandha (500mg)"] 
+            },
+            '102': { 
+                theme: 'Sleep, Stress & Anxiety', 
+                name: "Stress Relief Therapy", 
+                description: "This therapy is designed to help your body release accumulated tension and return to its natural state of balance.",
+                rationale: "The prevalence of physical tension, emotional overwhelm, and workplace pressure in your answers indicates that your body's stress response is chronically activated. This therapy directly addresses this by helping your nervous system shift from 'fight-or-flight' to 'rest-and-digest', releasing deep-seated tension.",
+                benefitsTimeline: {
+                    immediate: "A deep sense of calm, release of muscle tension, and clearer thinking after each session.",
+                    shortTerm: "Better response to daily stressors, improved sleep quality, and fewer tension headaches.",
+                    mediumTerm: "Sustained lower stress levels, greater emotional stability, and improved relationships.",
+                    longTerm: "Fundamental stress resilience, healthier stress patterns, and enhanced life satisfaction."
+                },
+                sessionLength: "35 minutes", frequency: "1-2 sessions per week", fullCourse: "8 weeks", totalSessions: "8-16 sessions", nutritionalSupport: ["Vitamin B Complex", "Omega-3 (1000mg EPA/DHA)", "Magnesium Citrate (300mg)"] 
+            },
+            '402': { 
+                theme: 'Joint Pain & Arthritis Relief', 
+                name: "ArthriComfort Therapy", 
+                description: "This therapy is designed to support joint comfort and mobility for those experiencing arthritis-related challenges.",
+                rationale: "Your detailed answers regarding chronic joint pain, morning stiffness, and inflammation point directly to the mechanisms addressed by this therapy. It works to reduce the inflammatory responses that cause discomfort while supporting the health of joint tissues, helping you to move more freely.",
+                benefitsTimeline: {
+                    immediate: "Reduced stiffness sensation and greater comfort with movement.",
+                    shortTerm: "Noticeable improvement in daily comfort, better morning mobility, and increased activity tolerance.",
+                    mediumTerm: "Significant gains in flexibility and sustained comfort levels, improving quality of life.",
+                    longTerm: "Maintained joint comfort, optimal mobility for your condition, and better long-term joint health."
+                },
+                sessionLength: "40 minutes", frequency: "2-3 sessions per week", fullCourse: "6-12 weeks", totalSessions: "12-36 sessions", nutritionalSupport: ["Glucosamine Sulphate (1500mg)", "Chondroitin (1200mg)", "Turmeric/Curcumin (500mg)"] 
+            },
+            // ... (All other therapies would be similarly expanded with 'rationale' and 'benefitsTimeline')
+            '103': { theme: 'Sleep, Stress & Anxiety', name: "Relaxation & Calm Therapy", description: "This therapy is designed to help you achieve profound states of relaxation and inner peace.", rationale: "Your responses about daily anxiety, restlessness, and an inability to 'switch off' suggest a need for nervous system calming. This therapy focuses on activating your body's natural relaxation pathways to reduce baseline anxiety and promote a sustained sense of peace.", benefitsTimeline: { immediate: "A deep state of relaxation and mental quiet during and after the session.", shortTerm: "Lower baseline anxiety, better daily calm, and improved stress response.", mediumTerm: "A sustained state of calm, better emotional balance, and improved enjoyment of life.", longTerm: "An established sense of inner peace, emotional resilience, and natural relaxation ability." }, sessionLength: "40 minutes", frequency: "2 sessions per week", fullCourse: "8 weeks", totalSessions: "16 sessions", nutritionalSupport: ["L-Theanine (200mg)", "Lemon Balm Extract (300mg)", "Holy Basil/Tulsi (500mg)"] },
+            '104': { theme: 'Sleep, Stress & Anxiety', name: "Sleep Quality Therapy", description: "This therapy is designed to enhance the depth and quality of your sleep, supporting natural sleep architecture.", rationale: "Your answers point towards a pattern of light, fragmented, and unrefreshing sleep. This therapy is ideal as it specifically targets the architecture of your sleep, helping you achieve the deeper, more restorative sleep stages needed for physical repair and mental clarity.", benefitsTimeline: { immediate: "A sensation of deeper sleep and noticing fewer awakenings.", shortTerm: "Consistently deeper sleep, sleeping through the night more effectively, and more refreshed mornings.", mediumTerm: "Optimal sleep architecture, sustained deep sleep, and better memory function.", longTerm: "Maintained high-quality sleep, optimal restoration, and long-term sleep health." }, sessionLength: "40 minutes", frequency: "2-3 sessions per week", fullCourse: "6-8 weeks", totalSessions: "12-24 sessions", nutritionalSupport: ["Magnesium Bisglycinate (400mg)", "L-Tryptophan (500mg)", "Valerian Root (500mg)"] },
+            '201': { theme: 'Kidney & Urinary Wellness', name: "Kidney Vitality Therapy", description: "This therapy is designed to enhance your body's natural filtration and elimination processes.", rationale: "Your symptoms of fluid retention, low energy, and concerns around kidney stress are the primary indicators for this therapy. It supports optimal kidney function by enhancing energy flow and circulation to these vital organs, aiding your body's natural detoxification and fluid balance processes.", benefitsTimeline: { immediate: "Reduced puffiness and a better sense of fluid balance.", shortTerm: "A noticeable increase in energy, less swelling in extremities, and clearer thinking.", mediumTerm: "Enhanced vitality, better exercise tolerance, and improved skin appearance.", longTerm: "Sustained kidney support, maintained vitality, and better overall health." }, sessionLength: "40 minutes", frequency: "2 sessions per week", fullCourse: "8 weeks", totalSessions: "16 sessions", nutritionalSupport: ["Vitamin B6 (50mg)", "Omega-3 (1000mg)", "Nettle Leaf Extract (300mg)"] },
+            '202': { theme: 'Kidney & Urinary Wellness', name: "Kidney Support Therapy", description: "This therapy is designed to provide gentle stimulation to maintain and improve kidney function.", rationale: "This supportive therapy is indicated by your concerns about kidney stress from medication or other health conditions. It provides gentle stimulation to enhance kidney filtration efficiency and improve blood flow, helping to reduce the overall burden on these vital organs.", benefitsTimeline: { immediate: "A better sense of fluid balance and comfort.", shortTerm: "Improved elimination, better energy levels, and enhanced vitality.", mediumTerm: "Optimised kidney support, better overall function, and enhanced detoxification.", longTerm: "Maintained kidney wellness, sustained support, and optimal long-term function." }, sessionLength: "40 minutes", frequency: "2-3 sessions per week", fullCourse: "8 weeks", totalSessions: "16-24 sessions", nutritionalSupport: ["N-Acetyl Cysteine/NAC (600mg)", "Astragalus Extract (500mg)", "Cordyceps (500mg)"] },
+            '203': { theme: 'Kidney & Urinary Wellness', name: "Bladder Comfort Therapy", description: "This therapy is designed to help restore normal bladder function and reduces urgency and frequency issues.", rationale: "Your answers highlight challenges with urinary frequency, urgency, and disrupted sleep, which this therapy directly addresses. It works by calming overactive bladder nerves and supporting pelvic floor function to help restore normal bladder capacity and control, leading to greater comfort and confidence.", benefitsTimeline: { immediate: "Reduced sensations of urgency and a greater feeling of control.", shortTerm: "Less frequent bathroom visits, better bladder capacity, and improved night's rest.", mediumTerm: "A return to more normalised urinary patterns and a significant improvement in comfort.", longTerm: "Maintained bladder comfort, natural control restored, and enhanced quality of life." }, sessionLength: "35 minutes", frequency: "2 sessions per week", fullCourse: "6-8 weeks", totalSessions: "12-16 sessions", nutritionalSupport: ["Pumpkin Seed Extract (500mg)", "Cranberry Extract (500mg)", "Quercetin (500mg)"] },
+            '204': { theme: 'Kidney & Urinary Wellness', name: "Urinary Flow Therapy", description: "This therapy is designed to help improve urinary flow and reduces hesitancy for better bladder emptying.", rationale: "Your experience with a weak stream, hesitancy, and incomplete emptying are the key indicators for this therapy. It supports the complex coordination of muscles and nerves required for efficient urination, helping to improve flow strength and ensure complete bladder emptying.", benefitsTimeline: { immediate: "Easier initiation of flow and a sensation of a better stream.", shortTerm: "A stronger stream force, less hesitancy, and a feeling of more complete emptying.", mediumTerm: "Significantly improved flow, better daily function, and enhanced comfort.", longTerm: "Sustained improvement in flow and optimal urinary wellness." }, sessionLength: "40 minutes", frequency: "2-3 sessions per week", fullCourse: "8-10 weeks", totalSessions: "16-30 sessions", nutritionalSupport: ["Saw Palmetto (320mg)", "Beta-Sitosterol (100mg)", "Pygeum Extract (100mg)"] },
+            '301': { theme: 'Cardiovascular & Circulation', name: "Heart Health Therapy", description: "This therapy is designed to support cardiovascular vitality and overall heart wellness.", rationale: "Given your concerns about heart rhythm, family history, and overall cardiovascular wellness, this therapy provides essential, holistic support. It is designed to optimise heart muscle function and improve circulation, strengthening your heart's ability to handle daily demands.", benefitsTimeline: { immediate: "Increased energy and better breathing comfort.", shortTerm: "Better exercise comfort, improved daily stamina, and enhanced circulation.", mediumTerm: "Significantly improved endurance and overall fitness.", longTerm: "Sustained heart wellness and optimal cardiovascular function." }, sessionLength: "45 minutes", frequency: "2 sessions per week", fullCourse: "10-12 weeks", totalSessions: "20-24 sessions", nutritionalSupport: ["CoQ10 (100mg)", "Omega-3 (1500mg EPA/DHA)", "Magnesium Taurate (400mg)"] },
+            '302': { theme: 'Cardiovascular & Circulation', name: "Blood Pressure Balance Therapy", description: "This therapy is designed to support your body's natural blood pressure regulation mechanisms.", rationale: "This therapy is recommended based on your answers concerning high or fluctuating blood pressure. It works by supporting the natural flexibility of your blood vessels and calming the stress responses that can contribute to elevated readings, promoting a more stable and healthy balance.", benefitsTimeline: { immediate: "A greater sense of relaxation and reduced tension.", shortTerm: "More stable daily blood pressure patterns and better stress management.", mediumTerm: "Consistent improvements in readings and better exercise comfort.", longTerm: "Sustained balance and natural regulation support." }, sessionLength: "40 minutes", frequency: "3 sessions weekly, then 2", fullCourse: "10 weeks", totalSessions: "25-30 sessions", nutritionalSupport: ["Magnesium Glycinate (400mg)", "Potassium Citrate (99mg)", "Hibiscus Extract (500mg)"] },
+            '303': { theme: 'Cardiovascular & Circulation', name: "Circulation Boost Therapy", description: "This therapy is designed to optimise blood flow throughout your entire body.", rationale: "Your experience with cold extremities, numbness, and leg discomfort are classic signs of sluggish circulation. This therapy is designed to improve blood flow to the smallest capillaries, ensuring vital oxygen and nutrients reach every part of your body, which can warm extremities and increase energy.", benefitsTimeline: { immediate: "Warmer extremities and improved comfort.", shortTerm: "Consistently warmer hands and feet, reduced numbness, and better energy.", mediumTerm: "Significant circulation improvement and better exercise tolerance.", longTerm: "Sustained circulation enhancement and optimal blood flow." }, sessionLength: "35 minutes", frequency: "2-3 sessions per week", fullCourse: "8 weeks", totalSessions: "16-24 sessions", nutritionalSupport: ["Ginkgo Biloba (120mg)", "Horse Chestnut (300mg)", "Pine Bark Extract (100mg)"] },
+            '304': { theme: 'Cardiovascular & Circulation', name: "Cardiovascular Vitality Therapy", description: "This therapy is designed to enhance cardiovascular function for optimal vitality and endurance.", rationale: "This performance-focused therapy is ideal for your goal of improving stamina and exercise tolerance. It works by optimising your heart's efficiency and your body's use of oxygen, leading to better endurance, faster recovery, and greater energy reserves for an active lifestyle.", benefitsTimeline: { immediate: "A sensation of increased energy and easier breathing.", shortTerm: "Better exercise endurance, faster recovery times, and improved daily stamina.", mediumTerm: "Significant gains in endurance and optimal recovery.", longTerm: "Sustained performance enhancement and optimal cardiovascular function." }, sessionLength: "40 minutes", frequency: "2 sessions per week", fullCourse: "8 weeks", totalSessions: "16 sessions", nutritionalSupport: ["L-Carnitine (1000mg)", "D-Ribose (5g)", "Beetroot Extract (500mg)"] },
+            '401': { theme: 'Joint Pain & Arthritis Relief', name: "Gout Relief Therapy", description: "This therapy is designed to support comfort and balance in joints affected by uric acid imbalances.", rationale: "The specific symptoms you described, such as sudden and severe joint pain attacks, align directly with the purpose of this therapy. It is designed to support your body's natural processes for managing uric acid and calming the intense inflammatory response during a flare-up.", benefitsTimeline: { immediate: "A reduction in discomfort and swelling within the first few days of a flare.", shortTerm: "Resolution of acute symptoms and a return to normal joint function.", mediumTerm: "Better metabolic balance and enhanced comfort.", longTerm: "Fewer flare-ups and better long-term joint health." }, sessionLength: "40 minutes", frequency: "2-3 times/week (daily during flares)", fullCourse: "6-8 weeks", totalSessions: "15-20 sessions", nutritionalSupport: ["Vitamin C (1000mg)", "Cherry Extract (600mg)", "Celery Seed Extract (150mg)"] },
+            '403': { theme: 'Joint Pain & Arthritis Relief', name: "Joint Mobility Therapy", description: "This therapy is designed to restore and enhance your natural range of motion and movement freedom.", rationale: "Your concerns about stiffness, reduced flexibility, and difficulty with daily movements are the key indicators for this therapy. It works by supporting the flexibility of connective tissues and improving joint lubrication, helping you regain your natural freedom of movement.", benefitsTimeline: { immediate: "Easier initiation of movement and a reduced feeling of stiffness.", shortTerm: "A measurable increase in flexibility and better comfort in daily movements.", mediumTerm: "Significant improvement in your range of motion and functional gains.", longTerm: "Restored mobility and maintained flexibility for an active life." }, sessionLength: "45 minutes", frequency: "3 sessions per week", fullCourse: "8-12 weeks", totalSessions: "24-36 sessions", nutritionalSupport: ["Collagen Peptides (10g)", "Vitamin C (1000mg)", "Hyaluronic Acid (100mg)"] },
+            '501': { theme: 'Circulation & Healing Support', name: "Wound Healing Therapy", description: "This therapy is designed to support your body's remarkable natural healing abilities.", rationale: "This therapy is recommended based on your answers concerning slow-healing wounds. By enhancing circulation and stimulating cellular energy directly at the site, it creates the ideal conditions for your body's own repair mechanisms to work faster and more effectively.", benefitsTimeline: { immediate: "Improved appearance of the healing area and greater comfort.", shortTerm: "Visible healing progress and healthy new tissue development.", mediumTerm: "Significant advancement in healing and strong tissue formation.", longTerm: "Complete healing with minimal scarring and restored tissue integrity." }, sessionLength: "45 minutes", frequency: "3-4 sessions per week", fullCourse: "12 weeks or until healed", totalSessions: "36-48 sessions", nutritionalSupport: ["Vitamin C (1000mg)", "Zinc (25mg)", "L-Arginine (1000mg)"] },
+            '502': { theme: 'Circulation & Healing Support', name: "Vascular Health Therapy", description: "This therapy is designed to support the health and function of your entire vascular network.", rationale: "Your symptoms of leg heaviness, swelling, and other circulation-related issues indicate a need to support your vascular system directly. This therapy helps improve the flexibility and strength of your blood vessels, promoting better blood flow and reducing the discomfort associated with venous insufficiency.", benefitsTimeline: { immediate: "Improved circulation sensation and greater comfort in your legs.", shortTerm: "Better walking comfort and reduced leg heaviness and swelling.", mediumTerm: "Significant improvement in circulation and better exercise tolerance.", longTerm: "Maintained vascular health and optimal vessel function." }, sessionLength: "40 minutes", frequency: "2-3 sessions per week", fullCourse: "10-12 weeks", totalSessions: "20-36 sessions", nutritionalSupport: ["Grape Seed Extract (150mg)", "Rutin (500mg)", "Resveratrol (250mg)"] },
+            '601': { theme: 'Digestive & Energy Wellness', name: "Digestive Balance Therapy", description: "This therapy is designed to support optimal digestive function and gut wellness.", rationale: "Your answers highlighting bloating, irregular bowel patterns, and post-meal discomfort suggest an imbalance in your digestive rhythm. This therapy helps to regulate gut motility and support your body’s natural digestive processes, leading to improved comfort and better nutrient absorption.", benefitsTimeline: { immediate: "Reduced bloating and greater comfort after meals.", shortTerm: "More regular elimination patterns and reduced gas discomfort.", mediumTerm: "Normalised digestive function and significantly improved comfort.", longTerm: "Sustained digestive comfort and optimal gut wellness." }, sessionLength: "40 minutes", frequency: "2 sessions per week", fullCourse: "8 weeks", totalSessions: "16 sessions", nutritionalSupport: ["Probiotic Blend (50 billion CFU)", "Digestive Enzymes", "L-Glutamine (5g)"] },
+            '602': { theme: 'Digestive & Energy Wellness', name: "Energy Boost Therapy", description: "This therapy is designed to restore your natural energy and vitality from the cellular level.", rationale: "The pattern of chronic fatigue, brain fog, and energy crashes you described points to depleted cellular energy. This therapy works by supporting your body's fundamental energy production systems, helping you to build sustainable, natural vitality without relying on stimulants.", benefitsTimeline: { immediate: "An immediate energy boost and improved mental clarity after sessions.", shortTerm: "Sustained daily energy, better morning vitality, and reduced need for caffeine.", mediumTerm: "Significantly increased stamina and restoration of normal activity levels.", longTerm: "Sustained energy restoration and a return to full, active engagement in life." }, sessionLength: "40 minutes", frequency: "2-3 sessions per week", fullCourse: "8 weeks", totalSessions: "16-24 sessions", nutritionalSupport: ["B12 (1000mcg)", "CoQ10 (100mg)", "Adaptogenic Blend (Ashwagandha, Rhodiola)"] },
+            '703': { theme: 'Digestive & Energy Wellness', name: "Skin Health Therapy", description: "This therapy is designed to support skin health and appearance from the inside out.", rationale: "This therapy is indicated by your desire to improve skin health from a foundational level. It works by enhancing circulation and supporting natural collagen production, addressing the internal factors that create radiant, healthy, and resilient skin, rather than just treating the surface.", benefitsTimeline: { immediate: "A feeling of better skin hydration and improved comfort.", shortTerm: "Improved skin texture, a clearer complexion, and reduced sensitivity.", mediumTerm: "Significant texture improvement, better skin tone, and enhanced radiance.", longTerm: "Sustained skin health and a natural, radiant appearance." }, sessionLength: "40 minutes", frequency: "2 sessions per week", fullCourse: "8 weeks", totalSessions: "16 sessions", nutritionalSupport: ["Collagen Peptides (10g)", "Biotin (5000mcg)", "Evening Primrose Oil (1000mg)"] },
+            '801': { theme: 'Comprehensive Wellness', name: "Total Wellness Package", description: "This comprehensive therapy addresses multiple body systems simultaneously for total wellness and optimal health.", rationale: "This package is the ultimate choice for proactive, preventative wellness. It addresses all major body systems in every session, creating a powerful synergistic effect that enhances energy, improves resilience, and supports long-term vitality. It is ideal for those seeking to optimise their overall health.", benefitsTimeline: { immediate: "Deep relaxation combined with a feeling of energy renewal.", shortTerm: "Increased vitality, better stress management, and improved digestion.", mediumTerm: "Optimal energy levels, excellent quality sleep, and strong resilience.", longTerm: "A comprehensive wellness transformation with youthful vitality and optimal function." }, sessionLength: "60 minutes", frequency: "1-2 sessions per week", fullCourse: "8-16 weeks", totalSessions: "8-32 sessions", nutritionalSupport: ["Comprehensive Multivitamin", "Omega-3 (2000mg)", "Probiotic (50 billion CFU)"] },
+            '802': { theme: 'Comprehensive Wellness', name: "Stress & Relaxation Package", description: "This comprehensive stress-relief package combines multiple therapies for complete stress management and deep relaxation.", rationale: "This package is recommended when stress is a significant, system-wide issue affecting multiple aspects of your life. It provides a deep reset for your entire nervous system, helping to break the cycle of chronic stress while building lasting resilience for better sleep, mood, and energy.", benefitsTimeline: { immediate: "Profound relaxation, a sense of stress release, and mental clarity.", shortTerm: "Significant stress reduction, better sleep quality, and improved energy.", mediumTerm: "Building true stress resilience and finding a sustained state of calm.", longTerm: "A complete stress transformation, leading to lasting resilience and life satisfaction." }, sessionLength: "50 minutes", frequency: "1-2 sessions per week", fullCourse: "8-12 weeks", totalSessions: "8-24 sessions", nutritionalSupport: ["Stress B-Complex", "Ashwagandha (600mg)", "Magnesium Complex (400mg)"] }
+        };
+
+        const themeExplanations = {
+            'Sleep, Stress & Anxiety': "This theme addresses the intricate connection between your mental state and your body's ability to rest and recover. An imbalance here suggests your nervous system may be in a state of chronic 'high alert' (the 'fight-or-flight' response), which disrupts sleep, drains energy, and leads to both emotional and physical tension.",
+            'Cardiovascular & Circulation': "This theme focuses on the health of your heart and the vast network of blood vessels that deliver life-giving oxygen and nutrients to every cell in your body. An imbalance here can manifest as issues with blood pressure, poor circulation to your hands and feet, or reduced stamina and endurance.",
+            'Kidney & Urinary Wellness': "This theme relates to your body's vital filtration and fluid balance systems. The kidneys and bladder work together to remove waste, regulate fluids, and maintain overall internal balance. An imbalance here can lead to issues with fluid retention, low energy, and urinary discomfort or control.",
+            'Joint Pain & Arthritis Relief': "This theme covers the health, comfort, and mobility of your joints. An imbalance in this area often involves inflammation, stiffness, and pain, which can significantly limit your ability to enjoy daily activities and maintain an active lifestyle.",
+            'Digestive & Energy Wellness': "This theme explores the critical link between your gut health and your overall vitality. Your digestive system is not only responsible for breaking down food but is also central to energy production and nutrient absorption. An imbalance here often results in digestive discomfort, fatigue, and even skin issues.",
+            'Circulation & Healing Support': "This theme focuses on your body's remarkable ability to repair itself and the circulatory foundation that makes it possible. An imbalance here can lead to slow-healing wounds and chronic issues related to poor blood flow, such as leg swelling and heaviness."
+        };
+
+
+        const safetyQuestions = [
+            "Do you have a pacemaker or any other implanted electronic device?",
+            "Are you currently in the first trimester of pregnancy?",
+            "Are you currently undergoing active cancer treatment?",
+            "Do you have a diagnosed severe arrhythmia?",
+            "Have you had a stroke or heart attack (myocardial infarction) within the last six weeks?"
+        ];
+
+        const primaryConcerns = [
+            { id: 'theme-1', name: 'Sleep, Stress & Anxiety' },
+            { id: 'theme-2', name: 'Cardiovascular & Circulation' },
+            { id: 'theme-3', name: 'Kidney & Urinary Wellness' },
+            { id: 'theme-4', name: 'Joint Pain & Arthritis Relief' },
+            { id: 'theme-5', name: 'Digestive & Energy Wellness' },
+            { id: 'theme-6', name: 'Circulation & Healing Support' },
+            { id: 'theme-7', name: 'I am interested in a comprehensive, preventative wellness plan.' },
+        ];
         
-        // Initialize Supabase
-        const SUPABASE_URL = 'https://defifwzgazqlrigwumqn.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlZmlmd3pnYXpxbHJpZ3d1bXFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcyNTM0MjYsImV4cCI6MjA3MjgyOTQyNn0.wcUBq6Pszjtqn5aBtuu3iXBE4BLmu8x9LtJbsMWlIiA';
-        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // --- ENHANCED HOLISTIC CROSS-SCORING MATRIX ---
+        const symptomTaggingMatrix = {
+            'q1-1': ['101'], 'q1-2': ['101', '102'], 'q1-3': ['101', '104'], 'q1-4': ['101'], 'q1-5': ['104'], 'q1-6': ['104'], 'q1-7': ['101', '104', '602'], 'q1-8': ['101'], 'q1-9': ['101'], 'q1-10': ['101'], 'q1-11': ['101'], 'q1-12': ['104'],
+            'q1-13': ['102', '103'], 'q1-14': ['102'], 'q1-15': ['102', '802', '602'], 'q1-16': ['102', '103'], 'q1-17': ['103'], 'q1-18': ['103'], 'q1-19': ['103'], 'q1-20': ['102'], 'q1-21': ['102', '103'], 'q1-22': ['103'], 'q1-23': ['102', '602'], 'q1-24': ['103'], 'q1-25': ['102'],
+            'q1-26': ['102'], 'q1-27': ['102', '103'], 'q1-28': ['102'], 'q1-29': ['601', '102'], 'q1-30': ['301', '102'], 'q1-31': ['102'], 'q1-32': ['102'], 'q1-33': ['703', '102'], 'q1-34': ['402'], 'q1-35': ['102'], 'q1-36': ['102'], 'q1-37': ['103'], 'q1-38': ['102'], 'q1-39': ['602'],
+            'q2-1': ['301'], 'q2-2': ['301'], 'q2-3': ['301'], 'q2-4': ['301'], 'q2-5': ['301'], 'q2-6': ['301', '102'],
+            'q2-7': ['302'], 'q2-8': ['302'], 'q2-9': ['302'], 'q2-10': ['302'], 'q2-11': ['302'], 'q2-12': ['302'],
+            'q2-13': ['304', '301', '602'], 'q2-14': ['301', '304'], 'q2-15': ['304'], 'q2-16': ['304'], 'q2-17': ['304'], 'q2-18': ['301', '304'],
+            'q2-19': ['303'], 'q2-20': ['303'], 'q2-21': ['303', '502'], 'q2-22': ['303'], 'q2-23': ['502'], 'q2-24': ['303'], 'q2-25': ['303', '502'], 'q2-26': ['502'], 'q2-27': ['501', '303'], 'q2-28': ['303'], 'q2-29': ['501', '502'], 'q2-30': ['303'], 'q2-31': ['502'], 'q2-32': ['502'], 'q2-33': ['303'], 'q2-34': ['303', '100'], 'q2-35': ['502'], 'q2-36': ['303', '602'], 'q2-37': ['502'],
+            'q3-1': ['201', '202'], 'q3-2': ['201', '202', '100', '302'], 'q3-3': ['201', '202'], 'q3-4': ['201'], 'q3-5': ['202'], 'q3-6': ['202'], 'q3-7': ['201'], 'q3-8': ['201', '602'], 'q3-9': ['201'], 'q3-10': ['201', '202'],
+            'q3-11': ['203'], 'q3-12': ['203'], 'q3-13': ['203'], 'q3-14': ['203', '104'], 'q3-15': ['203'], 'q3-16': ['203'], 'q3-17': ['203'], 'q3-18': ['203'], 'q3-19': ['203'], 'q3-20': ['203', '101'],
+            'q3-21': ['204'], 'q3-22': ['204'], 'q3-23': ['204'], 'q3-24': ['204'], 'q3-25': ['204'], 'q3-26': ['204'], 'q3-27': ['204'], 'q3-28': ['203'], 'q3-29': ['204'], 'q3-30': ['203'], 'q3-31': ['204'], 'q3-32': ['204'],
+            'q3-33': ['201', '202'], 'q3-34': ['202'], 'q3-35': ['202'], 'q3-36': [], 'q3-37': ['203'], 'q3-38': ['203', '204'],
+            'q4-1': ['402'], 'q4-2': ['402'], 'q4-3': ['402'], 'q4-4': ['401', '402'], 'q4-5': ['402'], 'q4-6': ['402'], 'q4-7': ['401'], 'q4-8': ['401'], 'q4-9': ['402'], 'q4-10': ['402'], 'q4-11': ['402', '101', '104'], 'q4-12': ['402'], 'q4-13': ['402', '403'],
+            'q4-14': ['402'], 'q4-15': ['402'], 'q4-16': ['403'], 'q4-17': ['403'], 'q4-18': ['403'], 'q4-19': ['403'], 'q4-20': ['403'], 'q4-21': ['403'], 'q4-22': ['403'], 'q4-23': ['403'],
+            'q4-24': ['402', '403'], 'q4-25': ['403'], 'q4-26': ['402', '403'], 'q4-27': ['403'], 'q4-28': ['402'], 'q4-29': ['402'], 'q4-30': ['402'], 'q4-31': ['402', '602', '102'], 'q4-32': ['402'], 'q4-33': ['402', '403'], 'q4-34': ['402'], 'q4-35': ['402'], 'q4-36': ['403'], 'q4-37': ['403'],
+            'q5-1': ['602'], 'q5-2': ['602'], 'q5-3': ['602', '100'], 'q5-4': ['602', '102'], 'q5-5': ['602'], 'q5-6': ['602'], 'q5-7': ['602'], 'q5-8': ['602'], 'q5-9': ['602'],
+            'q5-10': ['601'], 'q5-11': ['601'], 'q5-12': ['601'], 'q5-13': ['601'], 'q5-14': ['601'], 'q5-15': ['601'],
+            'q5-16': ['601'], 'q5-17': ['601'], 'q5-18': ['601'], 'q5-19': ['601'], 'q5-20': ['601'], 'q5-21': ['601'], 'q5-22': ['601', '102'], 'q5-23': ['601'], 'q5-24': ['601'],
+            'q5-25': ['100'], 'q5-26': ['100'], 'q5-27': ['100', '602'], 'q5-28': ['100'], 'q5-29': ['100'], 'q5-30': ['100'],
+            'q5-31': ['703'], 'q5-32': ['703'], 'q5-33': ['703', '501'], 'q5-34': ['703'], 'q5-35': ['703'], 'q5-36': ['703'], 'q5-37': ['703'],
+            'q6-1': ['501'], 'q6-2': ['501', '100'], 'q6-3': ['501', '502'], 'q6-4': ['501'], 'q6-5': ['501'], 'q6-6': ['501', '303'], 'q6-7': ['501'], 'q6-8': ['501'], 'q6-9': ['501'], 'q6-10': ['501'], 'q6-11': ['501'],
+            'q6-12': ['501'], 'q6-13': [], 'q6-14': ['501', '502'], 'q6-15': ['501', '502'], 'q6-16': ['703'],
+            'q6-17': ['501', '303'], 'q6-18': ['502'], 'q6-19': ['502'], 'q6-20': ['502'], 'q6-21': ['502'], 'q6-22': ['502'], 'q6-23': ['502'], 'q6-24': ['502'], 'q6-25': ['502'], 'q6-26': ['303'], 'q6-27': ['502'], 'q6-28': ['502'], 'q6-29': ['502'], 'q6-30': ['303', '502'], 'q6-31': ['303', '100'], 'q6-32': ['502'], 'q6-33': ['303'], 'q6-34': ['502'], 'q6-35': ['303'], 'q6-36': ['304']
+        };
 
-        // Enhanced Assessment Class
-        class ComprehensiveAssessment {
-            constructor() {
-                this.assessmentId = null;
-                this.patientId = null;
-                this.patientData = null;
-                this.clinicId = null;
-                this.practitionerName = '';
-                this.startTime = new Date();
-                this.currentSectionIndex = 0;
-                this.sections = [];
-                this.assessmentData = {
-                    patientInfo: {},
-                    safetyResponses: {},
-                    holisticSnapshot: {},
-                    selectedThemes: [],
-                    symptomResponses: {},
-                    therapyScores: {},
-                    reportData: {}
-                };
-                
-                this.init();
-            }
-
-            async init() {
-                // Get auth data
-                const authData = localStorage.getItem('celloxen_auth');
-                if (!authData) {
-                    alert('Please log in to access this module');
-                    window.location.href = 'unified-login.html';
-                    return;
-                }
-                
-                const auth = JSON.parse(authData);
-                this.clinicId = auth.clinicId;
-                this.practitionerName = auth.username || 'Practitioner';
-                
-                // Initialize sections
-                this.initializeSections();
-                
-                // Setup patient search
-                this.setupPatientSearch();
-                
-                // Setup navigation
-                this.setupNavigation();
-                
-                // Load therapy data
-                this.loadTherapyData();
-            }
-
-            initializeSections() {
-                this.sections = [
+        const questions = {
+            'theme-1': {
+                title: 'Sleep, Stress & Anxiety',
+                sections: [
                     {
-                        id: 'safety',
-                        title: 'Safety Screening',
-                        subtitle: 'Important safety questions to ensure therapy suitability',
-                        completed: false
+                        subtitle: 'About Your Sleep Quality & Patterns',
+                        questions: [
+                            { id: 'q1-1', text: "I find it difficult to fall asleep most nights (it takes longer than 30 minutes)." }, { id: 'q1-2', text: "My mind races with thoughts, worries, or plans when I try to sleep." }, { id: 'q1-3', text: "I wake up frequently throughout the night for no apparent reason." }, { id: 'q1-4', text: "If I wake up at night, I struggle to fall back asleep." }, { id: 'q1-5', text: "I consistently wake up very early (e.g., 3-5 AM) and cannot get back to sleep." }, { id: 'q1-6', text: "My sleep feels light, fragmented, or as if I'm \"on alert\" all night." }, { id: 'q1-7', text: "I never wake up feeling truly refreshed, restored, or energised." }, { id: 'q1-8', text: "I feel anxious or worried specifically about my ability to get a good night's sleep." }, { id: 'q1-9', text: "My sleep schedule is irregular due to shift work or frequent travel." }, { id: 'q1-10', text: "I rely on medication or sleep aids to get to sleep." }, { id: 'q1-11', text: "My partner tells me I am restless or move a lot during sleep." }, { id: 'q1-12', text: "I experience night sweats that disrupt my sleep." },
+                        ]
                     },
                     {
-                        id: 'holistic',
-                        title: 'Holistic Snapshot',
-                        subtitle: 'Understanding your overall wellness picture',
-                        completed: false
+                        subtitle: 'About Your Daily Stress, Mood & Anxiety',
+                        questions: [
+                            { id: 'q1-13', text: "I live with a constant feeling of being \"on edge,\" under pressure, or overwhelmed." }, { id: 'q1-14', text: "I would describe my work or daily life as chronically stressful." }, { id: 'q1-15', text: "I often feel emotionally exhausted, drained, or burnt out." }, { id: 'q1-16', text: "I experience feelings of emotional overwhelm, irritability, or frequent mood swings." }, { id: 'q1-17', text: "I feel restless, agitated, or unable to truly relax, even during my downtime." }, { id: 'q1-18', text: "I experience feelings of anxiety or nervousness in social or performance situations." }, { id: 'q1-19', text: "I have experienced mild panic symptoms (e.g., rapid heartbeat, sweating, shortness of breath)." }, { id: 'q1-20', text: "My stress levels are negatively impacting my personal or professional relationships." }, { id: 'q1-21', text: "I find it very difficult to \"switch off\" my brain from work or worries." }, { id: 'q1-22', text: "I often feel a sense of dread or worry about the future." }, { id: 'q1-23', text: "My concentration and focus are poor because of stress." }, { id: 'q1-24', text: "I feel a need to be in control of situations to manage my anxiety." }, { id: 'q1-25', text: "I have been through a significant life stressor recently (e.g., bereavement, job loss, moving)." },
+                        ]
                     },
                     {
-                        id: 'concerns',
-                        title: 'Primary Concerns',
-                        subtitle: 'Select the main areas you want to address',
-                        completed: false
+                        subtitle: 'About the Physical Symptoms of Stress',
+                        questions: [
+                             { id: 'q1-26', text: "I suffer from frequent tension headaches, especially at the end of the day." }, { id: 'q1-27', text: "I hold a lot of physical tension in my neck, shoulders, back, or jaw." }, { id: 'q1-28', text: "I clench my jaw or grind my teeth, especially at night." }, { id: 'q1-29', text: "My digestion gets worse when I am stressed (e.g., butterflies, indigestion, changed bowel habits)." }, { id: 'q1-30', text: "I experience a rapid heartbeat or palpitations when stressed or anxious." }, { id: 'q1-31', text: "I feel dizzy or lightheaded when under pressure." }, { id: 'q1-32', text: "I get sick more often when I am run down or stressed." }, { id: 'q1-33', text: "My skin breaks out or flares up (e.g., eczema, acne) when I'm stressed." }, { id: 'q1-34', text: "I experience unexplained muscle aches and pains." }, { id: 'q1-35', text: "I often feel a lump in my throat or tightness in my chest." }, { id: 'q1-36', text: "My breathing becomes shallow and rapid when I'm anxious." }, { id: 'q1-37', text: "I startle easily at sudden noises." }, { id: 'q1-38', text: "I rely on substances like caffeine, nicotine, or alcohol to manage stress." }, { id: 'q1-39', text: "My libido has decreased due to stress and fatigue." },
+                        ]
+                    }
+                ]
+            },
+            'theme-2': {
+                title: 'Cardiovascular & Circulation',
+                sections: [
+                    {
+                        subtitle: 'About Your Heart Function & Sensation',
+                        questions: [
+                             { id: 'q2-1', text: "I experience an irregular heartbeat, skipped beats, flutters, or palpitations." }, { id: 'q2-2', text: "I feel my heart beating too fast or too forcefully at times." }, { id: 'q2-3', text: "I experience tightness, pressure, or mild discomfort in my chest." }, { id: 'q2-4', text: "I have a family history of heart disease that is a concern for me." }, { id: 'q2-5', text: "I have been told I have arrhythmias or am recovering from a cardiac event (with GP clearance)." }, { id: 'q2-6', text: "My heart-related symptoms get worse with stress or anxiety." }
+                        ]
                     },
                     {
-                        id: 'symptoms',
-                        title: 'Detailed Assessment',
-                        subtitle: 'Specific questions about your selected concerns',
-                        completed: false
+                        subtitle: 'About Your Blood Pressure',
+                        questions: [
+                            { id: 'q2-7', text: "I have been diagnosed with high blood pressure (hypertension)." }, { id: 'q2-8', text: "I am concerned about \"borderline\" or pre-hypertension readings." }, { id: 'q2-9', text: "My blood pressure is highly variable and can spike unexpectedly." }, { id: 'q2-10', text: "I experience \"white coat\" hypertension at the doctor's surgery." }, { id: 'q2-11', text: "I take medication for my blood pressure." }, { id: 'q2-12', text: "I experience symptoms like dizziness or headaches which I think are related to my blood pressure." }
+                        ]
+                    },
+                    {
+                        subtitle: 'About Your Stamina & Performance',
+                        questions: [
+                            { id: 'q2-13', text: "I get short of breath or fatigued much quicker than I used to during physical activity." }, { id: 'q2-14', text: "My tolerance for exercise is poor." }, { id: 'q2-15', text: "It takes me a long time to recover after physical exertion." }, { id: 'q2-16', text: "I want to improve my cardiovascular fitness and overall stamina." }, { id: 'q2-17', text: "As an athlete, I am looking to enhance my performance and recovery time." }, { id: 'q2-18', text: "I am seeking preventative care to maintain a strong and healthy heart as I age." }
+                        ]
+                    },
+                    {
+                        subtitle: 'About Your General Circulation',
+                        questions: [
+                             { id: 'q2-19', text: "My hands and feet are almost always cold." }, { id: 'q2-20', text: "I experience numbness, tingling, or a \"pins and needles\" sensation in my fingers or toes." }, { id: 'q2-21', text: "My skin, particularly on my legs and feet, appears pale or has a bluish tint." }, { id: 'q2-22', text: "I have been diagnosed with Raynaud's phenomenon." }, { id: 'q2-23', text: "I have noticeable swelling (oedema) in my feet, ankles, or lower legs, especially at the end of the day." }, { id: 'q2-24', text: "I suffer from frequent leg cramps, especially at night." }, { id: 'q2-25', text: "My legs often feel heavy, achy, or restless." }, { id: 'q2-26', text: "I have visible varicose veins or spider veins that cause pain or discomfort." }, { id: 'q2-27', text: "Wounds, cuts, or sores on my legs or feet heal extremely slowly." }, { id: 'q2-28', text: "I have been diagnosed with Peripheral Artery Disease (PAD)." }, { id: 'q2-29', text: "My skin feels thin or shiny on my lower legs." }, { id: 'q2-30', text: "I experience pain in my calves when walking that eases with rest (claudication)." }, { id: 'q2-31', text: "I've had a Deep Vein Thrombosis (DVT) in the past." }, { id: 'q2-32', text: "I have difficulty walking long distances due to leg pain or heaviness." }, { id: 'q2-33', text: "I want to support my circulation due to a sedentary job or lifestyle." }, { id: 'q2-34', text: "I am concerned about circulation issues related to diabetes." }, { id: 'q2-35', text: "My walking distance feels limited." }, { id: 'q2-36', text: "I feel my overall energy is low due to poor circulation." }, { id: 'q2-37', text: "I am seeking support before or after vascular surgery." }
+                        ]
                     }
-                ];
-            }
-
-            setupPatientSearch() {
-                const searchInput = document.getElementById('patientSearch');
-                const dropdown = document.getElementById('patientDropdown');
-                let searchTimeout;
-
-                searchInput.addEventListener('input', (e) => {
-                    clearTimeout(searchTimeout);
-                    const searchTerm = e.target.value.trim();
-                    
-                    if (searchTerm.length >= 2) {
-                        searchTimeout = setTimeout(() => {
-                            this.searchPatients(searchTerm);
-                        }, 300);
-                    } else {
-                        dropdown.classList.remove('show');
+                ]
+            },
+            'theme-3': {
+                title: 'Kidney & Urinary Wellness',
+                 sections: [
+                    {
+                        subtitle: 'About Your Kidney Health & Fluid Balance',
+                        questions: [
+                             { id: 'q3-1', text: "I have been told I have reduced kidney function (e.g., Stage 1-3 Chronic Kidney Disease)." }, { id: 'q3-2', text: "I am concerned about my kidney health due to diabetes or high blood pressure." }, { id: 'q3-3', text: "I have a family history of kidney problems." }, { id: 'q3-4', text: "I experience fluid retention, causing puffiness or swelling in my hands, ankles, or face." }, { id: 'q3-5', text: "I have been told I have protein in my urine (proteinuria)." }, { id: 'q3-6', text: "I take medications that I am concerned could be a burden on my kidneys." }, { id: 'q3-7', text: "I am looking for support to prevent kidney stone formation." }, { id: 'q3-8', text: "I feel a persistent lack of energy or \"brain fog\" that I suspect is related to kidney stress." }, { id: 'q3-9', text: "I have discomfort or a dull ache in my mid-to-lower back (kidney area)." }, { id: 'q3-10', text: "I am seeking support after a kidney infection." },
+                        ]
+                    },
+                     {
+                        subtitle: 'About Your Bladder Control & Sensation (Frequency & Urgency)',
+                        questions: [
+                             { id: 'q3-11', text: "I need to urinate very frequently throughout the day (more than 8 times)." }, { id: 'q3-12', text: "I often feel a sudden, urgent, and overwhelming need to urinate." }, { id: 'q3-13', text: "I sometimes leak urine before I can get to the toilet (urge incontinence)." }, { id: 'q3-14', text: "I regularly wake up two or more times a night to urinate (nocturia)." }, { id: 'q3-15', text: "I feel a constant sense of pressure or discomfort in my bladder." }, { id: 'q3-16', text: "My bladder feels sensitive or irritated, especially after a UTI." }, { id: 'q3-17', text: "I have been diagnosed with an overactive bladder or interstitial cystitis." }, { id: 'q3-18', text: "I leak a small amount of urine when I cough, sneeze, laugh, or exercise (stress incontinence)." }, { id: 'q3-19', text: "I plan my daily activities around being near a toilet." }, { id: 'q3-20', text: "My sleep is consistently disrupted by the need to urinate." },
+                        ]
+                    },
+                    {
+                        subtitle: 'About Your Urinary Flow & Emptying',
+                        questions: [
+                            { id: 'q3-21', text: "My urine stream feels weak, slow, or interrupted (it stops and starts)." }, { id: 'q3-22', text: "I have to wait a while for my urine stream to begin (hesitancy)." }, { id: 'q3-23', text: "I have to strain or push to start or maintain urination." }, { id: 'q3-24', text: "I feel that my bladder does not empty completely after I finish." }, { id: 'q3-25', text: "I experience dribbling after I have finished urinating." }, { id: 'q3-26', text: "It takes me a long time to finish urinating." }, { id: 'q3-27', text: "My urinary issues have been linked to an enlarged prostate (BPH)." }, { id: 'q3-28', text: "I have a history of recurring urinary tract infections (UTIs)." }, { id: 'q3-29', text: "I am concerned about age-related changes to my urinary function." }, { id: 'q3-30', text: "I experience discomfort or burning post-urination." }, { id: 'q3-31', text: "My urine flow seems to have less force than it used to." }, { id: 'q3-32', text: "I find myself returning to the toilet shortly after urinating." },
+                        ]
+                    },
+                     {
+                        subtitle: 'General Urinary Concerns',
+                        questions: [
+                            { id: 'q3-33', text: "I am seeking preventative support for my long-term urinary health." }, { id: 'q3-34', text: "I am an athlete concerned about the impact of intense exercise on my kidneys." }, { id: 'q3-35', text: "I am looking for support with my body's natural detoxification processes." }, { id: 'q3-36', text: "My urine appears cloudy or has an unusual odour." }, { id: 'q3-37', text: "I want to feel more confident and in control of my bladder." }, { id: 'q3-38', text: "My urinary symptoms are impacting my quality of life and social activities." },
+                        ]
                     }
-                });
-
-                // Close dropdown when clicking outside
-                document.addEventListener('click', (e) => {
-                    if (!e.target.closest('.patient-search-container')) {
-                        dropdown.classList.remove('show');
+                ]
+            },
+            'theme-4': {
+                title: 'Joint Pain & Arthritis Relief',
+                sections: [
+                    {
+                        subtitle: 'About Your Joint Pain & Discomfort',
+                        questions: [
+                             { id: 'q4-1', text: "I suffer from chronic, persistent pain in one or more joints (e.g., knees, hips, hands, spine)." }, { id: 'q4-2', text: "My joint pain is often a dull, deep ache." }, { id: 'q4-3', text: "I experience sharp, stabbing pains in my joints with certain movements." }, { id: 'q4-4', text: "My joints are often swollen, tender, warm to the touch, or appear red." }, { id: 'q4-5', text: "I have been diagnosed with osteoarthritis." }, { id: 'q4-6', text: "I have been diagnosed with an inflammatory arthritis, such as rheumatoid or psoriatic arthritis." }, { id: 'q4-7', text: "I experience sudden, severe, and excruciating attacks of joint pain, particularly in my big toe, ankle or knee (gout)." }, { id: 'q4-8', text: "I have been told I have high uric acid levels." }, { id: 'q4-9', text: "My joint pain seems to get worse with changes in the weather." }, { id: 'q4-10', text: "I rely on pain medication to get through the day." }, { id: 'q4-11', text: "The pain in my joints disrupts my sleep." }, { id: 'q4-12', text: "The pain is present in multiple joints throughout my body." }, { id: 'q4-13', text: "I experience creaking, popping, or grinding sensations in my joints." }
+                        ]
+                    },
+                    {
+                        subtitle: 'About Your Stiffness & Mobility',
+                        questions: [
+                             { id: 'q4-14', text: "I experience significant joint stiffness, especially first thing in the morning." }, { id: 'q4-15', text: "My morning stiffness lasts for more than 30 minutes." }, { id: 'q4-16', text: "My joints feel stiff and difficult to move after periods of inactivity (e.g., sitting for a long time)." }, { id: 'q4-17', text: "My flexibility and overall range of motion have noticeably decreased over time." }, { id: 'q4-18', text: "I have been diagnosed with a \"frozen shoulder\"." }, { id: 'q4-19', text: "I am seeking support to improve my mobility after surgery or a significant joint injury." }, { id: 'q4-20', text: "My joints feel unstable or like they might \"give way\"." }, { id: 'q4-21', text: "I am looking to improve my joint mobility to enhance athletic performance." }, { id: 'q4-22', text: "I feel my movements are becoming more restricted as I age." }, { id: 'q4-23', text: "I have developed joint contractures (a permanent shortening of a muscle or joint)." }
+                        ]
+                    },
+                    {
+                        subtitle: 'About the Impact on Your Daily Life',
+                        questions: [
+                             { id: 'q4-24', text: "My joint pain makes daily activities like climbing stairs, bending, or opening jars difficult." }, { id: 'q4-25', text: "I find walking for any length of time painful." }, { id: 'q4-26', text: "I have had to give up hobbies or activities I enjoy because of my joint issues." }, { id: 'q4-27', text: "I feel that my independence is being threatened by my lack of mobility." }, { id: 'q4-28', text: "I am concerned about the long-term damage occurring in my joints." }, { id: 'q4-29', text: "I have developed compensation patterns, leading to pain in other areas of my body." }, { id: 'q4-30', text: "I am seeking a natural alternative or complement to my current medication." }, { id: 'q4-31', text: "The chronic pain has a negative impact on my mood and energy levels." }, { id: 'q4-32', text: "I want to maintain my joint health to support an active lifestyle." }, { id: 'q4-33', text: "My quality of life is significantly reduced due to my joint problems." }, { id: 'q4-34', text: "I am worried about needing joint replacement surgery in the future." }, { id: 'q4-35', text: "I have pain in my joints that is related to a previous trauma or injury." }, { id: 'q4-36', text: "I avoid certain movements or activities out of fear of causing pain." }, { id: 'q4-37', text: "I am looking for support with pre-surgical optimisation to get stronger before an operation." }
+                        ]
                     }
-                });
-
-                // New patient button
-                document.getElementById('newPatientBtn').addEventListener('click', () => {
-                    this.showNewPatientForm();
-                });
-
-                // Start assessment button
-                document.getElementById('startAssessmentBtn').addEventListener('click', () => {
-                    this.startAssessment();
-                });
-            }
-
-            async searchPatients(searchTerm) {
-                const dropdown = document.getElementById('patientDropdown');
-                
-                try {
-                    const { data: patients, error } = await supabase
-                        .from('patients')
-                        .select('*')
-                        .eq('clinic_id', this.clinicId)
-                        .or(`first_name.ilike.%${searchTerm}%,last_name.ilike.%${searchTerm}%,patient_id.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%`)
-                        .limit(10);
-
-                    if (error) throw error;
-
-                    if (patients && patients.length > 0) {
-                        this.displayPatientDropdown(patients);
-                    } else {
-                        dropdown.innerHTML = `
-                            <div class="patient-option">
-                                <div class="patient-option-info">
-                                    <div class="patient-option-name">No patients found</div>
-                                    <div class="patient-option-details">Try a different search term</div>
-                                </div>
-                            </div>
-                        `;
-                        dropdown.classList.add('show');
+                ]
+            },
+            'theme-5': {
+                title: 'Digestive & Energy Wellness',
+                sections: [
+                     {
+                        subtitle: 'About Your Energy & Vitality',
+                        questions: [
+                            { id: 'q5-1', text: "I feel chronically fatigued or exhausted, even after sleeping." }, { id: 'q5-2', text: "I rely on caffeine or sugar to get through the day." }, { id: 'q5-3', text: "I experience a significant energy \"crash\" in the mid-afternoon." }, { id: 'q5-4', text: "I struggle with \"brain fog,\" poor concentration, and lack of mental clarity." }, { id: 'q5-5', text: "I feel physically weak and have low stamina for daily tasks." }, { id: 'q5-6', text: "I lack motivation and drive." }, { id: 'q5-7', text: "I have been told I may have adrenal fatigue." }, { id: 'q5-8', text: "My energy levels have not returned to normal after a viral illness (post-viral fatigue)." }, { id: 'q5-9', text: "I feel generally run down and lack vitality." }
+                        ]
+                    },
+                     {
+                        subtitle: 'About Your Upper Digestion (Stomach & Oesophagus)',
+                        questions: [
+                            { id: 'q5-10', text: "I frequently experience acid reflux, heartburn, or indigestion." }, { id: 'q5-11', text: "I feel overly full, heavy, or uncomfortable after eating even small meals." }, { id: 'q5-12', text: "I suffer from nausea." }, { id: 'q5-13', text: "I have been diagnosed with GORD (Gastro-Oesophageal Reflux Disease)." }, { id: 'q5-14', text: "My stomach feels uncomfortable or painful." }, { id: 'q5-15', text: "I burp frequently after meals." }
+                        ]
+                    },
+                    {
+                        subtitle: 'About Your Lower Digestion (Intestines & Bowel)',
+                        questions: [
+                            { id: 'q5-16', text: "I often feel bloated, and my abdomen becomes distended after eating." }, { id: 'q5-17', text: "I suffer from excessive or uncomfortable gas and wind." }, { id: 'q5-18', text: "My bowel movements are irregular or unpredictable." }, { id: 'q5-19', text: "I tend to be constipated (less than 3 bowel movements per week)." }, { id: 'q5-20', text: "I tend to have diarrhoea or loose stools." }, { id: 'q5-21', text: "I have been diagnosed with Irritable Bowel Syndrome (IBS)." }, { id: 'q5-22', text: "My digestive symptoms get worse with stress." }, { id: 'q5-23', text: "I am looking for support after taking a course of antibiotics." }, { id: 'q5-24', text: "I suspect I have food sensitivities." }
+                        ]
+                    },
+                     {
+                        subtitle: 'About Your Metabolism & Blood Sugar',
+                        questions: [
+                            { id: 'q5-25', text: "I am concerned about pre-diabetes or insulin resistance." }, { id: 'q5-26', text: "I am actively managing Type 2 Diabetes." }, { id: 'q5-27', text: "I experience noticeable energy crashes or \"hanger\" if I miss a meal." }, { id: 'q5-28', text: "I have strong cravings for sugary or carbohydrate-rich foods." }, { id: 'q5-29', text: "I feel sleepy or fatigued after eating meals, particularly those high in carbs." }, { id: 'q5-30', text: "I struggle to maintain a healthy weight." }
+                        ]
+                    },
+                    {
+                        subtitle: 'About Your Skin Health (as a reflection of internal health)',
+                        questions: [
+                            { id: 'q5-31', text: "My skin often looks dull, dry, or lacks a healthy glow." }, { id: 'q5-32', text: "I have persistent inflammatory skin issues like eczema, psoriasis, or acne." }, { id: 'q5-33', text: "My skin seems to heal slowly." }, { id: 'q5-34', text: "I have signs of premature ageing." }, { id: 'q5-35', text: "I want to improve my skin's health and appearance from the \"inside out\"." }, { id: 'q5-36', text: "My skin is often inflamed or irritated." }, { id: 'q5-37', text: "I am concerned about age spots or poor skin texture." }
+                        ]
                     }
-                } catch (error) {
-                    console.error('Error searching patients:', error);
-                }
+                ]
+            },
+            'theme-6': {
+                title: 'Circulation & Healing Support',
+                 sections: [
+                    {
+                        subtitle: 'About a Specific Wound or Injury',
+                        questions: [
+                            { id: 'q6-1', text: "I have a specific wound from surgery that is not healing as expected." }, { id: 'q6-2', text: "I am managing a diabetic foot ulcer." }, { id: 'q6-3', text: "I have a venous stasis ulcer on my lower leg." }, { id: 'q6-4', text: "I have a pressure sore (bedsore) that is slow to heal." }, { id: 'q6-5', text: "I have a burn that is in the recovery phase of healing." }, { id: 'q6-6', text: "The area around my wound looks pale or has poor colour." }, { id: 'q6-7', text: "My wound shows little sign of improvement from week to week." }, { id: 'q6-8', text: "The tissue forming in the wound does not look healthy or robust." }, { id: 'q6-9', text: "I am concerned about the risk of infection in a slow-healing wound." }, { id: 'q6-10', text: "I want to minimise scarring from a wound or surgery." }, { id: 'q6-11', text: "I have a minor skin injury that is taking an unusually long time to heal." }
+                        ]
+                    },
+                    {
+                        subtitle: 'About Your General Healing & Tissue Health',
+                        questions: [
+                            { id: 'q6-12', text: "I have noticed that I generally heal much more slowly than I used to." }, { id: 'q6-13', text: "I bruise very easily." }, { id: 'q6-14', text: "I am seeking support to prepare my body for an upcoming surgery." }, { id: 'q6-15', text: "I want to accelerate my recovery after a medical procedure." }, { id: 'q6-16', text: "My skin feels thin and fragile." }
+                        ]
+                    },
+                    {
+                        subtitle: 'About Your General Circulation & Vascular Health',
+                        questions: [
+                            { id: 'q6-17', text: "I believe my poor circulation is the main reason for my slow healing." }, { id: 'q6-18', text: "My legs often feel heavy, tired, or achy." }, { id: 'q6-19', text: "I experience significant swelling in my legs, ankles, or feet." }, { id: 'q6-20', text: "I have been diagnosed with venous insufficiency." }, { id: 'q6-21', text: "I have been diagnosed with lymphoedema." }, { id: 'q6-22', text: "I have had a Deep Vein Thrombosis (DVT) in the past and want to support my vascular health." }, { id: 'q6-23', text: "I have visible spider veins or varicose veins that are uncomfortable." }, { id: 'q6-24', text: "I am concerned about atherosclerosis or endothelial dysfunction." }, { id: 'q6-25', text: "I am looking to strengthen my blood vessels and improve their flexibility." }, { id: 'q6-26', text: "I suffer from cold hands and feet, indicating poor peripheral circulation." }, { id: 'q6-27', text: "My walking distance is limited by pain or heaviness in my legs." }, { id: 'q6-28', text: "I am seeking to improve my overall vascular health preventatively." }, { id: 'q6-29', text: "The skin on my lower legs is discoloured or has a different texture." }, { id: 'q6-30', text: "I want to improve blood flow to all my tissues for better overall health." }, { id: 'q6-31', text: "My circulation issues are related to diabetes." }, { id: 'q6-32', text: "I want to reduce the risk of future vascular problems." }, { id: 'q6-33', text: "I experience numbness or tingling in my extremities." }, { id: 'q6-34', text: "I want to reduce leg discomfort and swelling." }, { id: 'q6-35', text: "My job requires long periods of sitting or standing, which affects my leg circulation." }, { id: 'q6-36', text: "I am an athlete looking to improve circulation for better performance and recovery." }
+                        ]
+                    }
+                ]
             }
+        };
 
-            displayPatientDropdown(patients) {
-                const dropdown = document.getElementById('patientDropdown');
-                
-                dropdown.innerHTML = patients.map(patient => {
-                    const age = patient.date_of_birth ? 
-                        Math.floor((new Date() - new Date(patient.date_of_birth)) / (365.25 * 24 * 60 * 60 * 1000)) : 
-                        'N/A';
-                    
-                    return `
-                        <div class="patient-option" onclick="window.assessment.selectPatient(${patient.id})">
-                            <div class="patient-option-info">
-                                <div class="patient-option-name">${patient.first_name} ${patient.last_name}</div>
-                                <div class="patient-option-details">
-                                    Age: ${age} | Gender: ${patient.gender || 'N/A'} | ${patient.email || 'No email'}
-                                </div>
-                            </div>
-                            <div class="patient-option-id">${patient.patient_id || 'ID: N/A'}</div>
-                        </div>
-                    `;
-                }).join('');
-                
-                dropdown.classList.add('show');
-            }
 
-            async selectPatient(patientId) {
-                const dropdown = document.getElementById('patientDropdown');
-                dropdown.classList.remove('show');
-                
-                try {
-                    const { data: patient, error } = await supabase
-                        .from('patients')
-                        .select('*')
-                        .eq('id', patientId)
-                        .single();
+        // --- UI & LOGIC SETUP ---
+        
+        const mainFormContainer = document.getElementById('assessment-form');
 
-                    if (error) throw error;
-
-                    this.patientId = patient.id;
-                    this.patientData = patient;
-                    
-                    // Calculate age
-                    const age = patient.date_of_birth ? 
-                        Math.floor((new Date() - new Date(patient.date_of_birth)) / (365.25 * 24 * 60 * 60 * 1000)) : 
-                        'N/A';
-                    
-                    // Display selected patient
-                    document.getElementById('selectedPatientInfo').classList.remove('hidden');
-                    document.getElementById('selectedPatientDetails').innerHTML = `
-                        <p class="text-gray-700"><strong>Name:</strong> ${patient.first_name} ${patient.last_name}</p>
-                        <p class="text-gray-700"><strong>Age:</strong> ${age}</p>
-                        <p class="text-gray-700"><strong>Gender:</strong> ${patient.gender || 'Not specified'}</p>
-                        <p class="text-gray-700"><strong>ID:</strong> ${patient.patient_id || 'N/A'}</p>
-                    `;
-                    
-                    document.getElementById('patientSearch').value = `${patient.first_name} ${patient.last_name}`;
-                    
-                    // Store patient info for assessment
-                    this.assessmentData.patientInfo = {
-                        patient_name: `${patient.first_name} ${patient.last_name}`,
-                        patient_age: age,
-                        patient_gender: patient.gender || 'Not specified'
-                    };
-                    
-                } catch (error) {
-                    console.error('Error selecting patient:', error);
-                    this.showSaveIndicator('Error selecting patient', 'error');
-                }
-            }
-
-            showNewPatientForm() {
-                // For now, redirect to patient registration
-                // In future, you could show an inline form
-                window.location.href = 'patient-registration.html?returnTo=assessment';
-            }
-
-            async startAssessment() {
-                if (!this.patientId) {
-                    alert('Please select a patient first');
-                    return;
-                }
-                
-                // Hide splash screen, show assessment form
-                document.getElementById('splash-screen').classList.add('hidden');
-                document.getElementById('assessment-form').classList.remove('hidden');
-                
-                // Create assessment record
-                await this.createAssessmentRecord();
-                
-                // Initialize section navigation
-                this.initializeSectionNav();
-                
-                // Load first section
-                this.loadSection(0);
-                
-                // Start auto-save
-                this.startAutoSave();
-            }
-
-            initializeSectionNav() {
-                const nav = document.getElementById('sectionNav');
-                nav.innerHTML = this.sections.map((section, index) => 
-                    `<div class="section-dot ${index === 0 ? 'active' : ''}" data-index="${index}"></div>`
-                ).join('');
-            }
-
-            setupNavigation() {
-                const prevBtn = document.getElementById('prevBtn');
-                const nextBtn = document.getElementById('nextBtn');
-                
-                prevBtn?.addEventListener('click', () => this.previousSection());
-                nextBtn?.addEventListener('click', () => this.nextSection());
-            }
-
-            loadSection(index) {
-                const section = this.sections[index];
-                const container = document.getElementById('sectionContainer');
-                
-                // Update progress
-                const progress = ((index + 1) / this.sections.length) * 100;
-                document.getElementById('progressBar').style.width = `${progress}%`;
-                
-                // Update nav dots
-                document.querySelectorAll('.section-dot').forEach((dot, i) => {
-                    dot.classList.toggle('active', i === index);
-                    dot.classList.toggle('completed', i < index);
-                });
-                
-                // Update navigation buttons
-                document.getElementById('prevBtn').disabled = index === 0;
-                document.getElementById('nextBtn').textContent = 
-                    index === this.sections.length - 1 ? 'Generate Report' : 'Next →';
-                
-                // Load section content
-                container.innerHTML = this.getSectionHTML(section);
-                
-                // Apply fade-in animation
-                container.style.opacity = '0';
-                setTimeout(() => {
-                    container.style.transition = 'opacity 0.5s ease';
-                    container.style.opacity = '1';
-                }, 50);
-                
-                this.currentSectionIndex = index;
-            }
-
-            getSectionHTML(section) {
-                switch(section.id) {
-                    case 'safety':
-                        return this.getSafetyHTML();
-                    case 'holistic':
-                        return this.getHolisticHTML();
-                    case 'concerns':
-                        return this.getConcernsHTML();
-                    case 'symptoms':
-                        return this.getSymptomsHTML();
-                    default:
-                        return '';
-                }
-            }
-
-            getSafetyHTML() {
-                const questions = [
-                    "Do you have a pacemaker or any other implanted electronic device?",
-                    "Are you currently in the first trimester of pregnancy?",
-                    "Are you currently undergoing active cancer treatment?",
-                    "Do you have a diagnosed severe arrhythmia?",
-                    "Have you had a stroke or heart attack within the last six weeks?"
-                ];
-                
-                return `
-                    <div class="space-y-6">
-                        <div>
-                            <h2 class="text-2xl font-semibold text-slate-800">${this.sections[0].title}</h2>
-                            <p class="text-slate-600 mt-2">${this.sections[0].subtitle}</p>
-                        </div>
-                        
-                        <div class="space-y-4 mt-6">
-                            ${questions.map((q, i) => `
-                                <div class="flex items-start p-4 bg-slate-50 rounded-lg">
-                                    <div class="flex-1 text-sm">${i + 1}. ${q}</div>
-                                    <div class="flex items-center space-x-4 ml-4">
-                                        <label class="flex items-center cursor-pointer">
-                                            <input type="radio" name="safety-${i}" value="no" class="h-4 w-4 text-green-600" checked>
-                                            <span class="ml-2 text-sm">No</span>
-                                        </label>
-                                        <label class="flex items-center cursor-pointer">
-                                            <input type="radio" name="safety-${i}" value="yes" class="h-4 w-4 text-red-600">
-                                            <span class="ml-2 text-sm">Yes</span>
-                                        </label>
-                                    </div>
-                                </div>
-                            `).join('')}
-                        </div>
-                        
-                        <div id="contraindication-warning" class="hidden mt-4 p-4 bg-red-100 border-l-4 border-red-500 text-red-700">
-                            <p class="font-bold">⚠️ Therapy Cannot Proceed</p>
-                            <p>The client has indicated a contraindication. Please advise them to consult their GP.</p>
-                        </div>
+        // Populate Step 1: Safety Questions
+        const safetyContainer = document.getElementById('safety-questions');
+        safetyQuestions.forEach((q, i) => {
+            safetyContainer.innerHTML += `
+                <div class="flex items-start">
+                    <div class="flex-1 text-sm">${i + 1}. ${q}</div>
+                    <div class="flex items-center space-x-4 ml-4">
+                        <label class="flex items-center"><input type="radio" name="safety-${i}" value="no" class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500" checked> <span class="ml-2">No</span></label>
+                        <label class="flex items-center"><input type="radio" name="safety-${i}" value="yes" class="h-4 w-4 text-red-600 border-gray-300 focus:ring-red-500"> <span class="ml-2">Yes</span></label>
                     </div>
-                `;
-            }
+                </div>`;
+        });
+        
+        // Populate Step 3: Primary Concerns
+        const concernsContainer = document.getElementById('primary-concerns');
+        primaryConcerns.forEach(concern => {
+             concernsContainer.innerHTML += `
+                <label class="flex items-center p-4 border rounded-lg hover:bg-slate-50 cursor-pointer">
+                    <input type="checkbox" id="${concern.id}" name="primary-concern" value="${concern.id}" class="h-5 w-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                    <span class="ml-3 text-sm font-medium">${concern.name}</span>
+                </label>`;
+        });
+        
+        // Populate Step 4: Deep Dive Questionnaires
+        const questionnairesContainer = document.getElementById('deep-dive-questionnaires');
+        Object.keys(questions).forEach(themeId => {
+            const theme = questions[themeId];
+            let themeHtml = `<div id="questionnaire-${themeId}" class="hidden space-y-6 p-6 bg-slate-50 rounded-lg border">
+                                <h3 class="text-xl font-semibold text-indigo-700">${theme.title}</h3>`;
+            
+            theme.sections.forEach(section => {
+                themeHtml += `<div class="space-y-3">
+                                <h4 class="font-semibold text-slate-800">${section.subtitle}</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3">`;
+                section.questions.forEach(q => {
+                    themeHtml += `<label class="flex items-start font-normal text-sm">
+                                    <input type="checkbox" data-symptom-text="${q.text}" id="${q.id}" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mt-1 mr-2 flex-shrink-0">
+                                    <span>${q.text}</span>
+                                 </label>`;
+                });
+                themeHtml += `</div></div>`;
+            });
 
-            getHolisticHTML() {
-                return `
-                    <div class="space-y-6">
-                        <div>
-                            <h2 class="text-2xl font-semibold text-slate-800">${this.sections[1].title}</h2>
-                            <p class="text-slate-600 mt-2">${this.sections[1].subtitle}</p>
-                        </div>
-                        
-                        <div class="space-y-6 mt-6">
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-2">
-                                    What is the main health challenge you're hoping we can support?
-                                </label>
-                                <textarea 
-                                    id="main-challenge" 
-                                    rows="3" 
-                                    class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                    placeholder="Describe your main health concern..."
-                                ></textarea>
-                            </div>
-                            
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                    <label class="block text-sm font-medium text-slate-700 mb-2">
-                                        Energy Level (1-10)
-                                    </label>
-                                    <input type="range" id="energy-level" min="1" max="10" value="5" 
-                                        class="w-full" oninput="this.nextElementSibling.textContent = this.value">
-                                    <output class="block text-center mt-1 font-semibold text-blue-600">5</output>
-                                </div>
-                                
-                                <div>
-                                    <label class="block text-sm font-medium text-slate-700 mb-2">
-                                        Sleep Quality (1-10)
-                                    </label>
-                                    <input type="range" id="sleep-quality" min="1" max="10" value="5" 
-                                        class="w-full" oninput="this.nextElementSibling.textContent = this.value">
-                                    <output class="block text-center mt-1 font-semibold text-blue-600">5</output>
-                                </div>
-                                
-                                <div>
-                                    <label class="block text-sm font-medium text-slate-700 mb-2">
-                                        Stress Level (1-10)
-                                    </label>
-                                    <input type="range" id="stress-level" min="1" max="10" value="5" 
-                                        class="w-full" oninput="this.nextElementSibling.textContent = this.value">
-                                    <output class="block text-center mt-1 font-semibold text-blue-600">5</output>
-                                </div>
-                                
-                                <div>
-                                    <label class="block text-sm font-medium text-slate-700 mb-2">
-                                        Digestive Comfort (1-10)
-                                    </label>
-                                    <input type="range" id="digestive-comfort" min="1" max="10" value="5" 
-                                        class="w-full" oninput="this.nextElementSibling.textContent = this.value">
-                                    <output class="block text-center mt-1 font-semibold text-blue-600">5</output>
-                                </div>
-                            </div>
-                            
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-2">
-                                    Which aspects of life are most affected?
-                                </label>
-                                <div class="space-y-2">
-                                    ${['Work/Productivity', 'Mood/Emotional Well-being', 'Social Life/Relationships', 'Hobbies/Physical Activities'].map(aspect => `
-                                        <label class="flex items-center p-3 bg-slate-50 rounded-lg cursor-pointer hover:bg-slate-100">
-                                            <input type="checkbox" value="${aspect}" class="h-4 w-4 text-blue-600 mr-3">
-                                            <span class="text-sm">${aspect}</span>
-                                        </label>
-                                    `).join('')}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }
+            themeHtml += `</div>`;
+            questionnairesContainer.innerHTML += themeHtml;
+        });
 
-            getConcernsHTML() {
-                const concerns = [
-                    'Sleep, Stress & Anxiety',
-                    'Cardiovascular & Circulation',
-                    'Kidney & Urinary Wellness',
-                    'Joint Pain & Arthritis Relief',
-                    'Digestive & Energy Wellness',
-                    'Circulation & Healing Support',
-                    'Comprehensive Preventative Wellness'
-                ];
-                
-                return `
-                    <div class="space-y-6">
-                        <div>
-                            <h2 class="text-2xl font-semibold text-slate-800">${this.sections[2].title}</h2>
-                            <p class="text-slate-600 mt-2">${this.sections[2].subtitle}</p>
-                        </div>
-                        
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-                            ${concerns.map((concern, i) => `
-                                <label class="flex items-center p-4 border-2 border-slate-200 rounded-lg hover:bg-slate-50 cursor-pointer transition-all">
-                                    <input type="checkbox" value="theme-${i + 1}" name="primary-concern" 
-                                        class="h-5 w-5 text-blue-600 mr-3">
-                                    <span class="text-sm font-medium">${concern}</span>
-                                </label>
-                            `).join('')}
-                        </div>
-                    </div>
-                `;
-            }
 
-            getSymptomsHTML() {
-                // This will be dynamically populated based on selected concerns
-                return `
-                    <div class="space-y-6">
-                        <div>
-                            <h2 class="text-2xl font-semibold text-slate-800">${this.sections[3].title}</h2>
-                            <p class="text-slate-600 mt-2">Please select all symptoms that apply to your condition</p>
-                        </div>
-                        
-                        <div id="symptoms-container" class="space-y-6 mt-6">
-                            <!-- Symptoms will be dynamically loaded based on selected concerns -->
-                        </div>
-                    </div>
-                `;
-            }
-
-            async previousSection() {
-                if (this.currentSectionIndex > 0) {
-                    await this.saveCurrentSection();
-                    this.loadSection(this.currentSectionIndex - 1);
+        // --- EVENT LISTENERS & NAVIGATION ---
+        
+        // Step 1 -> Step 2
+        document.getElementById('next-step-1').addEventListener('click', () => {
+             let hasContraindication = false;
+             document.querySelectorAll('#safety-questions input[type="radio"]:checked').forEach(radio => {
+                if (radio.value === 'yes') {
+                    hasContraindication = true;
                 }
+             });
+
+             if (hasContraindication) {
+                document.getElementById('contraindication-warning').classList.remove('hidden');
+                document.getElementById('next-step-1').disabled = true;
+             } else {
+                document.getElementById('contraindication-warning').classList.add('hidden');
+                document.getElementById('step-1').classList.remove('step-visible');
+                document.getElementById('step-1').classList.add('step-hidden');
+                document.getElementById('step-2').classList.remove('step-hidden');
+                document.getElementById('step-2').classList.add('step-visible');
+             }
+        });
+        
+        // Step 2 -> Step 3
+        document.getElementById('next-step-2').addEventListener('click', () => {
+            document.getElementById('step-2').classList.remove('step-visible');
+            document.getElementById('step-2').classList.add('step-hidden');
+            document.getElementById('step-3').classList.remove('step-hidden');
+            document.getElementById('step-3').classList.add('step-visible');
+        });
+
+        // Step 3 -> Step 4
+        document.getElementById('next-step-3').addEventListener('click', () => {
+            const selectedConcerns = Array.from(document.querySelectorAll('input[name="primary-concern"]:checked')).map(cb => cb.value);
+            
+            if (selectedConcerns.length === 0) {
+                alert("Please select at least one area of concern.");
+                return;
             }
 
-            async nextSection() {
-                // Validate current section
-                if (!this.validateCurrentSection()) {
-                    return;
-                }
-                
-                await this.saveCurrentSection();
-                
-                if (this.currentSectionIndex < this.sections.length - 1) {
-                    // Special handling for symptoms section
-                    if (this.sections[this.currentSectionIndex + 1].id === 'symptoms') {
-                        await this.loadSymptomsForConcerns();
-                    }
-                    this.loadSection(this.currentSectionIndex + 1);
+            if(selectedConcerns.includes('theme-7')) {
+                const comprehensiveScores = { '801': 5, '802': 3 }; 
+                generateAndDisplayReport(comprehensiveScores);
+                return;
+            }
+
+            Object.keys(questions).forEach(themeId => {
+                const questionnaireDiv = document.getElementById(`questionnaire-${themeId}`);
+                if (selectedConcerns.includes(themeId)) {
+                    questionnaireDiv.classList.remove('hidden');
                 } else {
-                    // Generate report
-                    await this.generateReport();
+                    questionnaireDiv.classList.add('hidden');
                 }
-            }
+            });
 
-            validateCurrentSection() {
-                const section = this.sections[this.currentSectionIndex];
-                
-                // Check for contraindications in safety section
-                if (section.id === 'safety') {
-                    let hasContraindication = false;
-                    document.querySelectorAll('input[type="radio"]:checked').forEach(radio => {
-                        if (radio.value === 'yes') {
-                            hasContraindication = true;
-                        }
+            document.getElementById('step-3').classList.remove('step-visible');
+            document.getElementById('step-3').classList.add('step-hidden');
+            document.getElementById('step-4').classList.remove('step-hidden');
+            document.getElementById('step-4').classList.add('step-visible');
+        });
+
+        document.getElementById('generate-report').addEventListener('click', () => {
+            const scores = calculateScores();
+            if (Object.keys(scores).length === 0) {
+                alert("Please select at least one symptom before generating the report.");
+                return;
+            }
+            generateAndDisplayReport(scores);
+        });
+        
+        // --- CORE LOGIC FUNCTIONS ---
+        
+        function calculateScores() {
+            const scores = {};
+            const checkedBoxes = document.querySelectorAll('#step-4 input[type="checkbox"]:checked');
+            
+            checkedBoxes.forEach(box => {
+                const questionId = box.id;
+                const therapyCodes = symptomTaggingMatrix[questionId];
+                if (therapyCodes) {
+                    therapyCodes.forEach(code => {
+                        scores[code] = (scores[code] || 0) + 1;
                     });
-                    
-                    if (hasContraindication) {
-                        document.getElementById('contraindication-warning')?.classList.remove('hidden');
-                        return false;
-                    }
                 }
-                
-                // Validate concerns selection
-                if (section.id === 'concerns') {
-                    const selected = document.querySelectorAll('input[name="primary-concern"]:checked');
-                    if (selected.length === 0) {
-                        alert('Please select at least one area of concern');
-                        return false;
-                    }
-                }
-                
-                return true;
-            }
-
-            async saveCurrentSection() {
-                await this.saveProgress();
-                this.sections[this.currentSectionIndex].completed = true;
-            }
-
-            async loadSymptomsForConcerns() {
-                // Load symptoms based on selected concerns
-                // This would load the appropriate questionnaires from your therapy data
-                // For now, using a simplified version
-                
-                const container = document.getElementById('symptoms-container');
-                if (!container) return;
-                
-                const selectedConcerns = Array.from(
-                    document.querySelectorAll('input[name="primary-concern"]:checked')
-                ).map(cb => cb.value);
-                
-                // This would be populated from your comprehensive symptoms data
-                // Simplified for demonstration
-                container.innerHTML = `
-                    <div class="bg-blue-50 p-4 rounded-lg">
-                        <p class="text-sm text-blue-800">
-                            Detailed symptom questionnaires will appear here based on your selected concerns.
-                        </p>
-                    </div>
-                `;
-            }
-
-            async createAssessmentRecord() {
-                try {
-                    const { data, error } = await supabase
-                        .from('comprehensive_assessments')
-                        .insert({
-                            clinic_id: this.clinicId,
-                            patient_id: this.patientId,
-                            practitioner_name: this.practitionerName,
-                            patient_name: this.assessmentData.patientInfo.patient_name,
-                            patient_age: this.assessmentData.patientInfo.patient_age,
-                            patient_gender: this.assessmentData.patientInfo.patient_gender,
-                            status: 'in_progress'
-                        })
-                        .select()
-                        .single();
-                    
-                    if (error) throw error;
-                    
-                    this.assessmentId = data.id;
-                    console.log('Assessment created:', this.assessmentId);
-                    
-                } catch (error) {
-                    console.error('Error creating assessment:', error);
-                    this.showSaveIndicator('Error creating assessment', 'error');
-                }
-            }
-
-            startAutoSave() {
-                // Auto-save every 30 seconds
-                setInterval(() => {
-                    if (this.assessmentId) {
-                        this.saveProgress();
-                    }
-                }, 30000);
-            }
-
-            async saveProgress() {
-                if (!this.assessmentId) return;
-                
-                this.showSaveIndicator('Saving...', 'saving');
-                
-                // Collect data based on current section
-                this.collectSectionData();
-                
-                try {
-                    const { error } = await supabase
-                        .from('comprehensive_assessments')
-                        .update({
-                            ...this.assessmentData,
-                            updated_at: new Date().toISOString()
-                        })
-                        .eq('id', this.assessmentId);
-                    
-                    if (error) throw error;
-                    
-                    this.showSaveIndicator('Saved', 'saved');
-                    
-                } catch (error) {
-                    console.error('Error saving:', error);
-                    this.showSaveIndicator('Error saving', 'error');
-                }
-            }
-
-            collectSectionData() {
-                const section = this.sections[this.currentSectionIndex];
-                
-                switch(section.id) {
-                    case 'safety':
-                        const safetyResponses = {};
-                        document.querySelectorAll('input[type="radio"]:checked').forEach((radio, i) => {
-                            safetyResponses[`q${i}`] = radio.value;
-                        });
-                        this.assessmentData.safetyResponses = safetyResponses;
-                        break;
-                        
-                    case 'holistic':
-                        this.assessmentData.holisticSnapshot = {
-                            mainChallenge: document.getElementById('main-challenge')?.value,
-                            energyLevel: document.getElementById('energy-level')?.value,
-                            sleepQuality: document.getElementById('sleep-quality')?.value,
-                            stressLevel: document.getElementById('stress-level')?.value,
-                            digestiveComfort: document.getElementById('digestive-comfort')?.value,
-                            lifeAspects: Array.from(
-                                document.querySelectorAll('input[type="checkbox"]:checked')
-                            ).map(cb => cb.value)
-                        };
-                        break;
-                        
-                    case 'concerns':
-                        this.assessmentData.selectedThemes = Array.from(
-                            document.querySelectorAll('input[name="primary-concern"]:checked')
-                        ).map(cb => cb.value);
-                        break;
-                }
-            }
-
-            async generateReport() {
-                // Show loading
-                this.showSaveIndicator('Generating report...', 'saving');
-                
-                // Hide assessment form, show report
-                document.getElementById('assessment-form').classList.add('hidden');
-                document.getElementById('report-section').classList.remove('hidden');
-                
-                // Generate report HTML with patient details
-                const reportHTML = this.createReportHTML();
-                document.getElementById('report-section').innerHTML = reportHTML;
-                
-                // Save complete assessment
-                await this.saveCompleteAssessment(reportHTML);
-                
-                window.scrollTo(0, 0);
-            }
-
-            createReportHTML() {
-                const date = new Date().toLocaleDateString('en-GB');
-                
-                return `
-                    <div class="space-y-8">
-                        <h2 class="text-3xl font-bold text-center text-slate-900">Personalised Wellness Plan</h2>
-                        
-                        <div class="bg-gray-50 p-6 rounded-lg">
-                            <h3 class="text-lg font-semibold mb-4">Patient Information</h3>
-                            <div class="grid grid-cols-2 gap-4 text-sm">
-                                <div><strong>Name:</strong> ${this.assessmentData.patientInfo.patient_name}</div>
-                                <div><strong>Age:</strong> ${this.assessmentData.patientInfo.patient_age}</div>
-                                <div><strong>Gender:</strong> ${this.assessmentData.patientInfo.patient_gender}</div>
-                                <div><strong>Assessment Date:</strong> ${date}</div>
-                                <div><strong>Practitioner:</strong> ${this.practitionerName}</div>
-                                <div><strong>Clinic ID:</strong> ${this.clinicId}</div>
-                            </div>
-                        </div>
-                        
-                        <div class="bg-blue-50 p-6 rounded-lg">
-                            <h3 class="text-lg font-semibold mb-4">Assessment Summary</h3>
-                            <p class="text-sm text-gray-700">
-                                <strong>Main Health Challenge:</strong> ${this.assessmentData.holisticSnapshot.mainChallenge || 'Not specified'}
-                            </p>
-                            <div class="grid grid-cols-2 gap-4 mt-4 text-sm">
-                                <div><strong>Energy Level:</strong> ${this.assessmentData.holisticSnapshot.energyLevel}/10</div>
-                                <div><strong>Sleep Quality:</strong> ${this.assessmentData.holisticSnapshot.sleepQuality}/10</div>
-                                <div><strong>Stress Level:</strong> ${this.assessmentData.holisticSnapshot.stressLevel}/10</div>
-                                <div><strong>Digestive Comfort:</strong> ${this.assessmentData.holisticSnapshot.digestiveComfort}/10</div>
-                            </div>
-                        </div>
-                        
-                        <div class="text-center mt-8 no-print">
-                            <button onclick="window.print()" class="bg-gray-700 text-white font-semibold py-2 px-6 rounded-lg hover:bg-gray-800 mr-3">
-                                Print Report
-                            </button>
-                            <button onclick="location.reload()" class="bg-blue-600 text-white font-semibold py-2 px-6 rounded-lg hover:bg-blue-700">
-                                New Assessment
-                            </button>
-                        </div>
-                    </div>
-                `;
-            }
-
-            async saveCompleteAssessment(reportHTML) {
-                if (!this.assessmentId) return;
-                
-                try {
-                    const { error } = await supabase
-                        .from('comprehensive_assessments')
-                        .update({
-                            report_html: reportHTML,
-                            status: 'completed',
-                            completion_time: Math.round((new Date() - this.startTime) / 1000),
-                            updated_at: new Date().toISOString()
-                        })
-                        .eq('id', this.assessmentId);
-                    
-                    if (error) throw error;
-                    
-                    this.showSaveIndicator('Assessment completed!', 'saved');
-                    
-                } catch (error) {
-                    console.error('Error saving report:', error);
-                    this.showSaveIndicator('Error saving report', 'error');
-                }
-            }
-
-            showSaveIndicator(message, type) {
-                const indicator = document.getElementById('saveIndicator');
-                const messageSpan = document.getElementById('saveMessage');
-                const spinner = document.getElementById('saveSpinner');
-                
-                indicator.className = `save-indicator ${type}`;
-                messageSpan.textContent = message;
-                
-                if (type === 'saving') {
-                    spinner.style.display = 'block';
-                } else {
-                    spinner.style.display = 'none';
-                    setTimeout(() => {
-                        indicator.className = 'save-indicator';
-                    }, 3000);
-                }
-            }
-
-            loadTherapyData() {
-                // Load your therapy details and questions data
-                // This would include all the therapy codes, descriptions, etc.
-                // For now, keeping it minimal for the example
-            }
+            });
+            return scores;
         }
 
-        // Initialize
-        document.addEventListener('DOMContentLoaded', () => {
-            window.assessment = new ComprehensiveAssessment();
-        });
+        // --- ENHANCED REPORT GENERATION ---
+        function generateAndDisplayReport(scores) {
+            const sortedTherapies = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+            
+            if (sortedTherapies.length === 0) return;
+
+            const primaryTherapyCode = sortedTherapies[0][0];
+            const primaryTherapy = therapyDetails[primaryTherapyCode];
+
+            // --- Comprehensive Analysis Logic ---
+            const contributingFactors = {};
+            const allSelectedSymptoms = {};
+
+            document.querySelectorAll('#step-4 input[type="checkbox"]:checked').forEach(cb => {
+                const therapyCodes = symptomTaggingMatrix[cb.id];
+                if (therapyCodes) {
+                    therapyCodes.forEach(code => {
+                        if (!allSelectedSymptoms[code]) allSelectedSymptoms[code] = [];
+                        allSelectedSymptoms[code].push(cb.dataset.symptomText);
+                    });
+                }
+            });
+
+            sortedTherapies.slice(1).forEach(([code, score]) => {
+                const therapy = therapyDetails[code];
+                if (therapy.theme !== primaryTherapy.theme && score > 2) { // Threshold score of 3 for significance
+                     if (!contributingFactors[therapy.theme]) {
+                        contributingFactors[therapy.theme] = [];
+                    }
+                    contributingFactors[therapy.theme].push(therapy.name);
+                }
+            });
+
+            const clientName = document.getElementById('fullName').value || 'Not Provided';
+            const mainChallenge = document.getElementById('main-challenge-summary').value || 'The areas identified during the assessment.';
+            const lifeAspects = Array.from(document.querySelectorAll('#life-aspects-affected input:checked')).map(cb => cb.value).join(', ');
+
+            // --- Building the Narrative Report ---
+            
+            // Part 1: Summary
+            let summaryHtml = `<h3 class="text-xl font-semibold text-slate-800 border-b pb-3 mb-4">1. Summary of Your Assessment</h3>
+                               <p class="text-sm text-slate-600">Thank you for completing the wellness assessment. This report summarises our findings and provides a recommended action plan tailored to your specific needs. Our analysis indicates that your primary concern regarding <strong>${mainChallenge}</strong> is affecting several aspects of your life, including your ${lifeAspects}.</p>
+                               <p class="text-sm text-slate-600 mt-2">The key wellness areas identified from your answers are: <strong>${primaryTherapy.theme}</strong>${Object.keys(contributingFactors).length > 0 ? ' and its connection to <strong>' + Object.keys(contributingFactors).join(', ') + '</strong>' : ''}.</p>`;
+
+            // Part 2: Findings
+            let findingsHtml = `<div class="page-break"><h3 class="text-xl font-semibold text-slate-800 border-b pb-3 mb-4">2. A Deeper Look at Your Results</h3></div>`;
+            
+            // Primary Finding
+            findingsHtml += `<div class="p-4 bg-indigo-50 border-l-4 border-indigo-500 rounded-r-lg">
+                                <h4 class="font-semibold text-indigo-800">Primary Area of Imbalance: ${primaryTherapy.theme}</h4>
+                                <p class="text-sm text-slate-600 mt-2">${themeExplanations[primaryTherapy.theme] || ''}</p>
+                                <p class="text-sm text-slate-600 mt-2">Your answers that point to this being your primary area of imbalance include:</p>
+                                <ul class="list-disc list-inside text-sm text-slate-600 mt-2 space-y-1">${(allSelectedSymptoms[primaryTherapyCode] || []).map(s => `<li>${s}</li>`).join('')}</ul>
+                             </div>`;
+
+            // Secondary Findings (if any)
+            if (Object.keys(contributingFactors).length > 0) {
+                findingsHtml += `<div class="mt-6 p-4 bg-amber-50 border-l-4 border-amber-500 rounded-r-lg">
+                                    <h4 class="font-semibold text-amber-800">Secondary Contributing Factors</h4>
+                                    <p class="text-sm text-slate-600 mt-2">Our holistic analysis reveals that your primary challenge with <strong>${primaryTherapy.theme}</strong> is likely having a ripple effect on other areas of your health. It is common for the body's systems to influence one another, and your assessment highlighted the following connections:</p>`;
+                Object.keys(contributingFactors).forEach(theme => {
+                    const relatedSymptoms = [];
+                    contributingFactors[theme].forEach(therapyName => {
+                        const therapyCode = Object.keys(therapyDetails).find(key => therapyDetails[key].name === therapyName);
+                        if(allSelectedSymptoms[therapyCode]){
+                            relatedSymptoms.push(...allSelectedSymptoms[therapyCode]);
+                        }
+                    });
+
+                    findingsHtml += `<div class="mt-3">
+                                        <p class="text-sm font-semibold text-slate-700">Connection to ${theme}:</p>
+                                        <ul class="list-disc list-inside text-sm text-slate-600 mt-1 space-y-1">${[...new Set(relatedSymptoms)].map(s => `<li>${s}</li>`).join('')}</ul>
+                                     </div>`;
+                });
+                findingsHtml += `</div>`;
+            }
+            
+            // The Holistic Picture
+            findingsHtml += `<div class="mt-6 p-4 bg-emerald-50 border-l-4 border-emerald-500 rounded-r-lg">
+                                <h4 class="font-semibold text-emerald-800">The Holistic Picture: Your Personalised Narrative</h4>
+                                <p class="text-sm text-slate-600 mt-2">Based on your assessment, a clear picture emerges: the imbalance in your <strong>${primaryTherapy.theme}</strong> appears to be the primary driver of your health challenges. This is not only creating the direct symptoms you feel, but is also creating a ripple effect, placing a significant strain on your ${Object.keys(contributingFactors).join(' and ').toLowerCase() || 'overall well-being'}. Our recommended plan is designed to address both the root cause and its effects, creating a more comprehensive and lasting improvement to your health.</p>
+                             </div>`;
+            
+            // Part 3: Action Plan
+            let actionPlanHtml = `<div class="page-break"><h3 class="text-xl font-semibold text-slate-800 border-b pb-3 mb-4">3. Your Personalised Action Plan</h3></div>
+                                  <p class="text-sm text-slate-600 mb-4">Based on the comprehensive findings, we recommend beginning with the therapy that addresses your primary area of imbalance. This focused approach is the most effective way to start creating positive change in your system.</p>`;
+            
+            actionPlanHtml += `<div class="mt-4 p-6 border rounded-lg shadow-sm bg-slate-50">
+                                <p class="text-lg font-semibold text-indigo-700">Primary Recommended Therapy: ${primaryTherapy.name} (Code ${primaryTherapyCode})</p>
+                                <div class="mt-4">
+                                    <h5 class="font-semibold text-slate-800">Why This Therapy is Recommended For You:</h5>
+                                    <p class="text-sm text-slate-600 mt-1">${primaryTherapy.rationale || primaryTherapy.description}</p>
+                                </div>
+                                <div class="mt-4">
+                                    <h5 class="font-semibold text-slate-800">Your Anticipated Wellness Journey:</h5>
+                                    <div class="text-sm text-slate-600 mt-2 space-y-2">
+                                        <p><strong>Immediate Benefits (First 1-2 Weeks):</strong> ${primaryTherapy.benefitsTimeline.immediate}</p>
+                                        <p><strong>Short-Term Benefits (Weeks 2-4):</strong> ${primaryTherapy.benefitsTimeline.shortTerm}</p>
+                                        <p><strong>Medium-Term Benefits (Weeks 5-6):</strong> ${primaryTherapy.benefitsTimeline.mediumTerm}</p>
+                                        <p><strong>Long-Term Benefits (Weeks 7-8 and beyond):</strong> ${primaryTherapy.benefitsTimeline.longTerm}</p>
+                                    </div>
+                                </div>
+                              </div>`;
+
+            actionPlanHtml += `<h4 class="font-semibold text-base mt-6">Your Recommended Programme Details:</h4>
+                               <table class="w-full mt-2 text-sm border">
+                                   <thead class="bg-slate-100">
+                                      <tr>
+                                        <th class="p-2 text-left font-semibold">Therapy Programme</th>
+                                        <th class="p-2 text-left font-semibold">Details</th>
+                                      </tr>
+                                   </thead>
+                                   <tbody>
+                                     <tr class="border-t"><td class="p-2 font-medium">Recommended Therapy</td><td class="p-2"><strong>${primaryTherapy.name}</strong></td></tr>
+                                     <tr class="border-t bg-slate-50"><td class="p-2 font-medium">Session Length</td><td class="p-2">${primaryTherapy.sessionLength}</td></tr>
+                                     <tr class="border-t"><td class="p-2 font-medium">Frequency</td><td class="p-2">${primaryTherapy.frequency}</td></tr>
+                                     <tr class="border-t bg-slate-50"><td class="p-2 font-medium">Full Course</td><td class="p-2">${primaryTherapy.fullCourse}</td></tr>
+                                     <tr class="border-t"><td class="p-2 font-medium">Total Sessions</td><td class="p-2">${primaryTherapy.totalSessions}</td></tr>
+                                   </tbody>
+                                </table>`;
+            
+            actionPlanHtml += `<div class="mt-6">
+                                <h4 class="font-semibold text-base">Recommended Nutritional Support:</h4>
+                                <ul class="list-disc list-inside text-sm text-slate-600 mt-2 space-y-1">${primaryTherapy.nutritionalSupport.map(s => `<li>${s}</li>`).join('')}</ul>
+                               </div>
+                               <div class="mt-6">
+                                <h4 class="font-semibold text-base">Practitioner's Notes & Lifestyle Suggestions:</h4>
+                                <div class="mt-2 p-3 bg-slate-50 border rounded-md text-sm text-slate-600 min-h-[100px]"></div>
+                               </div>`;
+
+
+            const reportHtml = `
+                <div class="space-y-8">
+                    <h2 class="text-3xl font-bold text-center text-slate-900">Personalised Wellness Plan</h2>
+                    
+                    <div class="text-sm">
+                        <p><strong>Client Name:</strong> ${clientName}</p>
+                        <p><strong>Practitioner Name:</strong> [Practitioner Name]</p>
+                        <p><strong>Date:</strong> ${new Date().toLocaleDateString('en-GB')}</p>
+                    </div>
+
+                    <div>${summaryHtml}</div>
+                    <div>${findingsHtml}</div>
+                    <div>${actionPlanHtml}</div>
+
+                    <div class="page-break">
+                        <h3 class="text-xl font-semibold text-slate-800 border-b pb-3 mb-4">4. Your Journey to Wellness Starts Now</h3>
+                        <p class="text-sm text-slate-600">Congratulations on taking this proactive first step toward improving your health. This personalised plan is your roadmap to achieving the benefits we've discussed—from immediate improvements in your day-to-day comfort to lasting changes in your overall vitality.</p>
+                    </div>
+
+                    <div class="pt-6 border-t">
+                        <h3 class="text-base font-semibold">Important Notice & Disclaimer</h3>
+                        <p class="text-xs text-slate-500 mt-2">The therapies offered at our clinic are designed to support general wellness and are not intended to diagnose, treat, cure, or prevent any disease or medical condition. The information and recommendations provided in this wellness plan are not a substitute for professional medical advice, diagnosis, or treatment from your General Practitioner (GP) or other qualified healthcare provider. We strongly encourage you to discuss this wellness plan with your GP before beginning any new therapy programme, especially if you have a pre-existing medical condition or are under medical supervision. Never disregard professional medical advice or delay in seeking it because of something you have read in this plan. Individual results may vary.</p>
+                    </div>
+                </div>
+                 <div class="text-center mt-8 no-print">
+                    <button onclick="window.print()" class="bg-gray-700 text-white font-semibold py-2 px-6 rounded-lg shadow-sm hover:bg-gray-800">Print Plan</button>
+                    <button onclick="location.reload()" class="ml-4 bg-indigo-600 text-white font-semibold py-2 px-6 rounded-lg shadow-sm hover:bg-indigo-700">Start New Assessment</button>
+                </div>
+            `;
+            
+            document.getElementById('report-section').innerHTML = reportHtml;
+            mainFormContainer.classList.add('hidden');
+            document.getElementById('report-section').classList.remove('hidden');
+            window.scrollTo(0, 0);
+        }
+
+    });
     </script>
+
 </body>
 </html>
+
+Lets
