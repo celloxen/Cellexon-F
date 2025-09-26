@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lily AI Health Assessment - Celloxen Platform</title>
+    <title>Lily Health Assessment - Celloxen Platform</title>
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -74,148 +74,9 @@
         
         /* Container */
         .container {
-            max-width: 1400px;
+            max-width: 1200px;
             margin: 0 auto;
             padding: 30px 20px;
-        }
-        
-        /* Patient Selection Card */
-        .patient-selection-card {
-            background: white;
-            border-radius: 12px;
-            padding: 30px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-            margin-bottom: 30px;
-        }
-        
-        .card-title {
-            font-size: 20px;
-            font-weight: 600;
-            color: #1e293b;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .search-container {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        
-        .search-input {
-            flex: 1;
-            padding: 12px 15px;
-            border: 2px solid #e5e7eb;
-            border-radius: 8px;
-            font-size: 14px;
-            transition: all 0.3s;
-        }
-        
-        .search-input:focus {
-            outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
-        
-        .btn {
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            border: none;
-        }
-        
-        .btn-primary {
-            background: #10b981;
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            background: #059669;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-        }
-        
-        .btn-secondary {
-            background: #e5e7eb;
-            color: #374151;
-        }
-        
-        .btn-secondary:hover {
-            background: #d1d5db;
-        }
-        
-        /* Patient Results */
-        .patient-results {
-            max-height: 300px;
-            overflow-y: auto;
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            margin-top: 15px;
-        }
-        
-        .patient-item {
-            padding: 15px;
-            border-bottom: 1px solid #f3f4f6;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .patient-item:hover {
-            background: #f0f9ff;
-        }
-        
-        .patient-item.selected {
-            background: #dbeafe;
-            border-left: 3px solid #3b82f6;
-        }
-        
-        .patient-info {
-            flex: 1;
-        }
-        
-        .patient-name {
-            font-weight: 600;
-            color: #1e293b;
-            margin-bottom: 5px;
-        }
-        
-        .patient-details {
-            font-size: 12px;
-            color: #6b7280;
-        }
-        
-        .select-btn {
-            background: #3b82f6;
-            color: white;
-            padding: 6px 16px;
-            border-radius: 6px;
-            border: none;
-            cursor: pointer;
-            font-size: 12px;
-            font-weight: 600;
-        }
-        
-        /* Selected Patient Display */
-        .selected-patient-display {
-            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-            border-radius: 8px;
-            padding: 15px 20px;
-            margin-bottom: 20px;
-            display: none;
-        }
-        
-        .selected-patient-display.show {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
         }
         
         /* Chat Container */
@@ -223,7 +84,7 @@
             background: white;
             border-radius: 12px;
             box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-            height: 600px;
+            height: 700px;
             display: flex;
             flex-direction: column;
             overflow: hidden;
@@ -413,6 +274,94 @@
             border-color: #3b82f6;
         }
         
+        .input-group {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .text-input {
+            flex: 1;
+            padding: 12px 20px;
+            border: 2px solid #e5e7eb;
+            border-radius: 25px;
+            font-size: 15px;
+            outline: none;
+            transition: all 0.2s;
+        }
+        
+        .text-input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .send-btn {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        
+        .send-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        }
+        
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        /* Patient Search Dropdown */
+        .patient-search-container {
+            position: relative;
+            margin: 15px 0;
+        }
+        
+        .patient-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 10;
+            display: none;
+        }
+        
+        .patient-dropdown.show {
+            display: block;
+        }
+        
+        .patient-option {
+            padding: 10px 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-bottom: 1px solid #f3f4f6;
+        }
+        
+        .patient-option:hover {
+            background: #f0f9ff;
+        }
+        
+        .patient-option-name {
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .patient-option-details {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 2px;
+        }
+        
         .recommendation-card {
             background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
             border-radius: 12px;
@@ -434,19 +383,16 @@
             line-height: 1.6;
         }
         
-        .empty-state {
-            text-align: center;
-            padding: 40px;
-            color: #9ca3af;
+        .patient-info-display {
+            background: #f0f9ff;
+            border-radius: 8px;
+            padding: 10px 15px;
+            margin: 10px 0;
+            font-size: 14px;
         }
         
-        .info-banner {
-            background: #dbeafe;
+        .patient-info-display strong {
             color: #1e40af;
-            padding: 12px 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-size: 14px;
         }
     </style>
 </head>
@@ -455,57 +401,19 @@
         <div class="header-container">
             <div class="logo-section">
                 <div class="logo">CELLOXEN</div>
-                <div class="module-name">Lily AI Health Assessment</div>
+                <div class="module-name">Lily Health Assessment</div>
             </div>
             <a href="clinic-dashboard.html" class="back-btn">← Back to Dashboard</a>
         </div>
     </div>
 
     <div class="container">
-        <div class="info-banner">
-            ℹ️ Use Lily AI to conduct comprehensive health assessments for your patients. The assessment takes approximately 10-15 minutes and will recommend personalised therapy plans.
-        </div>
-
-        <!-- Patient Selection -->
-        <div class="patient-selection-card">
-            <h3 class="card-title">
-                <span>👥</span>
-                <span>Select Patient for Assessment</span>
-            </h3>
-            
-            <div class="search-container">
-                <input type="text" 
-                       class="search-input" 
-                       id="patientSearch" 
-                       placeholder="Search by patient name, ID, or email...">
-                <button class="btn btn-primary" onclick="searchPatients()">Search</button>
-                <button class="btn btn-secondary" onclick="clearSearch()">Clear</button>
-            </div>
-            
-            <div class="selected-patient-display" id="selectedPatientDisplay">
-                <div>
-                    <strong>Selected Patient:</strong> 
-                    <span id="selectedPatientName"></span>
-                </div>
-                <button class="btn btn-secondary" onclick="clearSelection()">Change Patient</button>
-            </div>
-            
-            <div class="patient-results" id="patientResults" style="display: none;">
-                <!-- Patient search results will appear here -->
-            </div>
-            
-            <div class="empty-state" id="emptyState">
-                <p>Search for a patient to begin the assessment</p>
-            </div>
-        </div>
-
-        <!-- Chat Interface -->
-        <div class="chat-container" id="chatContainer" style="display: none;">
+        <div class="chat-container">
             <div class="chat-header">
                 <div class="lily-avatar">🌸</div>
                 <div class="chat-header-text">
-                    <h2>Lily AI Health Consultant</h2>
-                    <p id="assessmentStatus">Ready to begin assessment</p>
+                    <h2>Lily Health Consultant</h2>
+                    <p id="assessmentStatus">Welcome to Health Assessment</p>
                     <div class="progress-bar-container">
                         <div class="progress-bar" id="progressBar"></div>
                     </div>
@@ -520,6 +428,10 @@
                 <div class="quick-responses" id="quickResponses">
                     <!-- Quick response buttons will be added here -->
                 </div>
+                <div class="input-group">
+                    <input type="text" class="text-input" id="userInput" placeholder="Type your response here..." />
+                    <button class="send-btn" id="sendBtn" onclick="sendMessage()">Send</button>
+                </div>
             </div>
         </div>
     </div>
@@ -532,154 +444,16 @@
         
         const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         
-        let selectedPatient = null;
-        let lilyAssessment = null;
-        let currentClinicId = null;
-        
-        // Get clinic ID from auth
-        document.addEventListener('DOMContentLoaded', () => {
-            const authData = localStorage.getItem('celloxen_auth');
-            if (!authData) {
-                alert('Please log in to access this module');
-                window.location.href = 'unified-login.html';
-                return;
-            }
-            
-            const auth = JSON.parse(authData);
-            currentClinicId = auth.clinicId;
-            
-            // Enable enter key for search
-            document.getElementById('patientSearch').addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    searchPatients();
-                }
-            });
-        });
-        
-        window.searchPatients = async function() {
-            const searchTerm = document.getElementById('patientSearch').value.trim();
-            
-            if (!searchTerm) {
-                alert('Please enter a search term');
-                return;
-            }
-            
-            try {
-                // Search patients in the database
-                const { data: patients, error } = await supabase
-                    .from('patients')
-                    .select('*')
-                    .eq('clinic_id', currentClinicId)
-                    .or(`first_name.ilike.%${searchTerm}%,last_name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%,patient_id.ilike.%${searchTerm}%`)
-                    .limit(10);
-                
-                if (error) throw error;
-                
-                displayPatientResults(patients);
-                
-            } catch (error) {
-                console.error('Error searching patients:', error);
-                alert('Error searching patients. Please try again.');
-            }
-        }
-        
-        function displayPatientResults(patients) {
-            const resultsDiv = document.getElementById('patientResults');
-            const emptyState = document.getElementById('emptyState');
-            
-            if (!patients || patients.length === 0) {
-                resultsDiv.style.display = 'none';
-                emptyState.style.display = 'block';
-                emptyState.innerHTML = '<p>No patients found. Try a different search term.</p>';
-                return;
-            }
-            
-            emptyState.style.display = 'none';
-            resultsDiv.style.display = 'block';
-            
-            resultsDiv.innerHTML = patients.map(patient => {
-                const age = patient.date_of_birth ? 
-                    new Date().getFullYear() - new Date(patient.date_of_birth).getFullYear() : 'N/A';
-                
-                return `
-                    <div class="patient-item" id="patient-${patient.id}">
-                        <div class="patient-info">
-                            <div class="patient-name">${patient.first_name} ${patient.last_name}</div>
-                            <div class="patient-details">
-                                ID: ${patient.patient_id || 'N/A'} | 
-                                Age: ${age} | 
-                                ${patient.email || 'No email'}
-                            </div>
-                        </div>
-                        <button class="select-btn" onclick="selectPatient(${patient.id})">Select</button>
-                    </div>
-                `;
-            }).join('');
-        }
-        
-        window.selectPatient = async function(patientId) {
-            try {
-                // Load patient data
-                const { data: patient, error } = await supabase
-                    .from('patients')
-                    .select('*')
-                    .eq('id', patientId)
-                    .single();
-                
-                if (error) throw error;
-                
-                selectedPatient = patient;
-                
-                // Update UI
-                document.getElementById('selectedPatientDisplay').classList.add('show');
-                document.getElementById('selectedPatientName').textContent = 
-                    `${patient.first_name} ${patient.last_name} (ID: ${patient.patient_id || 'N/A'})`;
-                
-                // Hide search results
-                document.getElementById('patientResults').style.display = 'none';
-                document.getElementById('emptyState').style.display = 'none';
-                
-                // Show chat interface and start assessment
-                document.getElementById('chatContainer').style.display = 'block';
-                
-                // Start Lily assessment
-                startLilyAssessment(patient);
-                
-            } catch (error) {
-                console.error('Error selecting patient:', error);
-                alert('Error loading patient data. Please try again.');
-            }
-        }
-        
-        window.clearSelection = function() {
-            selectedPatient = null;
-            document.getElementById('selectedPatientDisplay').classList.remove('show');
-            document.getElementById('chatContainer').style.display = 'none';
-            document.getElementById('chatMessages').innerHTML = '';
-            document.getElementById('progressBar').style.width = '0%';
-            document.getElementById('emptyState').style.display = 'block';
-        }
-        
-        window.clearSearch = function() {
-            document.getElementById('patientSearch').value = '';
-            document.getElementById('patientResults').style.display = 'none';
-            document.getElementById('patientResults').innerHTML = '';
-            if (!selectedPatient) {
-                document.getElementById('emptyState').style.display = 'block';
-            }
-        }
-        
-        // Lily Assessment Class
-        class LilyAIAssessment {
-            constructor(patient, clinicId) {
-                this.patient = patient;
-                this.clinicId = clinicId;
+        class LilyHealthAssessment {
+            constructor() {
                 this.sessionId = this.generateSessionId();
                 this.currentStep = 'welcome';
                 this.currentQuestionIndex = 0;
+                this.clinicId = null;
+                this.practitionerName = '';
+                this.selectedPatient = null;
+                this.manualPatientEntry = false;
                 this.assessmentData = {
-                    patientId: patient.id,
-                    clinicId: clinicId,
                     safetyPassed: false,
                     safetyResponses: {},
                     primaryConcerns: [],
@@ -689,11 +463,31 @@
                     startTime: new Date()
                 };
                 this.questions = [];
-                this.loadQuestions();
+                this.searchResults = [];
+                this.init();
             }
             
             generateSessionId() {
                 return 'lily_' + Date.now() + '_' + Math.random().toString(36).substring(7);
+            }
+            
+            async init() {
+                // Get clinic ID from auth
+                const authData = localStorage.getItem('celloxen_auth');
+                if (authData) {
+                    const auth = JSON.parse(authData);
+                    this.clinicId = auth.clinicId;
+                    this.practitionerName = auth.username || '';
+                }
+                
+                // Load questions
+                await this.loadQuestions();
+                
+                // Start conversation
+                this.startConversation();
+                
+                // Setup input handlers
+                this.setupInputHandlers();
             }
             
             async loadQuestions() {
@@ -715,21 +509,55 @@
                     this.safetyQuestions = safetyQuestions || [];
                     this.screeningQuestions = screeningQuestions || [];
                     
-                    // Start the assessment
-                    this.startConversation();
-                    
                 } catch (error) {
                     console.error('Error loading questions:', error);
-                    this.addMessage('lily', 'Sorry, I encountered an error loading the assessment. Please refresh and try again.');
                 }
             }
             
+            setupInputHandlers() {
+                const inputField = document.getElementById('userInput');
+                const sendBtn = document.getElementById('sendBtn');
+                
+                // Enable/disable send button based on input
+                inputField.addEventListener('input', () => {
+                    sendBtn.disabled = inputField.value.trim() === '';
+                });
+                
+                // Handle enter key
+                inputField.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter' && !sendBtn.disabled) {
+                        this.sendMessage();
+                    }
+                });
+                
+                // Initially disable send button
+                sendBtn.disabled = true;
+            }
+            
             startConversation() {
-                this.addMessage('lily', `Hello ${this.patient.first_name}! I'm Lily, your AI health consultant. I'm here to help assess your health and wellness needs.`);
+                this.addMessage('lily', "Good day! I'm Lily, your health consultant here at Celloxen.");
                 
                 setTimeout(() => {
-                    this.addMessage('lily', "I'll guide you through a comprehensive health assessment that will take approximately 10-15 minutes. Your responses will help me recommend the most suitable therapies for your needs.");
-                    this.showQuickResponses(['Begin Assessment', 'Tell Me More', 'Not Now']);
+                    if (this.practitionerName) {
+                        this.addMessage('lily', `Welcome back, ${this.practitionerName}! I'm here to help you conduct a comprehensive health assessment for your patient.`);
+                        this.currentStep = 'confirm_assessment';
+                        setTimeout(() => {
+                            this.confirmAssessment();
+                        }, 1500);
+                    } else {
+                        this.addMessage('lily', "May I have your name, please?");
+                        this.currentStep = 'get_practitioner_name';
+                        this.showTextInput(true);
+                    }
+                }, 1500);
+            }
+            
+            confirmAssessment() {
+                this.addMessage('lily', "I'll guide you through a structured health assessment that will help identify the most suitable therapies for your patient. The assessment covers safety screening, health concerns, and specific symptoms.");
+                
+                setTimeout(() => {
+                    this.addMessage('lily', "Would you like to conduct a health assessment for a patient now?");
+                    this.showQuickResponses(['Yes, let\'s begin', 'Not now']);
                 }, 1500);
             }
             
@@ -772,6 +600,8 @@
                     btn.onclick = () => this.handleResponse(option);
                     quickDiv.appendChild(btn);
                 });
+                
+                this.showTextInput(false);
             }
             
             showScaleResponses(min = 1, max = 5, labels = []) {
@@ -789,26 +619,87 @@
                     btn.onclick = () => this.handleResponse(i.toString());
                     scaleDiv.appendChild(btn);
                 }
+                
+                this.showTextInput(false);
+            }
+            
+            showTextInput(show = true) {
+                const inputGroup = document.querySelector('.input-group');
+                inputGroup.style.display = show ? 'flex' : 'none';
+                
+                if (show) {
+                    document.getElementById('userInput').focus();
+                    document.getElementById('quickResponses').innerHTML = '';
+                }
             }
             
             async handleResponse(response) {
                 this.addMessage('user', response);
                 document.getElementById('quickResponses').innerHTML = '';
+                document.getElementById('userInput').value = '';
                 
                 switch (this.currentStep) {
-                    case 'welcome':
-                        if (response === 'Begin Assessment') {
-                            this.currentStep = 'safety';
-                            this.currentQuestionIndex = 0;
-                            this.askSafetyQuestion();
-                        } else if (response === 'Tell Me More') {
-                            this.addMessage('lily', "I'll ask you about various health areas including sleep quality, stress levels, energy, digestion, and any specific concerns you may have. Based on your responses, I'll create a personalised therapy recommendation using our advanced bioelectronic treatments.");
-                            setTimeout(() => {
-                                this.showQuickResponses(['Begin Assessment', 'Not Now']);
-                            }, 1000);
+                    case 'get_practitioner_name':
+                        this.practitionerName = response;
+                        this.addMessage('lily', `Thank you, ${response}. Lovely to meet you!`);
+                        this.currentStep = 'confirm_assessment';
+                        setTimeout(() => {
+                            this.confirmAssessment();
+                        }, 1000);
+                        break;
+                    
+                    case 'confirm_assessment':
+                        if (response === 'Yes, let\'s begin') {
+                            this.currentStep = 'get_patient';
+                            this.addMessage('lily', "Excellent! Let's start by identifying your patient. Please type their name to search our records.");
+                            this.showTextInput(true);
+                            this.setupPatientSearch();
                         } else {
-                            this.addMessage('lily', "No problem! The assessment will be saved and you can continue anytime. Have a lovely day!");
+                            this.addMessage('lily', "No problem! Feel free to return whenever you're ready to conduct an assessment. Have a wonderful day!");
                         }
+                        break;
+                    
+                    case 'get_patient':
+                        await this.searchPatients(response);
+                        break;
+                    
+                    case 'confirm_patient':
+                        if (response === 'Yes, proceed') {
+                            this.startPatientAssessment();
+                        } else if (response === 'Search again') {
+                            this.currentStep = 'get_patient';
+                            this.addMessage('lily', "Let's search again. Please enter the patient's name:");
+                            this.showTextInput(true);
+                        } else if (response === 'Enter manually') {
+                            this.manualPatientEntry = true;
+                            this.currentStep = 'manual_patient_name';
+                            this.addMessage('lily', "I'll record the patient details manually. What is the patient's full name?");
+                            this.showTextInput(true);
+                        }
+                        break;
+                    
+                    case 'manual_patient_name':
+                        this.selectedPatient = { 
+                            first_name: response.split(' ')[0],
+                            last_name: response.split(' ').slice(1).join(' ') || '',
+                            manual_entry: true
+                        };
+                        this.currentStep = 'manual_patient_age';
+                        this.addMessage('lily', `Thank you. What is ${response}'s age?`);
+                        this.showTextInput(true);
+                        break;
+                    
+                    case 'manual_patient_age':
+                        this.selectedPatient.age = response;
+                        this.currentStep = 'manual_patient_gender';
+                        this.addMessage('lily', "And what is their gender?");
+                        this.showQuickResponses(['Male', 'Female', 'Other', 'Prefer not to say']);
+                        break;
+                    
+                    case 'manual_patient_gender':
+                        this.selectedPatient.gender = response;
+                        this.displayPatientInfo();
+                        this.startPatientAssessment();
                         break;
                     
                     case 'safety':
@@ -827,15 +718,187 @@
                         break;
                     
                     case 'complete':
-                        if (response === 'View Report') {
-                            this.generateReport();
-                        } else if (response === 'Proceed to IRIS') {
-                            window.location.href = `iris-assessment-integrated.html?patientId=${this.patient.id}`;
-                        } else if (response === 'Schedule Treatment') {
-                            window.location.href = `treatment-planning.html?patientId=${this.patient.id}`;
-                        }
+                        this.handleCompletionAction(response);
                         break;
                 }
+            }
+            
+            setupPatientSearch() {
+                const inputField = document.getElementById('userInput');
+                
+                // Remove any existing listeners
+                const newInput = inputField.cloneNode(true);
+                inputField.parentNode.replaceChild(newInput, inputField);
+                
+                // Add new listener for live search
+                newInput.addEventListener('input', async (e) => {
+                    const searchTerm = e.target.value.trim();
+                    if (searchTerm.length >= 2) {
+                        await this.liveSearchPatients(searchTerm);
+                    } else {
+                        this.hidePatientDropdown();
+                    }
+                });
+            }
+            
+            async liveSearchPatients(searchTerm) {
+                try {
+                    const { data: patients, error } = await supabase
+                        .from('patients')
+                        .select('*')
+                        .eq('clinic_id', this.clinicId)
+                        .or(`first_name.ilike.%${searchTerm}%,last_name.ilike.%${searchTerm}%,patient_id.ilike.%${searchTerm}%`)
+                        .limit(5);
+                    
+                    if (error) throw error;
+                    
+                    this.searchResults = patients || [];
+                    this.showPatientDropdown();
+                    
+                } catch (error) {
+                    console.error('Error searching patients:', error);
+                }
+            }
+            
+            showPatientDropdown() {
+                const inputGroup = document.querySelector('.input-group');
+                
+                // Remove existing dropdown
+                const existingDropdown = document.querySelector('.patient-dropdown');
+                if (existingDropdown) {
+                    existingDropdown.remove();
+                }
+                
+                if (this.searchResults.length === 0) return;
+                
+                // Create dropdown
+                const dropdown = document.createElement('div');
+                dropdown.className = 'patient-dropdown show';
+                dropdown.style.position = 'absolute';
+                dropdown.style.bottom = '100%';
+                dropdown.style.left = '0';
+                dropdown.style.right = '60px';
+                dropdown.style.marginBottom = '5px';
+                dropdown.style.background = 'white';
+                dropdown.style.border = '2px solid #e5e7eb';
+                dropdown.style.borderRadius = '8px';
+                dropdown.style.maxHeight = '200px';
+                dropdown.style.overflowY = 'auto';
+                dropdown.style.boxShadow = '0 -4px 12px rgba(0,0,0,0.1)';
+                
+                this.searchResults.forEach(patient => {
+                    const option = document.createElement('div');
+                    option.className = 'patient-option';
+                    option.innerHTML = `
+                        <div class="patient-option-name">${patient.first_name} ${patient.last_name}</div>
+                        <div class="patient-option-details">
+                            ID: ${patient.patient_id || 'N/A'} | 
+                            ${patient.email || 'No email'}
+                        </div>
+                    `;
+                    option.onclick = () => this.selectPatient(patient);
+                    dropdown.appendChild(option);
+                });
+                
+                inputGroup.style.position = 'relative';
+                inputGroup.appendChild(dropdown);
+            }
+            
+            hidePatientDropdown() {
+                const dropdown = document.querySelector('.patient-dropdown');
+                if (dropdown) {
+                    dropdown.remove();
+                }
+            }
+            
+            selectPatient(patient) {
+                this.selectedPatient = patient;
+                this.hidePatientDropdown();
+                document.getElementById('userInput').value = '';
+                this.showTextInput(false);
+                
+                // Calculate age
+                let age = 'Unknown';
+                if (patient.date_of_birth) {
+                    const birthDate = new Date(patient.date_of_birth);
+                    const today = new Date();
+                    age = Math.floor((today - birthDate) / (365.25 * 24 * 60 * 60 * 1000));
+                }
+                
+                this.selectedPatient.age = age;
+                
+                this.addMessage('lily', `I've found the patient record:`);
+                
+                const patientInfo = `
+                    <div class="patient-info-display">
+                        <strong>Name:</strong> ${patient.first_name} ${patient.last_name}<br>
+                        <strong>Age:</strong> ${age}<br>
+                        <strong>Gender:</strong> ${patient.gender || 'Not specified'}<br>
+                        <strong>ID:</strong> ${patient.patient_id || 'N/A'}
+                    </div>
+                `;
+                
+                this.addMessage('lily', patientInfo, true);
+                
+                this.currentStep = 'confirm_patient';
+                setTimeout(() => {
+                    this.addMessage('lily', "Is this the correct patient?");
+                    this.showQuickResponses(['Yes, proceed', 'Search again', 'Enter manually']);
+                }, 1000);
+            }
+            
+            async searchPatients(searchTerm) {
+                try {
+                    const { data: patients, error } = await supabase
+                        .from('patients')
+                        .select('*')
+                        .eq('clinic_id', this.clinicId)
+                        .or(`first_name.ilike.%${searchTerm}%,last_name.ilike.%${searchTerm}%,patient_id.ilike.%${searchTerm}%`)
+                        .limit(1);
+                    
+                    if (error) throw error;
+                    
+                    if (patients && patients.length > 0) {
+                        this.selectPatient(patients[0]);
+                    } else {
+                        this.addMessage('lily', "I couldn't find a patient with that name in our records. Would you like to:");
+                        this.currentStep = 'confirm_patient';
+                        this.showQuickResponses(['Search again', 'Enter manually']);
+                    }
+                    
+                } catch (error) {
+                    console.error('Error searching patients:', error);
+                    this.addMessage('lily', "There was an error searching for the patient. Would you like to enter their details manually?");
+                    this.showQuickResponses(['Enter manually', 'Try again']);
+                }
+            }
+            
+            displayPatientInfo() {
+                const patientInfo = `
+                    <div class="patient-info-display">
+                        <strong>Patient:</strong> ${this.selectedPatient.first_name} ${this.selectedPatient.last_name}<br>
+                        <strong>Age:</strong> ${this.selectedPatient.age}<br>
+                        <strong>Gender:</strong> ${this.selectedPatient.gender}
+                    </div>
+                `;
+                
+                this.addMessage('lily', patientInfo, true);
+            }
+            
+            startPatientAssessment() {
+                this.currentStep = 'safety';
+                this.currentQuestionIndex = 0;
+                
+                this.addMessage('lily', `Excellent! Let's begin the health assessment for ${this.selectedPatient.first_name}.`);
+                
+                setTimeout(() => {
+                    this.addMessage('lily', "I'll start with some important safety questions. These help ensure the therapies we recommend are suitable.");
+                    setTimeout(() => {
+                        this.askSafetyQuestion();
+                    }, 1500);
+                }, 1000);
+                
+                this.updateProgress(5);
             }
             
             askSafetyQuestion() {
@@ -858,12 +921,7 @@
                 
                 // Check for contraindications
                 if (response === 'Yes' && this.currentQuestionIndex < 5) {
-                    this.addMessage('lily', "⚠️ Based on your response, I need to inform you that bioelectronic therapy may not be suitable at this time. Please consult with your GP or specialist before proceeding.");
-                    setTimeout(() => {
-                        this.addMessage('lily', "Would you like to continue the assessment for informational purposes only?");
-                        this.showQuickResponses(['Continue (Info Only)', 'Stop Assessment']);
-                    }, 2000);
-                    return;
+                    this.addMessage('lily', "⚠️ Thank you for that information. Based on this response, I need to note that some therapies may require additional medical clearance. Let's continue with the assessment.");
                 }
                 
                 this.currentQuestionIndex++;
@@ -872,18 +930,19 @@
             
             completeSafetyScreening() {
                 this.assessmentData.safetyPassed = true;
-                this.addMessage('lily', "Brilliant! You've completed the safety screening successfully. ✅");
+                this.addMessage('lily', "✅ Safety screening complete. Thank you for providing that important information.");
                 
                 setTimeout(() => {
                     this.currentStep = 'primary_concern';
-                    this.addMessage('lily', "Now, what brings you here today? What's your primary health concern?");
+                    this.addMessage('lily', `Now, what is ${this.selectedPatient.first_name}'s primary health concern?`);
                     this.showQuickResponses([
                         'Sleep Problems',
-                        'Stress & Anxiety', 
+                        'Stress & Anxiety',
                         'Low Energy',
                         'Joint Pain',
                         'Digestive Issues',
                         'Heart Health',
+                        'Kidney Health',
                         'Other Concerns'
                     ]);
                 }, 1500);
@@ -893,24 +952,26 @@
                 // Filter questions based on primary concern
                 let relevantQuestions = [];
                 
-                if (this.assessmentData.primaryConcerns.includes('Sleep Problems')) {
-                    relevantQuestions = this.screeningQuestions.filter(q => q.domain === 'sleep_stress');
-                } else if (this.assessmentData.primaryConcerns.includes('Stress & Anxiety')) {
-                    relevantQuestions = this.screeningQuestions.filter(q => q.domain === 'sleep_stress');
-                } else if (this.assessmentData.primaryConcerns.includes('Low Energy')) {
-                    relevantQuestions = this.screeningQuestions.filter(q => q.domain === 'metabolic');
-                } else if (this.assessmentData.primaryConcerns.includes('Joint Pain')) {
-                    relevantQuestions = this.screeningQuestions.filter(q => q.domain === 'joint_mobility');
-                } else if (this.assessmentData.primaryConcerns.includes('Digestive Issues')) {
-                    relevantQuestions = this.screeningQuestions.filter(q => q.domain === 'digestive');
-                } else if (this.assessmentData.primaryConcerns.includes('Heart Health')) {
-                    relevantQuestions = this.screeningQuestions.filter(q => q.domain === 'cardiovascular');
-                } else {
-                    // Ask a mix of questions
+                const concernMapping = {
+                    'Sleep Problems': 'sleep_stress',
+                    'Stress & Anxiety': 'sleep_stress',
+                    'Low Energy': 'metabolic',
+                    'Joint Pain': 'joint_mobility',
+                    'Digestive Issues': 'digestive',
+                    'Heart Health': 'cardiovascular',
+                    'Kidney Health': 'kidney_urinary'
+                };
+                
+                const domain = concernMapping[this.assessmentData.primaryConcerns[0]] || 'sleep_stress';
+                relevantQuestions = this.screeningQuestions.filter(q => q.domain === domain);
+                
+                // If no specific questions, use general ones
+                if (relevantQuestions.length === 0) {
                     relevantQuestions = this.screeningQuestions.slice(0, 10);
                 }
                 
                 this.questions = relevantQuestions;
+                this.currentQuestionIndex = 0;
                 this.askScreeningQuestion();
             }
             
@@ -923,8 +984,12 @@
                     
                     if (question.response_type === 'scale') {
                         this.showScaleResponses(options.min, options.max, options.labels);
-                    } else {
+                    } else if (question.response_type === 'yes_no') {
                         this.showQuickResponses(options.options);
+                    } else if (question.response_type === 'frequency') {
+                        this.showQuickResponses(options.options);
+                    } else {
+                        this.showTextInput(true);
                     }
                     
                     const progress = 35 + ((this.currentQuestionIndex / this.questions.length) * 55);
@@ -987,109 +1052,151 @@
                     domainScores[domain] = Math.round(avg);
                 }
                 
-                // Save assessment to database
-                const assessmentRecord = {
-                    patient_id: this.patient.id,
-                    clinic_id: this.clinicId,
-                    session_id: this.sessionId,
-                    lily_session_id: this.sessionId,
-                    assessment_type: 'lily_ai',
-                    assessment_depth: 'adaptive',
-                    safety_passed: this.assessmentData.safetyPassed,
-                    safety_responses: this.assessmentData.safetyResponses,
-                    primary_concerns: this.assessmentData.primaryConcerns,
-                    symptoms: [...new Set(this.assessmentData.symptoms)],
-                    answers: this.assessmentData.answers,
-                    scores: domainScores,
-                    domain_scores: domainScores,
-                    completed: true,
-                    completion_time: completionTime,
-                    status: 'completed',
-                    created_at: new Date().toISOString(),
-                    assessment_date: new Date().toISOString()
-                };
-                
-                try {
-                    const { data: assessment, error } = await supabase
-                        .from('health_assessments')
-                        .insert(assessmentRecord)
-                        .select()
-                        .single();
-                    
-                    if (error) throw error;
-                    
-                    // Get therapy recommendations
-                    const { data: recommendations } = await supabase
-                        .rpc('process_assessment_and_recommend', {
-                            p_assessment_id: assessment.id
-                        });
-                    
-                    this.hideTypingIndicator();
-                    this.showResults(recommendations, domainScores);
-                    
-                    // Update patient workflow status
-                    await this.updateWorkflowStatus();
-                    
-                } catch (error) {
-                    console.error('Error saving assessment:', error);
-                    this.hideTypingIndicator();
-                    this.showResults(null, domainScores);
-                }
-            }
-            
-            async updateWorkflowStatus() {
-                try {
-                    await supabase
-                        .from('patient_workflow_status')
-                        .upsert({
-                            patient_id: this.patient.id,
+                // Save assessment if patient is in database
+                if (this.selectedPatient && !this.selectedPatient.manual_entry) {
+                    try {
+                        const assessmentRecord = {
+                            patient_id: this.selectedPatient.id,
                             clinic_id: this.clinicId,
-                            current_stage: 'health_assessment_complete',
-                            lily_assessment_completed: true,
-                            updated_at: new Date().toISOString()
-                        });
-                } catch (error) {
-                    console.error('Error updating workflow:', error);
+                            practitioner_name: this.practitionerName,
+                            session_id: this.sessionId,
+                            lily_session_id: this.sessionId,
+                            assessment_type: 'lily_health',
+                            assessment_date: new Date().toISOString(),
+                            safety_passed: this.assessmentData.safetyPassed,
+                            safety_responses: this.assessmentData.safetyResponses,
+                            primary_concerns: this.assessmentData.primaryConcerns,
+                            symptoms: [...new Set(this.assessmentData.symptoms)],
+                            answers: this.assessmentData.answers,
+                            scores: domainScores,
+                            domain_scores: domainScores,
+                            completed: true,
+                            completion_time: completionTime,
+                            status: 'completed',
+                            created_at: new Date().toISOString()
+                        };
+                        
+                        const { data: assessment, error } = await supabase
+                            .from('health_assessments')
+                            .insert(assessmentRecord)
+                            .select()
+                            .single();
+                        
+                        if (!error) {
+                            console.log('Assessment saved:', assessment.id);
+                        }
+                    } catch (error) {
+                        console.error('Error saving assessment:', error);
+                    }
                 }
+                
+                this.hideTypingIndicator();
+                this.showResults(domainScores);
             }
             
-            showResults(recommendations, scores) {
-                this.addMessage('lily', "✅ Brilliant! I've completed your health assessment. Let me share your results...");
+            showResults(scores) {
+                this.addMessage('lily', `✅ Brilliant! I've completed the health assessment for ${this.selectedPatient.first_name}.`);
                 
-                // Show primary recommendation
-                if (recommendations && recommendations.primary_therapy) {
-                    const primary = recommendations.primary_therapy;
+                // Determine primary therapy recommendation based on scores
+                const topDomain = Object.entries(scores)
+                    .sort(([,a], [,b]) => b - a)[0];
+                
+                let recommendedTherapy = '';
+                let therapyDescription = '';
+                
+                if (topDomain) {
+                    const therapyMap = {
+                        'sleep_stress': { 
+                            code: '101', 
+                            name: 'Deep Sleep Renewal Therapy',
+                            desc: 'Helps restore natural sleep patterns and reduce stress'
+                        },
+                        'cardiovascular': { 
+                            code: '301', 
+                            name: 'Heart Health Therapy',
+                            desc: 'Supports cardiovascular function and circulation'
+                        },
+                        'metabolic': { 
+                            code: '602', 
+                            name: 'Energy Boost Therapy',
+                            desc: 'Enhances natural energy production and vitality'
+                        },
+                        'joint_mobility': { 
+                            code: '402', 
+                            name: 'ArthriComfort Therapy',
+                            desc: 'Reduces joint discomfort and improves mobility'
+                        },
+                        'digestive': { 
+                            code: '601', 
+                            name: 'Digestive Balance Therapy',
+                            desc: 'Restores digestive harmony and comfort'
+                        },
+                        'kidney_urinary': { 
+                            code: '201', 
+                            name: 'Kidney Vitality Therapy',
+                            desc: 'Supports kidney function and fluid balance'
+                        }
+                    };
+                    
+                    const therapy = therapyMap[topDomain[0]] || therapyMap['sleep_stress'];
                     
                     const recommendationHtml = `
                         <div class="recommendation-card">
                             <div class="therapy-name">
-                                Primary Recommendation: ${primary.name}
+                                Primary Recommendation: ${therapy.name}
                             </div>
                             <div class="therapy-details">
-                                <p>${primary.description}</p>
+                                <p><strong>Therapy Code:</strong> ${therapy.code}</p>
+                                <p>${therapy.desc}</p>
                                 <br>
-                                <strong>Treatment Plan:</strong>
-                                <ul style="margin: 10px 0; padding-left: 20px;">
-                                    <li>Duration: ${primary.duration}</li>
-                                    <li>Sessions: ${primary.sessions}</li>
-                                </ul>
+                                <p><strong>Assessment Score:</strong> ${topDomain[1]}% severity in ${topDomain[0].replace('_', ' ')} domain</p>
                             </div>
                         </div>
                     `;
                     
                     this.addMessage('lily', recommendationHtml, true);
-                } else {
-                    // Default recommendation based on scores
-                    this.addMessage('lily', "Based on your assessment, I recommend starting with our comprehensive wellness programme. Your practitioner will review these results and create a personalised treatment plan.");
                 }
                 
                 setTimeout(() => {
-                    this.addMessage('lily', "Your assessment has been saved to your patient record. What would you like to do next?");
-                    this.showQuickResponses(['View Report', 'Proceed to IRIS', 'Schedule Treatment']);
+                    this.addMessage('lily', "The assessment has been saved to the patient's record. What would you like to do next?");
+                    this.showQuickResponses([
+                        'Proceed to IRIS Assessment',
+                        'Create Treatment Plan',
+                        'Start New Assessment',
+                        'Return to Dashboard'
+                    ]);
                 }, 2000);
                 
                 // Update status
                 document.getElementById('assessmentStatus').textContent = 'Assessment Complete ✅';
+            }
+            
+            handleCompletionAction(action) {
+                switch (action) {
+                    case 'Proceed to IRIS Assessment':
+                        if (this.selectedPatient && !this.selectedPatient.manual_entry) {
+                            window.location.href = `iris-assessment-integrated.html?patientId=${this.selectedPatient.id}`;
+                        } else {
+                            this.addMessage('lily', "Please register the patient in the system first before proceeding to IRIS assessment.");
+                        }
+                        break;
+                    
+                    case 'Create Treatment Plan':
+                        if (this.selectedPatient && !this.selectedPatient.manual_entry) {
+                            window.location.href = `treatment-planning.html?patientId=${this.selectedPatient.id}`;
+                        } else {
+                            this.addMessage('lily', "Please register the patient in the system first before creating a treatment plan.");
+                        }
+                        break;
+                    
+                    case 'Start New Assessment':
+                        window.location.reload();
+                        break;
+                    
+                    case 'Return to Dashboard':
+                        window.location.href = 'clinic-dashboard.html';
+                        break;
+                }
             }
             
             showTypingIndicator() {
@@ -1119,28 +1226,41 @@
                 if (percentage === 100) {
                     document.getElementById('assessmentStatus').textContent = 'Assessment Complete';
                 } else if (percentage > 50) {
-                    document.getElementById('assessmentStatus').textContent = 'Nearly finished...';
+                    document.getElementById('assessmentStatus').textContent = 'Assessment in progress - Nearly finished';
                 } else if (percentage > 0) {
-                    document.getElementById('assessmentStatus').textContent = 'Assessment in progress...';
+                    document.getElementById('assessmentStatus').textContent = 'Assessment in progress';
                 }
             }
             
-            generateReport() {
-                this.addMessage('lily', "📊 Generating your comprehensive health report...");
-                // Report generation would be implemented here
-                setTimeout(() => {
-                    this.addMessage('lily', "Your report has been generated and saved to your patient record. Your practitioner will review it with you during your next consultation.");
-                }, 2000);
+            sendMessage() {
+                const input = document.getElementById('userInput');
+                const message = input.value.trim();
+                
+                if (message) {
+                    this.handleResponse(message);
+                }
             }
         }
         
-        function startLilyAssessment(patient) {
-            // Clear previous messages
-            document.getElementById('chatMessages').innerHTML = '';
-            document.getElementById('progressBar').style.width = '0%';
+        // Initialize Lily
+        let lily;
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check authentication
+            const authData = localStorage.getItem('celloxen_auth');
+            if (!authData) {
+                alert('Please log in to access this module');
+                window.location.href = 'unified-login.html';
+                return;
+            }
             
-            // Start new assessment
-            lilyAssessment = new LilyAIAssessment(patient, currentClinicId);
+            lily = new LilyHealthAssessment();
+        });
+        
+        // Global function for send button
+        window.sendMessage = function() {
+            if (lily) {
+                lily.sendMessage();
+            }
         }
     </script>
 </body>
