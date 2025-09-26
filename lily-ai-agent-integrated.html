@@ -525,13 +525,16 @@
                 
                 // Handle enter key
                 inputField.addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter' && !sendBtn.disabled) {
+                    if (e.key === 'Enter' && inputField.value.trim() !== '') {
                         this.sendMessage();
                     }
                 });
                 
                 // Initially disable send button
                 sendBtn.disabled = true;
+                
+                // Also make sure input is hidden initially
+                this.showTextInput(false);
             }
             
             startConversation() {
@@ -652,8 +655,12 @@
                         if (response === 'Yes, let\'s begin') {
                             this.currentStep = 'get_patient';
                             this.addMessage('lily', "Excellent! Let's start by identifying your patient. Please type their name to search our records.");
+                            // Ensure input field is visible
                             this.showTextInput(true);
-                            this.setupPatientSearch();
+                            // Setup patient search after ensuring input is visible
+                            setTimeout(() => {
+                                this.setupPatientSearch();
+                            }, 100);
                         } else {
                             this.addMessage('lily', "No problem! Feel free to return whenever you're ready to conduct an assessment. Have a wonderful day!");
                         }
@@ -737,6 +744,13 @@
                         await this.liveSearchPatients(searchTerm);
                     } else {
                         this.hidePatientDropdown();
+                    }
+                });
+                
+                // Add the sendMessage handler back
+                newInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter' && e.target.value.trim() !== '') {
+                        this.sendMessage();
                     }
                 });
             }
@@ -1238,6 +1252,9 @@
                 
                 if (message) {
                     this.handleResponse(message);
+                    input.value = '';
+                    // Re-enable/disable send button
+                    document.getElementById('sendBtn').disabled = true;
                 }
             }
         }
