@@ -150,11 +150,37 @@
             transition: background 0.3s;
         }
         .action-btn:hover { background: #1e40af; }
+        
+        .continue-section {
+            margin-top: 30px;
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+            border-radius: 10px;
+        }
+        
+        .continue-btn {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 14px 35px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .continue-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
+        }
 
         @media print {
             body { background: none; }
             .container { margin: 0; padding: 0; box-shadow: none; border-radius: 0; }
             .no-print { display: none; }
+            .continue-section { display: none; }
         }
     </style>
 </head>
@@ -209,14 +235,25 @@
         <div class="disclaimer">
             This report is generated based on iridology principles for constitutional analysis and is intended for educational and informational purposes only. It is not a medical diagnosis and should not be used as a substitute for professional medical advice, diagnosis, or treatment.
         </div>
+        
+        <!-- Continue to IRIS Assessment Button -->
+        <div class="continue-section no-print">
+            <h3 style="color: #1e3a8a; margin-bottom: 15px;">Continue Patient Assessment Workflow</h3>
+            <p style="color: #64748b; margin-bottom: 20px;">Start a new IRIS assessment for this patient or return to dashboard</p>
+            <button class="continue-btn" onclick="continueToIrisAssessment()">
+                Start New IRIS Assessment →
+            </button>
+            <button class="action-btn" onclick="window.location.href='clinic-dashboard.html'" style="margin-left: 10px;">
+                Return to Dashboard
+            </button>
+        </div>
     </div>
 
     <script>
     // --- START OF SCRIPT ---
     (function() {
         // --- 1. SUPABASE CONFIGURATION (STANDALONE) ---
-        const SUPABASE_URL = 'https://defifwgazqlrigwumqn.supabase.co';
-        // IMPORTANT: Replace this placeholder with your actual Supabase public anon key
+        const SUPABASE_URL = 'https://defifwzgazqlrigwumqn.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlZmlmd3pnYXpxbHJpZ3d1bXFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcyNTM0MjYsImV4cCI6MjA3MjgyOTQyNn0.wcUBq6Pszjtqn5aBtuu3iXBE4BLmu8x9LtJbsMWlIiA';
         
         if (!window.supabase) {
@@ -246,7 +283,6 @@
         };
 
         const renderAssessmentData = (assessment) => {
-            // The AI analysis is stored in the 'claude_analysis' column, even though we use Gemini
             const analysis = assessment.claude_analysis;
             if (!analysis || !analysis.basic_findings) {
                 document.getElementById('report-content').innerHTML += '<h2>Error: AI analysis data is missing or corrupt.</h2>';
@@ -284,6 +320,9 @@
         async function generateComprehensiveReport(patientId, assessmentId) {
             console.log(`Starting report generation for patient ${patientId}, assessment ${assessmentId}`);
             try {
+                // Store current patient ID for workflow continuity
+                sessionStorage.setItem('currentPatientId', patientId);
+                
                 // Fetch patient and assessment data in parallel
                 const [patientRes, assessmentRes] = await Promise.all([
                     supabase.from('patients').select('*').eq('id', patientId).single(),
@@ -317,13 +356,21 @@
             const body = "Please find the attached IRIS constitutional analysis report.";
             window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
         };
+        
+        // Continue to IRIS Assessment function
+        window.continueToIrisAssessment = () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const patientId = urlParams.get('patientId');
+            if (patientId) {
+                // Pass patient ID to IRIS assessment to maintain workflow
+                sessionStorage.setItem('currentPatientId', patientId);
+                window.location.href = `iris-assessment-integrated.html?patientId=${patientId}`;
+            } else {
+                window.location.href = 'iris-assessment-integrated.html';
+            }
+        };
 
         document.addEventListener('DOMContentLoaded', () => {
-            if (SUPABASE_ANON_KEY.includes('PASTE_YOUR')) {
-                alert('CRITICAL ERROR: Supabase API Key is missing. Please edit the HTML file and insert your key.');
-                return;
-            }
-
             const urlParams = new URLSearchParams(window.location.search);
             const patientId = urlParams.get('patientId');
             const assessmentId = urlParams.get('assessmentId');
