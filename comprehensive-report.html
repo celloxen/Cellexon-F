@@ -258,16 +258,35 @@
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <div>
-                <h1>Comprehensive Health Report</h1>
-                <p>Combined Wellness & IRIS Constitutional Analysis</p>
-            </div>
-            <div class="header-info">
-                <p><strong>Patient ID:</strong> <span id="patientId"></span></p>
-                <p><strong>Report Date:</strong> <span id="reportDate"></span></p>
+        <!-- Patient Search Section -->
+        <div class="section" id="patientSearchSection">
+            <h2>Select Patient for Comprehensive Report</h2>
+            <div style="max-width: 600px; margin: 0 auto;">
+                <div style="position: relative; margin-bottom: 20px;">
+                    <input type="text" id="patientSearch" placeholder="Search by name, ID, or email..." 
+                           style="width: 100%; padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 16px; transition: all 0.3s;">
+                    <div id="patientDropdown" style="position: absolute; top: 100%; left: 0; right: 0; background: white; border: 2px solid #e2e8f0; border-top: none; border-radius: 0 0 10px 10px; max-height: 300px; overflow-y: auto; display: none; z-index: 100; box-shadow: 0 10px 25px rgba(0,0,0,0.1);"></div>
+                </div>
+                <div id="selectedPatientPreview" style="display: none; padding: 20px; background: #f0f9ff; border-radius: 10px; margin-bottom: 20px;">
+                    <h3 style="color: #1e3a8a; margin-bottom: 10px;">Selected Patient</h3>
+                    <div id="selectedPatientDetails"></div>
+                    <button class="action-btn" style="margin-top: 15px; width: 100%; background: linear-gradient(135deg, #10b981, #059669);" onclick="generateReportForPatient()">Generate Comprehensive Report</button>
+                </div>
             </div>
         </div>
+
+        <!-- Report Content (Hidden Initially) -->
+        <div id="reportContent" style="display: none;">
+            <div class="header">
+                <div>
+                    <h1>Comprehensive Health Report</h1>
+                    <p>Combined Wellness & IRIS Constitutional Analysis</p>
+                </div>
+                <div class="header-info">
+                    <p><strong>Patient ID:</strong> <span id="patientId"></span></p>
+                    <p><strong>Report Date:</strong> <span id="reportDate"></span></p>
+                </div>
+            </div>
 
         <!-- Patient Demographics -->
         <div class="section">
@@ -333,13 +352,14 @@
             This comprehensive report combines wellness assessment data with iris constitutional analysis for educational and informational purposes. It is not a medical diagnosis and should not be used as a substitute for professional medical advice, diagnosis, or treatment.
         </div>
         
-        <!-- Action Buttons -->
-        <div class="action-buttons">
-            <button class="action-btn" onclick="window.print()">🖨️ Print Report</button>
-            <button class="action-btn" onclick="sendEmail()">📧 Email Report</button>
-            <button class="action-btn btn-secondary" onclick="window.location.href='clinic-dashboard.html'">Return to Dashboard</button>
-        </div>
-    </div>
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <button class="action-btn" onclick="window.print()">🖨️ Print Report</button>
+                <button class="action-btn" onclick="sendEmail()">📧 Email Report</button>
+                <button class="action-btn btn-secondary" onclick="window.location.href='clinic-dashboard.html'">Return to Dashboard</button>
+            </div>
+        </div><!-- End of reportContent -->
+    </div><!-- End of container -->
 
     <script>
     (function() {
@@ -352,6 +372,191 @@
         }
         const { createClient } = window.supabase;
         const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        let currentPatient = null;
+        let clinicId = null;
+
+        // Initialize on DOM Load
+        document.addEventListener('DOMContentLoaded', () => {
+            // Get auth data
+            const authDataString = localStorage.getItem('celloxen_auth');
+            
+            if (!authDataString) {
+                alert('Please log in to access this module.');
+                window.location.href = 'unified-login.html';
+                return;
+            }
+            
+            const authData = JSON.parse(authDataString);
+            clinicId = authData.clinicId;
+            
+            document.getElementById('reportDate').textContent = new Date().toLocaleDateString('en-GB');
+            
+            // Check if patient ID is in URL (for direct access from other modules)
+            const urlParams = new URLSearchParams(window.location.search);
+            const patientId = urlParams.get('patientId');
+            
+            if (patientId) {
+                // Load patient directly if ID provided
+                loadPatientDirectly(patientId);
+            } else {
+                // Setup patient search
+                setupPatientSearch();
+            }
+        });
+        
+        // Setup patient search functionality
+        function setupPatientSearch() {
+            const searchInput = document.getElementById('patientSearch');
+            const dropdown = document.getElementById('patientDropdown');
+            let searchTimeout;
+            
+            searchInput.addEventListener('input', (e) => {
+                clearTimeout(searchTimeout);
+                const searchTerm = e.target.value.trim();
+                if (searchTerm.length >= 2) {
+                    searchTimeout = setTimeout(() => searchPatients(searchTerm), 300);
+                } else {
+                    dropdown.style.display = 'none';
+                }
+            });
+            
+            searchInput.addEventListener('focus', () => {
+                searchInput.style.borderColor = '#1e3a8a';
+            });
+            
+            searchInput.addEventListener('blur', () => {
+                setTimeout(() => {
+                    searchInput.style.borderColor = '#e2e8f0';
+                    dropdown.style.display = 'none';
+                }, 200);
+            });
+        }
+        
+        // Search patients function
+        async function searchPatients(searchTerm) {
+            const dropdown = document.getElementById('patientDropdown');
+            
+            try {
+                const { data: patients, error } = await supabase
+                    .from('patients')
+                    .select('*')
+                    .eq('clinic_id', clinicId)
+                    .or(`first_name.ilike.%${searchTerm}%,last_name.ilike.%${searchTerm}%,patient_id.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%`)
+                    .limit(10);
+                    
+                if (error) throw error;
+                
+                let html = '';
+                if (patients && patients.length > 0) {
+                    patients.forEach(patient => {
+                        const age = calculateAge(patient.date_of_birth);
+                        html += `
+                            <div onclick="selectPatient(${patient.id})" style="padding: 12px; cursor: pointer; border-bottom: 1px solid #f1f5f9; transition: all 0.2s;">
+                                <div style="font-weight: 600; color: #1e293b;">${patient.first_name} ${patient.last_name}</div>
+                                <div style="font-size: 12px; color: #64748b;">ID: ${patient.patient_id} | Age: ${age}</div>
+                            </div>
+                        `;
+                    });
+                } else {
+                    html = '<div style="padding: 12px; color: #64748b;">No patients found</div>';
+                }
+                
+                dropdown.innerHTML = html;
+                dropdown.style.display = 'block';
+                
+                // Add hover effect
+                dropdown.querySelectorAll('div[onclick]').forEach(item => {
+                    item.addEventListener('mouseenter', function() {
+                        this.style.backgroundColor = '#f0f9ff';
+                    });
+                    item.addEventListener('mouseleave', function() {
+                        this.style.backgroundColor = 'white';
+                    });
+                });
+                
+            } catch (error) {
+                console.error('Error searching patients:', error);
+                dropdown.innerHTML = '<div style="padding: 12px; color: #ef4444;">Error searching patients</div>';
+                dropdown.style.display = 'block';
+            }
+        }
+        
+        // Select patient function
+        window.selectPatient = async function(patientId) {
+            try {
+                const { data: patient, error } = await supabase
+                    .from('patients')
+                    .select('*')
+                    .eq('id', patientId)
+                    .single();
+                    
+                if (error) throw error;
+                
+                currentPatient = patient;
+                const age = calculateAge(patient.date_of_birth);
+                
+                // Update search input
+                document.getElementById('patientSearch').value = `${patient.first_name} ${patient.last_name}`;
+                document.getElementById('patientDropdown').style.display = 'none';
+                
+                // Show selected patient preview
+                const preview = document.getElementById('selectedPatientPreview');
+                preview.style.display = 'block';
+                document.getElementById('selectedPatientDetails').innerHTML = `
+                    <div style="display: grid; gap: 10px;">
+                        <div><strong>Name:</strong> ${patient.first_name} ${patient.last_name}</div>
+                        <div><strong>Patient ID:</strong> ${patient.patient_id}</div>
+                        <div><strong>Age:</strong> ${age}</div>
+                        <div><strong>Email:</strong> ${patient.email || 'N/A'}</div>
+                    </div>
+                `;
+                
+            } catch (error) {
+                console.error('Error selecting patient:', error);
+                alert('Error selecting patient. Please try again.');
+            }
+        };
+        
+        // Load patient directly (when ID passed in URL)
+        async function loadPatientDirectly(patientId) {
+            try {
+                const { data: patient, error } = await supabase
+                    .from('patients')
+                    .select('*')
+                    .eq('id', patientId)
+                    .eq('clinic_id', clinicId)
+                    .single();
+                    
+                if (error) throw error;
+                
+                currentPatient = patient;
+                // Hide search section and show report directly
+                document.getElementById('patientSearchSection').style.display = 'none';
+                document.getElementById('reportContent').style.display = 'block';
+                generateComprehensiveReport(patientId);
+                
+            } catch (error) {
+                console.error('Error loading patient:', error);
+                alert('Error loading patient. Please search and select a patient.');
+                setupPatientSearch();
+            }
+        }
+        
+        // Generate report for selected patient
+        window.generateReportForPatient = function() {
+            if (!currentPatient) {
+                alert('Please select a patient first');
+                return;
+            }
+            
+            // Hide search section, show report
+            document.getElementById('patientSearchSection').style.display = 'none';
+            document.getElementById('reportContent').style.display = 'block';
+            
+            // Generate the report
+            generateComprehensiveReport(currentPatient.id);
+        };
 
         // Helper Functions
         const calculateAge = (dob) => {
