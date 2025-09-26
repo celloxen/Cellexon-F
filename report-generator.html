@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Comprehensive IRIS Report - Celloxen Platform</title>
+    <title>Comprehensive Health Report - Celloxen Platform</title>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
@@ -52,9 +52,21 @@
             border-bottom: 2px solid #e2e8f0;
             margin-bottom: 20px;
         }
+        .section h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #0c4a6e;
+            margin-top: 20px;
+            margin-bottom: 15px;
+        }
         .grid-3 {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
             gap: 20px;
         }
         .info-card {
@@ -96,6 +108,51 @@
             color: #0284c7;
             text-transform: capitalize;
         }
+        
+        /* Wellness Assessment Styles */
+        .wellness-card {
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .wellness-metric {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .metric-label {
+            font-weight: 600;
+            color: #166534;
+        }
+        
+        .metric-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: #059669;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #10b981, #059669);
+            transition: width 0.3s ease;
+        }
+        
         .recommendations ul {
             list-style-type: none;
             padding-left: 0;
@@ -108,6 +165,25 @@
             border-left: 4px solid #22c55e;
             font-size: 14px;
         }
+        
+        .summary-box {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .summary-box h4 {
+            color: #92400e;
+            margin-bottom: 10px;
+        }
+        
+        .summary-box p {
+            color: #78350f;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
         .disclaimer {
             font-size: 12px;
             color: #64748b;
@@ -144,11 +220,39 @@
         .btn-secondary:hover {
             background: #475569;
         }
+        
+        .alert-box {
+            background: #fef2f2;
+            border-left: 4px solid #ef4444;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .alert-box h4 {
+            color: #991b1b;
+            margin-bottom: 5px;
+        }
+        
+        .alert-box p {
+            color: #7f1d1d;
+            font-size: 14px;
+        }
 
         @media print {
             body { background: none; }
             .container { margin: 0; padding: 40px; box-shadow: none; border-radius: 0; }
             .action-buttons { display: none; }
+            .page-break { page-break-before: always; }
+        }
+        
+        .no-data {
+            background: #f3f4f6;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            color: #6b7280;
+            font-style: italic;
         }
     </style>
 </head>
@@ -156,16 +260,16 @@
     <div class="container">
         <div class="header">
             <div>
-                <h1>IRIS Comprehensive Report</h1>
-                <p>AI-Powered Constitutional Analysis</p>
+                <h1>Comprehensive Health Report</h1>
+                <p>Combined Wellness & IRIS Constitutional Analysis</p>
             </div>
             <div class="header-info">
                 <p><strong>Patient ID:</strong> <span id="patientId"></span></p>
-                <p><strong>Assessment ID:</strong> <span id="assessmentId"></span></p>
-                <p><strong>Date:</strong> <span id="reportDate"></span></p>
+                <p><strong>Report Date:</strong> <span id="reportDate"></span></p>
             </div>
         </div>
 
+        <!-- Patient Demographics -->
         <div class="section">
             <h2>Patient Demographics</h2>
             <div class="grid-3">
@@ -175,27 +279,61 @@
             </div>
         </div>
 
+        <!-- Executive Summary -->
         <div class="section">
-            <h2>AI Constitutional Findings</h2>
-            <div class="findings-grid" id="constitutionalFindings"></div>
-        </div>
-        
-        <div class="section">
-            <h2>AI System Analysis</h2>
-            <p id="systemAnalysisNotes" style="font-size: 14px; margin-bottom: 20px;"></p>
-            <div class="system-analysis" id="systemAnalysis"></div>
+            <h2>Executive Health Summary</h2>
+            <div class="summary-box">
+                <h4>Overall Health Status</h4>
+                <p id="executiveSummary">Comprehensive assessment combining wellness evaluation and iris constitutional analysis provides a holistic view of the patient's health status.</p>
+            </div>
         </div>
 
+        <!-- Wellness Assessment Section -->
+        <div class="section">
+            <h2>Wellness Assessment Results</h2>
+            <div id="wellnessContent">
+                <div class="no-data">No wellness assessment data available</div>
+            </div>
+        </div>
+
+        <!-- IRIS Assessment Section -->
+        <div class="section page-break">
+            <h2>IRIS Constitutional Analysis</h2>
+            
+            <h3>Constitutional Findings</h3>
+            <div class="findings-grid" id="constitutionalFindings"></div>
+            
+            <h3>System Analysis</h3>
+            <p id="systemAnalysisNotes" style="font-size: 14px; margin-bottom: 20px;"></p>
+            <div id="systemAnalysis"></div>
+        </div>
+
+        <!-- Combined Recommendations -->
         <div class="section recommendations">
-            <h2>AI-Generated Recommendations</h2>
-            <div id="recommendations"></div>
+            <h2>Integrated Health Recommendations</h2>
+            
+            <h3>From Wellness Assessment</h3>
+            <div id="wellnessRecommendations">
+                <div class="no-data">No wellness recommendations available</div>
+            </div>
+            
+            <h3>From IRIS Analysis</h3>
+            <div id="irisRecommendations"></div>
+        </div>
+
+        <!-- Clinical Notes -->
+        <div class="section">
+            <h2>Clinical Notes & Observations</h2>
+            <div id="clinicalNotes" class="wellness-card">
+                <p>Combined assessment provides comprehensive health insights based on both subjective wellness metrics and objective iris analysis.</p>
+            </div>
         </div>
 
         <div class="disclaimer">
-            This report is generated based on iridology principles for constitutional analysis and is intended for educational and informational purposes only. It is not a medical diagnosis and should not be used as a substitute for professional medical advice, diagnosis, or treatment.
+            This comprehensive report combines wellness assessment data with iris constitutional analysis for educational and informational purposes. It is not a medical diagnosis and should not be used as a substitute for professional medical advice, diagnosis, or treatment.
         </div>
         
-        <!-- Action Buttons at the Bottom -->
+        <!-- Action Buttons -->
         <div class="action-buttons">
             <button class="action-btn" onclick="window.print()">🖨️ Print Report</button>
             <button class="action-btn" onclick="sendEmail()">📧 Email Report</button>
@@ -215,6 +353,7 @@
         const { createClient } = window.supabase;
         const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+        // Helper Functions
         const calculateAge = (dob) => {
             if (!dob) return 'N/A';
             const ageDifMs = Date.now() - new Date(dob).getTime();
@@ -222,8 +361,12 @@
             return Math.abs(ageDate.getUTCFullYear() - 1970);
         };
 
-        const formatDate = (dateString) => new Date(dateString).toLocaleDateString('en-GB');
+        const formatDate = (dateString) => {
+            if (!dateString) return 'N/A';
+            return new Date(dateString).toLocaleDateString('en-GB');
+        };
 
+        // Render Patient Data
         const renderPatientData = (patient) => {
             document.getElementById('patientId').textContent = patient.patient_id || 'N/A';
             document.getElementById('patientName').textContent = `${patient.first_name} ${patient.last_name}`;
@@ -231,29 +374,109 @@
             document.getElementById('patientAge').textContent = calculateAge(patient.date_of_birth);
         };
 
-        const renderAssessmentData = (assessment) => {
-            const analysis = assessment.claude_analysis;
-            if (!analysis || !analysis.basic_findings) {
-                document.getElementById('constitutionalFindings').innerHTML = '<p>Error: AI analysis data is missing.</p>';
+        // Render Wellness Assessment Data
+        const renderWellnessData = (assessment) => {
+            if (!assessment) {
+                document.getElementById('wellnessContent').innerHTML = '<div class="no-data">No wellness assessment completed</div>';
                 return;
             }
 
-            const findings = analysis.basic_findings;
-            const findingsContainer = document.getElementById('constitutionalFindings');
-            findingsContainer.innerHTML = `
-                <div class="finding-item"><h4>Constitutional Type</h4><p>${findings.constitutional_type || 'N/A'}</p></div>
-                <div class="finding-item"><h4>Fibre Density</h4><p>${findings.fiber_density || 'N/A'}</p></div>
-                <div class="finding-item"><h4>Pupil Size</h4><p>${findings.pupil_size || 'N/A'}</p></div>
-                <div class="finding-item"><h4>Collarette</h4><p>${findings.collarette_position || 'N/A'}</p></div>
-                <div class="finding-item"><h4>Lacunae</h4><p>${findings.lacunae || 'N/A'}</p></div>
-                <div class="finding-item"><h4>Stress Rings</h4><p>${findings.stress_rings || 'N/A'}</p></div>
+            const wellnessContent = document.getElementById('wellnessContent');
+            let html = '<div class="wellness-card">';
+            
+            // Overall Health Score
+            const overallScore = assessment.overall_score || calculateOverallScore(assessment);
+            html += `
+                <div class="wellness-metric">
+                    <span class="metric-label">Overall Wellness Score</span>
+                    <span class="metric-value">${overallScore}/100</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: ${overallScore}%"></div>
+                </div>
             `;
             
-            document.getElementById('systemAnalysisNotes').textContent = findings.clinical_notes || 'No specific clinical notes were generated.';
+            // Individual metrics
+            html += '<h4 style="margin-top: 20px; color: #166534;">Key Health Metrics</h4>';
+            
+            const metrics = [
+                { label: 'Digestive Health', value: assessment.digestive_health || assessment.health_metrics?.digestive || 'N/A' },
+                { label: 'Energy Level', value: assessment.energy_level || assessment.health_metrics?.energy || 'N/A' },
+                { label: 'Sleep Quality', value: assessment.sleep_quality || assessment.health_metrics?.sleep || 'N/A' },
+                { label: 'Stress Level', value: assessment.stress_level || assessment.health_metrics?.stress || 'N/A' },
+                { label: 'Physical Activity', value: assessment.physical_activity || assessment.health_metrics?.activity || 'N/A' }
+            ];
+            
+            metrics.forEach(metric => {
+                html += `
+                    <div class="wellness-metric">
+                        <span class="metric-label">${metric.label}</span>
+                        <span class="metric-value">${metric.value}/10</span>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            wellnessContent.innerHTML = html;
+            
+            // Wellness Recommendations
+            if (assessment.recommendations) {
+                const wellnessRec = document.getElementById('wellnessRecommendations');
+                wellnessRec.innerHTML = '<ul>';
+                if (Array.isArray(assessment.recommendations)) {
+                    assessment.recommendations.forEach(rec => {
+                        wellnessRec.innerHTML += `<li>${rec}</li>`;
+                    });
+                } else if (assessment.ai_recommendations) {
+                    wellnessRec.innerHTML += `<li>${assessment.ai_recommendations}</li>`;
+                }
+                wellnessRec.innerHTML += '</ul>';
+            }
+        };
 
+        // Calculate Overall Score
+        const calculateOverallScore = (assessment) => {
+            const metrics = [
+                assessment.digestive_health,
+                assessment.energy_level,
+                assessment.sleep_quality,
+                assessment.stress_level,
+                assessment.physical_activity
+            ].filter(val => val !== null && val !== undefined);
+            
+            if (metrics.length === 0) return 50;
+            const sum = metrics.reduce((a, b) => a + parseInt(b), 0);
+            return Math.round((sum / (metrics.length * 10)) * 100);
+        };
+
+        // Render IRIS Assessment Data
+        const renderIrisData = (assessment) => {
+            if (!assessment || !assessment.claude_analysis) {
+                document.getElementById('constitutionalFindings').innerHTML = '<div class="no-data">No IRIS assessment completed</div>';
+                return;
+            }
+
+            const analysis = assessment.claude_analysis;
+            const findings = analysis.basic_findings;
+            
+            if (findings) {
+                const findingsContainer = document.getElementById('constitutionalFindings');
+                findingsContainer.innerHTML = `
+                    <div class="finding-item"><h4>Constitutional Type</h4><p>${findings.constitutional_type || 'N/A'}</p></div>
+                    <div class="finding-item"><h4>Fibre Density</h4><p>${findings.fiber_density || 'N/A'}</p></div>
+                    <div class="finding-item"><h4>Pupil Size</h4><p>${findings.pupil_size || 'N/A'}</p></div>
+                    <div class="finding-item"><h4>Collarette</h4><p>${findings.collarette_position || 'N/A'}</p></div>
+                    <div class="finding-item"><h4>Lacunae</h4><p>${findings.lacunae || 'N/A'}</p></div>
+                    <div class="finding-item"><h4>Stress Rings</h4><p>${findings.stress_rings || 'N/A'}</p></div>
+                `;
+                
+                document.getElementById('systemAnalysisNotes').textContent = findings.clinical_notes || 'No specific clinical notes were generated.';
+            }
+
+            // IRIS Recommendations
             const recommendations = analysis.recommendations;
             if (recommendations) {
-                const recContainer = document.getElementById('recommendations');
+                const irisRec = document.getElementById('irisRecommendations');
                 let html = '';
                 
                 if (recommendations.nutritional?.foods_to_support?.length > 0) {
@@ -280,48 +503,115 @@
                     html += '</ul>';
                 }
                 
-                recContainer.innerHTML = html;
+                irisRec.innerHTML = html || '<div class="no-data">No IRIS recommendations available</div>';
             }
         };
 
-        async function generateComprehensiveReport(patientId, assessmentId) {
+        // Main Report Generation Function
+        async function generateComprehensiveReport(patientId) {
             try {
-                const [patientRes, assessmentRes] = await Promise.all([
+                // Fetch all data in parallel
+                const [patientRes, wellnessRes, irisRes] = await Promise.all([
                     supabase.from('patients').select('*').eq('id', patientId).single(),
-                    supabase.from('iris_assessments').select('*').eq('id', assessmentId).single()
+                    supabase.from('comprehensive_assessments')
+                        .select('*')
+                        .eq('patient_id', patientId)
+                        .order('created_at', { ascending: false })
+                        .limit(1)
+                        .single(),
+                    supabase.from('iris_assessments')
+                        .select('*')
+                        .eq('patient_id', patientId)
+                        .eq('status', 'completed')
+                        .order('created_at', { ascending: false })
+                        .limit(1)
+                        .single()
                 ]);
 
-                if (patientRes.error) throw new Error(`Failed to fetch patient data: ${patientRes.error.message}`);
-                if (assessmentRes.error) throw new Error(`Failed to fetch assessment data: ${assessmentRes.error.message}`);
+                // Check for patient data
+                if (patientRes.error && patientRes.error.code !== 'PGRST116') {
+                    throw new Error(`Failed to fetch patient data: ${patientRes.error.message}`);
+                }
 
-                renderPatientData(patientRes.data);
-                renderAssessmentData(assessmentRes.data);
+                // Render patient information
+                if (patientRes.data) {
+                    renderPatientData(patientRes.data);
+                }
+
+                // Render wellness assessment (may be null)
+                if (!wellnessRes.error && wellnessRes.data) {
+                    renderWellnessData(wellnessRes.data);
+                } else {
+                    renderWellnessData(null);
+                }
+
+                // Render IRIS assessment (may be null)
+                if (!irisRes.error && irisRes.data) {
+                    renderIrisData(irisRes.data);
+                } else {
+                    renderIrisData(null);
+                }
+
+                // Generate executive summary based on available data
+                generateExecutiveSummary(wellnessRes.data, irisRes.data);
 
             } catch (error) {
-                console.error('Error generating report:', error);
+                console.error('Error generating comprehensive report:', error);
                 alert('Error loading report data: ' + error.message);
             }
         }
 
+        // Generate Executive Summary
+        function generateExecutiveSummary(wellness, iris) {
+            const summaryEl = document.getElementById('executiveSummary');
+            let summary = '';
+            
+            if (wellness && iris) {
+                summary = 'Comprehensive health assessment completed combining subjective wellness evaluation and objective iris constitutional analysis. ';
+                if (wellness.overall_score) {
+                    summary += `Overall wellness score: ${wellness.overall_score}/100. `;
+                }
+                if (iris.claude_analysis?.basic_findings?.constitutional_type) {
+                    summary += `Constitutional type identified as ${iris.claude_analysis.basic_findings.constitutional_type}. `;
+                }
+                summary += 'See detailed findings and recommendations below.';
+            } else if (wellness && !iris) {
+                summary = 'Wellness assessment completed. IRIS constitutional analysis pending. ';
+                if (wellness.overall_score) {
+                    summary += `Current wellness score: ${wellness.overall_score}/100.`;
+                }
+            } else if (!wellness && iris) {
+                summary = 'IRIS constitutional analysis completed. Wellness assessment pending. ';
+                if (iris.claude_analysis?.basic_findings?.constitutional_type) {
+                    summary += `Constitutional type: ${iris.claude_analysis.basic_findings.constitutional_type}.`;
+                }
+            } else {
+                summary = 'No assessment data available. Please complete wellness assessment and/or IRIS analysis.';
+            }
+            
+            summaryEl.textContent = summary;
+        }
+
+        // Email Function
         window.sendEmail = () => {
-            const subject = `IRIS Report for Patient ID: ${document.getElementById('patientId').textContent}`;
-            const body = "Please find the attached IRIS constitutional analysis report.";
+            const subject = `Comprehensive Health Report for Patient ID: ${document.getElementById('patientId').textContent}`;
+            const body = "Please find the attached comprehensive health report combining wellness and IRIS assessments.";
             window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
         };
 
+        // Initialize on DOM Load
         document.addEventListener('DOMContentLoaded', () => {
             const urlParams = new URLSearchParams(window.location.search);
             const patientId = urlParams.get('patientId');
-            const assessmentId = urlParams.get('assessmentId');
-
-            document.getElementById('assessmentId').textContent = assessmentId || 'N/A';
+            
             document.getElementById('reportDate').textContent = new Date().toLocaleDateString('en-GB');
 
-            if (!patientId || !assessmentId) {
-                alert('Patient ID or Assessment ID is missing from the URL.');
+            if (!patientId) {
+                alert('Patient ID is missing from the URL.');
                 return;
             }
-            generateComprehensiveReport(patientId, assessmentId);
+            
+            generateComprehensiveReport(patientId);
         });
     })();
     </script>
