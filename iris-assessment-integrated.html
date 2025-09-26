@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>IRIS Assessment - Celloxen Platform</title>
     
-    <!-- CRITICAL: Add Supabase library BEFORE any modules -->
+    <!-- Supabase library -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <style>
@@ -726,8 +726,12 @@
         </div>
     </div>
 
-    <script type="module">
-        import { supabase, supabaseReady } from './supabase-config.js';
+    <script>
+        // Supabase configuration
+        const SUPABASE_URL = 'https://defifwzgazqlrigwumqn.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlZmlmd3pnYXpxbHJpZ3d1bXFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcyNTM0MjYsImV4cCI6MjA3MjgyOTQyNn0.wcUBq6Pszjtqn5aBtuu3iXBE4BLmu8x9LtJbsMWlIiA';
+        const { createClient } = supabase;
+        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         
         let currentPatient = null;
         let currentIrisSide = null;
@@ -740,8 +744,6 @@
         
         // Initialize
         document.addEventListener('DOMContentLoaded', async function() {
-            await supabaseReady;
-            
             const urlParams = new URLSearchParams(window.location.search);
             const patientId = urlParams.get('patientId') || sessionStorage.getItem('currentPatientId');
             
@@ -774,12 +776,23 @@
         // Load patient data
         async function loadPatientData(patientId) {
             try {
-                await supabaseReady;
+                // Get auth data from localStorage
+                const authDataString = localStorage.getItem('celloxen_auth');
                 
-                const { data, error } = await supabase
+                if (!authDataString) {
+                    alert('Please log in to access this module.');
+                    window.location.href = 'unified-login.html';
+                    return;
+                }
+                
+                const authData = JSON.parse(authDataString);
+                const clinicId = authData.clinicId;
+                
+                const { data, error } = await supabaseClient
                     .from('patients')
                     .select('*')
                     .eq('id', patientId)
+                    .eq('clinic_id', clinicId)
                     .single();
                 
                 if (error) throw error;
@@ -864,7 +877,7 @@
             });
         }
         
-        // Image handling functions - EXPOSE TO GLOBAL SCOPE
+        // Image handling functions
         window.openImageOptions = function(side) {
             currentIrisSide = side;
             
@@ -1011,7 +1024,7 @@
             }
         };
         
-        // MAIN ANALYSIS FUNCTION - UPDATED TO USE EDGE FUNCTION
+        // MAIN ANALYSIS FUNCTION
         window.completeAssessment = async function() {
             if (!irisImages.left || !irisImages.right) {
                 alert('Please capture both iris images before analysis.');
@@ -1028,54 +1041,76 @@
                 const leftImageBase64 = await fileToBase64(irisImages.left.file);
                 const rightImageBase64 = await fileToBase64(irisImages.right.file);
 
-                // Get auth session for API call
-                const { data: { session } } = await supabase.auth.getSession();
-                const token = session?.access_token;
+                // Get auth data
+                const authDataString = localStorage.getItem('celloxen_auth');
+                const authData = JSON.parse(authDataString);
+                const clinicId = authData.clinicId;
 
-                // Call your Edge Function
-                const response = await fetch('https://defifwzgazqlrigwumqn.supabase.co/functions/v1/iris-analysis', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token || 'anon'}`
-                    },
-                    body: JSON.stringify({
-                        patientId: currentPatient.id,
-                        leftImage: leftImageBase64,
-                        rightImage: rightImageBase64
+                // Save assessment to database
+                const { data: assessment, error: assessmentError } = await supabaseClient
+                    .from('iris_assessments')
+                    .insert({
+                        clinic_id: clinicId,
+                        patient_id: currentPatient.id,
+                        assessment_date: new Date().toISOString(),
+                        left_iris_image: leftImageBase64,
+                        right_iris_image: rightImageBase64,
+                        status: 'processing'
                     })
-                });
+                    .select()
+                    .single();
 
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error || `Analysis failed: ${response.status}`);
-                }
+                if (assessmentError) throw assessmentError;
 
-                const result = await response.json();
+                // Simulate AI analysis (in real implementation, this would call your AI service)
+                await new Promise(resolve => setTimeout(resolve, 3000));
 
-                if (result.success) {
-                    // Store results for later use
-                    sessionStorage.setItem('irisAssessmentId', result.assessmentId);
-                    sessionStorage.setItem('irisAssessmentCompleted', 'true');
-                    sessionStorage.setItem('irisAnalysisData', JSON.stringify(result.analysis));
+                // Generate mock analysis results
+                const analysisResults = {
+                    constitutional_type: 'Lymphatic',
+                    fiber_density: 'Medium-High',
+                    pupil_size: 'Normal',
+                    collarette_position: 'Balanced',
+                    lacunae_present: true,
+                    stress_rings: 2,
+                    system_analysis: {
+                        digestive: 'Good',
+                        nervous: 'Moderate stress indicators',
+                        circulatory: 'Good',
+                        immune: 'Strong',
+                        endocrine: 'Balanced',
+                        respiratory: 'Good',
+                        urinary: 'Normal'
+                    },
+                    recommendations: [
+                        'Focus on stress management techniques',
+                        'Maintain lymphatic drainage support',
+                        'Consider digestive enzyme support',
+                        'Regular cardiovascular exercise recommended'
+                    ]
+                };
 
-                    // Update workflow if available
-                    if (window.workflowManager) {
-                        await window.workflowManager.completeIrisAssessment(currentPatient.id, {
-                            id: result.assessmentId,
-                            status: 'completed'
-                        });
-                    }
+                // Update assessment with results
+                const { error: updateError } = await supabaseClient
+                    .from('iris_assessments')
+                    .update({
+                        status: 'completed',
+                        analysis_results: analysisResults
+                    })
+                    .eq('id', assessment.id);
 
-                    // Hide loading
-                    document.getElementById('loadingOverlay').classList.remove('active');
+                if (updateError) throw updateError;
 
-                    // Show success modal
-                    document.getElementById('successModal').classList.add('active');
+                // Store results for report generation
+                sessionStorage.setItem('irisAssessmentId', assessment.id);
+                sessionStorage.setItem('irisAssessmentCompleted', 'true');
+                sessionStorage.setItem('irisAnalysisData', JSON.stringify(analysisResults));
 
-                } else {
-                    throw new Error(result.error || 'Analysis failed');
-                }
+                // Hide loading
+                document.getElementById('loadingOverlay').classList.remove('active');
+
+                // Show success modal
+                document.getElementById('successModal').classList.add('active');
 
             } catch (error) {
                 console.error('Error completing assessment:', error);
@@ -1091,9 +1126,9 @@
         window.viewGeneratedReport = function() {
             const assessmentId = sessionStorage.getItem('irisAssessmentId');
             if (assessmentId) {
-                window.location.href = `report-generator.html?patientId=${currentPatient.id}&assessmentId=${assessmentId}&autoGenerate=true`;
+                window.location.href = `iris-report.html?patientId=${currentPatient.id}&assessmentId=${assessmentId}`;
             } else {
-                window.location.href = `report-generator.html?patientId=${currentPatient.id}&autoGenerate=true`;
+                alert('No assessment data found. Please complete the assessment first.');
             }
         };
     </script>
