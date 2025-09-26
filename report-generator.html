@@ -17,7 +17,6 @@
         }
         .container {
             max-width: 8.5in;
-            min-height: 11in;
             margin: 40px auto;
             padding: 50px;
             background: white;
@@ -53,12 +52,11 @@
             border-bottom: 2px solid #e2e8f0;
             margin-bottom: 20px;
         }
-        .grid-2, .grid-3 {
+        .grid-3 {
             display: grid;
+            grid-template-columns: repeat(3, 1fr);
             gap: 20px;
         }
-        .grid-2 { grid-template-columns: repeat(2, 1fr); }
-        .grid-3 { grid-template-columns: repeat(3, 1fr); }
         .info-card {
             background: #f8fafc;
             padding: 15px;
@@ -98,19 +96,6 @@
             color: #0284c7;
             text-transform: capitalize;
         }
-        .system-analysis {
-            column-count: 2;
-            column-gap: 30px;
-        }
-        .system-item {
-            background: #f8fafc;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            break-inside: avoid;
-        }
-        .system-item h4 { font-size: 15px; color: #1e3a8a; }
-        .system-item p { font-size: 14px; margin-top: 5px; }
         .recommendations ul {
             list-style-type: none;
             padding-left: 0;
@@ -131,62 +116,44 @@
             border-top: 1px solid #e2e8f0;
             padding-top: 20px;
         }
-        .no-print {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            display: flex;
-            gap: 10px;
+        .action-buttons {
+            margin-top: 30px;
+            text-align: center;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 10px;
         }
         .action-btn {
             background: #1e3a8a;
             color: white;
-            padding: 10px 20px;
+            padding: 12px 25px;
             border: none;
             border-radius: 6px;
             cursor: pointer;
             font-size: 14px;
             font-weight: 500;
             transition: background 0.3s;
+            margin: 5px;
         }
-        .action-btn:hover { background: #1e40af; }
-        
-        .continue-section {
-            margin-top: 30px;
-            text-align: center;
-            padding: 20px;
-            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
-            border-radius: 10px;
+        .action-btn:hover { 
+            background: #1e40af; 
         }
-        
-        .continue-btn {
-            background: linear-gradient(135deg, #10b981, #059669);
-            color: white;
-            padding: 14px 35px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: 600;
-            transition: all 0.3s;
+        .btn-secondary {
+            background: #64748b;
         }
-        
-        .continue-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
+        .btn-secondary:hover {
+            background: #475569;
         }
 
         @media print {
             body { background: none; }
-            .container { margin: 0; padding: 0; box-shadow: none; border-radius: 0; }
-            .no-print { display: none; }
-            .continue-section { display: none; }
+            .container { margin: 0; padding: 40px; box-shadow: none; border-radius: 0; }
+            .action-buttons { display: none; }
         }
     </style>
 </head>
 <body>
-
-    <div class="container" id="report-content">
+    <div class="container">
         <div class="header">
             <div>
                 <h1>IRIS Comprehensive Report</h1>
@@ -210,53 +177,34 @@
 
         <div class="section">
             <h2>AI Constitutional Findings</h2>
-            <div class="findings-grid" id="constitutionalFindings">
-                </div>
+            <div class="findings-grid" id="constitutionalFindings"></div>
         </div>
         
         <div class="section">
             <h2>AI System Analysis</h2>
             <p id="systemAnalysisNotes" style="font-size: 14px; margin-bottom: 20px;"></p>
-            <div class="system-analysis" id="systemAnalysis">
-                </div>
+            <div class="system-analysis" id="systemAnalysis"></div>
         </div>
 
         <div class="section recommendations">
             <h2>AI-Generated Recommendations</h2>
-            <div id="recommendations">
-                </div>
+            <div id="recommendations"></div>
         </div>
 
         <div class="disclaimer">
             This report is generated based on iridology principles for constitutional analysis and is intended for educational and informational purposes only. It is not a medical diagnosis and should not be used as a substitute for professional medical advice, diagnosis, or treatment.
         </div>
         
-        <!-- Continue to IRIS Assessment Button -->
-        <div class="continue-section no-print">
-            <h3 style="color: #1e3a8a; margin-bottom: 15px;">Report Actions</h3>
-            <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin-bottom: 20px;">
-                <button class="action-btn" onclick="window.print()">
-                    🖨️ Print Report
-                </button>
-                <button class="action-btn" onclick="sendEmail()">
-                    📧 Email Report
-                </button>
-            </div>
-            <h3 style="color: #1e3a8a; margin-bottom: 15px; margin-top: 30px;">Continue Assessment Workflow</h3>
-            <p style="color: #64748b; margin-bottom: 20px;">Start a new IRIS assessment for this patient or return to dashboard</p>
-            <button class="continue-btn" onclick="continueToIrisAssessment()">
-                Start New IRIS Assessment →
-            </button>
-            <button class="action-btn" onclick="window.location.href='clinic-dashboard.html'" style="margin-left: 10px;">
-                Return to Dashboard
-            </button>
+        <!-- Action Buttons at the Bottom -->
+        <div class="action-buttons">
+            <button class="action-btn" onclick="window.print()">🖨️ Print Report</button>
+            <button class="action-btn" onclick="sendEmail()">📧 Email Report</button>
+            <button class="action-btn btn-secondary" onclick="window.location.href='clinic-dashboard.html'">Return to Dashboard</button>
         </div>
     </div>
 
     <script>
-    // --- START OF SCRIPT ---
     (function() {
-        // --- 1. SUPABASE CONFIGURATION (STANDALONE) ---
         const SUPABASE_URL = 'https://defifwzgazqlrigwumqn.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlZmlmd3pnYXpxbHJpZ3d1bXFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcyNTM0MjYsImV4cCI6MjA3MjgyOTQyNn0.wcUBq6Pszjtqn5aBtuu3iXBE4BLmu8x9LtJbsMWlIiA';
         
@@ -266,9 +214,7 @@
         }
         const { createClient } = window.supabase;
         const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        console.log('Report Generator: Supabase client initialized.');
 
-        // --- 2. HELPER FUNCTIONS ---
         const calculateAge = (dob) => {
             if (!dob) return 'N/A';
             const ageDifMs = Date.now() - new Date(dob).getTime();
@@ -278,7 +224,6 @@
 
         const formatDate = (dateString) => new Date(dateString).toLocaleDateString('en-GB');
 
-        // --- 3. DATA RENDERING FUNCTIONS ---
         const renderPatientData = (patient) => {
             document.getElementById('patientId').textContent = patient.patient_id || 'N/A';
             document.getElementById('patientName').textContent = `${patient.first_name} ${patient.last_name}`;
@@ -289,7 +234,7 @@
         const renderAssessmentData = (assessment) => {
             const analysis = assessment.claude_analysis;
             if (!analysis || !analysis.basic_findings) {
-                document.getElementById('report-content').innerHTML += '<h2>Error: AI analysis data is missing or corrupt.</h2>';
+                document.getElementById('constitutionalFindings').innerHTML = '<p>Error: AI analysis data is missing.</p>';
                 return;
             }
 
@@ -309,25 +254,38 @@
             const recommendations = analysis.recommendations;
             if (recommendations) {
                 const recContainer = document.getElementById('recommendations');
-                recContainer.innerHTML = `
-                    <h4>Nutritional</h4>
-                    <ul>${(recommendations.nutritional?.foods_to_support || []).map(item => `<li>${item}</li>`).join('')}</ul>
-                    <h4>Supplements</h4>
-                    <ul>${(recommendations.supplements?.targeted || []).map(item => `<li>${item}</li>`).join('')}</ul>
-                    <h4>Lifestyle</h4>
-                    <ul>${(recommendations.lifestyle?.stress_management || []).map(item => `<li>${item}</li>`).join('')}</ul>
-                `;
+                let html = '';
+                
+                if (recommendations.nutritional?.foods_to_support?.length > 0) {
+                    html += '<h4>Nutritional</h4><ul>';
+                    recommendations.nutritional.foods_to_support.forEach(item => {
+                        html += `<li>${item}</li>`;
+                    });
+                    html += '</ul>';
+                }
+                
+                if (recommendations.supplements?.targeted?.length > 0) {
+                    html += '<h4>Supplements</h4><ul>';
+                    recommendations.supplements.targeted.forEach(item => {
+                        html += `<li>${item}</li>`;
+                    });
+                    html += '</ul>';
+                }
+                
+                if (recommendations.lifestyle?.stress_management?.length > 0) {
+                    html += '<h4>Lifestyle</h4><ul>';
+                    recommendations.lifestyle.stress_management.forEach(item => {
+                        html += `<li>${item}</li>`;
+                    });
+                    html += '</ul>';
+                }
+                
+                recContainer.innerHTML = html;
             }
         };
 
-        // --- 4. MAIN DATA FETCHING FUNCTION ---
         async function generateComprehensiveReport(patientId, assessmentId) {
-            console.log(`Starting report generation for patient ${patientId}, assessment ${assessmentId}`);
             try {
-                // Store current patient ID for workflow continuity
-                sessionStorage.setItem('currentPatientId', patientId);
-                
-                // Fetch patient and assessment data in parallel
                 const [patientRes, assessmentRes] = await Promise.all([
                     supabase.from('patients').select('*').eq('id', patientId).single(),
                     supabase.from('iris_assessments').select('*').eq('id', assessmentId).single()
@@ -336,42 +294,19 @@
                 if (patientRes.error) throw new Error(`Failed to fetch patient data: ${patientRes.error.message}`);
                 if (assessmentRes.error) throw new Error(`Failed to fetch assessment data: ${assessmentRes.error.message}`);
 
-                const patient = patientRes.data;
-                const assessment = assessmentRes.data;
-
-                // Populate the report
-                renderPatientData(patient);
-                renderAssessmentData(assessment);
+                renderPatientData(patientRes.data);
+                renderAssessmentData(assessmentRes.data);
 
             } catch (error) {
                 console.error('Error generating report:', error);
-                document.getElementById('report-content').innerHTML = `
-                    <div class="section">
-                        <h2>Failed to Generate Report</h2>
-                        <p style="color: red;">Could not load report data. Please check the console for details.</p>
-                        <p><strong>Error:</strong> ${error.message}</p>
-                    </div>`;
+                alert('Error loading report data: ' + error.message);
             }
         }
 
-        // --- 5. GLOBAL FUNCTIONS AND INITIALIZATION ---
         window.sendEmail = () => {
             const subject = `IRIS Report for Patient ID: ${document.getElementById('patientId').textContent}`;
             const body = "Please find the attached IRIS constitutional analysis report.";
             window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-        };
-        
-        // Continue to IRIS Assessment function
-        window.continueToIrisAssessment = () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const patientId = urlParams.get('patientId');
-            if (patientId) {
-                // Pass patient ID to IRIS assessment to maintain workflow
-                sessionStorage.setItem('currentPatientId', patientId);
-                window.location.href = `iris-assessment-integrated.html?patientId=${patientId}`;
-            } else {
-                window.location.href = 'iris-assessment-integrated.html';
-            }
         };
 
         document.addEventListener('DOMContentLoaded', () => {
