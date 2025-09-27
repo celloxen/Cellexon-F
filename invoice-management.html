@@ -1229,6 +1229,9 @@
             
             return { subtotal, vat, total: grandTotal, vatRate: vatEnabled ? vatRate : 0 };
         }
+        
+        // Make calculateTotals globally accessible
+        window.calculateTotals = calculateTotals;
 
         // Handle form submission
         async function handleSubmit(e) {
