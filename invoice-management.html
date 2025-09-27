@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice Management - Celloxen Platform</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f7fa; 
+        }
+        
+        .header { 
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%); 
+            color: white; 
+            padding: 20px 0; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header-container { 
+            max-width: 1400px; 
+            margin: 0 auto; 
+            padding: 0 20px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+        }
+        
+        .header h1 { font-size: 24px; }
+        
+        .back-btn { 
+            background: rgba(255,255,255,0.2); 
+            border: 1px solid rgba(255,255,255,0.3); 
+            color: white; 
+            padding: 8px 20px; 
+            border-radius: 6px; 
+            text-decoration: none; 
+            transition: all 0.3s;
+        }
+        
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .container { 
+            max-width: 1400px; 
+            margin: 30px auto; 
+            padding: 0 20px; 
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 5px;
+        }
+        
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+        
+        .stat-change {
+            font-size: 12px;
+            margin-top: 5px;
+        }
+        
+        .stat-positive { color: #10b981; }
+        .stat-negative { color: #ef4444; }
+        
+        .controls-bar { 
+            background: white; 
+            padding: 20px; 
+            border-radius: 12px; 
+            margin-bottom: 30px; 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08); 
+            display: flex; 
+            gap: 15px; 
+            align-items: center; 
+            flex-wrap: wrap;
+        }
+        
+        .search-input { 
+            flex: 1; 
+            min-width: 250px;
+            padding: 10px 15px; 
+            border: 2px solid #e5e7eb; 
+            border-radius: 8px; 
+            font-size: 14px; 
+        }
+        
+        .filter-select {
+            padding: 10px 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+        }
+        
+        .btn-primary { 
+            background: linear-gradient(135deg, #10b981, #059669); 
+            color: white; 
+            border: none; 
+            padding: 10px 20px; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
+        }
+        
+        .invoices-table-container { 
+            background: white; 
+            border-radius: 12px; 
+            padding: 20px; 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08); 
+            overflow-x: auto; 
+        }
+        
+        .table-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 20px; 
+        }
+        
+        .table-title { font-size: 18px; font-weight: 600; }
+        .results-count { color: #6b7280; }
+        
+        table { width: 100%; border-collapse: collapse; }
+        th { 
+            background: #f9fafb; 
+            padding: 12px; 
+            text-align: left; 
+            font-size: 12px; 
+            text-transform: uppercase; 
+            color: #6b7280; 
+            border-bottom: 2px solid #e5e7eb; 
+        }
+        td { 
+            padding: 12px; 
+            border-bottom: 1px solid #f3f4f6; 
+            font-size: 14px; 
+        }
+        
+        .invoice-number { 
+            font-weight: 600; 
+            color: #1e3a8a;
+        }
+        
+        .patient-name { font-weight: 500; }
+        
+        .amount {
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .status-badge { 
+            display: inline-block; 
+            padding: 4px 10px; 
+            border-radius: 20px; 
+            font-size: 11px; 
+            font-weight: 600; 
+            text-transform: capitalize; 
+        }
+        
+        .status-pending { 
+            background: #fef3c7; 
+            color: #92400e; 
+        }
+        
+        .status-paid { 
+            background: #d1fae5; 
+            color: #065f46; 
+        }
+        
+        .status-overdue { 
+            background: #fee2e2; 
+            color: #991b1b; 
+        }
+        
+        .status-cancelled { 
+            background: #f3f4f6; 
+            color: #374151; 
+        }
+        
+        .action-buttons { 
+            display: flex; 
+            gap: 8px; 
+        }
+        
+        .btn-action { 
+            padding: 6px 12px; 
+            border-radius: 6px; 
+            border: 1px solid #e5e7eb; 
+            background: white; 
+            cursor: pointer; 
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+        
+        .btn-view { color: #3b82f6; border-color: #3b82f6; }
+        .btn-edit { color: #f59e0b; border-color: #f59e0b; }
+        .btn-delete { color: #ef4444; border-color: #ef4444; }
+        .btn-pay { color: #10b981; border-color: #10b981; }
+        
+        .btn-action:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .empty-state { 
+            text-align: center; 
+            padding: 60px 20px; 
+            color: #9ca3af; 
+        }
+        
+        .loading-state { 
+            text-align: center; 
+            padding: 40px 20px; 
+            color: #6b7280; 
+        }
+        
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.active { display: flex; }
+        
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #6b7280;
+            cursor: pointer;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 5px;
+        }
+        
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .form-textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 25px;
+        }
+        
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #374151;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        
+        .items-table {
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        .items-table th {
+            background: #f3f4f6;
+            padding: 8px;
+            font-size: 12px;
+        }
+        
+        .items-table td {
+            padding: 8px;
+        }
+        
+        .item-input {
+            width: 100%;
+            padding: 5px;
+            border: 1px solid #e5e7eb;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+        
+        .btn-add-item {
+            background: #f3f4f6;
+            color: #374151;
+            border: 1px dashed #9ca3af;
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            margin-top: 10px;
+            width: 100%;
+        }
+        
+        .total-section {
+            background: #f9fafb;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+        
+        .total-label {
+            color: #6b7280;
+            font-size: 14px;
+        }
+        
+        .total-value {
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .grand-total {
+            border-top: 2px solid #e5e7eb;
+            padding-top: 10px;
+            margin-top: 10px;
+        }
+        
+        .grand-total .total-value {
+            font-size: 18px;
+            color: #1e3a8a;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-container">
+            <h1>Invoice Management</h1>
+            <a href="clinic-dashboard.html" class="back-btn">← Back to Dashboard</a>
+        </div>
+    </div>
+    
+    <div class="container">
+        <!-- Statistics Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Total Revenue</div>
+                <div class="stat-value" id="totalRevenue">£0</div>
+                <div class="stat-change stat-positive">+12% from last month</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Pending Invoices</div>
+                <div class="stat-value" id="pendingCount">0</div>
+                <div class="stat-change" id="pendingAmount">£0 outstanding</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Paid This Month</div>
+                <div class="stat-value" id="paidThisMonth">£0</div>
+                <div class="stat-change stat-positive">On track</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Overdue</div>
+                <div class="stat-value" id="overdueCount">0</div>
+                <div class="stat-change stat-negative" id="overdueAmount">£0 overdue</div>
+            </div>
+        </div>
+        
+        <!-- Controls Bar -->
+        <div class="controls-bar">
+            <input type="text" class="search-input" id="searchInput" placeholder="Search by invoice number, patient name...">
+            <select class="filter-select" id="statusFilter">
+                <option value="">All Status</option>
+                <option value="pending">Pending</option>
+                <option value="paid">Paid</option>
+                <option value="overdue">Overdue</option>
+                <option value="cancelled">Cancelled</option>
+            </select>
+            <button class="btn-primary" onclick="createNewInvoice()">+ Create Invoice</button>
+        </div>
+        
+        <!-- Invoices Table -->
+        <div class="invoices-table-container">
+            <div class="table-header">
+                <h2 class="table-title">All Invoices</h2>
+                <span class="results-count" id="resultsCount">0 invoices</span>
+            </div>
+            
+            <table id="invoicesTable">
+                <thead>
+                    <tr>
+                        <th>Invoice #</th>
+                        <th>Patient</th>
+                        <th>Date</th>
+                        <th>Due Date</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="invoicesTableBody">
+                    <tr>
+                        <td colspan="7" class="loading-state">Loading invoices...</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div id="emptyState" class="empty-state" style="display: none;">
+                <h3>No Invoices Found</h3>
+                <p>Start by creating a new invoice</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Create/Edit Invoice Modal -->
+    <div class="modal" id="invoiceModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">Create New Invoice</h3>
+                <button class="close-btn" onclick="closeModal()">×</button>
+            </div>
+            
+            <form id="invoiceForm">
+                <div class="form-group">
+                    <label class="form-label">Patient *</label>
+                    <select class="form-select" id="patientSelect" required>
+                        <option value="">Select a patient...</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Invoice Date *</label>
+                    <input type="date" class="form-input" id="invoiceDate" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Due Date *</label>
+                    <input type="date" class="form-input" id="dueDate" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Services</label>
+                    <table class="items-table" id="itemsTable">
+                        <thead>
+                            <tr>
+                                <th>Service</th>
+                                <th>Quantity</th>
+                                <th>Price</th>
+                                <th>Total</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="itemsTableBody">
+                            <tr class="item-row">
+                                <td><input type="text" class="item-input" placeholder="e.g., IRIS Assessment"></td>
+                                <td><input type="number" class="item-input" value="1" min="1"></td>
+                                <td><input type="number" class="item-input" placeholder="0.00" step="0.01"></td>
+                                <td class="item-total">£0.00</td>
+                                <td><button type="button" onclick="removeItem(this)">×</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <button type="button" class="btn-add-item" onclick="addItem()">+ Add Service</button>
+                </div>
+                
+                <div class="total-section">
+                    <div class="total-row">
+                        <span class="total-label">Subtotal:</span>
+                        <span class="total-value" id="subtotal">£0.00</span>
+                    </div>
+                    <div class="total-row">
+                        <span class="total-label">VAT (20%):</span>
+                        <span class="total-value" id="vat">£0.00</span>
+                    </div>
+                    <div class="total-row grand-total">
+                        <span class="total-label">Total:</span>
+                        <span class="total-value" id="grandTotal">£0.00</span>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Notes</label>
+                    <textarea class="form-textarea" id="notes" placeholder="Additional notes..."></textarea>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn-primary">Save Invoice</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+        
+        const SUPABASE_URL = 'https://defifwzgazqlrigwumqn.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlZmlmd3pnYXpxbHJpZ3d1bXFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcyNTM0MjYsImV4cCI6MjA3MjgyOTQyNn0.wcUBq6Pszjtqn5aBtuu3iXBE4BLmu8x9LtJbsMWlIiA';
+        
+        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let allInvoices = [];
+        let currentClinicId = null;
+        let editingInvoiceId = null;
+        let patients = [];
+
+        // Initialize
+        async function init() {
+            const authData = localStorage.getItem('celloxen_auth');
+            if (!authData) {
+                window.location.href = 'unified-login.html';
+                return;
+            }
+            
+            const auth = JSON.parse(authData);
+            currentClinicId = auth.clinicId;
+            
+            await loadPatients();
+            await loadInvoices();
+            setupEventListeners();
+            setDefaultDates();
+        }
+
+        // Load patients for dropdown
+        async function loadPatients() {
+            try {
+                const { data, error } = await supabase
+                    .from('patients')
+                    .select('id, first_name, last_name, patient_id')
+                    .eq('clinic_id', currentClinicId)
+                    .order('first_name');
+                    
+                if (error) throw error;
+                
+                patients = data || [];
+                populatePatientSelect();
+            } catch (e) {
+                console.error('Error loading patients:', e);
+            }
+        }
+
+        // Populate patient dropdown
+        function populatePatientSelect() {
+            const select = document.getElementById('patientSelect');
+            select.innerHTML = '<option value="">Select a patient...</option>';
+            patients.forEach(p => {
+                select.innerHTML += `<option value="${p.id}">${p.first_name} ${p.last_name} (${p.patient_id})</option>`;
+            });
+        }
+
+        // Load invoices
+        async function loadInvoices() {
+            const tbody = document.getElementById('invoicesTableBody');
+            tbody.innerHTML = '<tr><td colspan="7" class="loading-state">Loading invoices...</td></tr>';
+            
+            try {
+                const { data, error } = await supabase
+                    .from('invoices')
+                    .select(`
+                        *,
+                        patients (first_name, last_name)
+                    `)
+                    .eq('clinic_id', currentClinicId)
+                    .order('created_at', { ascending: false });
+                    
+                if (error) throw error;
+                
+                allInvoices = data || [];
+                displayInvoices(allInvoices);
+                updateStatistics();
+                
+            } catch (e) {
+                console.error('Error loading invoices:', e);
+                tbody.innerHTML = `<tr><td colspan="7" class="error-state">Error loading invoices</td></tr>`;
+            }
+        }
+
+        // Display invoices in table
+        function displayInvoices(invoices) {
+            const tbody = document.getElementById('invoicesTableBody');
+            const emptyState = document.getElementById('emptyState');
+            const table = document.getElementById('invoicesTable');
+            
+            document.getElementById('resultsCount').textContent = `${invoices.length} invoice${invoices.length !== 1 ? 's' : ''}`;
+            
+            if (invoices.length === 0) {
+                table.style.display = 'none';
+                emptyState.style.display = 'block';
+                return;
+            }
+            
+            table.style.display = 'table';
+            emptyState.style.display = 'none';
+            
+            tbody.innerHTML = invoices.map(inv => {
+                const patientName = inv.patients ? `${inv.patients.first_name} ${inv.patients.last_name}` : 'Unknown';
+                const status = getInvoiceStatus(inv);
+                
+                return `
+                    <tr>
+                        <td class="invoice-number">#${inv.invoice_number || inv.id}</td>
+                        <td class="patient-name">${patientName}</td>
+                        <td>${formatDate(inv.invoice_date)}</td>
+                        <td>${formatDate(inv.due_date)}</td>
+                        <td class="amount">£${(inv.total_amount || 0).toFixed(2)}</td>
+                        <td><span class="status-badge status-${status}">${status}</span></td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn-action btn-view" onclick="viewInvoice(${inv.id})">View</button>
+                                ${status === 'pending' || status === 'overdue' ? 
+                                    `<button class="btn-action btn-pay" onclick="markAsPaid(${inv.id})">Mark Paid</button>` : ''}
+                                <button class="btn-action btn-delete" onclick="deleteInvoice(${inv.id})">Delete</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Get invoice status
+        function getInvoiceStatus(invoice) {
+            if (invoice.status === 'paid') return 'paid';
+            if (invoice.status === 'cancelled') return 'cancelled';
+            
+            const dueDate = new Date(invoice.due_date);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            dueDate.setHours(0, 0, 0, 0);
+            
+            if (dueDate < today) return 'overdue';
+            return 'pending';
+        }
+
+        // Update statistics
+        function updateStatistics() {
+            let totalRevenue = 0;
+            let pendingCount = 0;
+            let pendingAmount = 0;
+            let overdueCount = 0;
+            let overdueAmount = 0;
+            let paidThisMonth = 0;
+            
+            const now = new Date();
+            const thisMonth = now.getMonth();
+            const thisYear = now.getFullYear();
+            
+            allInvoices.forEach(inv => {
+                const status = getInvoiceStatus(inv);
+                const amount = inv.total_amount || 0;
+                
+                if (inv.status === 'paid') {
+                    totalRevenue += amount;
+                    
+                    const paidDate = new Date(inv.updated_at || inv.created_at);
+                    if (paidDate.getMonth() === thisMonth && paidDate.getFullYear() === thisYear) {
+                        paidThisMonth += amount;
+                    }
+                } else if (status === 'pending') {
+                    pendingCount++;
+                    pendingAmount += amount;
+                } else if (status === 'overdue') {
+                    overdueCount++;
+                    overdueAmount += amount;
+                }
+            });
+            
+            document.getElementById('totalRevenue').textContent = `£${totalRevenue.toFixed(2)}`;
+            document.getElementById('pendingCount').textContent = pendingCount;
+            document.getElementById('pendingAmount').textContent = `£${pendingAmount.toFixed(2)} outstanding`;
+            document.getElementById('paidThisMonth').textContent = `£${paidThisMonth.toFixed(2)}`;
+            document.getElementById('overdueCount').textContent = overdueCount;
+            document.getElementById('overdueAmount').textContent = `£${overdueAmount.toFixed(2)} overdue`;
+        }
+
+        // Format date
+        function formatDate(dateStr) {
+            return new Date(dateStr).toLocaleDateString('en-GB', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric'
+            });
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            document.getElementById('searchInput').addEventListener('input', filterInvoices);
+            document.getElementById('statusFilter').addEventListener('change', filterInvoices);
+            document.getElementById('invoiceForm').addEventListener('submit', handleSubmit);
+            
+            // Calculate totals on item changes
+            document.getElementById('itemsTableBody').addEventListener('input', calculateTotals);
+        }
+
+        // Set default dates
+        function setDefaultDates() {
+            const today = new Date().toISOString().split('T')[0];
+            const dueDate = new Date();
+            dueDate.setDate(dueDate.getDate() + 30);
+            
+            document.getElementById('invoiceDate').value = today;
+            document.getElementById('dueDate').value = dueDate.toISOString().split('T')[0];
+        }
+
+        // Filter invoices
+        function filterInvoices() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const statusFilter = document.getElementById('statusFilter').value;
+            
+            let filtered = allInvoices;
+            
+            if (searchTerm) {
+                filtered = filtered.filter(inv => {
+                    const patientName = inv.patients ? 
+                        `${inv.patients.first_name} ${inv.patients.last_name}`.toLowerCase() : '';
+                    const invoiceNumber = (inv.invoice_number || inv.id.toString()).toLowerCase();
+                    
+                    return patientName.includes(searchTerm) || invoiceNumber.includes(searchTerm);
+                });
+            }
+            
+            if (statusFilter) {
+                filtered = filtered.filter(inv => getInvoiceStatus(inv) === statusFilter);
+            }
+            
+            displayInvoices(filtered);
+        }
+
+        // Global functions
+        window.createNewInvoice = () => {
+            editingInvoiceId = null;
+            document.getElementById('modalTitle').textContent = 'Create New Invoice';
+            document.getElementById('invoiceForm').reset();
+            setDefaultDates();
+            document.getElementById('invoiceModal').classList.add('active');
+        };
+
+        window.closeModal = () => {
+            document.getElementById('invoiceModal').classList.remove('active');
+        };
+
+        window.viewInvoice = (id) => {
+            // In a full implementation, this would open a detailed view
+            alert('View invoice functionality would show full invoice details and allow printing');
+        };
+
+        window.markAsPaid = async (id) => {
+            if (!confirm('Mark this invoice as paid?')) return;
+            
+            try {
+                const { error } = await supabase
+                    .from('invoices')
+                    .update({ status: 'paid', paid_date: new Date().toISOString() })
+                    .eq('id', id);
+                    
+                if (error) throw error;
+                
+                await loadInvoices();
+            } catch (e) {
+                console.error('Error updating invoice:', e);
+                alert('Error marking invoice as paid');
+            }
+        };
+
+        window.deleteInvoice = async (id) => {
+            if (!confirm('Delete this invoice?')) return;
+            
+            try {
+                const { error } = await supabase
+                    .from('invoices')
+                    .delete()
+                    .eq('id', id);
+                    
+                if (error) throw error;
+                
+                await loadInvoices();
+            } catch (e) {
+                console.error('Error deleting invoice:', e);
+                alert('Error deleting invoice');
+            }
+        };
+
+        window.addItem = () => {
+            const tbody = document.getElementById('itemsTableBody');
+            const newRow = document.createElement('tr');
+            newRow.className = 'item-row';
+            newRow.innerHTML = `
+                <td><input type="text" class="item-input" placeholder="e.g., Wellness Assessment"></td>
+                <td><input type="number" class="item-input" value="1" min="1"></td>
+                <td><input type="number" class="item-input" placeholder="0.00" step="0.01"></td>
+                <td class="item-total">£0.00</td>
+                <td><button type="button" onclick="removeItem(this)">×</button></td>
+            `;
+            tbody.appendChild(newRow);
+        };
+
+        window.removeItem = (btn) => {
+            btn.closest('tr').remove();
+            calculateTotals();
+        };
+
+        // Calculate totals
+        function calculateTotals() {
+            let subtotal = 0;
+            
+            document.querySelectorAll('.item-row').forEach(row => {
+                const qty = parseFloat(row.cells[1].querySelector('input').value) || 0;
+                const price = parseFloat(row.cells[2].querySelector('input').value) || 0;
+                const total = qty * price;
+                
+                row.cells[3].textContent = `£${total.toFixed(2)}`;
+                subtotal += total;
+            });
+            
+            const vat = subtotal * 0.20;
+            const grandTotal = subtotal + vat;
+            
+            document.getElementById('subtotal').textContent = `£${subtotal.toFixed(2)}`;
+            document.getElementById('vat').textContent = `£${vat.toFixed(2)}`;
+            document.getElementById('grandTotal').textContent = `£${grandTotal.toFixed(2)}`;
+            
+            return { subtotal, vat, total: grandTotal };
+        }
+
+        // Handle form submission
+        async function handleSubmit(e) {
+            e.preventDefault();
+            
+            const totals = calculateTotals();
+            const items = [];
+            
+            document.querySelectorAll('.item-row').forEach(row => {
+                const service = row.cells[0].querySelector('input').value;
+                const qty = parseFloat(row.cells[1].querySelector('input').value) || 0;
+                const price = parseFloat(row.cells[2].querySelector('input').value) || 0;
+                
+                if (service && qty && price) {
+                    items.push({ service, quantity: qty, price, total: qty * price });
+                }
+            });
+            
+            if (items.length === 0) {
+                alert('Please add at least one service');
+                return;
+            }
+            
+            const invoiceData = {
+                clinic_id: currentClinicId,
+                patient_id: parseInt(document.getElementById('patientSelect').value),
+                invoice_date: document.getElementById('invoiceDate').value,
+                due_date: document.getElementById('dueDate').value,
+                items: items,
+                subtotal: totals.subtotal,
+                vat_amount: totals.vat,
+                total_amount: totals.total,
+                notes: document.getElementById('notes').value,
+                status: 'pending',
+                invoice_number: `INV${Date.now()}`
+            };
+            
+            try {
+                if (editingInvoiceId) {
+                    const { error } = await supabase
+                        .from('invoices')
+                        .update(invoiceData)
+                        .eq('id', editingInvoiceId);
+                        
+                    if (error) throw error;
+                } else {
+                    const { error } = await supabase
+                        .from('invoices')
+                        .insert(invoiceData);
+                        
+                    if (error) throw error;
+                }
+                
+                closeModal();
+                await loadInvoices();
+                
+            } catch (e) {
+                console.error('Error saving invoice:', e);
+                alert('Error saving invoice: ' + e.message);
+            }
+        }
+
+        // Initialize on DOM ready
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
