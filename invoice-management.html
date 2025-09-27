@@ -335,6 +335,30 @@
             font-weight: 500;
         }
         
+        /* Patient Info Display */
+        .patient-info-display {
+            background: #f9fafb;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 13px;
+        }
+        
+        .patient-info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        
+        .patient-info-label {
+            color: #6b7280;
+            font-weight: 500;
+        }
+        
+        .patient-info-value {
+            color: #1e293b;
+        }
+        
         .items-table {
             width: 100%;
             margin-top: 10px;
@@ -403,6 +427,125 @@
             font-size: 18px;
             color: #1e3a8a;
         }
+        
+        /* Invoice View Modal */
+        .invoice-view-modal .modal-content {
+            max-width: 800px;
+        }
+        
+        .invoice-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .clinic-info h2 {
+            color: #1e3a8a;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        
+        .clinic-info p {
+            font-size: 13px;
+            color: #6b7280;
+            margin: 2px 0;
+        }
+        
+        .invoice-meta {
+            text-align: right;
+        }
+        
+        .invoice-meta h3 {
+            font-size: 20px;
+            color: #1e293b;
+            margin-bottom: 10px;
+        }
+        
+        .invoice-meta p {
+            font-size: 13px;
+            color: #6b7280;
+            margin: 2px 0;
+        }
+        
+        .billing-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .billing-section h4 {
+            font-size: 14px;
+            color: #1e3a8a;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+        
+        .billing-section p {
+            font-size: 13px;
+            color: #374151;
+            margin: 3px 0;
+        }
+        
+        .invoice-items-section {
+            margin-bottom: 30px;
+        }
+        
+        .invoice-items-section h4 {
+            font-size: 16px;
+            color: #1e293b;
+            margin-bottom: 15px;
+        }
+        
+        .invoice-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .invoice-table th {
+            background: #f3f4f6;
+            padding: 10px;
+            text-align: left;
+            font-size: 12px;
+            text-transform: uppercase;
+            color: #6b7280;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .invoice-table td {
+            padding: 10px;
+            border-bottom: 1px solid #f3f4f6;
+            font-size: 14px;
+        }
+        
+        .invoice-totals {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+        
+        .totals-box {
+            width: 300px;
+        }
+        
+        .print-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        @media print {
+            body { background: white; }
+            .header, .controls-bar, .stats-grid, .action-buttons, .print-actions { display: none; }
+            .modal { position: static; background: none; }
+            .modal-content { max-width: 100%; padding: 0; box-shadow: none; }
+            .close-btn { display: none; }
+        }
     </style>
 </head>
 <body>
@@ -463,6 +606,7 @@
                     <tr>
                         <th>Invoice #</th>
                         <th>Patient</th>
+                        <th>Patient ID</th>
                         <th>Date</th>
                         <th>Due Date</th>
                         <th>Amount</th>
@@ -472,7 +616,7 @@
                 </thead>
                 <tbody id="invoicesTableBody">
                     <tr>
-                        <td colspan="7" class="loading-state">Loading invoices...</td>
+                        <td colspan="8" class="loading-state">Loading invoices...</td>
                     </tr>
                 </tbody>
             </table>
@@ -495,9 +639,29 @@
             <form id="invoiceForm">
                 <div class="form-group">
                     <label class="form-label">Patient *</label>
-                    <select class="form-select" id="patientSelect" required>
+                    <select class="form-select" id="patientSelect" required onchange="updatePatientInfo()">
                         <option value="">Select a patient...</option>
                     </select>
+                </div>
+                
+                <!-- Patient Info Display -->
+                <div class="patient-info-display" id="patientInfoDisplay" style="display: none;">
+                    <div class="patient-info-row">
+                        <span class="patient-info-label">Patient ID:</span>
+                        <span class="patient-info-value" id="displayPatientId">-</span>
+                    </div>
+                    <div class="patient-info-row">
+                        <span class="patient-info-label">Address:</span>
+                        <span class="patient-info-value" id="displayAddress">-</span>
+                    </div>
+                    <div class="patient-info-row">
+                        <span class="patient-info-label">Phone:</span>
+                        <span class="patient-info-value" id="displayPhone">-</span>
+                    </div>
+                    <div class="patient-info-row">
+                        <span class="patient-info-label">Email:</span>
+                        <span class="patient-info-value" id="displayEmail">-</span>
+                    </div>
                 </div>
                 
                 <div class="form-group">
@@ -562,6 +726,25 @@
             </form>
         </div>
     </div>
+    
+    <!-- Invoice View Modal -->
+    <div class="modal invoice-view-modal" id="invoiceViewModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Invoice Details</h3>
+                <button class="close-btn" onclick="closeViewModal()">×</button>
+            </div>
+            
+            <div id="invoiceViewContent">
+                <!-- Invoice content will be populated here -->
+            </div>
+            
+            <div class="print-actions">
+                <button class="btn-primary" onclick="printInvoice()">🖨️ Print Invoice</button>
+                <button class="btn-secondary" onclick="closeViewModal()">Close</button>
+            </div>
+        </div>
+    </div>
 
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
@@ -573,6 +756,7 @@
 
         let allInvoices = [];
         let currentClinicId = null;
+        let currentClinicData = null;
         let editingInvoiceId = null;
         let patients = [];
 
@@ -587,18 +771,36 @@
             const auth = JSON.parse(authData);
             currentClinicId = auth.clinicId;
             
+            await loadClinicData();
             await loadPatients();
             await loadInvoices();
             setupEventListeners();
             setDefaultDates();
         }
 
-        // Load patients for dropdown
+        // Load clinic data for invoice header
+        async function loadClinicData() {
+            try {
+                const { data, error } = await supabase
+                    .from('clinics')
+                    .select('*')
+                    .eq('id', currentClinicId)
+                    .single();
+                    
+                if (!error && data) {
+                    currentClinicData = data;
+                }
+            } catch (e) {
+                console.error('Error loading clinic data:', e);
+            }
+        }
+
+        // Load patients for dropdown - with complete details
         async function loadPatients() {
             try {
                 const { data, error } = await supabase
                     .from('patients')
-                    .select('id, first_name, last_name, patient_id')
+                    .select('*')
                     .eq('clinic_id', currentClinicId)
                     .order('first_name');
                     
@@ -619,18 +821,38 @@
                 select.innerHTML += `<option value="${p.id}">${p.first_name} ${p.last_name} (${p.patient_id})</option>`;
             });
         }
+        
+        // Update patient info display
+        window.updatePatientInfo = function() {
+            const patientId = document.getElementById('patientSelect').value;
+            const infoDisplay = document.getElementById('patientInfoDisplay');
+            
+            if (!patientId) {
+                infoDisplay.style.display = 'none';
+                return;
+            }
+            
+            const patient = patients.find(p => p.id == patientId);
+            if (patient) {
+                document.getElementById('displayPatientId').textContent = patient.patient_id || 'N/A';
+                document.getElementById('displayAddress').textContent = patient.address || 'N/A';
+                document.getElementById('displayPhone').textContent = patient.phone || 'N/A';
+                document.getElementById('displayEmail').textContent = patient.email || 'N/A';
+                infoDisplay.style.display = 'block';
+            }
+        };
 
         // Load invoices
         async function loadInvoices() {
             const tbody = document.getElementById('invoicesTableBody');
-            tbody.innerHTML = '<tr><td colspan="7" class="loading-state">Loading invoices...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="8" class="loading-state">Loading invoices...</td></tr>';
             
             try {
                 const { data, error } = await supabase
                     .from('invoices')
                     .select(`
                         *,
-                        patients (first_name, last_name)
+                        patients (first_name, last_name, patient_id)
                     `)
                     .eq('clinic_id', currentClinicId)
                     .order('created_at', { ascending: false });
@@ -643,7 +865,7 @@
                 
             } catch (e) {
                 console.error('Error loading invoices:', e);
-                tbody.innerHTML = `<tr><td colspan="7" class="error-state">Error loading invoices</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="8" class="error-state">Error loading invoices</td></tr>`;
             }
         }
 
@@ -666,12 +888,14 @@
             
             tbody.innerHTML = invoices.map(inv => {
                 const patientName = inv.patients ? `${inv.patients.first_name} ${inv.patients.last_name}` : 'Unknown';
+                const patientId = inv.patients?.patient_id || 'N/A';
                 const status = getInvoiceStatus(inv);
                 
                 return `
                     <tr>
                         <td class="invoice-number">#${inv.invoice_number || inv.id}</td>
                         <td class="patient-name">${patientName}</td>
+                        <td>${patientId}</td>
                         <td>${formatDate(inv.invoice_date)}</td>
                         <td>${formatDate(inv.due_date)}</td>
                         <td class="amount">£${(inv.total_amount || 0).toFixed(2)}</td>
@@ -797,22 +1021,120 @@
             displayInvoices(filtered);
         }
 
+        // View invoice
+        window.viewInvoice = async (id) => {
+            const invoice = allInvoices.find(inv => inv.id === id);
+            if (!invoice) return;
+            
+            const patient = patients.find(p => p.id === invoice.patient_id);
+            
+            const content = `
+                <div class="invoice-header">
+                    <div class="clinic-info">
+                        <h2>${currentClinicData?.clinic_name || 'Celloxen Clinic'}</h2>
+                        <p>${currentClinicData?.address || '123 Health Street'}</p>
+                        <p>${currentClinicData?.city || 'London'}, ${currentClinicData?.postcode || 'SW1 1AA'}</p>
+                        <p>Tel: ${currentClinicData?.phone || '020 1234 5678'}</p>
+                        <p>Email: ${currentClinicData?.email || 'clinic@celloxen.com'}</p>
+                    </div>
+                    <div class="invoice-meta">
+                        <h3>INVOICE #${invoice.invoice_number || invoice.id}</h3>
+                        <p><strong>Date:</strong> ${formatDate(invoice.invoice_date)}</p>
+                        <p><strong>Due Date:</strong> ${formatDate(invoice.due_date)}</p>
+                        <p><strong>Status:</strong> ${getInvoiceStatus(invoice).toUpperCase()}</p>
+                    </div>
+                </div>
+                
+                <div class="billing-info">
+                    <div class="billing-section">
+                        <h4>Bill To:</h4>
+                        <p><strong>${patient?.first_name} ${patient?.last_name}</strong></p>
+                        <p>Patient ID: ${patient?.patient_id || 'N/A'}</p>
+                        <p>${patient?.address || 'Address not provided'}</p>
+                        <p>Tel: ${patient?.phone || 'N/A'}</p>
+                        <p>Email: ${patient?.email || 'N/A'}</p>
+                    </div>
+                    <div class="billing-section">
+                        <h4>Payment Information:</h4>
+                        <p>Payment Terms: Net 30 days</p>
+                        <p>Payment Methods: Bank Transfer, Card</p>
+                        ${invoice.status === 'paid' ? `<p><strong>PAID ON:</strong> ${formatDate(invoice.paid_date || invoice.updated_at)}</p>` : ''}
+                    </div>
+                </div>
+                
+                <div class="invoice-items-section">
+                    <h4>Services</h4>
+                    <table class="invoice-table">
+                        <thead>
+                            <tr>
+                                <th>Service</th>
+                                <th>Quantity</th>
+                                <th>Unit Price</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${(invoice.items || []).map(item => `
+                                <tr>
+                                    <td>${item.service}</td>
+                                    <td>${item.quantity}</td>
+                                    <td>£${item.price.toFixed(2)}</td>
+                                    <td>£${item.total.toFixed(2)}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="invoice-totals">
+                    <div class="totals-box">
+                        <div class="total-row">
+                            <span class="total-label">Subtotal:</span>
+                            <span class="total-value">£${(invoice.subtotal || 0).toFixed(2)}</span>
+                        </div>
+                        <div class="total-row">
+                            <span class="total-label">VAT (20%):</span>
+                            <span class="total-value">£${(invoice.vat_amount || 0).toFixed(2)}</span>
+                        </div>
+                        <div class="total-row grand-total">
+                            <span class="total-label">Total Due:</span>
+                            <span class="total-value">£${(invoice.total_amount || 0).toFixed(2)}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                ${invoice.notes ? `
+                    <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+                        <h4 style="font-size: 14px; margin-bottom: 10px;">Notes:</h4>
+                        <p style="font-size: 13px; color: #6b7280;">${invoice.notes}</p>
+                    </div>
+                ` : ''}
+            `;
+            
+            document.getElementById('invoiceViewContent').innerHTML = content;
+            document.getElementById('invoiceViewModal').classList.add('active');
+        };
+        
+        window.closeViewModal = () => {
+            document.getElementById('invoiceViewModal').classList.remove('active');
+        };
+        
+        window.printInvoice = () => {
+            window.print();
+        };
+
         // Global functions
         window.createNewInvoice = () => {
             editingInvoiceId = null;
             document.getElementById('modalTitle').textContent = 'Create New Invoice';
             document.getElementById('invoiceForm').reset();
+            document.getElementById('patientInfoDisplay').style.display = 'none';
             setDefaultDates();
             document.getElementById('invoiceModal').classList.add('active');
         };
 
         window.closeModal = () => {
             document.getElementById('invoiceModal').classList.remove('active');
-        };
-
-        window.viewInvoice = (id) => {
-            // In a full implementation, this would open a detailed view
-            alert('View invoice functionality would show full invoice details and allow printing');
         };
 
         window.markAsPaid = async (id) => {
