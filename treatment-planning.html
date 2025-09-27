@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Treatment Planning - Celloxen Platform</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
     <style>
         * {
             margin: 0;
@@ -35,12 +38,6 @@
         .header h1 {
             font-size: 28px;
             font-weight: 700;
-        }
-        
-        .header p {
-            color: #cbd5e1;
-            margin-top: 5px;
-            font-size: 14px;
         }
         
         .back-btn {
@@ -81,169 +78,40 @@
             border-bottom: 2px solid #f1f5f9;
         }
         
-        .patient-header {
-            background: linear-gradient(135deg, #1e3a8a, #1e40af);
-            color: white;
-            padding: 25px;
-            border-radius: 16px;
-            margin-bottom: 25px;
-        }
-        
-        .patient-info-grid {
+        .patient-selector {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: 1fr auto;
             gap: 20px;
-            margin-top: 15px;
+            align-items: end;
         }
         
-        .info-item {
-            background: rgba(255,255,255,0.1);
-            padding: 10px;
-            border-radius: 8px;
+        .form-group {
+            margin-bottom: 20px;
         }
         
-        .info-label {
-            font-size: 12px;
-            opacity: 0.9;
-            text-transform: uppercase;
-        }
-        
-        .info-value {
-            font-size: 18px;
+        .form-label {
+            display: block;
+            font-size: 14px;
             font-weight: 600;
-            margin-top: 5px;
+            color: #475569;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         
-        .protocol-card {
-            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
-            border-left: 4px solid #10b981;
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 15px;
+        .form-input, .form-select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 15px;
             transition: all 0.3s ease;
-            cursor: pointer;
         }
         
-        .protocol-card:hover {
-            transform: translateX(5px);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
-        
-        .protocol-card.selected {
-            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
-            border-left-color: #059669;
-        }
-        
-        .protocol-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: start;
-            margin-bottom: 15px;
-        }
-        
-        .protocol-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: #1e293b;
-        }
-        
-        .protocol-code {
-            background: #1e3a8a;
-            color: white;
-            padding: 4px 12px;
-            border-radius: 6px;
-            font-size: 14px;
-        }
-        
-        .protocol-priority {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            margin-left: 10px;
-        }
-        
-        .priority-mandatory {
-            background: #fee2e2;
-            color: #991b1b;
-        }
-        
-        .priority-primary {
-            background: #fef3c7;
-            color: #92400e;
-        }
-        
-        .priority-secondary {
-            background: #e0f2fe;
-            color: #0369a1;
-        }
-        
-        .protocol-details {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-            margin-top: 15px;
-        }
-        
-        .detail-box {
-            background: white;
-            padding: 10px;
-            border-radius: 8px;
-        }
-        
-        .detail-label {
-            font-size: 12px;
-            color: #64748b;
-            text-transform: uppercase;
-        }
-        
-        .detail-value {
-            font-size: 16px;
-            font-weight: 600;
-            color: #1e293b;
-            margin-top: 5px;
-        }
-        
-        .schedule-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 25px;
-            margin-top: 25px;
-        }
-        
-        .summary-box {
-            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
-            border: 1px solid #1e3a8a;
-            border-radius: 16px;
-            padding: 25px;
-            margin: 20px 0;
-        }
-        
-        .summary-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-        }
-        
-        .summary-item {
-            background: white;
-            padding: 15px;
-            border-radius: 8px;
-            text-align: center;
-        }
-        
-        .summary-number {
-            font-size: 32px;
-            font-weight: bold;
-            color: #1e3a8a;
-        }
-        
-        .summary-label {
-            font-size: 14px;
-            color: #64748b;
-            margin-top: 5px;
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: #1e3a8a;
+            box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
         }
         
         .btn {
@@ -275,8 +143,212 @@
             color: #475569;
         }
         
-        .btn-secondary:hover {
-            background: #e2e8f0;
+        .patient-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 20px;
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .info-item {
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+        }
+        
+        .info-label {
+            font-size: 12px;
+            color: #64748b;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+        
+        .info-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .therapy-grid {
+            display: grid;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .therapy-card {
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            border-left: 4px solid #e2e8f0;
+            padding: 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .therapy-card:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .therapy-card.recommended {
+            border-left-color: #10b981;
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+        }
+        
+        .therapy-card.selected {
+            border-left-color: #1e3a8a;
+            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+        }
+        
+        .therapy-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 10px;
+        }
+        
+        .therapy-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .therapy-code {
+            background: #1e3a8a;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+        }
+        
+        .therapy-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .detail-box {
+            background: white;
+            padding: 8px;
+            border-radius: 6px;
+        }
+        
+        .detail-label {
+            font-size: 11px;
+            color: #64748b;
+            text-transform: uppercase;
+        }
+        
+        .detail-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+        
+        .badge-recommended {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .calendar-section {
+            margin-top: 30px;
+        }
+        
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .calendar-day:hover {
+            border-color: #1e3a8a;
+            background: #f0f9ff;
+        }
+        
+        .calendar-day.selected {
+            background: linear-gradient(135deg, #dcfce7, #d1fae5);
+            border-color: #10b981;
+        }
+        
+        .calendar-day.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .day-number {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .day-label {
+            font-size: 11px;
+            color: #64748b;
+        }
+        
+        .schedule-summary {
+            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .summary-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 15px;
+        }
+        
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+        
+        .summary-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .summary-number {
+            font-size: 28px;
+            font-weight: bold;
+            color: #1e3a8a;
+        }
+        
+        .summary-label {
+            font-size: 12px;
+            color: #64748b;
+            margin-top: 5px;
         }
         
         .action-buttons {
@@ -293,12 +365,6 @@
             display: flex;
             align-items: center;
             gap: 10px;
-        }
-        
-        .alert-success {
-            background: linear-gradient(135deg, #d1fae5, #a7f3d0);
-            color: #065f46;
-            border-left: 4px solid #10b981;
         }
         
         .alert-info {
@@ -327,507 +393,486 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        
-        input[type="date"], input[type="number"], select {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
-            font-size: 15px;
-            transition: all 0.3s ease;
-        }
-        
-        input:focus, select:focus {
-            outline: none;
-            border-color: #1e3a8a;
-            box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
-        }
-        
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            color: #475569;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        .checkbox-group {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            margin-top: 10px;
-        }
-        
-        .checkbox-label {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 15px;
-            background: #f1f5f9;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .checkbox-label:hover {
-            background: #e2e8f0;
-        }
-        
-        .checkbox-label input[type="checkbox"]:checked + span {
-            color: #1e3a8a;
-            font-weight: 600;
-        }
     </style>
 </head>
 <body>
     <div class="header">
         <div class="header-container">
-            <div>
-                <h1>Treatment Planning</h1>
-                <p>Configure therapy protocols and schedule</p>
-            </div>
+            <h1>Treatment Planning</h1>
             <a href="clinic-dashboard.html" class="back-btn">← Back to Dashboard</a>
         </div>
     </div>
     
     <div class="container">
-        <!-- Patient Information -->
-        <div class="patient-header">
-            <h2 style="margin: 0;">Treatment Plan Configuration</h2>
-            <div class="patient-info-grid">
-                <div class="info-item">
-                    <div class="info-label">Patient</div>
-                    <div class="info-value" id="patientName">Loading...</div>
+        <!-- Patient Selection -->
+        <div class="card">
+            <h2>Select Patient</h2>
+            <div class="patient-selector">
+                <div class="form-group">
+                    <label class="form-label">Choose Patient</label>
+                    <select class="form-select" id="patientSelect" onchange="loadPatientData()">
+                        <option value="">Select a patient...</option>
+                    </select>
                 </div>
-                <div class="info-item">
-                    <div class="info-label">Patient ID</div>
-                    <div class="info-value" id="patientId">--</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Report Date</div>
-                    <div class="info-value" id="reportDate">--</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Status</div>
-                    <div class="info-value">Planning Treatment</div>
+                <button class="btn btn-primary" onclick="loadPatientData()">Load Patient</button>
+            </div>
+            
+            <div id="patientInfo" style="display: none;">
+                <div class="patient-info-grid">
+                    <!-- Patient info will be populated here -->
                 </div>
             </div>
         </div>
         
-        <!-- Recommended Protocols -->
-        <div class="card">
-            <h2>Recommended Treatment Protocols</h2>
+        <!-- Therapy Selection -->
+        <div class="card" id="therapyCard" style="display: none;">
+            <h2>Select Therapy Protocols</h2>
             <div class="alert alert-info">
-                These protocols have been automatically selected based on the comprehensive diagnostic report. 
-                Click on each protocol to see details and configure the treatment schedule.
+                Recommended therapies are highlighted based on the patient's assessment. You can select additional therapies as needed.
             </div>
-            <div id="protocolsList">
-                <div class="loading">
-                    <div class="spinner"></div>
-                    <p>Loading recommended protocols from database...</p>
-                </div>
+            
+            <div id="therapyList" class="therapy-grid">
+                <!-- Therapies will be populated here -->
             </div>
         </div>
         
         <!-- Schedule Configuration -->
         <div class="card" id="scheduleCard" style="display: none;">
-            <h2>Treatment Schedule Configuration</h2>
-            <div class="schedule-grid">
-                <div>
-                    <label>Treatment Start Date</label>
-                    <input type="date" id="startDate" min="">
-                </div>
-                <div>
-                    <label>Treatment Duration (Weeks)</label>
-                    <input type="number" id="durationWeeks" value="8" min="1" max="52">
-                </div>
-                <div>
-                    <label>Sessions Per Week</label>
-                    <input type="number" id="sessionsPerWeek" value="2" min="1" max="7">
-                </div>
-                <div>
-                    <label>Session Duration</label>
-                    <select id="sessionDuration">
-                        <option value="30">30 minutes</option>
-                        <option value="45" selected>45 minutes</option>
-                        <option value="60">60 minutes</option>
-                        <option value="90">90 minutes</option>
-                    </select>
-                </div>
+            <h2>Configure Treatment Schedule</h2>
+            
+            <div class="form-group">
+                <label class="form-label">Treatment Start Date</label>
+                <input type="date" class="form-input" id="startDate">
             </div>
             
-            <div style="margin-top: 25px;">
-                <label>Preferred Treatment Days</label>
-                <div class="checkbox-group">
-                    <label class="checkbox-label">
-                        <input type="checkbox" name="days" value="Monday" checked>
-                        <span>Monday</span>
-                    </label>
-                    <label class="checkbox-label">
-                        <input type="checkbox" name="days" value="Tuesday">
-                        <span>Tuesday</span>
-                    </label>
-                    <label class="checkbox-label">
-                        <input type="checkbox" name="days" value="Wednesday" checked>
-                        <span>Wednesday</span>
-                    </label>
-                    <label class="checkbox-label">
-                        <input type="checkbox" name="days" value="Thursday">
-                        <span>Thursday</span>
-                    </label>
-                    <label class="checkbox-label">
-                        <input type="checkbox" name="days" value="Friday" checked>
-                        <span>Friday</span>
-                    </label>
-                    <label class="checkbox-label">
-                        <input type="checkbox" name="days" value="Saturday">
-                        <span>Saturday</span>
-                    </label>
-                </div>
+            <div class="form-group">
+                <label class="form-label">Sessions Per Week</label>
+                <select class="form-select" id="sessionsPerWeek">
+                    <option value="1">1 session per week</option>
+                    <option value="2" selected>2 sessions per week</option>
+                    <option value="3">3 sessions per week</option>
+                </select>
             </div>
             
-            <div style="margin-top: 25px; text-align: center;">
-                <button class="btn btn-primary" onclick="calculatePlan()">
-                    Calculate Treatment Plan
-                </button>
+            <div class="form-group">
+                <label class="form-label">Preferred Time</label>
+                <select class="form-select" id="preferredTime">
+                    <option value="09:00">9:00 AM</option>
+                    <option value="10:00">10:00 AM</option>
+                    <option value="11:00">11:00 AM</option>
+                    <option value="14:00">2:00 PM</option>
+                    <option value="15:00">3:00 PM</option>
+                    <option value="16:00">4:00 PM</option>
+                </select>
             </div>
+            
+            <button class="btn btn-primary" onclick="generateSchedule()">Generate Schedule</button>
         </div>
         
-        <!-- Treatment Summary -->
-        <div class="card" id="summaryCard" style="display: none;">
-            <h2>Treatment Plan Summary</h2>
-            <div class="summary-box">
-                <h3 style="color: #1e293b; margin-bottom: 20px;">Comprehensive Treatment Program</h3>
-                <div class="summary-grid">
-                    <div class="summary-item">
-                        <div class="summary-number" id="totalSessions">0</div>
-                        <div class="summary-label">Total Sessions</div>
-                    </div>
-                    <div class="summary-item">
-                        <div class="summary-number" id="totalProtocols">0</div>
-                        <div class="summary-label">Therapy Protocols</div>
-                    </div>
-                    <div class="summary-item">
-                        <div class="summary-number" id="totalWeeks">0</div>
-                        <div class="summary-label">Weeks Duration</div>
-                    </div>
-                    <div class="summary-item">
-                        <div class="summary-number" id="estimatedHours">0</div>
-                        <div class="summary-label">Total Hours</div>
-                    </div>
+        <!-- Schedule Preview -->
+        <div class="card" id="previewCard" style="display: none;">
+            <h2>Treatment Plan Preview</h2>
+            
+            <div class="schedule-summary">
+                <h3 class="summary-title">Plan Summary</h3>
+                <div class="summary-grid" id="summaryGrid">
+                    <!-- Summary will be populated here -->
                 </div>
             </div>
             
-            <div class="alert alert-success" style="margin-top: 20px;">
-                <strong>Treatment Plan Ready!</strong> Review the details above and confirm to begin the treatment program.
+            <div class="calendar-section">
+                <h3>Scheduled Sessions</h3>
+                <div id="sessionList" style="margin-top: 20px;">
+                    <!-- Session list will be populated here -->
+                </div>
             </div>
             
             <div class="action-buttons">
-                <button class="btn btn-primary" onclick="confirmTreatmentPlan()">
-                    ✓ Confirm Treatment Plan
-                </button>
-                <button class="btn btn-secondary" onclick="adjustPlan()">
-                    Adjust Schedule
-                </button>
-                <button class="btn btn-secondary" onclick="printPlan()">
-                    Print Plan
-                </button>
+                <button class="btn btn-secondary" onclick="adjustSchedule()">Adjust Schedule</button>
+                <button class="btn btn-primary" onclick="confirmTreatmentPlan()">Confirm & Save Plan</button>
             </div>
         </div>
     </div>
 
     <script type="module">
-        import { supabase } from './supabase-config.js';
-        import { workflowManager } from './workflow-manager.js';
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
         
+        const SUPABASE_URL = 'https://defifwzgazqlrigwumqn.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlZmlmd3pnYXpxbHJpZ3d1bXFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcyNTM0MjYsImV4cCI6MjA3MjgyOTQyNn0.wcUBq6Pszjtqn5aBtuu3iXBE4BLmu8x9LtJbsMWlIiA';
+        
+        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        let currentClinicId = null;
         let selectedPatient = null;
-        let recommendedProtocols = [];
-        let selectedProtocols = [];
-        let reportData = null;
-        let treatmentPlan = {};
+        let availableTherapies = [];
+        let selectedTherapies = [];
+        let recommendedTherapies = [];
+        let scheduledSessions = [];
         
         // Initialize
-        document.addEventListener('DOMContentLoaded', async function() {
-            // Set minimum date to today
+        document.addEventListener('DOMContentLoaded', async () => {
+            const authData = localStorage.getItem('celloxen_auth');
+            if (!authData) {
+                window.location.href = 'unified-login.html';
+                return;
+            }
+            
+            const auth = JSON.parse(authData);
+            currentClinicId = auth.clinicId;
+            
+            // Set today as minimum date
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('startDate').value = today;
             document.getElementById('startDate').min = today;
             
-            // Get patient ID from URL or session
-            const urlParams = new URLSearchParams(window.location.search);
-            const patientId = urlParams.get('patientId') || sessionStorage.getItem('currentPatientId');
-            const reportId = urlParams.get('reportId') || sessionStorage.getItem('reportId');
+            await loadPatients();
+            await loadTherapyProtocols();
             
+            // Check if patient ID passed in URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const patientId = urlParams.get('patientId');
             if (patientId) {
-                await loadPatientData(patientId);
-                await loadRecommendedProtocols(patientId, reportId);
-            } else {
-                alert('No patient selected. Please start from patient selection.');
-                window.location.href = 'patient-management.html';
+                document.getElementById('patientSelect').value = patientId;
+                await loadPatientData();
             }
         });
         
-        async function loadPatientData(patientId) {
+        async function loadPatients() {
             try {
                 const { data, error } = await supabase
                     .from('patients')
                     .select('*')
-                    .eq('id', patientId)
-                    .single();
-                
+                    .eq('clinic_id', currentClinicId)
+                    .order('first_name');
+                    
                 if (error) throw error;
                 
-                selectedPatient = data;
-                document.getElementById('patientName').textContent = `${data.first_name} ${data.last_name}`;
-                document.getElementById('patientId').textContent = data.patient_id;
-                document.getElementById('reportDate').textContent = new Date().toLocaleDateString('en-GB');
+                const select = document.getElementById('patientSelect');
+                select.innerHTML = '<option value="">Select a patient...</option>';
+                data.forEach(patient => {
+                    select.innerHTML += `
+                        <option value="${patient.id}">
+                            ${patient.first_name} ${patient.last_name} (${patient.patient_id})
+                        </option>
+                    `;
+                });
+            } catch (error) {
+                console.error('Error loading patients:', error);
+            }
+        }
+        
+        async function loadTherapyProtocols() {
+            try {
+                const { data, error } = await supabase
+                    .from('therapy_protocols')
+                    .select('*')
+                    .eq('is_active', true)
+                    .order('therapy_name');
+                    
+                if (error) throw error;
+                
+                availableTherapies = data || [];
+                console.log('Loaded therapies:', availableTherapies.length);
+            } catch (error) {
+                console.error('Error loading therapy protocols:', error);
+                // Use default therapies if table doesn't exist
+                availableTherapies = [
+                    { id: 1, therapy_code: '601', therapy_name: 'Stress Relief', total_sessions: 12, session_duration_minutes: 45 },
+                    { id: 2, therapy_code: '701', therapy_name: 'Energy Boost', total_sessions: 8, session_duration_minutes: 40 }
+                ];
+            }
+        }
+        
+        window.loadPatientData = async function() {
+            const patientId = document.getElementById('patientSelect').value;
+            if (!patientId) return;
+            
+            try {
+                // Load patient data
+                const { data: patient, error } = await supabase
+                    .from('patients')
+                    .select('*')
+                    .eq('id', patientId)
+                    .single();
+                    
+                if (error) throw error;
+                
+                selectedPatient = patient;
+                
+                // Display patient info
+                document.getElementById('patientInfo').style.display = 'block';
+                document.querySelector('.patient-info-grid').innerHTML = `
+                    <div class="info-item">
+                        <div class="info-label">Name</div>
+                        <div class="info-value">${patient.first_name} ${patient.last_name}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Patient ID</div>
+                        <div class="info-value">${patient.patient_id}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Age</div>
+                        <div class="info-value">${calculateAge(patient.date_of_birth)} years</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Phone</div>
+                        <div class="info-value">${patient.phone || 'N/A'}</div>
+                    </div>
+                `;
+                
+                // Load recommendations from comprehensive report
+                await loadRecommendations(patientId);
+                
+                // Display therapies
+                displayTherapies();
+                
+                document.getElementById('therapyCard').style.display = 'block';
+                document.getElementById('scheduleCard').style.display = 'block';
                 
             } catch (error) {
                 console.error('Error loading patient:', error);
-                alert('Error loading patient data');
             }
-        }
+        };
         
-        async function loadRecommendedProtocols(patientId, reportId) {
+        async function loadRecommendations(patientId) {
             try {
-                // First, load the medical report to get recommendations
-                const { data: report, error: reportError } = await supabase
-                    .from('medical_reports')
+                // Check for existing recommendations
+                const { data, error } = await supabase
+                    .from('therapy_recommendations')
                     .select('*')
-                    .eq('patient_id', patientId)
-                    .eq('id', reportId || 0)
-                    .single();
-                
-                if (!reportError && report) {
-                    reportData = report;
-                    const therapyCodes = report.therapies_recommended || [];
+                    .eq('patient_id', patientId);
                     
-                    // Now load the full protocol details from therapy_configurations
-                    const { data: protocols, error: protocolError } = await supabase
-                        .from('therapy_configurations')
-                        .select('*')
-                        .in('therapy_code', therapyCodes)
-                        .eq('is_active', true);
-                    
-                    if (!protocolError && protocols) {
-                        recommendedProtocols = protocols;
-                        displayProtocols(protocols);
-                    } else {
-                        // Use default protocols if none found
-                        loadDefaultProtocols();
-                    }
+                if (!error && data && data.length > 0) {
+                    recommendedTherapies = data.map(r => r.therapy_code);
                 } else {
-                    // Load default protocols if no report found
-                    loadDefaultProtocols();
+                    // Default recommendations
+                    recommendedTherapies = ['601', '701'];
                 }
-                
             } catch (error) {
-                console.error('Error loading protocols:', error);
-                loadDefaultProtocols();
+                console.error('Error loading recommendations:', error);
+                recommendedTherapies = ['601', '701'];
             }
         }
         
-        function loadDefaultProtocols() {
-            // Default protocols based on common recommendations
-            recommendedProtocols = [
-                {
-                    therapy_name: 'Stress Relief Therapy',
-                    therapy_code: '602',
-                    category: 'Stress, Anxiety & Sleep',
-                    duration: 40,
-                    conditions_treated: 'Anxiety, tension, stress',
-                    notes: 'Calming protocol for stress relief',
-                    priority: 'PRIMARY'
-                },
-                {
-                    therapy_name: 'Energy Boost Therapy',
-                    therapy_code: '701',
-                    category: 'Digestive & Energy Wellness',
-                    duration: 40,
-                    conditions_treated: 'Vitality-enhancing',
-                    notes: 'Boosts energy levels and vitality',
-                    priority: 'SECONDARY'
-                }
-            ];
-            displayProtocols(recommendedProtocols);
-        }
-        
-        function displayProtocols(protocols) {
-            const container = document.getElementById('protocolsList');
+        function displayTherapies() {
+            const container = document.getElementById('therapyList');
             
-            if (protocols.length === 0) {
-                container.innerHTML = '<p>No protocols found. Please check the therapy database.</p>';
-                return;
-            }
-            
-            container.innerHTML = protocols.map((protocol, index) => {
-                const priority = determinePriority(protocol, index);
-                const priorityClass = getPriorityClass(priority);
+            container.innerHTML = availableTherapies.map(therapy => {
+                const isRecommended = recommendedTherapies.includes(therapy.therapy_code);
                 
                 return `
-                    <div class="protocol-card" onclick="selectProtocol('${protocol.therapy_code}')" data-code="${protocol.therapy_code}">
-                        <div class="protocol-header">
+                    <div class="therapy-card ${isRecommended ? 'recommended' : ''}" 
+                         onclick="toggleTherapy('${therapy.therapy_code}')"
+                         data-code="${therapy.therapy_code}">
+                        <div class="therapy-header">
                             <div>
-                                <div class="protocol-title">${protocol.therapy_name}</div>
-                                <span class="protocol-priority ${priorityClass}">${priority}</span>
+                                <div class="therapy-name">${therapy.therapy_name}</div>
+                                ${isRecommended ? '<span class="badge badge-recommended">Recommended</span>' : ''}
                             </div>
-                            <div class="protocol-code">Code ${protocol.therapy_code}</div>
+                            <div class="therapy-code">Code ${therapy.therapy_code}</div>
                         </div>
-                        <div class="protocol-details">
+                        <div class="therapy-details">
                             <div class="detail-box">
-                                <div class="detail-label">Category</div>
-                                <div class="detail-value">${protocol.category}</div>
+                                <div class="detail-label">Sessions</div>
+                                <div class="detail-value">${therapy.total_sessions || 6}</div>
                             </div>
                             <div class="detail-box">
                                 <div class="detail-label">Duration</div>
-                                <div class="detail-value">${protocol.duration || 45} min</div>
+                                <div class="detail-value">${therapy.session_duration_minutes || 45} min</div>
                             </div>
                             <div class="detail-box">
-                                <div class="detail-label">Conditions</div>
-                                <div class="detail-value">${protocol.conditions_treated || 'General wellness'}</div>
+                                <div class="detail-label">Category</div>
+                                <div class="detail-value">${therapy.category || 'Wellness'}</div>
                             </div>
                         </div>
-                        ${protocol.notes ? `
-                            <div style="margin-top: 15px; padding: 10px; background: white; border-radius: 8px;">
-                                <strong>Clinical Notes:</strong> ${protocol.notes}
-                            </div>
-                        ` : ''}
                     </div>
                 `;
             }).join('');
             
-            // Show schedule configuration
-            document.getElementById('scheduleCard').style.display = 'block';
-            
-            // Auto-select all protocols initially
-            protocols.forEach(p => {
-                selectedProtocols.push(p.therapy_code);
-            });
-            document.querySelectorAll('.protocol-card').forEach(card => {
-                card.classList.add('selected');
+            // Auto-select recommended therapies
+            recommendedTherapies.forEach(code => {
+                selectedTherapies.push(code);
+                const card = document.querySelector(`[data-code="${code}"]`);
+                if (card) card.classList.add('selected');
             });
         }
         
-        function determinePriority(protocol, index) {
-            if (protocol.priority) return protocol.priority;
-            if (index === 0) return 'MANDATORY';
-            if (index === 1) return 'PRIMARY';
-            return 'SECONDARY';
-        }
-        
-        function getPriorityClass(priority) {
-            if (priority === 'MANDATORY') return 'priority-mandatory';
-            if (priority === 'PRIMARY') return 'priority-primary';
-            return 'priority-secondary';
-        }
-        
-        window.selectProtocol = function(code) {
+        window.toggleTherapy = function(code) {
             const card = document.querySelector(`[data-code="${code}"]`);
-            card.classList.toggle('selected');
             
-            if (selectedProtocols.includes(code)) {
-                selectedProtocols = selectedProtocols.filter(c => c !== code);
+            if (selectedTherapies.includes(code)) {
+                selectedTherapies = selectedTherapies.filter(c => c !== code);
+                card.classList.remove('selected');
             } else {
-                selectedProtocols.push(code);
+                selectedTherapies.push(code);
+                card.classList.add('selected');
             }
         };
         
-        window.calculatePlan = function() {
-            if (selectedProtocols.length === 0) {
-                alert('Please select at least one treatment protocol');
+        window.generateSchedule = function() {
+            if (selectedTherapies.length === 0) {
+                alert('Please select at least one therapy protocol');
                 return;
             }
             
-            const startDate = document.getElementById('startDate').value;
-            const durationWeeks = parseInt(document.getElementById('durationWeeks').value);
+            const startDate = new Date(document.getElementById('startDate').value);
             const sessionsPerWeek = parseInt(document.getElementById('sessionsPerWeek').value);
-            const sessionDuration = parseInt(document.getElementById('sessionDuration').value);
+            const preferredTime = document.getElementById('preferredTime').value;
             
-            // Get selected days
-            const selectedDays = [];
-            document.querySelectorAll('input[name="days"]:checked').forEach(cb => {
-                selectedDays.push(cb.value);
+            scheduledSessions = [];
+            
+            // Generate sessions for each selected therapy
+            selectedTherapies.forEach(therapyCode => {
+                const therapy = availableTherapies.find(t => t.therapy_code === therapyCode);
+                if (!therapy) return;
+                
+                const totalSessions = therapy.total_sessions || 6;
+                let currentDate = new Date(startDate);
+                let sessionCount = 0;
+                
+                while (sessionCount < totalSessions) {
+                    // Skip weekends
+                    if (currentDate.getDay() !== 0 && currentDate.getDay() !== 6) {
+                        scheduledSessions.push({
+                            therapy_code: therapyCode,
+                            therapy_name: therapy.therapy_name,
+                            session_number: sessionCount + 1,
+                            scheduled_date: new Date(currentDate).toISOString().split('T')[0],
+                            scheduled_time: preferredTime,
+                            total_sessions: totalSessions
+                        });
+                        sessionCount++;
+                    }
+                    
+                    // Move to next available day based on frequency
+                    currentDate.setDate(currentDate.getDate() + Math.floor(7 / sessionsPerWeek));
+                }
             });
             
-            if (selectedDays.length === 0) {
-                alert('Please select at least one treatment day');
-                return;
-            }
+            // Sort sessions by date
+            scheduledSessions.sort((a, b) => new Date(a.scheduled_date) - new Date(b.scheduled_date));
             
-            // Calculate totals
-            const totalSessions = durationWeeks * sessionsPerWeek;
-            const totalHours = Math.round((totalSessions * sessionDuration) / 60);
+            displaySchedulePreview();
+        };
+        
+        function displaySchedulePreview() {
+            document.getElementById('previewCard').style.display = 'block';
             
-            // Update summary
-            document.getElementById('totalSessions').textContent = totalSessions;
-            document.getElementById('totalProtocols').textContent = selectedProtocols.length;
-            document.getElementById('totalWeeks').textContent = durationWeeks;
-            document.getElementById('estimatedHours').textContent = totalHours;
+            // Display summary
+            const totalSessions = scheduledSessions.length;
+            const therapyCount = selectedTherapies.length;
+            const endDate = scheduledSessions[scheduledSessions.length - 1].scheduled_date;
+            const duration = Math.ceil((new Date(endDate) - new Date(document.getElementById('startDate').value)) / (1000 * 60 * 60 * 24 * 7));
             
-            // Store plan details
-            treatmentPlan = {
-                patient_id: selectedPatient.id,
-                clinic_id: selectedPatient.clinic_id,
-                start_date: startDate,
-                duration_weeks: durationWeeks,
-                sessions_per_week: sessionsPerWeek,
-                session_duration: sessionDuration,
-                total_sessions: totalSessions,
-                selected_days: selectedDays,
-                protocols: selectedProtocols,
-                protocol_details: recommendedProtocols.filter(p => 
-                    selectedProtocols.includes(p.therapy_code)
-                )
-            };
+            document.getElementById('summaryGrid').innerHTML = `
+                <div class="summary-item">
+                    <div class="summary-number">${totalSessions}</div>
+                    <div class="summary-label">Total Sessions</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-number">${therapyCount}</div>
+                    <div class="summary-label">Therapies</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-number">${duration}</div>
+                    <div class="summary-label">Weeks</div>
+                </div>
+            `;
             
-            // Show summary
-            document.getElementById('summaryCard').style.display = 'block';
-            document.getElementById('summaryCard').scrollIntoView({ behavior: 'smooth' });
+            // Display session list
+            const sessionList = document.getElementById('sessionList');
+            sessionList.innerHTML = `
+                <div style="max-height: 400px; overflow-y: auto;">
+                    ${scheduledSessions.map(session => `
+                        <div style="padding: 10px; margin-bottom: 10px; background: white; border-radius: 8px; border-left: 4px solid #1e3a8a;">
+                            <div style="display: flex; justify-content: space-between;">
+                                <div>
+                                    <strong>${session.therapy_name}</strong> - Session ${session.session_number}/${session.total_sessions}
+                                </div>
+                                <div style="color: #64748b;">
+                                    ${new Date(session.scheduled_date).toLocaleDateString('en-GB')} at ${session.scheduled_time}
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            
+            document.getElementById('previewCard').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        window.adjustSchedule = function() {
+            document.getElementById('previewCard').style.display = 'none';
+            document.getElementById('scheduleCard').scrollIntoView({ behavior: 'smooth' });
         };
         
         window.confirmTreatmentPlan = async function() {
             try {
-                // Save treatment plan to database
-                const { data, error } = await supabase
-                    .from('treatment_plans')
-                    .insert([{
-                        ...treatmentPlan,
-                        status: 'active',
-                        created_at: new Date().toISOString(),
-                        completed_sessions: 0
-                    }])
-                    .select()
-                    .single();
+                // Create treatment plans for each selected therapy
+                for (const therapyCode of selectedTherapies) {
+                    const therapy = availableTherapies.find(t => t.therapy_code === therapyCode);
+                    if (!therapy) continue;
+                    
+                    // Create treatment plan
+                    const { data: plan, error: planError } = await supabase
+                        .from('treatment_plans')
+                        .insert({
+                            patient_id: selectedPatient.id,
+                            clinic_id: currentClinicId,
+                            therapy_protocol_id: therapy.id,
+                            therapy_name: therapy.therapy_name,
+                            therapy_code: therapy.therapy_code,
+                            total_sessions: therapy.total_sessions || 6,
+                            completed_sessions: 0,
+                            start_date: document.getElementById('startDate').value,
+                            status: 'active',
+                            created_by: currentClinicId
+                        })
+                        .select()
+                        .single();
+                        
+                    if (planError) throw planError;
+                    
+                    // Create individual sessions
+                    const therapySessions = scheduledSessions
+                        .filter(s => s.therapy_code === therapyCode)
+                        .map(session => ({
+                            treatment_plan_id: plan.id,
+                            patient_id: selectedPatient.id,
+                            clinic_id: currentClinicId,
+                            session_number: session.session_number,
+                            scheduled_date: session.scheduled_date,
+                            scheduled_time: session.scheduled_time,
+                            status: 'scheduled'
+                        }));
+                    
+                    const { error: sessionsError } = await supabase
+                        .from('treatment_sessions')
+                        .insert(therapySessions);
+                        
+                    if (sessionsError) throw sessionsError;
+                }
                 
-                if (error) throw error;
-                
-                // Update workflow status
-                await workflowManager.updateStage(selectedPatient.id, 'treatment_planning');
-                
-                // Store plan ID for next steps
-                sessionStorage.setItem('treatmentPlanId', data.id);
-                
-                alert('Treatment plan confirmed successfully!');
-                
-                // Redirect to treatment schedule view
-                window.location.href = `treatment-schedule.html?planId=${data.id}`;
+                alert('Treatment plan created successfully!');
+                window.location.href = 'treatment-delivery.html';
                 
             } catch (error) {
-                console.error('Error saving treatment plan:', error);
-                alert('Error saving treatment plan. Please try again.');
+                console.error('Error creating treatment plan:', error);
+                alert('Error creating treatment plan. Please try again.');
             }
         };
         
-        window.adjustPlan = function() {
-            document.getElementById('summaryCard').style.display = 'none';
-            document.getElementById('scheduleCard').scrollIntoView({ behavior: 'smooth' });
-        };
-        
-        window.printPlan = function() {
-            window.print();
-        };
+        function calculateAge(dateOfBirth) {
+            if (!dateOfBirth) return 'Unknown';
+            const birthDate = new Date(dateOfBirth);
+            const today = new Date();
+            let age = today.getFullYear() - birthDate.getFullYear();
+            const monthDiff = today.getMonth() - birthDate.getMonth();
+            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                age--;
+            }
+            return age;
+        }
     </script>
 </body>
 </html>
