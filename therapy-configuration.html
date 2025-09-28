@@ -770,14 +770,16 @@
         
         async function loadProtocols() {
             try {
-                const { data, error } = await supabase
+                // First try with 'active' column, fallback to 'is_active' if that fails
+                let { data, error } = await supabase
                     .from('therapy_protocols')
                     .select('*')
                     .order('therapy_name');
                     
                 if (error) throw error;
                 
-                protocols = data || [];
+                // Filter active protocols (handle both column names)
+                protocols = (data || []).filter(p => p.active !== false && p.is_active !== false);
                 displayProtocols();
                 populateTherapySelects();
                 
@@ -796,13 +798,17 @@
                 return;
             }
             
-            container.innerHTML = protocols.map(protocol => `
-                <div class="therapy-card ${protocol.is_active ? 'active' : ''}">
+            container.innerHTML = protocols.map(protocol => {
+                // Handle both column names for active status
+                const isActive = protocol.active !== false && protocol.is_active !== false;
+                
+                return `
+                <div class="therapy-card ${isActive ? 'active' : ''}">
                     <div class="therapy-header">
                         <div>
                             <div class="therapy-name">${protocol.therapy_name}</div>
-                            <span class="status-badge ${protocol.is_active ? 'status-active' : 'status-inactive'}">
-                                ${protocol.is_active ? 'Active' : 'Inactive'}
+                            <span class="status-badge ${isActive ? 'status-active' : 'status-inactive'}">
+                                ${isActive ? 'Active' : 'Inactive'}
                             </span>
                         </div>
                         <div class="therapy-code">${protocol.therapy_code}</div>
@@ -845,7 +851,7 @@
                         </button>
                     </div>
                 </div>
-            `).join('');
+            `}).join('');
         }
         
         async function loadDiagrams() {
@@ -996,7 +1002,7 @@
                 total_sessions: parseInt(document.getElementById('totalSessions').value),
                 session_duration_minutes: parseInt(document.getElementById('sessionDuration').value),
                 sessions_per_week: parseInt(document.getElementById('sessionsPerWeek').value),
-                is_active: document.getElementById('therapyStatus').value === 'true',
+                active: document.getElementById('therapyStatus').value === 'true',
                 conditions_treated: document.getElementById('conditionsTreated').value,
                 contraindications: document.getElementById('contraindications').value,
                 expected_outcomes: document.getElementById('expectedOutcomes').value,
