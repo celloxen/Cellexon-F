@@ -104,7 +104,7 @@
         }
         
         .btn-primary {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            background: linear-gradient(135deg, #10b981, #059669);
             color: white;
             box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
         }
@@ -767,7 +767,7 @@
                     .from('probe_diagrams')
                     .select('*')
                     .eq('therapy_code', therapyCode)
-                    .eq('is_active', true)
+                    .eq('active', true)  // Fixed: changed from 'is_active' to 'active'
                     .order('display_order')
                     .limit(1);
                     
