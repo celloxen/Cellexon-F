@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Appointments - Celloxen Health Platform</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
     <style>
         * {
             margin: 0;
@@ -567,13 +570,6 @@
                     </div>
                     
                     <div class="form-group">
-                        <label>Practitioner *</label>
-                        <select id="practitionerId" required>
-                            <option value="">Select Practitioner</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
                         <label>Duration (minutes)</label>
                         <select id="duration">
                             <option value="30">30 minutes</option>
@@ -598,29 +594,33 @@
         </div>
     </div>
 
-    <!-- Include auth guard if available -->
-    <script src="auth-guard.js"></script>
-    
-    <!-- Include Supabase config -->
     <script type="module">
-        import { supabase } from './supabase-config.js';
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
         
-        // Make supabase available globally for this page
-        window.supabase = supabase;
+        const SUPABASE_URL = 'https://defifwzgazqlrigwumqn.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlZmlmd3pnYXpxbHJpZ3d1bXFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcyNTM0MjYsImV4cCI6MjA3MjgyOTQyNn0.wcUBq6Pszjtqn5aBtuu3iXBE4BLmu8x9LtJbsMWlIiA';
         
-        let clinicId = 1; // Default clinic ID
-        let allAppointments = []; // Store all appointments for filtering
+        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        let clinicId = null;
+        let allAppointments = [];
         let currentDate = new Date();
         let currentMonth = currentDate.getMonth();
         let currentYear = currentDate.getFullYear();
         
         // Initialize
         document.addEventListener('DOMContentLoaded', async function() {
-            // Get clinic ID from session if available
+            // Get clinic ID from session
             const authData = localStorage.getItem('celloxen_auth');
             if (authData) {
                 const auth = JSON.parse(authData);
-                clinicId = auth.clinicId || 1;
+                clinicId = auth.clinicId || sessionStorage.getItem('currentClinicId');
+            }
+            
+            if (!clinicId) {
+                alert('No clinic ID found. Please login again.');
+                window.location.href = 'unified-login.html';
+                return;
             }
             
             // Set minimum date to today
@@ -629,7 +629,6 @@
             // Load initial data
             await Promise.all([
                 loadPatients(),
-                loadPractitioners(),
                 loadTherapies(),
                 loadAppointments()
             ]);
@@ -649,7 +648,6 @@
             if (event && event.target) {
                 event.target.classList.add('active');
             } else {
-                // Find the right tab button when called programmatically
                 document.querySelectorAll('.tab').forEach(tab => {
                     if (tab.textContent.toLowerCase().includes(tabName.toLowerCase()) ||
                         (tabName === 'new' && tab.textContent.includes('New')) ||
@@ -672,7 +670,7 @@
             try {
                 const { data, error } = await supabase
                     .from('patients')
-                    .select('patient_id, first_name, last_name')
+                    .select('id, patient_id, first_name, last_name')
                     .eq('clinic_id', clinicId)
                     .order('first_name');
                 
@@ -684,7 +682,7 @@
                 if (data && data.length > 0) {
                     data.forEach(patient => {
                         const option = document.createElement('option');
-                        option.value = patient.patient_id;
+                        option.value = patient.id;
                         option.textContent = `${patient.first_name} ${patient.last_name} (${patient.patient_id})`;
                         select.appendChild(option);
                     });
@@ -694,41 +692,13 @@
             }
         };
         
-        // Load practitioners
-        window.loadPractitioners = async function() {
-            try {
-                const { data, error } = await supabase
-                    .from('practitioners')
-                    .select('id, name, specialization')
-                    .eq('clinic_id', clinicId)
-                    .eq('is_active', true)
-                    .order('name');
-                
-                if (error) throw error;
-                
-                const select = document.getElementById('practitionerId');
-                select.innerHTML = '<option value="">Select Practitioner</option>';
-                
-                if (data && data.length > 0) {
-                    data.forEach(practitioner => {
-                        const option = document.createElement('option');
-                        option.value = practitioner.id;
-                        option.textContent = `${practitioner.name}${practitioner.specialization ? ' - ' + practitioner.specialization : ''}`;
-                        select.appendChild(option);
-                    });
-                }
-            } catch (error) {
-                console.error('Error loading practitioners:', error);
-            }
-        };
-        
         // Load therapies
         window.loadTherapies = async function() {
             try {
                 const { data, error } = await supabase
-                    .from('therapy_configurations')
+                    .from('therapy_protocols')
                     .select('therapy_code, therapy_name')
-                    .eq('is_active', true)
+                    .eq('active', true)
                     .order('therapy_code');
                 
                 if (error) throw error;
@@ -762,50 +732,47 @@
         // Load appointments
         window.loadAppointments = async function() {
             try {
-                // First try the view
-                let { data, error } = await supabase
-                    .from('appointment_details')
-                    .select('*')
+                // Check if appointments table exists
+                const { data: tableCheck, error: tableError } = await supabase
+                    .from('appointments')
+                    .select('id')
+                    .limit(1);
+                
+                if (tableError && tableError.code === '42P01') {
+                    // Table doesn't exist
+                    document.getElementById('appointmentsList').innerHTML = 
+                        '<p style="color: #ef4444;">Appointments table not configured. Please set up the database.</p>';
+                    return;
+                }
+                
+                // Load appointments with patient info
+                const { data, error } = await supabase
+                    .from('appointments')
+                    .select(`
+                        *,
+                        patients!inner(first_name, last_name)
+                    `)
+                    .eq('clinic_id', clinicId)
                     .order('appointment_date', { ascending: true })
                     .order('appointment_time', { ascending: true });
                 
-                // If view doesn't work, try direct query
-                if (error || !data) {
-                    const result = await supabase
-                        .from('appointments')
-                        .select(`
-                            *,
-                            patients!inner(first_name, last_name),
-                            practitioners(name),
-                            therapy_configurations(therapy_name)
-                        `)
-                        .eq('clinic_id', clinicId)
-                        .order('appointment_date', { ascending: true });
-                    
-                    if (result.data) {
-                        // Transform the data
-                        data = result.data.map(apt => ({
-                            id: apt.id,
-                            appointment_date: apt.appointment_date,
-                            appointment_time: apt.appointment_time,
-                            appointment_type: apt.appointment_type,
-                            status: apt.status,
-                            notes: apt.notes,
-                            patient_name: apt.patients ? `${apt.patients.first_name} ${apt.patients.last_name}` : 'Unknown',
-                            patient_id: apt.patient_id,
-                            practitioner_name: apt.practitioners?.name || 'TBD',
-                            therapy_name: apt.therapy_configurations?.therapy_name || null
-                        }));
-                    }
-                }
+                if (error) throw error;
                 
-                allAppointments = data || [];
+                // Transform data
+                allAppointments = (data || []).map(apt => ({
+                    id: apt.id,
+                    appointment_date: apt.appointment_date,
+                    appointment_time: apt.appointment_time,
+                    appointment_type: apt.appointment_type,
+                    status: apt.status || 'scheduled',
+                    notes: apt.notes,
+                    patient_name: apt.patients ? `${apt.patients.first_name} ${apt.patients.last_name}` : 'Unknown',
+                    patient_id: apt.patient_id,
+                    therapy_code: apt.therapy_code
+                }));
+                
                 displayAppointments(allAppointments);
-                
-                // Update calendar if it exists
-                if (document.getElementById('calendarGrid')) {
-                    renderCalendar();
-                }
+                renderCalendar();
                 
             } catch (error) {
                 console.error('Error loading appointments:', error);
@@ -826,14 +793,12 @@
             container.innerHTML = appointments.map(apt => `
                 <div class="appointment-card">
                     <div class="appointment-info">
-                        <h3>${apt.patient_name || 'Unknown Patient'}</h3>
+                        <h3>${apt.patient_name}</h3>
                         <div class="appointment-details">
-                            <span>ID: ${apt.patient_id}</span>
                             <span>Date: ${formatDate(apt.appointment_date)}</span>
-                            <span>Time: ${apt.appointment_time.substring(0, 5)}</span>
+                            <span>Time: ${apt.appointment_time ? apt.appointment_time.substring(0, 5) : 'No time'}</span>
                             <span>Type: ${apt.appointment_type}</span>
-                            ${apt.therapy_name ? `<span>Therapy: ${apt.therapy_name}</span>` : ''}
-                            <span>Doctor: ${apt.practitioner_name}</span>
+                            ${apt.therapy_code ? `<span>Therapy: ${apt.therapy_code}</span>` : ''}
                             <span class="status-badge status-${apt.status}">${apt.status}</span>
                         </div>
                         ${apt.notes ? `<div style="margin-top: 5px; font-size: 12px; color: #6b7280;">Notes: ${apt.notes}</div>` : ''}
@@ -862,7 +827,7 @@
             if (searchFilter) {
                 filtered = filtered.filter(apt => 
                     (apt.patient_name && apt.patient_name.toLowerCase().includes(searchFilter)) ||
-                    (apt.patient_id && apt.patient_id.toLowerCase().includes(searchFilter))
+                    (apt.patient_id && apt.patient_id.toString().includes(searchFilter))
                 );
             }
             
@@ -876,7 +841,6 @@
             const appointmentData = {
                 clinic_id: clinicId,
                 patient_id: document.getElementById('patientId').value,
-                practitioner_id: parseInt(document.getElementById('practitionerId').value),
                 appointment_date: document.getElementById('appointmentDate').value,
                 appointment_time: document.getElementById('appointmentTime').value,
                 appointment_type: document.getElementById('appointmentType').value,
@@ -896,8 +860,6 @@
                 showMessage('Appointment scheduled successfully!', 'success');
                 clearForm();
                 await loadAppointments();
-                
-                // Switch to calendar view
                 switchTab('calendar');
                 
             } catch (error) {
@@ -917,10 +879,7 @@
             try {
                 const { error } = await supabase
                     .from('appointments')
-                    .update({ 
-                        status: newStatus,
-                        updated_at: new Date().toISOString()
-                    })
+                    .update({ status: newStatus })
                     .eq('id', id);
                 
                 if (error) throw error;
@@ -969,11 +928,9 @@
             const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
                 'July', 'August', 'September', 'October', 'November', 'December'];
             
-            // Update month display
             document.getElementById('currentMonth').textContent = 
                 `${monthNames[currentMonth]} ${currentYear}`;
             
-            // Clear calendar
             const calendarGrid = document.getElementById('calendarGrid');
             calendarGrid.innerHTML = '';
             
@@ -1009,8 +966,8 @@
             }
             
             // Add next month's leading days
-            const totalCells = calendarGrid.children.length - 7; // Subtract header row
-            const remainingCells = 35 - totalCells; // 5 weeks * 7 days
+            const totalCells = calendarGrid.children.length - 7;
+            const remainingCells = 35 - totalCells;
             for (let day = 1; day <= remainingCells; day++) {
                 const dayDiv = createDayElement(day, currentMonth + 1, currentYear, true);
                 calendarGrid.appendChild(dayDiv);
@@ -1025,7 +982,6 @@
                 dayDiv.classList.add('other-month');
             }
             
-            // Check if today
             const today = new Date();
             if (day === today.getDate() && 
                 month === today.getMonth() && 
@@ -1033,7 +989,6 @@
                 dayDiv.classList.add('today');
             }
             
-            // Add day number
             const dayNumber = document.createElement('div');
             dayNumber.className = 'calendar-day-number';
             dayNumber.textContent = day;
@@ -1050,12 +1005,11 @@
                 const aptDiv = document.createElement('div');
                 aptDiv.className = `calendar-appointment ${apt.appointment_type}`;
                 const patientName = apt.patient_name ? apt.patient_name.split(' ')[0] : 'Patient';
-                aptDiv.textContent = `${apt.appointment_time.substring(0, 5)} ${patientName}`;
+                aptDiv.textContent = `${apt.appointment_time ? apt.appointment_time.substring(0, 5) : ''} ${patientName}`;
                 aptDiv.onclick = () => showAppointmentDetails(apt);
                 dayDiv.appendChild(aptDiv);
             });
             
-            // If more than 3, show count
             if (dayAppointments.length > 3) {
                 const moreDiv = document.createElement('div');
                 moreDiv.className = 'more-appointments';
@@ -1102,9 +1056,8 @@
             alert(`Appointment Details:
 Patient: ${appointment.patient_name || 'Unknown'}
 Date: ${formatDate(appointment.appointment_date)}
-Time: ${appointment.appointment_time.substring(0, 5)}
+Time: ${appointment.appointment_time ? appointment.appointment_time.substring(0, 5) : 'No time'}
 Type: ${appointment.appointment_type}
-Practitioner: ${appointment.practitioner_name}
 Status: ${appointment.status}
 ${appointment.notes ? 'Notes: ' + appointment.notes : ''}`);
         };
