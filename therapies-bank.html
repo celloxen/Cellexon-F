@@ -3,815 +3,498 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Therapy Protocols Database - Celloxen Platform</title>
+    <title>Therapies Bank - Celloxen Platform</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
     <style>
-        body { 
-            font-family: 'Segoe UI', sans-serif; 
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            margin: 0; 
-            color: #1f2937; 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
             min-height: 100vh;
         }
         
-        .header { 
-            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
-            color: white; 
-            padding: 20px; 
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15); 
-        }
-        
-        .header-container { 
-            max-width: 1600px; 
-            margin: 0 auto; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-        }
-        
-        .logo { 
-            font-size: 24px; 
-            font-weight: bold; 
-        }
-        
-        .container { 
-            max-width: 1600px; 
-            margin: 30px auto; 
-            padding: 0 20px; 
-        }
-        
-        .main-grid { 
-            display: grid; 
-            grid-template-columns: 350px 1fr; 
-            gap: 25px; 
-        }
-        
-        .card { 
-            background: white; 
-            border-radius: 12px; 
-            padding: 25px; 
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08); 
-        }
-        
-        .list-card { 
-            max-height: 80vh; 
-            overflow-y: auto; 
-        }
-        
-        .list-header { 
-            font-size: 18px; 
-            font-weight: 600; 
-            color: #1e293b; 
-            margin-bottom: 15px; 
-            padding-bottom: 10px; 
-            border-bottom: 2px solid #e2e8f0;
-        }
-        
-        .therapy-item { 
-            padding: 12px; 
-            border-radius: 8px; 
-            margin-bottom: 8px; 
-            cursor: pointer; 
-            transition: all 0.2s; 
-            border: 1px solid #e5e7eb; 
-        }
-        
-        .therapy-item:hover { 
-            background: #f0f9ff; 
-            border-color: #3b82f6; 
-        }
-        
-        .therapy-item.active { 
-            background: #dbeafe; 
-            border-color: #3b82f6; 
-            font-weight: 600; 
-        }
-        
-        .form-title { 
-            font-size: 24px; 
-            font-weight: 600; 
-            color: #1e293b; 
-            margin-bottom: 25px; 
-        }
-        
-        .form-section { 
-            margin-bottom: 20px; 
-        }
-        
-        .section-title { 
-            font-size: 16px; 
-            font-weight: 600; 
-            color: #475569; 
-            margin-bottom: 15px; 
-            padding-bottom: 5px; 
-            border-bottom: 1px solid #e2e8f0;
-        }
-        
-        .form-grid { 
-            display: grid; 
-            grid-template-columns: 1fr 1fr; 
-            gap: 20px; 
-        }
-        
-        .form-group { 
-            margin-bottom: 15px; 
-        }
-        
-        .form-label { 
-            display: block; 
-            margin-bottom: 8px; 
-            font-weight: 500; 
-            color: #334155; 
-            font-size: 14px; 
-        }
-        
-        .form-input, .form-select, .form-textarea { 
-            width: 100%; 
-            padding: 10px 14px; 
-            border: 2px solid #e2e8f0; 
-            border-radius: 8px; 
-            transition: all 0.3s; 
-            box-sizing: border-box; 
-        }
-        
-        .form-input:focus, .form-select:focus, .form-textarea:focus { 
-            outline: none; 
-            border-color: #3b82f6; 
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); 
-        }
-        
-        .form-textarea { 
-            resize: vertical; 
-            min-height: 100px; 
-        }
-        
-        .btn-group { 
-            display: flex; 
-            gap: 10px; 
-            margin-top: 25px; 
-            border-top: 2px solid #e2e8f0; 
-            padding-top: 20px; 
-        }
-        
-        .btn { 
-            padding: 10px 24px; 
-            border: none; 
-            border-radius: 8px; 
-            font-size: 14px; 
-            font-weight: 600; 
-            cursor: pointer; 
-            transition: all 0.3s; 
-        }
-        
-        .btn-primary { background: #3b82f6; color: white; }
-        .btn-success { background: #16a34a; color: white; }
-        .btn-danger { background: #dc2626; color: white; }
-        .btn-secondary { background: #64748b; color: white; }
-        .btn-warning { background: #f59e0b; color: white; }
-        
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        }
-        
-        .loading { 
-            text-align: center; 
-            padding: 40px; 
-            color: #64748b; 
-        }
-        
-        .alert { 
-            padding: 12px 16px; 
-            border-radius: 8px; 
-            margin-bottom: 20px; 
-            font-size: 14px; 
-        }
-        
-        .alert-success { 
-            background: #dcfce7; 
-            color: #166534; 
-        }
-        
-        .alert-error { 
-            background: #fee2e2; 
-            color: #991b1b; 
-        }
-        
-        .alert-info {
-            background: #dbeafe;
-            color: #1e3a8a;
-        }
-        
-        .back-link { 
-            display: inline-block; 
-            margin-bottom: 20px; 
-            color: #3b82f6; 
-            text-decoration: none; 
-            font-weight: 600;
-        }
-        
-        .back-btn {
-            background: rgba(255,255,255,0.2);
-            border: 1px solid rgba(255,255,255,0.3);
+        .header {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
             color: white;
-            padding: 8px 20px;
-            border-radius: 6px;
+            padding: 20px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        
+        .search-bar {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 12px 20px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: #10b981;
+        }
+        
+        .filter-tabs {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-tab {
+            padding: 8px 16px;
+            border: 1px solid #e5e7eb;
+            background: white;
+            border-radius: 20px;
             cursor: pointer;
-            text-decoration: none;
-            transition: all 0.3s ease;
+            transition: all 0.3s;
         }
         
-        .back-btn:hover {
-            background: rgba(255,255,255,0.3);
+        .filter-tab:hover {
+            border-color: #10b981;
+            background: #f0fdf4;
         }
         
-        .search-box {
-            width: 100%;
-            padding: 10px;
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
+        .filter-tab.active {
+            background: #10b981;
+            color: white;
+            border-color: #10b981;
+        }
+        
+        .therapies-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+        }
+        
+        .therapy-card {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            transition: all 0.3s;
+        }
+        
+        .therapy-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+        }
+        
+        .therapy-header {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            padding: 20px;
+        }
+        
+        .therapy-code {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .therapy-name {
+            font-size: 18px;
+            opacity: 0.95;
+        }
+        
+        .therapy-body {
+            padding: 20px;
+        }
+        
+        .therapy-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
             margin-bottom: 15px;
         }
         
-        .category-filter {
-            width: 100%;
-            padding: 8px;
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
-            margin-bottom: 15px;
-        }
-        
-        .probe-item {
+        .info-box {
             background: #f8fafc;
             padding: 10px;
-            border-radius: 6px;
-            margin-bottom: 10px;
-            border-left: 3px solid #3b82f6;
+            border-radius: 8px;
         }
         
-        .spinner {
-            border: 3px solid #f3f4f6;
-            border-top: 3px solid #1e3a8a;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 20px auto;
+        .info-label {
+            font-size: 11px;
+            color: #64748b;
+            text-transform: uppercase;
+            margin-bottom: 3px;
         }
         
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .info-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .therapy-description {
+            color: #64748b;
+            line-height: 1.6;
+            margin-bottom: 15px;
+            min-height: 60px;
+        }
+        
+        .category-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        
+        .category-mental {
+            background: #e0e7ff;
+            color: #3730a3;
+        }
+        
+        .category-vitality {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .category-sleep {
+            background: #ddd6fe;
+            color: #5b21b6;
+        }
+        
+        .category-digestive {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .category-immune {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .category-pain {
+            background: #fce7f3;
+            color: #9f1239;
+        }
+        
+        .category-detox {
+            background: #ccfbf1;
+            color: #134e4a;
+        }
+        
+        .category-heart {
+            background: #fecaca;
+            color: #7f1d1d;
+        }
+        
+        .therapy-actions {
+            display: flex;
+            gap: 10px;
+            padding-top: 15px;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: #10b981;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #059669;
+        }
+        
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+        }
+        
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+        
+        .stats-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 20px;
+            background: white;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 32px;
+            font-weight: 700;
+            color: #10b981;
+        }
+        
+        .stat-label {
+            color: #64748b;
+            font-size: 14px;
         }
     </style>
 </head>
 <body>
     <div class="header">
         <div class="header-container">
-            <div class="logo">THERAPY PROTOCOLS DATABASE</div>
-            <a href="clinic-dashboard.html" class="back-btn">← Back to Dashboard</a>
+            <h1>Therapies Bank</h1>
+            <button class="btn btn-secondary" onclick="goBack()" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid white;">
+                Back to Dashboard
+            </button>
         </div>
     </div>
 
     <div class="container">
-        <div id="alertBox"></div>
+        <div class="stats-row">
+            <div class="stat-item">
+                <div class="stat-number" id="totalTherapies">0</div>
+                <div class="stat-label">Total Therapies</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="activeTherapies">0</div>
+                <div class="stat-label">Active Protocols</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="categories">0</div>
+                <div class="stat-label">Categories</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="avgDuration">0</div>
+                <div class="stat-label">Avg Duration (min)</div>
+            </div>
+        </div>
         
-        <!-- Quick Actions Card -->
-        <div class="card" style="margin-bottom: 25px;">
-            <h2 class="list-header">Quick Actions</h2>
-            <p style="color: #475569; margin-bottom: 15px;">
-                Manage therapy protocols that are used in treatment planning. 
-                These protocols are automatically recommended based on patient assessments.
-            </p>
-            <div style="display: flex; gap: 10px;">
-                <button class="btn btn-warning" onclick="initializeDatabase()">
-                    Initialize Database with Default Protocols
-                </button>
-                <button class="btn btn-primary" onclick="refreshList()">
-                    Refresh List
-                </button>
+        <div class="search-bar">
+            <input type="text" class="search-input" id="searchInput" placeholder="Search therapies by name, code, or description...">
+            <div class="filter-tabs">
+                <button class="filter-tab active" onclick="filterByCategory('all')">All Therapies</button>
+                <button class="filter-tab" onclick="filterByCategory('Mental Wellness')">Mental Wellness</button>
+                <button class="filter-tab" onclick="filterByCategory('Vitality')">Vitality</button>
+                <button class="filter-tab" onclick="filterByCategory('Sleep Health')">Sleep Health</button>
+                <button class="filter-tab" onclick="filterByCategory('Digestive Health')">Digestive</button>
+                <button class="filter-tab" onclick="filterByCategory('Immune Support')">Immune</button>
+                <button class="filter-tab" onclick="filterByCategory('Pain Relief')">Pain Relief</button>
+                <button class="filter-tab" onclick="filterByCategory('Detoxification')">Detox</button>
+                <button class="filter-tab" onclick="filterByCategory('Heart Health')">Heart Health</button>
             </div>
         </div>
 
-        <div class="main-grid">
-            <!-- Therapy List Panel -->
-            <div class="card list-card">
-                <h2 class="list-header">Available Protocols</h2>
-                
-                <!-- Search and Filter -->
-                <input type="text" class="search-box" id="searchBox" placeholder="Search protocols..." onkeyup="filterProtocols()">
-                
-                <select class="category-filter" id="categoryFilter" onchange="filterProtocols()">
-                    <option value="">All Categories</option>
-                    <option value="Diabetes Support">Diabetes Support</option>
-                    <option value="Kidney & Urinary Wellness">Kidney & Urinary</option>
-                    <option value="Cardiovascular & Circulation">Cardiovascular</option>
-                    <option value="Joint Pain & Arthritis Relief">Joint Pain</option>
-                    <option value="Stress, Anxiety & Sleep">Stress & Sleep</option>
-                    <option value="Digestive & Energy Wellness">Digestive & Energy</option>
-                </select>
-                
-                <div id="therapiesList" class="loading">
-                    <div class="spinner"></div>
-                    <p>Loading protocols...</p>
-                </div>
-            </div>
-
-            <!-- Protocol Details Panel -->
-            <div class="card">
-                <h1 class="form-title" id="formTitle">Select a Protocol to View Details</h1>
-                <form id="therapyForm">
-                    <input type="hidden" id="therapyId">
-                    
-                    <div class="form-section">
-                        <h3 class="section-title">Protocol Information</h3>
-                        <div class="form-grid">
-                            <div class="form-group">
-                                <label for="therapyName" class="form-label">Protocol Name</label>
-                                <input type="text" id="therapyName" class="form-input" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="therapyCode" class="form-label">Protocol Code</label>
-                                <input type="text" id="therapyCode" class="form-input" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="category" class="form-label">Category</label>
-                                <select id="category" class="form-select">
-                                    <option value="Diabetes Support">Diabetes Support</option>
-                                    <option value="Kidney & Urinary Wellness">Kidney & Urinary Wellness</option>
-                                    <option value="Cardiovascular & Circulation">Cardiovascular & Circulation</option>
-                                    <option value="Joint Pain & Arthritis Relief">Joint Pain & Arthritis Relief</option>
-                                    <option value="Circulation & Healing Support">Circulation & Healing Support</option>
-                                    <option value="Stress, Anxiety & Sleep">Stress, Anxiety & Sleep</option>
-                                    <option value="Digestive & Energy Wellness">Digestive & Energy Wellness</option>
-                                    <option value="Comprehensive Wellness Packages">Comprehensive Wellness</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="duration" class="form-label">Duration (minutes)</label>
-                                <input type="number" id="duration" class="form-input" placeholder="e.g., 45">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="form-section">
-                        <h3 class="section-title">Clinical Details</h3>
-                        <div class="form-group">
-                            <label for="conditions" class="form-label">Conditions Treated</label>
-                            <textarea id="conditions" class="form-textarea" placeholder="Enter conditions this protocol addresses"></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label for="notes" class="form-label">Clinical Notes & Instructions</label>
-                            <textarea id="notes" class="form-textarea" placeholder="Enter detailed clinical notes, contraindications, and special instructions"></textarea>
-                        </div>
-                    </div>
-                    
-                    <div class="form-section">
-                        <h3 class="section-title">Probe Placement Configuration</h3>
-                        <div class="form-group">
-                            <label for="probes" class="form-label">Probe Positions (JSON Format)</label>
-                            <div id="probesList" style="margin-bottom: 10px;"></div>
-                            <textarea id="probes" class="form-textarea" rows="6" placeholder='[{"position":"Location description","intensity":"Start X, progress to Y"}]'></textarea>
-                            <small style="color: #64748b;">Define probe positions and intensity settings in JSON format</small>
-                        </div>
-                    </div>
-
-                    <div class="btn-group">
-                        <button type="button" class="btn btn-primary" onclick="saveTherapy()">Save Changes</button>
-                        <button type="button" class="btn btn-success" onclick="createNewTherapy()">+ Add New Protocol</button>
-                        <button type="button" class="btn btn-danger" onclick="deactivateTherapy()">Deactivate Protocol</button>
-                        <button type="button" class="btn btn-secondary" onclick="clearForm()">Clear Form</button>
-                    </div>
-                </form>
-            </div>
+        <div class="therapies-grid" id="therapiesGrid">
+            <!-- Therapy cards will be loaded here -->
         </div>
     </div>
 
     <script type="module">
-        import { supabase } from './supabase-config.js';
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
         
-        // Master therapy list from PDFs
-        const masterTherapies = [
-            // Diabetes Support
-            { 
-                therapy_name: 'Blood Sugar Balance Therapy', 
-                therapy_code: '101', 
-                category: 'Diabetes Support', 
-                duration: 45, 
-                conditions_treated: 'Unstable blood sugar, energy crashes, high HbA1c', 
-                notes: 'Supports natural blood sugar balance and metabolic wellness. Monitor glucose levels before and after sessions.', 
-                probes: [
-                    {"position":"DU4 + BL23 - lower back kidney region","intensity":"Start 3, progress to 5-6"},
-                    {"position":"Liver reflex area (left side) - LI14 region","intensity":"Start 2, progress to 4-5"},
-                    {"position":"RN8 + RN6 - abdominal energy points","intensity":"Start 2, progress to 4-6"},
-                    {"position":"Morning: ST36 bilateral / Afternoon: KI1 bilateral","intensity":"Start 2, progress to 3-5"}
-                ],
-                is_active: true
-            },
-            // Kidney & Urinary
-            { 
-                therapy_name: 'Kidney Vitality Therapy', 
-                therapy_code: '201', 
-                category: 'Kidney & Urinary Wellness', 
-                duration: 40, 
-                conditions_treated: 'Fatigue, fluid retention, kidney function support', 
-                notes: 'Helps with kidney energy and vitality. Ensure adequate hydration before treatment.', 
-                probes: [
-                    {"position":"DU4 + BL23","intensity":"4-6"},
-                    {"position":"BL23 upper back energy point","intensity":"3-5"},
-                    {"position":"BL52 - liver reflex area (left side)","intensity":"3-5"},
-                    {"position":"K13 + K11 bilateral","intensity":"2-5"}
-                ],
-                is_active: true
-            },
-            { 
-                therapy_name: 'Kidney Support Therapy', 
-                therapy_code: '202', 
-                category: 'Kidney & Urinary Wellness', 
-                duration: 40, 
-                conditions_treated: 'Kidney weakness, lower back pain, energy depletion', 
-                notes: 'Provides support for overall kidney health. Not suitable for acute kidney conditions.', 
-                probes: [
-                    {"position":"DU4 acupoint - kidney energy center","intensity":"3-7"},
-                    {"position":"BL23 acupoint - kidney back-shu point","intensity":"3-7"},
-                    {"position":"BL52 acupoint - reinforcement","intensity":"3-7"},
-                    {"position":"Morning: ST36 bilateral / Afternoon: KI1 or SP6","intensity":"3-7"}
-                ],
-                is_active: true
-            },
-            // Cardiovascular & Circulation
-            { 
-                therapy_name: 'Cardiovascular Harmony Therapy', 
-                therapy_code: '301', 
-                category: 'Cardiovascular & Circulation', 
-                duration: 45, 
-                conditions_treated: 'High blood pressure, heart health, circulation support', 
-                notes: 'Supports overall cardiovascular health. Monitor blood pressure before and after.', 
-                probes: [
-                    {"position":"DU4 + BL23 - kidney region","intensity":"3-5"},
-                    {"position":"Upper back energy point - heart region support","intensity":"2-4"},
-                    {"position":"PC6-neck region circulation point","intensity":"2-4"},
-                    {"position":"Inner wrist (PC6 region) / Temple areas","intensity":"1-3"}
-                ],
-                is_active: true
-            },
-            // Joint Pain & Arthritis Relief
-            { 
-                therapy_name: 'Gout Relief Therapy', 
-                therapy_code: '401', 
-                category: 'Joint Pain & Arthritis Relief', 
-                duration: 30, 
-                conditions_treated: 'Gout, uric acid, joint inflammation, pain relief', 
-                notes: 'Aimed at reducing uric acid and providing relief from gout. Combine with dietary modifications.', 
-                probes: [
-                    {"position":"Lower back kidney region - BL23","intensity":"3-5"},
-                    {"position":"Liver reflex area (left side) - LI14","intensity":"3-5"},
-                    {"position":"Abdominal energy points - digestive support","intensity":"2-4"},
-                    {"position":"Lower leg circulation points (ST36) / Affected joint areas","intensity":"2-4"}
-                ],
-                is_active: true
-            },
-            // Stress, Anxiety & Sleep
-            { 
-                therapy_name: 'Deep Sleep Renewal Therapy', 
-                therapy_code: '601', 
-                category: 'Stress, Anxiety & Sleep', 
-                duration: 50, 
-                conditions_treated: 'Insomnia, restless sleep, nervous exhaustion', 
-                notes: 'Promotes deep and restorative sleep. Best performed in evening sessions.', 
-                probes: [
-                    {"position":"DU4 + BL23 - kidney energy support","intensity":"2-4"},
-                    {"position":"DU14 acupoint - upper back calming point","intensity":"2-3"},
-                    {"position":"GB20 + DU16 - neck region relaxation","intensity":"1-3"},
-                    {"position":"Temples (EX-HN5) - bilateral","intensity":"1-2"}
-                ],
-                is_active: true
-            },
-            { 
-                therapy_name: 'Stress Relief Therapy', 
-                therapy_code: '602', 
-                category: 'Stress, Anxiety & Sleep', 
-                duration: 40, 
-                conditions_treated: 'Anxiety, tension, stress', 
-                notes: 'Calming protocol for stress relief. Can be combined with breathing exercises.', 
-                probes: [
-                    {"position":"HT7 - heart calming point","intensity":"2-4"},
-                    {"position":"EX-HN3 - third eye point","intensity":"1-3"},
-                    {"position":"DU20 - crown point","intensity":"1-3"},
-                    {"position":"PC6 - inner wrist","intensity":"2-4"}
-                ],
-                is_active: true
-            },
-            // Digestive & Energy Wellness
-            { 
-                therapy_name: 'Energy Boost Therapy', 
-                therapy_code: '701', 
-                category: 'Digestive & Energy Wellness', 
-                duration: 40, 
-                conditions_treated: 'Fatigue, low energy, vitality enhancement', 
-                notes: 'Boosts energy levels and vitality. Best performed in morning sessions.', 
-                probes: [
-                    {"position":"ST36 - leg energy point","intensity":"3-5"},
-                    {"position":"RN6 - energy sea point","intensity":"3-5"},
-                    {"position":"RN4 - vital energy point","intensity":"3-5"},
-                    {"position":"DU4 - life gate","intensity":"3-5"}
-                ],
-                is_active: true
-            }
-        ];
-
+        const SUPABASE_URL = 'https://defifwzgazqlrigwumqn.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlZmlmd3pnYXpxbHJpZ3d1bXFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcyNTM0MjYsImV4cCI6MjA3MjgyOTQyNn0.wcUBq6Pszjtqn5aBtuu3iXBE4BLmu8x9LtJbsMWlIiA';
+        
+        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
         let allTherapies = [];
         let filteredTherapies = [];
-        let selectedTherapyId = null;
-
-        // Initialize database with master list
-        window.initializeDatabase = async () => {
-            if (!confirm('This will replace all existing protocols with the master list. Continue?')) {
-                return;
-            }
-
-            showAlert('Initializing database with master protocols...', 'info');
-
-            try {
-                // Delete existing protocols (optional - you might want to keep custom ones)
-                const { error: deleteError } = await supabase
-                    .from('therapy_configurations')
-                    .delete()
-                    .neq('id', 0); // Delete all
-
-                if (deleteError) console.log('Delete error (may be normal if table is empty):', deleteError);
-                
-                // Insert master list
-                const { error: insertError } = await supabase
-                    .from('therapy_configurations')
-                    .insert(masterTherapies);
-
-                if (insertError) throw insertError;
-                
-                showAlert('Database successfully initialized with master therapy protocols!', 'success');
-                await fetchTherapies();
-
-            } catch (error) {
-                console.error('Error initializing database:', error);
-                showAlert(`Error: ${error.message}`, 'error');
-            }
-        };
-
-        // Fetch all therapies from database
-        async function fetchTherapies() {
-            const listDiv = document.getElementById('therapiesList');
-            
+        let currentCategory = 'all';
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadTherapies();
+            setupSearch();
+        });
+        
+        async function loadTherapies() {
             try {
                 const { data, error } = await supabase
-                    .from('therapy_configurations')
+                    .from('therapy_protocols')
                     .select('*')
-                    .eq('is_active', true)
-                    .order('category', { ascending: true })
-                    .order('therapy_code', { ascending: true });
-
+                    .order('therapy_code');
+                
                 if (error) throw error;
-
+                
                 allTherapies = data || [];
                 filteredTherapies = allTherapies;
-                displayTherapies(filteredTherapies);
+                
+                updateStats();
+                displayTherapies();
                 
             } catch (error) {
-                console.error('Error fetching therapies:', error);
-                listDiv.innerHTML = `
-                    <div class="alert alert-error">
-                        Error loading protocols. Please check database connection.
-                    </div>
-                `;
-                showAlert('Could not load protocols. Please check database connection.', 'error');
-            }
-        }
-
-        // Display therapies in list
-        function displayTherapies(therapies) {
-            const listDiv = document.getElementById('therapiesList');
-            
-            if (therapies.length === 0) {
-                listDiv.innerHTML = `
-                    <p style="text-align: center; padding: 20px;">
-                        No protocols found. Click "Initialize Database" to load defaults.
-                    </p>
-                `;
-                return;
-            }
-
-            listDiv.innerHTML = '';
-            let currentCategory = '';
-            
-            therapies.forEach(therapy => {
-                // Add category header
-                if (therapy.category !== currentCategory) {
-                    currentCategory = therapy.category;
-                    const categoryHeader = document.createElement('div');
-                    categoryHeader.style.cssText = 'font-weight: 600; color: #1e3a8a; margin: 15px 0 5px; font-size: 13px; text-transform: uppercase;';
-                    categoryHeader.textContent = currentCategory;
-                    listDiv.appendChild(categoryHeader);
-                }
-                
-                // Add therapy item
-                const item = document.createElement('div');
-                item.className = 'therapy-item';
-                item.innerHTML = `
-                    <div style="font-weight: 500;">${therapy.therapy_code}: ${therapy.therapy_name}</div>
-                    <div style="font-size: 12px; color: #64748b; margin-top: 4px;">${therapy.duration} min</div>
-                `;
-                item.dataset.id = therapy.id;
-                item.onclick = () => selectTherapy(therapy.id);
-                listDiv.appendChild(item);
-            });
-        }
-
-        // Filter protocols
-        window.filterProtocols = function() {
-            const searchTerm = document.getElementById('searchBox').value.toLowerCase();
-            const category = document.getElementById('categoryFilter').value;
-            
-            filteredTherapies = allTherapies.filter(therapy => {
-                const matchesSearch = !searchTerm || 
-                    therapy.therapy_name.toLowerCase().includes(searchTerm) ||
-                    therapy.therapy_code.includes(searchTerm) ||
-                    (therapy.conditions_treated && therapy.conditions_treated.toLowerCase().includes(searchTerm));
-                
-                const matchesCategory = !category || therapy.category === category;
-                
-                return matchesSearch && matchesCategory;
-            });
-            
-            displayTherapies(filteredTherapies);
-        };
-
-        // Select therapy for editing
-        window.selectTherapy = function(id) {
-            const therapy = allTherapies.find(t => t.id === id);
-            if (!therapy) return;
-
-            selectedTherapyId = id;
-            document.getElementById('formTitle').textContent = `Editing: ${therapy.therapy_name}`;
-            document.getElementById('therapyId').value = therapy.id;
-            document.getElementById('therapyName').value = therapy.therapy_name || '';
-            document.getElementById('therapyCode').value = therapy.therapy_code || '';
-            document.getElementById('category').value = therapy.category || '';
-            document.getElementById('duration').value = therapy.duration || '';
-            document.getElementById('conditions').value = therapy.conditions_treated || '';
-            document.getElementById('notes').value = therapy.notes || '';
-            
-            // Handle probes
-            if (therapy.probes) {
-                document.getElementById('probes').value = JSON.stringify(therapy.probes, null, 2);
-                displayProbes(therapy.probes);
-            } else {
-                document.getElementById('probes').value = '';
-                document.getElementById('probesList').innerHTML = '';
-            }
-            
-            // Highlight selected item
-            document.querySelectorAll('.therapy-item').forEach(item => {
-                item.classList.toggle('active', item.dataset.id == id);
-            });
-        };
-
-        // Display probe positions visually
-        function displayProbes(probes) {
-            const probesList = document.getElementById('probesList');
-            if (!probes || !Array.isArray(probes)) {
-                probesList.innerHTML = '';
-                return;
-            }
-            
-            probesList.innerHTML = '<div style="margin-bottom: 10px; font-weight: 600;">Current Probe Configuration:</div>';
-            probes.forEach((probe, index) => {
-                probesList.innerHTML += `
-                    <div class="probe-item">
-                        <strong>Probe ${index + 1}:</strong> ${probe.position}<br>
-                        <small>Intensity: ${probe.intensity}</small>
-                    </div>
-                `;
-            });
-        }
-
-        // Create new therapy
-        window.createNewTherapy = function() {
-            selectedTherapyId = null;
-            document.getElementById('therapyForm').reset();
-            document.getElementById('formTitle').textContent = 'Create New Protocol';
-            document.getElementById('therapyId').value = '';
-            document.getElementById('probesList').innerHTML = '';
-            document.querySelectorAll('.therapy-item').forEach(item => item.classList.remove('active'));
-        };
-
-        // Save therapy
-        window.saveTherapy = async function() {
-            const probesJSON = document.getElementById('probes').value;
-            let probesData = null;
-            
-            if (probesJSON) {
-                try {
-                    probesData = JSON.parse(probesJSON);
-                } catch (e) {
-                    showAlert('Invalid JSON format for probe data. Please check syntax.', 'error');
-                    return;
-                }
-            }
-
-            const therapyData = {
-                therapy_name: document.getElementById('therapyName').value,
-                therapy_code: document.getElementById('therapyCode').value,
-                category: document.getElementById('category').value,
-                duration: parseInt(document.getElementById('duration').value) || 45,
-                conditions_treated: document.getElementById('conditions').value,
-                notes: document.getElementById('notes').value,
-                probes: probesData,
-                is_active: true,
-                updated_at: new Date().toISOString()
-            };
-
-            if (!therapyData.therapy_name || !therapyData.therapy_code) {
-                showAlert('Protocol name and code are required.', 'error');
-                return;
-            }
-
-            try {
-                let response;
-                if (selectedTherapyId) {
-                    // Update existing
-                    response = await supabase
-                        .from('therapy_configurations')
-                        .update(therapyData)
-                        .eq('id', selectedTherapyId);
-                } else {
-                    // Insert new
-                    therapyData.created_at = new Date().toISOString();
-                    response = await supabase
-                        .from('therapy_configurations')
-                        .insert([therapyData]);
-                }
-
-                if (response.error) throw response.error;
-
-                showAlert('Protocol saved successfully!', 'success');
-                await fetchTherapies();
-                
-            } catch(error) {
-                console.error('Error saving therapy:', error);
-                showAlert(`Error: ${error.message}`, 'error');
-            }
-        };
-
-        // Deactivate therapy
-        window.deactivateTherapy = async function() {
-            if (!selectedTherapyId) {
-                showAlert('Please select a protocol to deactivate.', 'error');
-                return;
-            }
-
-            if (!confirm('Deactivate this protocol? It will no longer be available for treatment planning.')) return;
-
-            try {
-                const { error } = await supabase
-                    .from('therapy_configurations')
-                    .update({ is_active: false })
-                    .eq('id', selectedTherapyId);
-
-                if (error) throw error;
-                
-                showAlert('Protocol deactivated.', 'success');
-                await fetchTherapies();
-                createNewTherapy();
-
-            } catch (error) {
-                console.error('Error deactivating therapy:', error);
-                showAlert(`Error: ${error.message}`, 'error');
-            }
-        };
-
-        // Clear form
-        window.clearForm = function() {
-            createNewTherapy();
-        };
-
-        // Refresh list
-        window.refreshList = function() {
-            fetchTherapies();
-        };
-
-        // Show alert
-        function showAlert(message, type) {
-            const alertBox = document.getElementById('alertBox');
-            alertBox.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
-            if (type !== 'info') {
-                setTimeout(() => {
-                    alertBox.innerHTML = '';
-                }, 5000);
+                console.error('Error loading therapies:', error);
+                document.getElementById('therapiesGrid').innerHTML = 
+                    '<p style="text-align: center; color: #ef4444;">Error loading therapies. Please refresh the page.</p>';
             }
         }
         
-        // Initialize on load
-        document.addEventListener('DOMContentLoaded', () => {
-            fetchTherapies();
-        });
+        function updateStats() {
+            const activeCount = allTherapies.filter(t => t.active).length;
+            const categories = [...new Set(allTherapies.map(t => t.category))].length;
+            const avgDuration = allTherapies.reduce((sum, t) => sum + (t.session_duration_minutes || 0), 0) / allTherapies.length || 0;
+            
+            document.getElementById('totalTherapies').textContent = allTherapies.length;
+            document.getElementById('activeTherapies').textContent = activeCount;
+            document.getElementById('categories').textContent = categories;
+            document.getElementById('avgDuration').textContent = Math.round(avgDuration);
+        }
+        
+        function displayTherapies() {
+            const grid = document.getElementById('therapiesGrid');
+            
+            if (filteredTherapies.length === 0) {
+                grid.innerHTML = '<p style="text-align: center; color: #64748b; grid-column: 1/-1;">No therapies found</p>';
+                return;
+            }
+            
+            grid.innerHTML = filteredTherapies.map(therapy => {
+                const categoryClass = getCategoryClass(therapy.category);
+                
+                return `
+                    <div class="therapy-card">
+                        <div class="therapy-header">
+                            <div class="therapy-code">${therapy.therapy_code}</div>
+                            <div class="therapy-name">${therapy.therapy_name}</div>
+                        </div>
+                        <div class="therapy-body">
+                            <span class="category-badge ${categoryClass}">${therapy.category || 'General'}</span>
+                            
+                            <div class="therapy-description">
+                                ${therapy.description || 'Comprehensive therapy protocol for health improvement'}
+                            </div>
+                            
+                            <div class="therapy-info">
+                                <div class="info-box">
+                                    <div class="info-label">Sessions</div>
+                                    <div class="info-value">${therapy.total_sessions || 6}</div>
+                                </div>
+                                <div class="info-box">
+                                    <div class="info-label">Duration</div>
+                                    <div class="info-value">${therapy.session_duration_minutes || 45} min</div>
+                                </div>
+                                <div class="info-box">
+                                    <div class="info-label">Per Week</div>
+                                    <div class="info-value">${therapy.sessions_per_week || 2}</div>
+                                </div>
+                                <div class="info-box">
+                                    <div class="info-label">Status</div>
+                                    <div class="info-value">${therapy.active ? 'Active' : 'Inactive'}</div>
+                                </div>
+                            </div>
+                            
+                            <div class="therapy-actions">
+                                <button class="btn btn-primary" onclick="viewDetails('${therapy.therapy_code}')">
+                                    View Details
+                                </button>
+                                <button class="btn btn-secondary" onclick="usetherapy('${therapy.id}')">
+                                    Use in Plan
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function getCategoryClass(category) {
+            const categoryMap = {
+                'Mental Wellness': 'category-mental',
+                'Vitality': 'category-vitality',
+                'Sleep Health': 'category-sleep',
+                'Digestive Health': 'category-digestive',
+                'Immune Support': 'category-immune',
+                'Pain Relief': 'category-pain',
+                'Detoxification': 'category-detox',
+                'Heart Health': 'category-heart'
+            };
+            return categoryMap[category] || 'category-mental';
+        }
+        
+        function setupSearch() {
+            const searchInput = document.getElementById('searchInput');
+            searchInput.addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                
+                filteredTherapies = allTherapies.filter(therapy => {
+                    const matchesSearch = 
+                        therapy.therapy_code.toLowerCase().includes(searchTerm) ||
+                        therapy.therapy_name.toLowerCase().includes(searchTerm) ||
+                        (therapy.description && therapy.description.toLowerCase().includes(searchTerm));
+                    
+                    const matchesCategory = currentCategory === 'all' || therapy.category === currentCategory;
+                    
+                    return matchesSearch && matchesCategory;
+                });
+                
+                displayTherapies();
+            });
+        }
+        
+        window.filterByCategory = function(category) {
+            currentCategory = category;
+            
+            // Update active tab
+            document.querySelectorAll('.filter-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Filter therapies
+            if (category === 'all') {
+                filteredTherapies = allTherapies;
+            } else {
+                filteredTherapies = allTherapies.filter(t => t.category === category);
+            }
+            
+            displayTherapies();
+        }
+        
+        window.viewDetails = function(therapyCode) {
+            alert(`Detailed view for ${therapyCode} will show:\n- Full protocol description\n- Conditions treated\n- Contraindications\n- Expected outcomes\n- Probe placement diagrams`);
+        }
+        
+        window.useTherapy = function(therapyId) {
+            window.location.href = `treatment-planning.html?therapyId=${therapyId}`;
+        }
+        
+        window.goBack = function() {
+            window.location.href = 'clinic-dashboard.html';
+        }
     </script>
 </body>
 </html>
