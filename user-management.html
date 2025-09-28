@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Management - Celloxen Super Admin</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
     <style>
         * {
             margin: 0;
@@ -578,12 +581,13 @@
         </div>
     </div>
 
-    <!-- Include auth guard -->
-    <script src="auth-guard.js"></script>
-    
-    <!-- Main script using ES6 modules -->
     <script type="module">
-        import { supabase } from './supabase-config.js';
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+        
+        const SUPABASE_URL = 'https://defifwzgazqlrigwumqn.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlZmlmd3pnYXpxbHJpZ3d1bXFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcyNTM0MjYsImV4cCI6MjA3MjgyOTQyNn0.wcUBq6Pszjtqn5aBtuu3iXBE4BLmu8x9LtJbsMWlIiA';
+        
+        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         
         let allUsers = [];
         let clinicAdmins = [];
@@ -702,14 +706,14 @@
                     <td>${new Date(user.created_at).toLocaleDateString('en-GB')}</td>
                     <td>
                         <div class="action-buttons">
-                            <button class="btn btn-primary btn-small" onclick="showResetPasswordModal('${user.role}', ${user.id}, '${user.username || user.clinic_name}')">
+                            <button class="btn btn-primary btn-small" onclick="showResetPasswordModal('${user.role}', '${user.id}', '${user.username || user.clinic_name}')">
                                 Reset Pass
                             </button>
                             <button class="btn ${user.is_active !== false ? 'btn-warning' : 'btn-primary'} btn-small" 
-                                    onclick="toggleUserStatus('${user.role}', ${user.id}, ${user.is_active !== false})">
+                                    onclick="toggleUserStatus('${user.role}', '${user.id}', ${user.is_active !== false})">
                                 ${user.is_active !== false ? 'Deactivate' : 'Activate'}
                             </button>
-                            <button class="btn btn-danger btn-small" onclick="deleteUser('${user.role}', ${user.id}, '${user.username || user.clinic_name}')">
+                            <button class="btn btn-danger btn-small" onclick="deleteUser('${user.role}', '${user.id}', '${user.username || user.clinic_name}')">
                                 Remove
                             </button>
                         </div>
@@ -739,11 +743,11 @@
                     </td>
                     <td>
                         <div class="action-buttons">
-                            <button class="btn btn-primary btn-small" onclick="showResetPasswordModal('clinic_admin', ${admin.id}, '${admin.username || admin.clinic_name}')">
+                            <button class="btn btn-primary btn-small" onclick="showResetPasswordModal('clinic_admin', '${admin.id}', '${admin.username || admin.clinic_name}')">
                                 Reset Password
                             </button>
                             <button class="btn ${admin.is_active !== false ? 'btn-warning' : 'btn-primary'} btn-small" 
-                                    onclick="toggleUserStatus('clinic_admin', ${admin.id}, ${admin.is_active !== false})">
+                                    onclick="toggleUserStatus('clinic_admin', '${admin.id}', ${admin.is_active !== false})">
                                 ${admin.is_active !== false ? 'Deactivate' : 'Activate'}
                             </button>
                         </div>
@@ -773,64 +777,14 @@
                     <td>${new Date(admin.created_at).toLocaleDateString('en-GB')}</td>
                     <td>
                         <div class="action-buttons">
-                            <button class="btn btn-primary btn-small" onclick="showResetPasswordModal('super_admin', ${admin.id}, '${admin.username}')">
+                            <button class="btn btn-primary btn-small" onclick="showResetPasswordModal('super_admin', '${admin.id}', '${admin.username}')">
                                 Reset Pass
                             </button>
                             <button class="btn ${admin.is_active !== false ? 'btn-warning' : 'btn-primary'} btn-small" 
-                                    onclick="toggleUserStatus('super_admin', ${admin.id}, ${admin.is_active !== false})">
+                                    onclick="toggleUserStatus('super_admin', '${admin.id}', ${admin.is_active !== false})">
                                 ${admin.is_active !== false ? 'Deactivate' : 'Activate'}
                             </button>
-                            <button class="btn btn-danger btn-small" onclick="deleteUser('super_admin', ${admin.id}, '${admin.username}')">
-                                Remove
-                            </button>
-                        </div>
-                    </td>
-                </tr>
-            `).join('');
-        }
-        
-        function searchUsers() {
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            const filteredUsers = allUsers.filter(user => 
-                (user.username && user.username.toLowerCase().includes(searchTerm)) ||
-                (user.full_name && user.full_name.toLowerCase().includes(searchTerm)) ||
-                (user.email && user.email.toLowerCase().includes(searchTerm)) ||
-                (user.clinic_name && user.clinic_name.toLowerCase().includes(searchTerm))
-            );
-            
-            const tbody = document.getElementById('userTableBody');
-            if (filteredUsers.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">No matching users found</td></tr>';
-                return;
-            }
-            
-            tbody.innerHTML = filteredUsers.map(user => `
-                <tr>
-                    <td><strong>${user.username || '-'}</strong></td>
-                    <td>${user.full_name || '-'}</td>
-                    <td>${user.email || '-'}</td>
-                    <td>
-                        <span class="role-badge ${user.role === 'super_admin' ? 'role-super-admin' : 'role-clinic-admin'}">
-                            ${user.role === 'super_admin' ? 'Super Admin' : 'Clinic Admin'}
-                        </span>
-                    </td>
-                    <td>${user.clinic_name || '-'}</td>
-                    <td>
-                        <span class="${user.is_active !== false ? 'status-active' : 'status-inactive'}">
-                            ● ${user.is_active !== false ? 'Active' : 'Inactive'}
-                        </span>
-                    </td>
-                    <td>${new Date(user.created_at).toLocaleDateString('en-GB')}</td>
-                    <td>
-                        <div class="action-buttons">
-                            <button class="btn btn-primary btn-small" onclick="showResetPasswordModal('${user.role}', ${user.id}, '${user.username || user.clinic_name}')">
-                                Reset Pass
-                            </button>
-                            <button class="btn ${user.is_active !== false ? 'btn-warning' : 'btn-primary'} btn-small" 
-                                    onclick="toggleUserStatus('${user.role}', ${user.id}, ${user.is_active !== false})">
-                                ${user.is_active !== false ? 'Deactivate' : 'Activate'}
-                            </button>
-                            <button class="btn btn-danger btn-small" onclick="deleteUser('${user.role}', ${user.id}, '${user.username || user.clinic_name}')">
+                            <button class="btn btn-danger btn-small" onclick="deleteUser('super_admin', '${admin.id}', '${admin.username}')">
                                 Remove
                             </button>
                         </div>
@@ -903,7 +857,6 @@
             currentResetUser = { role, userId, username };
             document.getElementById('resetUsername').textContent = username;
             
-            // Reset to auto-generate option
             selectPasswordOption('auto');
             generateNewPassword();
             
@@ -1018,7 +971,6 @@
                         throw error;
                     }
                     
-                    // Show password in copyable format
                     const alertMsg = `Super Admin created successfully!\n\nUsername: ${username}\nPassword: ${password}\n\nPlease save these credentials securely.`;
                     alert(alertMsg);
                     showAlert('Super Admin created successfully!', 'success');
@@ -1156,7 +1108,55 @@
             showAlert('Users refreshed', 'success');
         };
         
-        window.searchUsers = searchUsers;
+        window.searchUsers = function() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const filteredUsers = allUsers.filter(user => 
+                (user.username && user.username.toLowerCase().includes(searchTerm)) ||
+                (user.full_name && user.full_name.toLowerCase().includes(searchTerm)) ||
+                (user.email && user.email.toLowerCase().includes(searchTerm)) ||
+                (user.clinic_name && user.clinic_name.toLowerCase().includes(searchTerm))
+            );
+            
+            const tbody = document.getElementById('userTableBody');
+            if (filteredUsers.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">No matching users found</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = filteredUsers.map(user => `
+                <tr>
+                    <td><strong>${user.username || '-'}</strong></td>
+                    <td>${user.full_name || '-'}</td>
+                    <td>${user.email || '-'}</td>
+                    <td>
+                        <span class="role-badge ${user.role === 'super_admin' ? 'role-super-admin' : 'role-clinic-admin'}">
+                            ${user.role === 'super_admin' ? 'Super Admin' : 'Clinic Admin'}
+                        </span>
+                    </td>
+                    <td>${user.clinic_name || '-'}</td>
+                    <td>
+                        <span class="${user.is_active !== false ? 'status-active' : 'status-inactive'}">
+                            ● ${user.is_active !== false ? 'Active' : 'Inactive'}
+                        </span>
+                    </td>
+                    <td>${new Date(user.created_at).toLocaleDateString('en-GB')}</td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn btn-primary btn-small" onclick="showResetPasswordModal('${user.role}', '${user.id}', '${user.username || user.clinic_name}')">
+                                Reset Pass
+                            </button>
+                            <button class="btn ${user.is_active !== false ? 'btn-warning' : 'btn-primary'} btn-small" 
+                                    onclick="toggleUserStatus('${user.role}', '${user.id}', ${user.is_active !== false})">
+                                ${user.is_active !== false ? 'Deactivate' : 'Activate'}
+                            </button>
+                            <button class="btn btn-danger btn-small" onclick="deleteUser('${user.role}', '${user.id}', '${user.username || user.clinic_name}')">
+                                Remove
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        };
         
         window.logout = function() {
             if (confirm('Are you sure you want to logout?')) {
