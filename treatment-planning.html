@@ -143,6 +143,17 @@
             color: #475569;
         }
         
+        .btn-danger {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 6px 12px;
+            font-size: 13px;
+        }
+        
+        .btn-danger:hover {
+            background: #fecaca;
+        }
+        
         .patient-info-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -262,54 +273,69 @@
             color: #065f46;
         }
         
-        .calendar-section {
-            margin-top: 30px;
-        }
-        
-        .calendar-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 10px;
-            margin-top: 20px;
-        }
-        
-        .calendar-day {
-            aspect-ratio: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background: white;
+        /* Session Scheduling Styles */
+        .session-schedule-item {
+            background: #f8fafc;
             border: 2px solid #e5e7eb;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            position: relative;
         }
         
-        .calendar-day:hover {
-            border-color: #1e3a8a;
-            background: #f0f9ff;
-        }
-        
-        .calendar-day.selected {
-            background: linear-gradient(135deg, #dcfce7, #d1fae5);
+        .session-schedule-item.completed {
             border-color: #10b981;
+            background: #f0fdf4;
         }
         
-        .calendar-day.disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
+        .session-header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
         }
         
-        .day-number {
-            font-size: 18px;
+        .session-number {
+            font-size: 16px;
             font-weight: 600;
             color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
         
-        .day-label {
-            font-size: 11px;
+        .session-badge {
+            background: #1e3a8a;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+        }
+        
+        .session-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr auto;
+            gap: 15px;
+            align-items: end;
+        }
+        
+        .session-input-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .session-input-label {
+            font-size: 12px;
             color: #64748b;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+        
+        .session-input {
+            padding: 8px 12px;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            font-size: 14px;
         }
         
         .schedule-summary {
@@ -378,21 +404,6 @@
             padding: 40px;
             color: #64748b;
         }
-        
-        .spinner {
-            border: 3px solid #f3f4f6;
-            border-top: 3px solid #1e3a8a;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 20px auto;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
     </style>
 </head>
 <body>
@@ -446,7 +457,7 @@
             </div>
             
             <div class="form-group">
-                <label class="form-label">Sessions Per Week</label>
+                <label class="form-label">Sessions Per Week (for auto-scheduling)</label>
                 <select class="form-select" id="sessionsPerWeek">
                     <option value="1">1 session per week</option>
                     <option value="2" selected>2 sessions per week</option>
@@ -454,19 +465,29 @@
                 </select>
             </div>
             
-            <div class="form-group">
-                <label class="form-label">Preferred Time</label>
-                <select class="form-select" id="preferredTime">
-                    <option value="09:00">9:00 AM</option>
-                    <option value="10:00">10:00 AM</option>
-                    <option value="11:00">11:00 AM</option>
-                    <option value="14:00">2:00 PM</option>
-                    <option value="15:00">3:00 PM</option>
-                    <option value="16:00">4:00 PM</option>
-                </select>
+            <div style="margin: 20px 0; padding: 15px; background: #f0f9ff; border-radius: 8px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <h3 style="font-size: 16px; font-weight: 600; color: #1e3a8a;">Individual Session Scheduling</h3>
+                    <button class="btn btn-secondary" onclick="autoGenerateSessions()" style="padding: 8px 16px;">
+                        Auto-Generate Schedule
+                    </button>
+                </div>
+                <p style="font-size: 13px; color: #64748b;">
+                    Configure date and time for each session individually or use auto-generate for quick scheduling.
+                </p>
             </div>
             
-            <button class="btn btn-primary" onclick="generateSchedule()">Generate Schedule</button>
+            <div id="sessionsList" style="margin-top: 20px;">
+                <!-- Sessions will be dynamically added here -->
+            </div>
+            
+            <button class="btn btn-secondary" onclick="addSession()" style="margin-top: 15px;">
+                + Add Session
+            </button>
+            
+            <div style="margin-top: 30px; padding-top: 20px; border-top: 2px solid #e5e7eb;">
+                <button class="btn btn-primary" onclick="saveSchedule()">Save Schedule & Continue</button>
+            </div>
         </div>
         
         <!-- Schedule Preview -->
@@ -480,9 +501,9 @@
                 </div>
             </div>
             
-            <div class="calendar-section">
-                <h3>Scheduled Sessions</h3>
-                <div id="sessionList" style="margin-top: 20px;">
+            <div style="margin-top: 30px;">
+                <h3 style="font-size: 18px; font-weight: 600; margin-bottom: 15px;">Scheduled Sessions</h3>
+                <div id="sessionPreviewList" style="max-height: 400px; overflow-y: auto;">
                     <!-- Session list will be populated here -->
                 </div>
             </div>
@@ -507,7 +528,8 @@
         let availableTherapies = [];
         let selectedTherapies = [];
         let recommendedTherapies = [];
-        let scheduledSessions = [];
+        let sessionSchedules = [];
+        let sessionCounter = 0;
         
         // Initialize
         document.addEventListener('DOMContentLoaded', async () => {
@@ -695,6 +717,9 @@
                 const card = document.querySelector(`[data-code="${code}"]`);
                 if (card) card.classList.add('selected');
             });
+            
+            // Initialize sessions for selected therapies
+            initializeSessions();
         }
         
         window.toggleTherapy = function(code) {
@@ -707,50 +732,196 @@
                 selectedTherapies.push(code);
                 card.classList.add('selected');
             }
+            
+            initializeSessions();
         };
         
-        window.generateSchedule = function() {
-            if (selectedTherapies.length === 0) {
-                alert('Please select at least one therapy protocol');
-                return;
-            }
+        function initializeSessions() {
+            sessionSchedules = [];
+            sessionCounter = 0;
             
-            const startDate = new Date(document.getElementById('startDate').value);
-            const sessionsPerWeek = parseInt(document.getElementById('sessionsPerWeek').value);
-            const preferredTime = document.getElementById('preferredTime').value;
-            
-            scheduledSessions = [];
-            
-            // Generate sessions for each selected therapy
+            // Get total sessions needed for each selected therapy
             selectedTherapies.forEach(therapyCode => {
                 const therapy = availableTherapies.find(t => t.therapy_code === therapyCode);
                 if (!therapy) return;
                 
                 const totalSessions = therapy.total_sessions || 6;
-                let currentDate = new Date(startDate);
-                let sessionCount = 0;
-                
-                while (sessionCount < totalSessions) {
-                    // Skip weekends
-                    if (currentDate.getDay() !== 0 && currentDate.getDay() !== 6) {
-                        scheduledSessions.push({
-                            therapy_code: therapyCode,
-                            therapy_name: therapy.therapy_name,
-                            session_number: sessionCount + 1,
-                            scheduled_date: new Date(currentDate).toISOString().split('T')[0],
-                            scheduled_time: preferredTime,
-                            total_sessions: totalSessions
-                        });
-                        sessionCount++;
-                    }
-                    
-                    // Move to next available day based on frequency
-                    currentDate.setDate(currentDate.getDate() + Math.floor(7 / sessionsPerWeek));
+                for (let i = 0; i < totalSessions; i++) {
+                    sessionSchedules.push({
+                        sessionNumber: i + 1,
+                        therapyCode: therapyCode,
+                        therapyName: therapy.therapy_name,
+                        totalSessions: totalSessions,
+                        date: '',
+                        time: '10:00'
+                    });
                 }
             });
             
-            // Sort sessions by date
-            scheduledSessions.sort((a, b) => new Date(a.scheduled_date) - new Date(b.scheduled_date));
+            displaySessionSchedules();
+        }
+        
+        window.addSession = function() {
+            if (selectedTherapies.length === 0) {
+                alert('Please select at least one therapy first');
+                return;
+            }
+            
+            // Add session for first selected therapy
+            const therapyCode = selectedTherapies[0];
+            const therapy = availableTherapies.find(t => t.therapy_code === therapyCode);
+            
+            sessionSchedules.push({
+                sessionNumber: sessionSchedules.filter(s => s.therapyCode === therapyCode).length + 1,
+                therapyCode: therapyCode,
+                therapyName: therapy.therapy_name,
+                totalSessions: therapy.total_sessions,
+                date: '',
+                time: '10:00'
+            });
+            
+            displaySessionSchedules();
+        };
+        
+        function displaySessionSchedules() {
+            const container = document.getElementById('sessionsList');
+            
+            if (sessionSchedules.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #64748b;">No sessions scheduled yet. Select therapies to begin.</p>';
+                return;
+            }
+            
+            // Group sessions by therapy
+            const sessionsByTherapy = {};
+            sessionSchedules.forEach(session => {
+                if (!sessionsByTherapy[session.therapyCode]) {
+                    sessionsByTherapy[session.therapyCode] = [];
+                }
+                sessionsByTherapy[session.therapyCode].push(session);
+            });
+            
+            container.innerHTML = Object.keys(sessionsByTherapy).map(therapyCode => {
+                const sessions = sessionsByTherapy[therapyCode];
+                const therapy = availableTherapies.find(t => t.therapy_code === therapyCode);
+                
+                return `
+                    <div style="margin-bottom: 30px;">
+                        <h4 style="font-size: 16px; font-weight: 600; color: #1e3a8a; margin-bottom: 15px;">
+                            ${therapy.therapy_name} (${sessions.length} sessions)
+                        </h4>
+                        ${sessions.map((session, index) => `
+                            <div class="session-schedule-item" data-session-id="${therapyCode}-${index}">
+                                <div class="session-header-bar">
+                                    <div class="session-number">
+                                        <span class="session-badge">Session ${session.sessionNumber}</span>
+                                        of ${session.totalSessions}
+                                    </div>
+                                    <button class="btn btn-danger" onclick="removeSession('${therapyCode}', ${index})">
+                                        Remove
+                                    </button>
+                                </div>
+                                <div class="session-inputs">
+                                    <div class="session-input-group">
+                                        <label class="session-input-label">Date</label>
+                                        <input type="date" class="session-input" 
+                                               value="${session.date}"
+                                               min="${new Date().toISOString().split('T')[0]}"
+                                               onchange="updateSessionDate('${therapyCode}', ${index}, this.value)">
+                                    </div>
+                                    <div class="session-input-group">
+                                        <label class="session-input-label">Time</label>
+                                        <select class="session-input" 
+                                                onchange="updateSessionTime('${therapyCode}', ${index}, this.value)">
+                                            <option value="09:00" ${session.time === '09:00' ? 'selected' : ''}>9:00 AM</option>
+                                            <option value="10:00" ${session.time === '10:00' ? 'selected' : ''}>10:00 AM</option>
+                                            <option value="11:00" ${session.time === '11:00' ? 'selected' : ''}>11:00 AM</option>
+                                            <option value="12:00" ${session.time === '12:00' ? 'selected' : ''}>12:00 PM</option>
+                                            <option value="14:00" ${session.time === '14:00' ? 'selected' : ''}>2:00 PM</option>
+                                            <option value="15:00" ${session.time === '15:00' ? 'selected' : ''}>3:00 PM</option>
+                                            <option value="16:00" ${session.time === '16:00' ? 'selected' : ''}>4:00 PM</option>
+                                            <option value="17:00" ${session.time === '17:00' ? 'selected' : ''}>5:00 PM</option>
+                                        </select>
+                                    </div>
+                                    <div class="session-input-group">
+                                        <label class="session-input-label">Duration</label>
+                                        <input type="text" class="session-input" 
+                                               value="${therapy.session_duration_minutes || 45} min" 
+                                               readonly style="background: #f3f4f6;">
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        window.updateSessionDate = function(therapyCode, index, date) {
+            const sessions = sessionSchedules.filter(s => s.therapyCode === therapyCode);
+            sessions[index].date = date;
+        };
+        
+        window.updateSessionTime = function(therapyCode, index, time) {
+            const sessions = sessionSchedules.filter(s => s.therapyCode === therapyCode);
+            sessions[index].time = time;
+        };
+        
+        window.removeSession = function(therapyCode, index) {
+            const therapySessions = sessionSchedules.filter(s => s.therapyCode === therapyCode);
+            const sessionToRemove = therapySessions[index];
+            const globalIndex = sessionSchedules.indexOf(sessionToRemove);
+            sessionSchedules.splice(globalIndex, 1);
+            
+            // Renumber remaining sessions
+            sessionSchedules.forEach((session, i) => {
+                if (session.therapyCode === therapyCode) {
+                    const therapySessionNumber = sessionSchedules
+                        .slice(0, i + 1)
+                        .filter(s => s.therapyCode === therapyCode).length;
+                    session.sessionNumber = therapySessionNumber;
+                }
+            });
+            
+            displaySessionSchedules();
+        };
+        
+        window.autoGenerateSessions = function() {
+            const startDate = new Date(document.getElementById('startDate').value);
+            const sessionsPerWeek = parseInt(document.getElementById('sessionsPerWeek').value);
+            
+            if (!startDate || isNaN(startDate.getTime())) {
+                alert('Please set a treatment start date first');
+                return;
+            }
+            
+            let currentDate = new Date(startDate);
+            let sessionIndex = 0;
+            const daysBetweenSessions = Math.floor(7 / sessionsPerWeek);
+            
+            sessionSchedules.forEach((session, index) => {
+                // Skip weekends
+                while (currentDate.getDay() === 0 || currentDate.getDay() === 6) {
+                    currentDate.setDate(currentDate.getDate() + 1);
+                }
+                
+                session.date = currentDate.toISOString().split('T')[0];
+                session.time = '10:00'; // Default time
+                
+                // Move to next session date
+                currentDate.setDate(currentDate.getDate() + daysBetweenSessions);
+            });
+            
+            displaySessionSchedules();
+            alert('Schedule auto-generated! You can now adjust individual sessions as needed.');
+        };
+        
+        window.saveSchedule = function() {
+            // Validate all sessions have dates
+            const incompleteSessions = sessionSchedules.filter(s => !s.date);
+            if (incompleteSessions.length > 0) {
+                alert(`Please set dates for all ${incompleteSessions.length} sessions before continuing.`);
+                return;
+            }
             
             displaySchedulePreview();
         };
@@ -759,10 +930,14 @@
             document.getElementById('previewCard').style.display = 'block';
             
             // Display summary
-            const totalSessions = scheduledSessions.length;
-            const therapyCount = selectedTherapies.length;
-            const endDate = scheduledSessions[scheduledSessions.length - 1].scheduled_date;
-            const duration = Math.ceil((new Date(endDate) - new Date(document.getElementById('startDate').value)) / (1000 * 60 * 60 * 24 * 7));
+            const totalSessions = sessionSchedules.length;
+            const therapyCount = [...new Set(sessionSchedules.map(s => s.therapyCode))].length;
+            const startDate = sessionSchedules.reduce((min, s) => 
+                !min || s.date < min ? s.date : min, null);
+            const endDate = sessionSchedules.reduce((max, s) => 
+                !max || s.date > max ? s.date : max, null);
+            
+            const duration = Math.ceil((new Date(endDate) - new Date(startDate)) / (1000 * 60 * 60 * 24 * 7));
             
             document.getElementById('summaryGrid').innerHTML = `
                 <div class="summary-item">
@@ -779,26 +954,36 @@
                 </div>
             `;
             
-            // Display session list
-            const sessionList = document.getElementById('sessionList');
-            sessionList.innerHTML = `
-                <div style="max-height: 400px; overflow-y: auto;">
-                    ${scheduledSessions.map(session => `
-                        <div style="padding: 10px; margin-bottom: 10px; background: white; border-radius: 8px; border-left: 4px solid #1e3a8a;">
-                            <div style="display: flex; justify-content: space-between;">
-                                <div>
-                                    <strong>${session.therapy_name}</strong> - Session ${session.session_number}/${session.total_sessions}
-                                </div>
-                                <div style="color: #64748b;">
-                                    ${new Date(session.scheduled_date).toLocaleDateString('en-GB')} at ${session.scheduled_time}
-                                </div>
-                            </div>
+            // Display session list sorted by date
+            const sortedSessions = [...sessionSchedules].sort((a, b) => {
+                const dateCompare = a.date.localeCompare(b.date);
+                if (dateCompare !== 0) return dateCompare;
+                return a.time.localeCompare(b.time);
+            });
+            
+            const sessionList = document.getElementById('sessionPreviewList');
+            sessionList.innerHTML = sortedSessions.map(session => `
+                <div style="padding: 10px; margin-bottom: 10px; background: white; border-radius: 8px; border-left: 4px solid #1e3a8a;">
+                    <div style="display: flex; justify-content: space-between;">
+                        <div>
+                            <strong>${session.therapyName}</strong> - Session ${session.sessionNumber}/${session.totalSessions}
                         </div>
-                    `).join('')}
+                        <div style="color: #64748b;">
+                            ${new Date(session.date).toLocaleDateString('en-GB')} at ${formatTime(session.time)}
+                        </div>
+                    </div>
                 </div>
-            `;
+            `).join('');
             
             document.getElementById('previewCard').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function formatTime(time) {
+            const [hours, minutes] = time.split(':');
+            const hour = parseInt(hours);
+            const ampm = hour >= 12 ? 'PM' : 'AM';
+            const displayHour = hour > 12 ? hour - 12 : hour === 0 ? 12 : hour;
+            return `${displayHour}:${minutes} ${ampm}`;
         }
         
         window.adjustSchedule = function() {
@@ -808,10 +993,19 @@
         
         window.confirmTreatmentPlan = async function() {
             try {
-                // Create treatment plans for each selected therapy
-                for (const therapyCode of selectedTherapies) {
+                // Group sessions by therapy
+                const sessionsByTherapy = {};
+                sessionSchedules.forEach(session => {
+                    if (!sessionsByTherapy[session.therapyCode]) {
+                        sessionsByTherapy[session.therapyCode] = [];
+                    }
+                    sessionsByTherapy[session.therapyCode].push(session);
+                });
+                
+                // Create treatment plans for each therapy
+                for (const therapyCode of Object.keys(sessionsByTherapy)) {
                     const therapy = availableTherapies.find(t => t.therapy_code === therapyCode);
-                    if (!therapy) continue;
+                    const sessions = sessionsByTherapy[therapyCode];
                     
                     // Create treatment plan
                     const { data: plan, error: planError } = await supabase
@@ -822,9 +1016,9 @@
                             therapy_protocol_id: therapy.id,
                             therapy_name: therapy.therapy_name,
                             therapy_code: therapy.therapy_code,
-                            total_sessions: therapy.total_sessions || 6,
+                            total_sessions: sessions.length,
                             completed_sessions: 0,
-                            start_date: document.getElementById('startDate').value,
+                            start_date: sessions[0].date,
                             status: 'active',
                             created_by: currentClinicId
                         })
@@ -834,21 +1028,19 @@
                     if (planError) throw planError;
                     
                     // Create individual sessions
-                    const therapySessions = scheduledSessions
-                        .filter(s => s.therapy_code === therapyCode)
-                        .map(session => ({
-                            treatment_plan_id: plan.id,
-                            patient_id: selectedPatient.id,
-                            clinic_id: currentClinicId,
-                            session_number: session.session_number,
-                            scheduled_date: session.scheduled_date,
-                            scheduled_time: session.scheduled_time,
-                            status: 'scheduled'
-                        }));
+                    const treatmentSessions = sessions.map(session => ({
+                        treatment_plan_id: plan.id,
+                        patient_id: selectedPatient.id,
+                        clinic_id: currentClinicId,
+                        session_number: session.sessionNumber,
+                        scheduled_date: session.date,
+                        scheduled_time: session.time + ':00',
+                        status: 'scheduled'
+                    }));
                     
                     const { error: sessionsError } = await supabase
                         .from('treatment_sessions')
-                        .insert(therapySessions);
+                        .insert(treatmentSessions);
                         
                     if (sessionsError) throw sessionsError;
                 }
