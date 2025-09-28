@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Super Admin Creation</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <h1>Super Admin User Creation Test</h1>
+    <div id="results"></div>
+    
+    <button onclick="testConnection()">1. Test Connection</button>
+    <button onclick="checkTable()">2. Check Table</button>
+    <button onclick="testInsert()">3. Test Insert</button>
+    <button onclick="listUsers()">4. List All Users</button>
+    
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+        
+        const SUPABASE_URL = 'https://defifwzgazqlrigwumqn.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlZmlmd3pnYXpxbHJpZ3d1bXFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcyNTM0MjYsImV4cCI6MjA3MjgyOTQyNn0.wcUBq6Pszjtqn5aBtuu3iXBE4BLmu8x9LtJbsMWlIiA';
+        
+        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const results = document.getElementById('results');
+        
+        window.testConnection = async function() {
+            results.innerHTML += '<h3>Testing Connection...</h3>';
+            try {
+                const { data, error } = await supabase.from('clinics').select('count').limit(1);
+                if (error) throw error;
+                results.innerHTML += '<p style="color: green;">✓ Connection successful</p>';
+            } catch (error) {
+                results.innerHTML += `<p style="color: red;">✗ Connection failed: ${error.message}</p>`;
+            }
+        }
+        
+        window.checkTable = async function() {
+            results.innerHTML += '<h3>Checking super_admin_users table...</h3>';
+            try {
+                const { data, error } = await supabase
+                    .from('super_admin_users')
+                    .select('*');
+                    
+                if (error) throw error;
+                
+                results.innerHTML += `<p style="color: green;">✓ Table exists with ${data.length} users</p>`;
+                results.innerHTML += '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+            } catch (error) {
+                results.innerHTML += `<p style="color: red;">✗ Table error: ${error.message}</p>`;
+            }
+        }
+        
+        window.testInsert = async function() {
+            results.innerHTML += '<h3>Testing Insert...</h3>';
+            
+            const testUser = {
+                username: 'test_admin_' + Date.now(),
+                password_hash: 'TestPassword123',
+                full_name: 'Test Admin User',
+                email: 'test' + Date.now() + '@example.com',
+                role: 'super_admin',
+                is_active: true,
+                created_at: new Date().toISOString()
+            };
+            
+            try {
+                results.innerHTML += '<p>Attempting to insert:</p>';
+                results.innerHTML += '<pre>' + JSON.stringify(testUser, null, 2) + '</pre>';
+                
+                const { data, error } = await supabase
+                    .from('super_admin_users')
+                    .insert([testUser])
+                    .select();
+                    
+                if (error) throw error;
+                
+                results.innerHTML += '<p style="color: green;">✓ Insert successful!</p>';
+                results.innerHTML += '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                
+            } catch (error) {
+                results.innerHTML += `<p style="color: red;">✗ Insert failed: ${error.message}</p>`;
+                results.innerHTML += `<p style="color: red;">Error code: ${error.code}</p>`;
+                
+                if (error.code === '42501') {
+                    results.innerHTML += '<p style="color: orange;">⚠️ RLS Policy Error - Run this SQL:</p>';
+                    results.innerHTML += '<pre style="background: #f0f0f0; padding: 10px;">ALTER TABLE super_admin_users DISABLE ROW LEVEL SECURITY;</pre>';
+                }
+            }
+        }
+        
+        window.listUsers = async function() {
+            results.innerHTML += '<h3>All Super Admin Users:</h3>';
+            try {
+                const { data, error } = await supabase
+                    .from('super_admin_users')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+                    
+                if (error) throw error;
+                
+                if (data.length === 0) {
+                    results.innerHTML += '<p>No users found</p>';
+                } else {
+                    results.innerHTML += '<table border="1" style="width: 100%; margin-top: 10px;">';
+                    results.innerHTML += '<tr><th>ID</th><th>Username</th><th>Full Name</th><th>Email</th><th>Active</th><th>Created</th></tr>';
+                    
+                    data.forEach(user => {
+                        results.innerHTML += `<tr>
+                            <td>${user.id}</td>
+                            <td>${user.username}</td>
+                            <td>${user.full_name}</td>
+                            <td>${user.email}</td>
+                            <td>${user.is_active ? 'Yes' : 'No'}</td>
+                            <td>${new Date(user.created_at).toLocaleDateString()}</td>
+                        </tr>`;
+                    });
+                    results.innerHTML += '</table>';
+                }
+            } catch (error) {
+                results.innerHTML += `<p style="color: red;">✗ Error listing users: ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>
