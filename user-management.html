@@ -973,7 +973,15 @@
                     
                     const alertMsg = `Super Admin created successfully!\n\nUsername: ${username}\nPassword: ${password}\n\nPlease save these credentials securely.`;
                     alert(alertMsg);
+                    
+                    // Close modal first
+                    closeModal('addUserModal');
+                    
+                    // Show success message
                     showAlert('Super Admin created successfully!', 'success');
+                    
+                    // Reload the users list
+                    await loadUsers();
                     
                 } else {
                     const clinicId = document.getElementById('clinicSelect').value;
@@ -999,11 +1007,16 @@
                     
                     const alertMsg = `Clinic Admin updated successfully!\n\nUsername: ${username}\nPassword: ${password}\n\nPlease save these credentials securely.`;
                     alert(alertMsg);
+                    
+                    // Close modal first
+                    closeModal('addUserModal');
+                    
+                    // Show success message
                     showAlert('Clinic Admin updated successfully!', 'success');
+                    
+                    // Reload the users list
+                    await loadUsers();
                 }
-                
-                closeModal('addUserModal');
-                await loadUsers();
                 
             } catch (error) {
                 console.error('Error adding user:', error);
