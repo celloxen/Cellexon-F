@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Therapy Configuration - Celloxen Health Platform</title>
+    <title>Therapy Configuration - Super Admin</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
     <style>
         * {
             margin: 0;
@@ -12,305 +15,432 @@
         }
         
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #f5f5f5;
-            color: #2c3e50;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+            min-height: 100vh;
         }
         
         .header {
-            background: #1e3a8a;
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
             color: white;
-            padding: 20px 30px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 20px 0;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
         
-        .header-content {
-            max-width: 1400px;
+        .header-container {
+            max-width: 1600px;
             margin: 0 auto;
+            padding: 0 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
         
-        .page-title {
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .logo {
             font-size: 24px;
-            font-weight: 700;
+            font-weight: bold;
             letter-spacing: 1px;
         }
         
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
+        .admin-badge {
+            background: linear-gradient(135deg, #dc2626, #ef4444);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
         
-        .user-name {
-            font-size: 14px;
-            opacity: 0.9;
-        }
-        
-        .btn-back {
-            background: transparent;
-            border: 1px solid rgba(255,255,255,0.5);
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
             color: white;
             padding: 8px 20px;
-            border-radius: 5px;
+            border-radius: 6px;
             cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 14px;
-        }
-        
-        .btn-back:hover {
-            background: rgba(255,255,255,0.1);
-            border-color: white;
-        }
-        
-        .container {
-            max-width: 1400px;
-            margin: 2rem auto;
-            padding: 0 1rem;
-        }
-        
-        .controls-bar {
-            background: white;
-            border-radius: 8px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
-        
-        .search-box {
-            flex: 1;
-            min-width: 300px;
-        }
-        
-        .search-input {
-            width: 100%;
-            padding: 0.75rem;
-            border: 2px solid #e5e7eb;
-            border-radius: 8px;
-            font-size: 1rem;
-        }
-        
-        .search-input:focus {
-            outline: none;
-            border-color: #3b82f6;
-        }
-        
-        .btn-group {
-            display: flex;
-            gap: 0.5rem;
-        }
-        
-        .btn {
-            padding: 0.75rem 1.5rem;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 500;
+            text-decoration: none;
             transition: all 0.3s;
         }
         
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        
+        .page-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 30px;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            background: white;
+            padding: 10px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+        
+        .tab-btn {
+            padding: 12px 24px;
+            background: transparent;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            color: #64748b;
+            transition: all 0.3s;
+        }
+        
+        .tab-btn.active {
+            background: linear-gradient(135deg, #1e3a8a, #1e40af);
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            margin-bottom: 25px;
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .card-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
         .btn-primary {
-            background: #3b82f6;
+            background: linear-gradient(135deg, #10b981, #059669);
             color: white;
         }
         
         .btn-primary:hover {
-            background: #2563eb;
-            transform: translateY(-1px);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3);
         }
         
-        .btn-success {
-            background: #10b981;
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #374151;
+        }
+        
+        .btn-danger {
+            background: #ef4444;
             color: white;
         }
         
-        .btn-success:hover {
-            background: #059669;
-        }
-        
-        .btn-warning {
-            background: #f59e0b;
-            color: white;
-        }
-        
-        .main-grid {
+        .therapy-grid {
             display: grid;
-            grid-template-columns: 350px 1fr;
-            gap: 2rem;
+            gap: 20px;
         }
         
-        .therapy-list {
-            background: white;
-            border-radius: 8px;
-            padding: 1.5rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
-            max-height: calc(100vh - 250px);
-            overflow-y: auto;
+        .therapy-card {
+            background: #f8fafc;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 20px;
+            position: relative;
         }
         
-        .therapy-category {
-            margin-bottom: 1.5rem;
+        .therapy-card.active {
+            border-color: #10b981;
+            background: #f0fdf4;
         }
         
-        .category-title {
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: #6b7280;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 0.5rem;
-            padding-left: 0.5rem;
-        }
-        
-        .therapy-item {
-            padding: 0.75rem 1rem;
-            margin-bottom: 0.25rem;
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s;
+        .therapy-header {
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items: start;
+            margin-bottom: 15px;
         }
         
-        .therapy-item:hover {
-            background: #f3f4f6;
-            border-color: #3b82f6;
-        }
-        
-        .therapy-item.active {
-            background: #3b82f6;
-            color: white;
-            border-color: #2563eb;
+        .therapy-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1e293b;
         }
         
         .therapy-code {
-            font-size: 0.8rem;
-            opacity: 0.7;
-        }
-        
-        .config-panel {
-            background: white;
-            border-radius: 8px;
-            padding: 2rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
-        }
-        
-        .config-header {
-            border-bottom: 2px solid #3b82f6;
-            padding-bottom: 1rem;
-            margin-bottom: 2rem;
-        }
-        
-        .config-title {
-            font-size: 1.5rem;
-            color: #2c3e50;
-            margin-bottom: 0.5rem;
-        }
-        
-        .config-subtitle {
-            color: #6b7280;
-        }
-        
-        .config-section {
-            margin-bottom: 2rem;
-        }
-        
-        .section-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: #2c3e50;
-            margin-bottom: 1rem;
-        }
-        
-        .probe-config-table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 0 0 1px #e5e7eb;
-        }
-        
-        .probe-config-table th {
-            background: #f3f4f6;
-            padding: 0.75rem;
-            text-align: left;
-            font-weight: 600;
-            font-size: 0.9rem;
-        }
-        
-        .probe-config-table td {
-            padding: 0.75rem;
-            border-top: 1px solid #e5e7eb;
-        }
-        
-        .probe-input {
-            width: 100%;
-            padding: 0.5rem;
-            border: 1px solid #e5e7eb;
+            background: #1e3a8a;
+            color: white;
+            padding: 4px 12px;
             border-radius: 6px;
+            font-size: 12px;
         }
         
-        .cable-badge {
-            display: inline-block;
-            padding: 0.25rem 0.75rem;
-            border-radius: 20px;
-            font-weight: 500;
-            font-size: 0.85rem;
-        }
-        
-        .cable-blue { background: #dbeafe; color: #1e40af; }
-        .cable-yellow { background: #fef3c7; color: #f59e0b; }
-        .cable-green { background: #d1fae5; color: #065f46; }
-        .cable-grey-black { background: #f3f4f6; color: #374151; }
-        .cable-grey-white { background: #fafafa; color: #6b7280; border: 1px solid #e5e7eb; }
-        
-        .parameters-grid {
+        .therapy-details {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
         }
         
-        .parameter-field {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-        
-        .parameter-label {
-            font-size: 0.9rem;
-            font-weight: 500;
-            color: #6b7280;
-        }
-        
-        .parameter-input {
-            padding: 0.5rem;
-            border: 1px solid #e5e7eb;
+        .detail-item {
+            background: white;
+            padding: 10px;
             border-radius: 6px;
         }
         
-        .action-buttons {
+        .detail-label {
+            font-size: 11px;
+            color: #64748b;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+        
+        .detail-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .therapy-actions {
             display: flex;
-            gap: 1rem;
-            padding-top: 2rem;
+            gap: 10px;
+            margin-top: 15px;
+            padding-top: 15px;
             border-top: 1px solid #e5e7eb;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 800px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .modal-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 28px;
+            color: #64748b;
+            cursor: pointer;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 5px;
+        }
+        
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .diagram-upload-area {
+            border: 2px dashed #cbd5e1;
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            background: #f8fafc;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .diagram-upload-area:hover {
+            border-color: #3b82f6;
+            background: #f0f9ff;
+        }
+        
+        .diagram-preview {
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .diagram-preview img {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        
+        .diagram-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .diagram-item {
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+        }
+        
+        .diagram-thumbnail {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+        
+        .diagram-name {
+            font-size: 12px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 5px;
+        }
+        
+        .diagram-actions {
+            display: flex;
+            gap: 5px;
+            justify-content: center;
+            margin-top: 10px;
+        }
+        
+        .alert {
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin: 15px 0;
+        }
+        
+        .alert-info {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            color: #92400e;
+            border-left: 4px solid #f59e0b;
+        }
+        
+        .alert-success {
+            background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+            color: #065f46;
+            border-left: 4px solid #10b981;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #64748b;
+        }
+        
+        .spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #1e3a8a;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
         
         .status-badge {
             display: inline-block;
-            padding: 0.25rem 0.75rem;
+            padding: 4px 12px;
             border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 500;
+            font-size: 11px;
+            font-weight: 600;
         }
         
         .status-active {
@@ -322,553 +452,696 @@
             background: #fee2e2;
             color: #991b1b;
         }
-        
-        .alert {
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 1rem;
-        }
-        
-        .alert-success {
-            background: #d1fae5;
-            color: #065f46;
-            border: 1px solid #10b981;
-        }
-        
-        .alert-warning {
-            background: #fed7aa;
-            color: #92400e;
-            border: 1px solid #f97316;
-        }
-        
-        @media (max-width: 768px) {
-            .main-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .therapy-list {
-                max-height: 300px;
-            }
-        }
     </style>
 </head>
 <body>
     <div class="header">
-        <div class="header-content">
-            <div class="page-title">CELLOXEN HEALTH PLATFORM - THERAPY CONFIGURATION</div>
-            <div class="user-info">
-                <span class="user-name">Super Administrator</span>
-                <button class="btn-back" onclick="window.location.href='super-admin-dashboard.html'">
-                    Back to Dashboard
-                </button>
+        <div class="header-container">
+            <div class="logo-section">
+                <div class="logo">CELLOXEN</div>
+                <span class="admin-badge">SUPER ADMIN</span>
             </div>
+            <a href="super-admin-dashboard.html" class="back-btn">← Back to Dashboard</a>
         </div>
     </div>
     
     <div class="container">
-        <div class="controls-bar">
-            <div class="search-box">
-                <input type="text" class="search-input" placeholder="Search therapies..." id="searchInput" onkeyup="filterTherapies()">
-            </div>
-            <div class="btn-group">
-                <button class="btn btn-success" onclick="saveAllChanges()">Save All Changes</button>
-                <button class="btn btn-warning" onclick="exportConfig()">Export Config</button>
+        <h1 class="page-title">Therapy Configuration Management</h1>
+        
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('protocols')">Therapy Protocols</button>
+            <button class="tab-btn" onclick="switchTab('diagrams')">Probe Diagrams</button>
+            <button class="tab-btn" onclick="switchTab('categories')">Categories</button>
+        </div>
+        
+        <!-- Therapy Protocols Tab -->
+        <div id="protocolsTab" class="tab-content active">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Therapy Protocols</h2>
+                    <button class="btn btn-primary" onclick="openAddProtocolModal()">
+                        + Add New Protocol
+                    </button>
+                </div>
+                
+                <div class="alert alert-info">
+                    Configure therapy protocols with session counts, durations, and treatment parameters.
+                    These settings will be used in treatment planning and delivery.
+                </div>
+                
+                <div id="protocolsList" class="therapy-grid">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>Loading therapy protocols...</p>
+                    </div>
+                </div>
             </div>
         </div>
         
-        <div id="alertContainer"></div>
-        
-        <div class="main-grid">
-            <div class="therapy-list">
-                <div class="therapy-category">
-                    <div class="category-title">Sleep & Stress Management</div>
-                    <div class="therapy-item active" onclick="selectTherapy('deep-sleep', this)">
-                        <span>Deep Sleep Renewal</span>
-                        <span class="therapy-code">101</span>
-                    </div>
-                    <div class="therapy-item" onclick="selectTherapy('stress-relief', this)">
-                        <span>Stress Relief</span>
-                        <span class="therapy-code">102</span>
-                    </div>
-                    <div class="therapy-item" onclick="selectTherapy('relaxation-calm', this)">
-                        <span>Relaxation & Calm</span>
-                        <span class="therapy-code">103</span>
-                    </div>
-                    <div class="therapy-item" onclick="selectTherapy('sleep-quality', this)">
-                        <span>Sleep Quality</span>
-                        <span class="therapy-code">104</span>
-                    </div>
+        <!-- Probe Diagrams Tab -->
+        <div id="diagramsTab" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Probe Placement Diagrams</h2>
+                    <button class="btn btn-primary" onclick="openAddDiagramModal()">
+                        + Upload Diagram
+                    </button>
                 </div>
                 
-                <div class="therapy-category">
-                    <div class="category-title">Metabolic Health</div>
-                    <div class="therapy-item" onclick="selectTherapy('blood-sugar', this)">
-                        <span>Blood Sugar Balance</span>
-                        <span class="therapy-code">100</span>
-                    </div>
+                <div class="alert alert-info">
+                    Upload probe placement diagrams for each therapy. These will be displayed 
+                    at 75% screen size during treatment delivery.
                 </div>
                 
-                <div class="therapy-category">
-                    <div class="category-title">Cardiovascular</div>
-                    <div class="therapy-item" onclick="selectTherapy('heart-health', this)">
-                        <span>Heart Health</span>
-                        <span class="therapy-code">301</span>
-                    </div>
-                    <div class="therapy-item" onclick="selectTherapy('blood-pressure', this)">
-                        <span>Blood Pressure Balance</span>
-                        <span class="therapy-code">302</span>
-                    </div>
-                    <div class="therapy-item" onclick="selectTherapy('circulation-boost', this)">
-                        <span>Circulation Boost</span>
-                        <span class="therapy-code">303</span>
-                    </div>
-                    <div class="therapy-item" onclick="selectTherapy('cardiovascular-vitality', this)">
-                        <span>Cardiovascular Vitality</span>
-                        <span class="therapy-code">304</span>
-                    </div>
+                <div class="form-group">
+                    <label class="form-label">Filter by Therapy</label>
+                    <select class="form-select" id="therapyFilter" onchange="filterDiagrams()">
+                        <option value="">All Therapies</option>
+                    </select>
                 </div>
                 
-                <div class="therapy-category">
-                    <div class="category-title">Joint & Mobility</div>
-                    <div class="therapy-item" onclick="selectTherapy('gout-relief', this)">
-                        <span>Gout Relief</span>
-                        <span class="therapy-code">401</span>
-                    </div>
-                    <div class="therapy-item" onclick="selectTherapy('arthricomfort', this)">
-                        <span>ArthriComfort</span>
-                        <span class="therapy-code">402</span>
-                    </div>
-                    <div class="therapy-item" onclick="selectTherapy('joint-mobility', this)">
-                        <span>Joint Mobility</span>
-                        <span class="therapy-code">403</span>
-                    </div>
-                </div>
-                
-                <div class="therapy-category">
-                    <div class="category-title">Kidney & Urinary</div>
-                    <div class="therapy-item" onclick="selectTherapy('kidney-vitality', this)">
-                        <span>Kidney Vitality</span>
-                        <span class="therapy-code">201</span>
-                    </div>
-                    <div class="therapy-item" onclick="selectTherapy('kidney-support', this)">
-                        <span>Kidney Support</span>
-                        <span class="therapy-code">202</span>
-                    </div>
-                    <div class="therapy-item" onclick="selectTherapy('bladder-comfort', this)">
-                        <span>Bladder Comfort</span>
-                        <span class="therapy-code">203</span>
-                    </div>
-                    <div class="therapy-item" onclick="selectTherapy('urinary-flow', this)">
-                        <span>Urinary Flow</span>
-                        <span class="therapy-code">204</span>
-                    </div>
-                </div>
-                
-                <div class="therapy-category">
-                    <div class="category-title">Wellness & Energy</div>
-                    <div class="therapy-item" onclick="selectTherapy('digestive-balance', this)">
-                        <span>Digestive Balance</span>
-                        <span class="therapy-code">601</span>
-                    </div>
-                    <div class="therapy-item" onclick="selectTherapy('energy-boost', this)">
-                        <span>Energy Boost</span>
-                        <span class="therapy-code">602</span>
-                    </div>
-                    <div class="therapy-item" onclick="selectTherapy('skin-health', this)">
-                        <span>Skin Health</span>
-                        <span class="therapy-code">703</span>
-                    </div>
-                </div>
-                
-                <div class="therapy-category">
-                    <div class="category-title">Healing Support</div>
-                    <div class="therapy-item" onclick="selectTherapy('wound-healing', this)">
-                        <span>Wound Healing</span>
-                        <span class="therapy-code">501</span>
-                    </div>
-                    <div class="therapy-item" onclick="selectTherapy('vascular-health', this)">
-                        <span>Vascular Health</span>
-                        <span class="therapy-code">502</span>
-                    </div>
-                </div>
-                
-                <div class="therapy-category">
-                    <div class="category-title">Comprehensive Packages</div>
-                    <div class="therapy-item" onclick="selectTherapy('total-wellness', this)">
-                        <span>Total Wellness</span>
-                        <span class="therapy-code">801</span>
-                    </div>
-                    <div class="therapy-item" onclick="selectTherapy('stress-relaxation-package', this)">
-                        <span>Stress & Relaxation Package</span>
-                        <span class="therapy-code">802</span>
+                <div id="diagramsList" class="diagram-list">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>Loading diagrams...</p>
                     </div>
                 </div>
             </div>
-            
-            <div class="config-panel">
-                <div class="config-header">
-                    <h2 class="config-title" id="therapyTitle">Deep Sleep Renewal Therapy</h2>
-                    <p class="config-subtitle">
-                        Code: <span id="therapyCode">101</span> | 
-                        Status: <span class="status-badge status-active">Active</span>
-                    </p>
+        </div>
+        
+        <!-- Categories Tab -->
+        <div id="categoriesTab" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Therapy Categories</h2>
+                    <button class="btn btn-primary" onclick="openAddCategoryModal()">
+                        + Add Category
+                    </button>
                 </div>
                 
-                <div class="config-section">
-                    <h3 class="section-title">Probe Configuration</h3>
-                    <table class="probe-config-table">
-                        <thead>
-                            <tr>
-                                <th>Probe</th>
-                                <th>Cable Colour</th>
-                                <th>Placement Location</th>
-                                <th>Editable</th>
-                            </tr>
-                        </thead>
-                        <tbody id="probeConfigTable">
-                            <tr>
-                                <td>Probe 1</td>
-                                <td><span class="cable-badge cable-blue">Blue</span></td>
-                                <td><input type="text" class="probe-input" value="Lower back - centre of spine at waist level"></td>
-                                <td><input type="checkbox" checked></td>
-                            </tr>
-                            <tr>
-                                <td>Probe 2</td>
-                                <td><span class="cable-badge cable-yellow">Yellow</span></td>
-                                <td><input type="text" class="probe-input" value="Upper back - between shoulder blades"></td>
-                                <td><input type="checkbox" checked></td>
-                            </tr>
-                            <tr>
-                                <td>Probe 3</td>
-                                <td><span class="cable-badge cable-green">Green</span></td>
-                                <td><input type="text" class="probe-input" value="Back of neck - base of skull"></td>
-                                <td><input type="checkbox" checked></td>
-                            </tr>
-                            <tr>
-                                <td>Probe 4</td>
-                                <td><span class="cable-badge cable-grey-black">Grey/Black</span></td>
-                                <td><input type="text" class="probe-input" value="Left temple"></td>
-                                <td><input type="checkbox" checked></td>
-                            </tr>
-                            <tr>
-                                <td>Probe 5</td>
-                                <td><span class="cable-badge cable-grey-white">Grey/White</span></td>
-                                <td><input type="text" class="probe-input" value="Right temple"></td>
-                                <td><input type="checkbox" checked></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                
-                <div class="config-section">
-                    <h3 class="section-title">Treatment Parameters</h3>
-                    <div class="parameters-grid">
-                        <div class="parameter-field">
-                            <label class="parameter-label">Duration (minutes)</label>
-                            <input type="text" class="parameter-input" value="30-40" id="duration">
-                        </div>
-                        <div class="parameter-field">
-                            <label class="parameter-label">Frequency</label>
-                            <select class="parameter-input" id="frequency">
-                                <option value="daily">Daily</option>
-                                <option value="2x-daily">Twice Daily</option>
-                                <option value="3x-weekly">3x Weekly</option>
-                                <option value="weekly">Weekly</option>
-                            </select>
-                        </div>
-                        <div class="parameter-field">
-                            <label class="parameter-label">Intensity Range</label>
-                            <input type="text" class="parameter-input" value="2-4" id="intensity">
-                        </div>
-                        <div class="parameter-field">
-                            <label class="parameter-label">Temperature</label>
-                            <select class="parameter-input" id="temperature">
-                                <option value="low">Low</option>
-                                <option value="low-medium">Low-Medium</option>
-                                <option value="medium">Medium</option>
-                                <option value="high">High</option>
-                            </select>
-                        </div>
-                        <div class="parameter-field">
-                            <label class="parameter-label">Course Length (days)</label>
-                            <input type="number" class="parameter-input" value="10" id="courseLength">
-                        </div>
-                        <div class="parameter-field">
-                            <label class="parameter-label">Best Time</label>
-                            <select class="parameter-input" id="bestTime">
-                                <option value="morning">Morning</option>
-                                <option value="afternoon">Afternoon</option>
-                                <option value="evening">Evening</option>
-                                <option value="before-meals">Before Meals</option>
-                                <option value="after-meals">After Meals</option>
-                            </select>
-                        </div>
+                <div id="categoriesList">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>Loading categories...</p>
                     </div>
-                </div>
-                
-                <div class="config-section">
-                    <h3 class="section-title">Clinical Notes & Warnings</h3>
-                    <textarea class="parameter-input" rows="4" style="width: 100%;" id="clinicalNotes">Best performed 1-2 hours before bedtime. Patient should be in a quiet, comfortable environment. Avoid caffeine 4 hours before treatment.</textarea>
-                </div>
-                
-                <div class="config-section">
-                    <h3 class="section-title">Clinic Access Control</h3>
-                    <div class="parameter-field">
-                        <label class="parameter-label">
-                            <input type="checkbox" checked> Allow all clinics to use this therapy
-                        </label>
-                    </div>
-                    <div class="parameter-field">
-                        <label class="parameter-label">
-                            <input type="checkbox"> Require certification for this therapy
-                        </label>
-                    </div>
-                </div>
-                
-                <div class="action-buttons">
-                    <button class="btn btn-primary" onclick="saveTherapyConfig()">Save Configuration</button>
-                    <button class="btn btn-warning" onclick="duplicateTherapy()">Duplicate Therapy</button>
-                    <button class="btn" style="background: #ef4444; color: white;" onclick="deactivateTherapy()">Deactivate</button>
                 </div>
             </div>
         </div>
     </div>
     
-    <script src="https://unpkg.com/@supabase/supabase-js@1.35.7/dist/umd/supabase.js"></script>
-    <script>
-        // Check authentication first
-        document.addEventListener('DOMContentLoaded', function() {
-            try {
-                const authDataStr = localStorage.getItem('celloxen_auth');
-                if (!authDataStr) {
-                    alert('Unauthorized access - No authentication found');
-                    window.location.href = 'unified-login.html';
-                    return;
-                }
+    <!-- Add/Edit Protocol Modal -->
+    <div id="protocolModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="protocolModalTitle">Add Therapy Protocol</h3>
+                <button class="close-btn" onclick="closeModal('protocolModal')">×</button>
+            </div>
+            
+            <form id="protocolForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Therapy Code *</label>
+                        <input type="text" class="form-input" id="therapyCode" required 
+                               placeholder="e.g., STRESS-001">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Category *</label>
+                        <select class="form-select" id="therapyCategory" required>
+                            <option value="">Select Category</option>
+                            <option value="Mental Wellness">Mental Wellness</option>
+                            <option value="Digestive Health">Digestive Health</option>
+                            <option value="Immune Support">Immune Support</option>
+                            <option value="Pain Relief">Pain Relief</option>
+                            <option value="Vitality">Vitality</option>
+                            <option value="Detoxification">Detoxification</option>
+                            <option value="Sleep Health">Sleep Health</option>
+                            <option value="Heart Health">Heart Health</option>
+                        </select>
+                    </div>
+                </div>
                 
-                const authData = JSON.parse(authDataStr);
-                if (authData.userType !== 'super_admin') {
-                    alert('Unauthorized access - Super admin only');
-                    window.location.href = 'unified-login.html';
-                    return;
-                }
+                <div class="form-group">
+                    <label class="form-label">Therapy Name *</label>
+                    <input type="text" class="form-input" id="therapyName" required 
+                           placeholder="e.g., Stress Relief Protocol">
+                </div>
                 
-                console.log('Super admin authenticated:', authData.username);
+                <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <textarea class="form-textarea" id="therapyDescription" 
+                              placeholder="Describe the therapy protocol..."></textarea>
+                </div>
                 
-            } catch (error) {
-                console.error('Authentication error:', error);
-                alert('Authentication error');
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Total Sessions *</label>
+                        <input type="number" class="form-input" id="totalSessions" 
+                               required min="1" max="50" value="6">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Session Duration (minutes) *</label>
+                        <input type="number" class="form-input" id="sessionDuration" 
+                               required min="15" max="120" value="45">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Sessions Per Week</label>
+                        <input type="number" class="form-input" id="sessionsPerWeek" 
+                               min="1" max="7" value="2">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Status</label>
+                        <select class="form-select" id="therapyStatus">
+                            <option value="true">Active</option>
+                            <option value="false">Inactive</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Conditions Treated</label>
+                    <input type="text" class="form-input" id="conditionsTreated" 
+                           placeholder="e.g., Anxiety, Stress, Tension">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Contraindications</label>
+                    <textarea class="form-textarea" id="contraindications" 
+                              placeholder="List any contraindications..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Expected Outcomes</label>
+                    <textarea class="form-textarea" id="expectedOutcomes" 
+                              placeholder="Describe expected treatment outcomes..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Clinical Instructions</label>
+                    <textarea class="form-textarea" id="instructions" 
+                              placeholder="Instructions for practitioners..."></textarea>
+                </div>
+                
+                <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 30px;">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('protocolModal')">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        Save Protocol
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Add/Edit Diagram Modal -->
+    <div id="diagramModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Upload Probe Diagram</h3>
+                <button class="close-btn" onclick="closeModal('diagramModal')">×</button>
+            </div>
+            
+            <form id="diagramForm">
+                <div class="form-group">
+                    <label class="form-label">Select Therapy *</label>
+                    <select class="form-select" id="diagramTherapy" required>
+                        <option value="">Select a therapy...</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Diagram Name *</label>
+                    <input type="text" class="form-input" id="diagramName" required 
+                           placeholder="e.g., Primary Probe Placement">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Diagram Type</label>
+                    <select class="form-select" id="diagramType">
+                        <option value="primary">Primary</option>
+                        <option value="alternative">Alternative</option>
+                        <option value="supplementary">Supplementary</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Diagram URL or Upload *</label>
+                    <input type="text" class="form-input" id="diagramUrl" 
+                           placeholder="Enter image URL or upload below">
+                </div>
+                
+                <div class="form-group">
+                    <div class="diagram-upload-area" onclick="document.getElementById('diagramFile').click()">
+                        <p style="font-size: 48px; margin-bottom: 10px;">📸</p>
+                        <p style="font-weight: 600; color: #1e293b;">Click to Upload Image</p>
+                        <p style="font-size: 12px; color: #64748b; margin-top: 5px;">
+                            PNG, JPG up to 5MB
+                        </p>
+                        <input type="file" id="diagramFile" accept="image/*" style="display: none;" 
+                               onchange="previewDiagram(event)">
+                    </div>
+                    <div id="diagramPreview" class="diagram-preview" style="display: none;">
+                        <img id="previewImage" src="" alt="Preview">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Placement Instructions</label>
+                    <textarea class="form-textarea" id="diagramInstructions" rows="5"
+                              placeholder="Step-by-step probe placement instructions..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Display Order</label>
+                    <input type="number" class="form-input" id="displayOrder" value="1" min="1">
+                </div>
+                
+                <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 30px;">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('diagramModal')">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        Save Diagram
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+        
+        const SUPABASE_URL = 'https://defifwzgazqlrigwumqn.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlZmlmd3pnYXpxbHJpZ3d1bXFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcyNTM0MjYsImV4cCI6MjA3MjgyOTQyNn0.wcUBq6Pszjtqn5aBtuu3iXBE4BLmu8x9LtJbsMWlIiA';
+        
+        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        let protocols = [];
+        let diagrams = [];
+        let editingProtocolId = null;
+        let editingDiagramId = null;
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            await checkAuthentication();
+            await loadProtocols();
+            await loadDiagrams();
+            setupEventListeners();
+        });
+        
+        async function checkAuthentication() {
+            const authData = localStorage.getItem('celloxen_auth');
+            if (!authData) {
                 window.location.href = 'unified-login.html';
                 return;
             }
             
-            // Initialize after authentication check
-            loadTherapyConfigs();
-        });
-        
-        // Initialize Supabase with correct key
-        const SUPABASE_URL = 'https://defifwzgazqlrigwumqn.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlZmlmd3pnYXpxbHJpZ3d1bXFuIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NzI1MzQyNiwiZXhwIjoyMDcyODI5NDI2fQ.Z2rYuNduatwFsIfiA4aO-g__GNtQKAXBEyHBLG4r5W8';
-        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        
-        let currentTherapy = 'deep-sleep';
-        let therapyConfigs = {};
-        
-        // Load therapy configurations from database
-        async function loadTherapyConfigs() {
-            try {
-                const { data, error } = await supabaseClient
-                    .from('therapy_configurations')
-                    .select('*');
-                
-                if (data) {
-                    data.forEach(config => {
-                        therapyConfigs[config.therapy_id] = config;
-                    });
-                }
-            } catch (error) {
-                console.error('Error loading configurations:', error);
+            const auth = JSON.parse(authData);
+            if (auth.userType !== 'super_admin') {
+                alert('Access denied. Super Administrator privileges required.');
+                window.location.href = 'super-admin-dashboard.html';
+                return;
             }
         }
         
-        function selectTherapy(therapyId, element) {
-            // Update active state
-            document.querySelectorAll('.therapy-item').forEach(item => {
-                item.classList.remove('active');
-            });
-            element.classList.add('active');
-            
-            currentTherapy = therapyId;
-            loadTherapyData(therapyId);
-        }
-        
-        function loadTherapyData(therapyId) {
-            // Load therapy configuration from database or use defaults
-            const config = therapyConfigs[therapyId] || getDefaultConfig(therapyId);
-            
-            // Update UI with therapy data
-            document.getElementById('therapyTitle').textContent = config.name;
-            document.getElementById('therapyCode').textContent = config.code;
-            
-            // Update probe configuration table
-            updateProbeTable(config.probes);
-            
-            // Update parameters
-            document.getElementById('duration').value = config.duration;
-            document.getElementById('frequency').value = config.frequency;
-            document.getElementById('intensity').value = config.intensity;
-            document.getElementById('temperature').value = config.temperature;
-            document.getElementById('courseLength').value = config.courseLength;
-            document.getElementById('bestTime').value = config.bestTime;
-            document.getElementById('clinicalNotes').value = config.notes;
-        }
-        
-        async function saveTherapyConfig() {
-            const config = {
-                therapy_id: currentTherapy,
-                name: document.getElementById('therapyTitle').textContent,
-                code: document.getElementById('therapyCode').textContent,
-                probes: getProbeConfiguration(),
-                duration: document.getElementById('duration').value,
-                frequency: document.getElementById('frequency').value,
-                intensity: document.getElementById('intensity').value,
-                temperature: document.getElementById('temperature').value,
-                course_length: document.getElementById('courseLength').value,
-                best_time: document.getElementById('bestTime').value,
-                notes: document.getElementById('clinicalNotes').value,
-                is_active: true,
-                updated_at: new Date().toISOString()
-            };
-            
+        async function loadProtocols() {
             try {
-                const { data, error } = await supabaseClient
-                    .from('therapy_configurations')
-                    .upsert(config);
-                
+                const { data, error } = await supabase
+                    .from('therapy_protocols')
+                    .select('*')
+                    .order('therapy_name');
+                    
                 if (error) throw error;
                 
-                showAlert('Configuration saved successfully!', 'success');
-                therapyConfigs[currentTherapy] = config;
+                protocols = data || [];
+                displayProtocols();
+                populateTherapySelects();
+                
             } catch (error) {
-                console.error('Error saving configuration:', error);
-                showAlert('Failed to save configuration', 'error');
+                console.error('Error loading protocols:', error);
+                document.getElementById('protocolsList').innerHTML = 
+                    '<p>Error loading protocols. Please refresh the page.</p>';
             }
         }
         
-        function getProbeConfiguration() {
-            const probes = [];
-            const rows = document.querySelectorAll('#probeConfigTable tr');
-            rows.forEach((row, index) => {
-                const input = row.querySelector('.probe-input');
-                if (input) {
-                    probes.push({
-                        number: index + 1,
-                        location: input.value,
-                        editable: row.querySelector('input[type="checkbox"]').checked
-                    });
-                }
-            });
-            return probes;
-        }
-        
-        function showAlert(message, type) {
-            const alertDiv = document.createElement('div');
-            alertDiv.className = `alert alert-${type}`;
-            alertDiv.textContent = message;
-            document.getElementById('alertContainer').appendChild(alertDiv);
+        function displayProtocols() {
+            const container = document.getElementById('protocolsList');
             
-            setTimeout(() => {
-                alertDiv.remove();
-            }, 5000);
-        }
-        
-        function filterTherapies() {
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            document.querySelectorAll('.therapy-item').forEach(item => {
-                const text = item.textContent.toLowerCase();
-                item.style.display = text.includes(searchTerm) ? 'flex' : 'none';
-            });
-        }
-        
-        async function saveAllChanges() {
-            // Save all modified configurations
-            showAlert('All changes saved successfully!', 'success');
-        }
-        
-        function exportConfig() {
-            // Export configuration as JSON
-            const dataStr = JSON.stringify(therapyConfigs, null, 2);
-            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            if (protocols.length === 0) {
+                container.innerHTML = '<p>No therapy protocols configured yet.</p>';
+                return;
+            }
             
-            const exportFileDefaultName = 'therapy-configurations.json';
-            
-            const linkElement = document.createElement('a');
-            linkElement.setAttribute('href', dataUri);
-            linkElement.setAttribute('download', exportFileDefaultName);
-            linkElement.click();
+            container.innerHTML = protocols.map(protocol => `
+                <div class="therapy-card ${protocol.is_active ? 'active' : ''}">
+                    <div class="therapy-header">
+                        <div>
+                            <div class="therapy-name">${protocol.therapy_name}</div>
+                            <span class="status-badge ${protocol.is_active ? 'status-active' : 'status-inactive'}">
+                                ${protocol.is_active ? 'Active' : 'Inactive'}
+                            </span>
+                        </div>
+                        <div class="therapy-code">${protocol.therapy_code}</div>
+                    </div>
+                    
+                    <div class="therapy-details">
+                        <div class="detail-item">
+                            <div class="detail-label">Sessions</div>
+                            <div class="detail-value">${protocol.total_sessions || 6}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Duration</div>
+                            <div class="detail-value">${protocol.session_duration_minutes || 45} min</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Per Week</div>
+                            <div class="detail-value">${protocol.sessions_per_week || 2}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Category</div>
+                            <div class="detail-value">${protocol.category || 'General'}</div>
+                        </div>
+                    </div>
+                    
+                    ${protocol.description ? `
+                        <p style="font-size: 13px; color: #64748b; margin: 15px 0;">
+                            ${protocol.description}
+                        </p>
+                    ` : ''}
+                    
+                    <div class="therapy-actions">
+                        <button class="btn btn-secondary" onclick="editProtocol(${protocol.id})">
+                            Edit
+                        </button>
+                        <button class="btn btn-secondary" onclick="viewDiagrams('${protocol.therapy_code}')">
+                            View Diagrams
+                        </button>
+                        <button class="btn btn-danger" onclick="deleteProtocol(${protocol.id})">
+                            Delete
+                        </button>
+                    </div>
+                </div>
+            `).join('');
         }
         
-        function duplicateTherapy() {
-            showAlert('Therapy duplicated successfully!', 'success');
-        }
-        
-        function deactivateTherapy() {
-            if (confirm('Are you sure you want to deactivate this therapy?')) {
-                showAlert('Therapy deactivated', 'warning');
+        async function loadDiagrams() {
+            try {
+                const { data, error } = await supabase
+                    .from('probe_diagrams')
+                    .select('*')
+                    .order('therapy_code, display_order');
+                    
+                if (error) throw error;
+                
+                diagrams = data || [];
+                displayDiagrams();
+                
+            } catch (error) {
+                console.error('Error loading diagrams:', error);
             }
         }
         
-        function getDefaultConfig(therapyId) {
-            // Return default configuration for each therapy
-            const defaults = {
-                'deep-sleep': {
-                    name: 'Deep Sleep Renewal Therapy',
-                    code: '101',
-                    duration: '30-40',
-                    frequency: 'daily',
-                    intensity: '2-4',
-                    temperature: 'low',
-                    courseLength: 10,
-                    bestTime: 'evening',
-                    notes: 'Best performed 1-2 hours before bedtime.',
-                    probes: [
-                        { number: 1, location: 'Lower back - centre of spine at waist level' },
-                        { number: 2, location: 'Upper back - between shoulder blades' },
-                        { number: 3, location: 'Back of neck - base of skull' },
-                        { number: 4, location: 'Left temple' },
-                        { number: 5, location: 'Right temple' }
-                    ]
-                }
-                // Add other therapy defaults as needed
+        function displayDiagrams(filteredDiagrams = null) {
+            const container = document.getElementById('diagramsList');
+            const diagramsToShow = filteredDiagrams || diagrams;
+            
+            if (diagramsToShow.length === 0) {
+                container.innerHTML = '<p>No probe diagrams uploaded yet.</p>';
+                return;
+            }
+            
+            container.innerHTML = diagramsToShow.map(diagram => `
+                <div class="diagram-item">
+                    ${diagram.diagram_url ? `
+                        <img src="${diagram.diagram_url}" alt="${diagram.diagram_name}" 
+                             class="diagram-thumbnail"
+                             onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22150%22%3E%3Crect width=%22200%22 height=%22150%22 fill=%22%23e5e7eb%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%2364748b%22 font-family=%22sans-serif%22%3ENo Image%3C/text%3E%3C/svg%3E'">
+                    ` : `
+                        <div class="diagram-thumbnail" style="background: #e5e7eb; display: flex; align-items: center; justify-content: center; color: #64748b;">
+                            No Image
+                        </div>
+                    `}
+                    <div class="diagram-name">${diagram.diagram_name}</div>
+                    <div style="font-size: 11px; color: #64748b;">
+                        ${diagram.therapy_code} | ${diagram.diagram_type}
+                    </div>
+                    <div class="diagram-actions">
+                        <button class="btn btn-secondary" style="padding: 5px 10px; font-size: 12px;" 
+                                onclick="editDiagram(${diagram.id})">
+                            Edit
+                        </button>
+                        <button class="btn btn-danger" style="padding: 5px 10px; font-size: 12px;" 
+                                onclick="deleteDiagram(${diagram.id})">
+                            Delete
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function populateTherapySelects() {
+            const therapyFilter = document.getElementById('therapyFilter');
+            const diagramTherapy = document.getElementById('diagramTherapy');
+            
+            const options = protocols.map(p => 
+                `<option value="${p.therapy_code}">${p.therapy_name} (${p.therapy_code})</option>`
+            ).join('');
+            
+            therapyFilter.innerHTML = '<option value="">All Therapies</option>' + options;
+            diagramTherapy.innerHTML = '<option value="">Select a therapy...</option>' + options;
+        }
+        
+        function setupEventListeners() {
+            document.getElementById('protocolForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await saveProtocol();
+            });
+            
+            document.getElementById('diagramForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await saveDiagram();
+            });
+        }
+        
+        window.switchTab = function(tab) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Remove active from all buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected tab
+            document.getElementById(`${tab}Tab`).classList.add('active');
+            
+            // Set active button
+            event.target.classList.add('active');
+        };
+        
+        window.openAddProtocolModal = function() {
+            editingProtocolId = null;
+            document.getElementById('protocolModalTitle').textContent = 'Add Therapy Protocol';
+            document.getElementById('protocolForm').reset();
+            document.getElementById('protocolModal').classList.add('active');
+        };
+        
+        window.openAddDiagramModal = function() {
+            editingDiagramId = null;
+            document.getElementById('diagramForm').reset();
+            document.getElementById('diagramPreview').style.display = 'none';
+            document.getElementById('diagramModal').classList.add('active');
+        };
+        
+        window.closeModal = function(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        };
+        
+        window.editProtocol = async function(id) {
+            const protocol = protocols.find(p => p.id === id);
+            if (!protocol) return;
+            
+            editingProtocolId = id;
+            document.getElementById('protocolModalTitle').textContent = 'Edit Therapy Protocol';
+            
+            // Fill form with protocol data
+            document.getElementById('therapyCode').value = protocol.therapy_code;
+            document.getElementById('therapyName').value = protocol.therapy_name;
+            document.getElementById('therapyCategory').value = protocol.category || '';
+            document.getElementById('therapyDescription').value = protocol.description || '';
+            document.getElementById('totalSessions').value = protocol.total_sessions || 6;
+            document.getElementById('sessionDuration').value = protocol.session_duration_minutes || 45;
+            document.getElementById('sessionsPerWeek').value = protocol.sessions_per_week || 2;
+            document.getElementById('therapyStatus').value = protocol.is_active ? 'true' : 'false';
+            document.getElementById('conditionsTreated').value = protocol.conditions_treated || '';
+            document.getElementById('contraindications').value = protocol.contraindications || '';
+            document.getElementById('expectedOutcomes').value = protocol.expected_outcomes || '';
+            document.getElementById('instructions').value = protocol.instructions || '';
+            
+            document.getElementById('protocolModal').classList.add('active');
+        };
+        
+        async function saveProtocol() {
+            const formData = {
+                therapy_code: document.getElementById('therapyCode').value,
+                therapy_name: document.getElementById('therapyName').value,
+                category: document.getElementById('therapyCategory').value,
+                description: document.getElementById('therapyDescription').value,
+                total_sessions: parseInt(document.getElementById('totalSessions').value),
+                session_duration_minutes: parseInt(document.getElementById('sessionDuration').value),
+                sessions_per_week: parseInt(document.getElementById('sessionsPerWeek').value),
+                is_active: document.getElementById('therapyStatus').value === 'true',
+                conditions_treated: document.getElementById('conditionsTreated').value,
+                contraindications: document.getElementById('contraindications').value,
+                expected_outcomes: document.getElementById('expectedOutcomes').value,
+                instructions: document.getElementById('instructions').value
             };
-            return defaults[therapyId] || defaults['deep-sleep'];
-        }
-        
-        function updateProbeTable(probes) {
-            const tbody = document.getElementById('probeConfigTable');
-            tbody.innerHTML = '';
             
-            probes.forEach((probe, index) => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>Probe ${probe.number}</td>
-                    <td><span class="cable-badge cable-${getCableClass(index)}">${getCableColour(index)}</span></td>
-                    <td><input type="text" class="probe-input" value="${probe.location}"></td>
-                    <td><input type="checkbox" ${probe.editable ? 'checked' : ''}></td>
-                `;
-                tbody.appendChild(row);
-            });
+            try {
+                if (editingProtocolId) {
+                    const { error } = await supabase
+                        .from('therapy_protocols')
+                        .update(formData)
+                        .eq('id', editingProtocolId);
+                        
+                    if (error) throw error;
+                    alert('Protocol updated successfully!');
+                } else {
+                    const { error } = await supabase
+                        .from('therapy_protocols')
+                        .insert(formData);
+                        
+                    if (error) throw error;
+                    alert('Protocol added successfully!');
+                }
+                
+                closeModal('protocolModal');
+                await loadProtocols();
+                
+            } catch (error) {
+                console.error('Error saving protocol:', error);
+                alert('Error saving protocol: ' + error.message);
+            }
         }
         
-        function getCableClass(index) {
-            const classes = ['blue', 'yellow', 'green', 'grey-black', 'grey-white'];
-            return classes[index] || 'blue';
+        window.deleteProtocol = async function(id) {
+            if (!confirm('Delete this therapy protocol? This action cannot be undone.')) return;
+            
+            try {
+                const { error } = await supabase
+                    .from('therapy_protocols')
+                    .delete()
+                    .eq('id', id);
+                    
+                if (error) throw error;
+                
+                await loadProtocols();
+                alert('Protocol deleted successfully!');
+                
+            } catch (error) {
+                console.error('Error deleting protocol:', error);
+                alert('Error deleting protocol: ' + error.message);
+            }
+        };
+        
+        window.previewDiagram = function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('previewImage').src = e.target.result;
+                document.getElementById('diagramPreview').style.display = 'block';
+                // In production, you would upload this to cloud storage and get URL
+                document.getElementById('diagramUrl').value = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        };
+        
+        async function saveDiagram() {
+            const selectedTherapy = document.getElementById('diagramTherapy').value;
+            const therapy = protocols.find(p => p.therapy_code === selectedTherapy);
+            
+            const formData = {
+                therapy_code: selectedTherapy,
+                therapy_name: therapy ? therapy.therapy_name : '',
+                diagram_name: document.getElementById('diagramName').value,
+                diagram_url: document.getElementById('diagramUrl').value,
+                diagram_type: document.getElementById('diagramType').value,
+                instructions: document.getElementById('diagramInstructions').value,
+                display_order: parseInt(document.getElementById('displayOrder').value),
+                is_active: true
+            };
+            
+            try {
+                if (editingDiagramId) {
+                    const { error } = await supabase
+                        .from('probe_diagrams')
+                        .update(formData)
+                        .eq('id', editingDiagramId);
+                        
+                    if (error) throw error;
+                    alert('Diagram updated successfully!');
+                } else {
+                    const { error } = await supabase
+                        .from('probe_diagrams')
+                        .insert(formData);
+                        
+                    if (error) throw error;
+                    alert('Diagram added successfully!');
+                }
+                
+                closeModal('diagramModal');
+                await loadDiagrams();
+                
+            } catch (error) {
+                console.error('Error saving diagram:', error);
+                alert('Error saving diagram: ' + error.message);
+            }
         }
         
-        function getCableColour(index) {
-            const colours = ['Blue', 'Yellow', 'Green', 'Grey/Black', 'Grey/White'];
-            return colours[index] || 'Blue';
-        }
+        window.deleteDiagram = async function(id) {
+            if (!confirm('Delete this probe diagram?')) return;
+            
+            try {
+                const { error } = await supabase
+                    .from('probe_diagrams')
+                    .delete()
+                    .eq('id', id);
+                    
+                if (error) throw error;
+                
+                await loadDiagrams();
+                alert('Diagram deleted successfully!');
+                
+            } catch (error) {
+                console.error('Error deleting diagram:', error);
+                alert('Error deleting diagram: ' + error.message);
+            }
+        };
+        
+        window.filterDiagrams = function() {
+            const filter = document.getElementById('therapyFilter').value;
+            
+            if (!filter) {
+                displayDiagrams();
+            } else {
+                const filtered = diagrams.filter(d => d.therapy_code === filter);
+                displayDiagrams(filtered);
+            }
+        };
+        
+        window.viewDiagrams = function(therapyCode) {
+            document.getElementById('therapyFilter').value = therapyCode;
+            filterDiagrams();
+            switchTab('diagrams');
+        };
     </script>
 </body>
 </html>
