@@ -50,6 +50,35 @@
             padding: 30px 20px;
         }
         
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #1e3a8a;
+        }
+        
+        .stat-label {
+            color: #6b7280;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 5px;
+        }
+        
         .tabs-container {
             background: white;
             border-radius: 12px;
@@ -331,36 +360,6 @@
         .copy-btn:hover {
             background: #2563eb;
         }
-        
-        .password-options {
-            display: flex;
-            gap: 10px;
-            margin: 15px 0;
-        }
-        
-        .option-btn {
-            flex: 1;
-            padding: 10px;
-            border: 2px solid #e5e7eb;
-            background: white;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .option-btn.selected {
-            border-color: #10b981;
-            background: #f0fdf4;
-        }
-        
-        .password-info {
-            background: #fef3c7;
-            padding: 10px;
-            border-radius: 6px;
-            margin: 10px 0;
-            font-size: 13px;
-            color: #92400e;
-        }
     </style>
 </head>
 <body>
@@ -382,11 +381,31 @@
         <!-- Alert Messages -->
         <div id="alertMessage" class="alert"></div>
         
+        <!-- Statistics -->
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="stat-value" id="totalUsers">0</div>
+                <div class="stat-label">Total Users</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="clinicUserCount">0</div>
+                <div class="stat-label">Clinic Users</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="superAdminCount">0</div>
+                <div class="stat-label">Super Admins</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="activeUserCount">0</div>
+                <div class="stat-label">Active Users</div>
+            </div>
+        </div>
+        
         <!-- Tabs -->
         <div class="tabs-container">
             <div class="tabs">
                 <button class="tab-btn active" onclick="switchTab('all')">All Users</button>
-                <button class="tab-btn" onclick="switchTab('clinic')">Clinic Admins</button>
+                <button class="tab-btn" onclick="switchTab('clinic')">Clinic Users</button>
                 <button class="tab-btn" onclick="switchTab('super')">Super Admins</button>
             </div>
         </div>
@@ -395,7 +414,7 @@
         <div id="allTab" class="tab-content active">
             <div class="card">
                 <div class="search-section">
-                    <input type="text" class="search-input" id="searchInput" placeholder="Search users..." onkeyup="searchUsers()">
+                    <input type="text" class="search-input" id="searchInput" placeholder="Search by email or name..." onkeyup="searchUsers()">
                     <button class="btn btn-primary" onclick="showAddUserModal()">Add New User</button>
                     <button class="btn btn-secondary" onclick="refreshUsers()">Refresh</button>
                 </div>
@@ -414,30 +433,33 @@
                     </thead>
                     <tbody id="userTableBody">
                         <tr>
-                            <td colspan="8" style="text-align: center; padding: 40px;">Loading users...</td>
+                            <td colspan="7" style="text-align: center; padding: 40px;">Loading users...</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
         </div>
 
-        <!-- Clinic Admins Tab -->
+        <!-- Clinic Users Tab -->
         <div id="clinicTab" class="tab-content">
             <div class="card">
+                <button class="btn btn-primary" onclick="showAddUserModal('clinic_admin')" style="margin-bottom: 20px;">
+                    Add Clinic User
+                </button>
                 <table class="user-table">
                     <thead>
                         <tr>
-                            <th>Username</th>
-                            <th>Clinic Name</th>
-                            <th>Email</th>
-                            <th>Phone</th>
+                            <th>Login Email</th>
+                            <th>Name</th>
+                            <th>Clinic</th>
                             <th>Status</th>
+                            <th>Created</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody id="clinicTableBody">
                         <tr>
-                            <td colspan="6" style="text-align: center; padding: 40px;">Loading clinic admins...</td>
+                            <td colspan="6" style="text-align: center; padding: 40px;">Loading clinic users...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -453,9 +475,8 @@
                 <table class="user-table">
                     <thead>
                         <tr>
-                            <th>Username</th>
+                            <th>Login Email</th>
                             <th>Full Name</th>
-                            <th>Email</th>
                             <th>Status</th>
                             <th>Created</th>
                             <th>Actions</th>
@@ -463,7 +484,7 @@
                     </thead>
                     <tbody id="superTableBody">
                         <tr>
-                            <td colspan="6" style="text-align: center; padding: 40px;">Loading super admins...</td>
+                            <td colspan="5" style="text-align: center; padding: 40px;">Loading super admins...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -482,14 +503,14 @@
                 <div class="form-group">
                     <label class="form-label">User Type</label>
                     <select class="form-select" id="userType" onchange="toggleUserFields()">
-                        <option value="clinic_admin">Clinic Admin</option>
+                        <option value="clinic_admin">Clinic User</option>
                         <option value="super_admin">Super Admin</option>
                     </select>
                 </div>
                 
                 <div class="form-group" id="clinicField">
                     <label class="form-label">Select Clinic</label>
-                    <select class="form-select" id="clinicSelect">
+                    <select class="form-select" id="clinicSelect" required>
                         <option value="">Select a clinic...</option>
                     </select>
                 </div>
@@ -497,7 +518,7 @@
                 <div class="form-group">
                     <label class="form-label">Email (Login Username)</label>
                     <input type="email" class="form-input" id="newEmail" required placeholder="user@example.com">
-                    <small style="color: #6b7280;">This email will be used as the login username</small>
+                    <small style="color: #6b7280;">This email will be used for login</small>
                 </div>
                 
                 <div class="form-group">
@@ -527,43 +548,24 @@
                 <button class="close-btn" onclick="closeModal('resetPasswordModal')">&times;</button>
             </div>
             
-            <div class="password-info">
-                Resetting password for user: <strong id="resetUsername">-</strong>
+            <div style="background: #fef3c7; padding: 10px; border-radius: 6px; margin-bottom: 15px;">
+                Resetting password for: <strong id="resetUsername">-</strong>
             </div>
             
-            <div class="password-options">
-                <button class="option-btn selected" id="autoGenOption" onclick="selectPasswordOption('auto')">
-                    Auto-generate Password
-                </button>
-                <button class="option-btn" id="manualOption" onclick="selectPasswordOption('manual')">
-                    Enter Custom Password
-                </button>
-            </div>
-            
-            <div id="autoPasswordSection">
-                <div class="form-group">
-                    <label class="form-label">Generated Password</label>
-                    <div class="password-display" id="generatedPassword">
-                        Click "Generate" to create a new password
-                    </div>
-                    <button type="button" class="btn btn-primary" onclick="generateNewPassword()">
-                        Generate New Password
-                    </button>
-                    <button type="button" class="copy-btn" onclick="copyPassword()">
-                        Copy
-                    </button>
+            <div class="form-group">
+                <label class="form-label">New Password</label>
+                <div class="password-display" id="generatedPassword">
+                    Click "Generate" to create a new password
                 </div>
+                <button type="button" class="btn btn-primary" onclick="generateNewPassword()">
+                    Generate New Password
+                </button>
+                <button type="button" class="copy-btn" onclick="copyPassword()">
+                    Copy
+                </button>
             </div>
             
-            <div id="manualPasswordSection" style="display: none;">
-                <div class="form-group">
-                    <label class="form-label">Enter New Password</label>
-                    <input type="text" class="form-input" id="manualPassword" placeholder="Enter password">
-                    <small style="color: #6b7280;">Minimum 8 characters recommended</small>
-                </div>
-            </div>
-            
-            <div class="password-info" style="background: #dcfce7; color: #166534;">
+            <div style="background: #dcfce7; padding: 10px; border-radius: 6px; margin: 15px 0; color: #166534;">
                 ⚠️ Make sure to save this password! It cannot be recovered once this window is closed.
             </div>
             
@@ -585,11 +587,10 @@
         const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         
         let allUsers = [];
-        let clinicAdmins = [];
+        let clinicUsers = [];
         let superAdmins = [];
         let clinicsList = [];
         let currentResetUser = null;
-        let passwordOption = 'auto';
         let currentGeneratedPassword = '';
         
         // Load users on page load
@@ -615,38 +616,48 @@
         
         async function loadUsers() {
             try {
-                // Load clinic admins from clinics table
-                const { data: clinics, error: clinicError } = await supabase
-                    .from('clinics')
-                    .select('*')
+                // Load clinic users from clinic_users table
+                const { data: clinicUsersData, error: clinicError } = await supabase
+                    .from('clinic_users')
+                    .select(`
+                        *,
+                        clinics (clinic_name)
+                    `)
                     .order('created_at', { ascending: false });
                 
-                if (!clinicError && clinics) {
-                    clinicAdmins = clinics.map(clinic => ({
-                        ...clinic,
-                        full_name: clinic.owner_name || clinic.authorised_person || '-',
-                        role: 'clinic_admin'
+                if (!clinicError && clinicUsersData) {
+                    clinicUsers = clinicUsersData.map(user => ({
+                        ...user,
+                        clinic_name: user.clinics?.clinic_name || 'Unknown Clinic',
+                        role: 'clinic_admin',
+                        table: 'clinic_users'
                     }));
-                    displayClinicAdmins();
                 }
                 
                 // Load super admins
-                const { data: supers, error: superError } = await supabase
+                const { data: superAdminsData, error: superError } = await supabase
                     .from('super_admin_users')
                     .select('*')
                     .order('created_at', { ascending: false });
                 
-                if (!superError && supers) {
-                    superAdmins = supers.map(admin => ({
+                if (!superError && superAdminsData) {
+                    superAdmins = superAdminsData.map(admin => ({
                         ...admin,
-                        role: admin.role || 'super_admin'
+                        role: 'super_admin',
+                        table: 'super_admin_users'
                     }));
-                    displaySuperAdmins();
                 }
                 
-                // Combine and display all users
-                allUsers = [...clinicAdmins, ...superAdmins];
+                // Combine all users
+                allUsers = [...clinicUsers, ...superAdmins];
+                
+                // Update statistics
+                updateStatistics();
+                
+                // Display users in tables
                 displayAllUsers();
+                displayClinicUsers();
+                displaySuperAdmins();
                 
             } catch (error) {
                 console.error('Error loading users:', error);
@@ -666,7 +677,7 @@
                     const select = document.getElementById('clinicSelect');
                     select.innerHTML = '<option value="">Select a clinic...</option>';
                     clinics.forEach(clinic => {
-                        select.innerHTML += `<option value="${clinic.id}">${clinic.clinic_name} (${clinic.clinic_code})</option>`;
+                        select.innerHTML += `<option value="${clinic.id}">${clinic.clinic_name} (${clinic.clinic_code || 'No code'})</option>`;
                     });
                 }
             } catch (error) {
@@ -674,11 +685,20 @@
             }
         }
         
+        function updateStatistics() {
+            const activeUsers = allUsers.filter(u => u.is_active !== false).length;
+            
+            document.getElementById('totalUsers').textContent = allUsers.length;
+            document.getElementById('clinicUserCount').textContent = clinicUsers.length;
+            document.getElementById('superAdminCount').textContent = superAdmins.length;
+            document.getElementById('activeUserCount').textContent = activeUsers;
+        }
+        
         function displayAllUsers() {
             const tbody = document.getElementById('userTableBody');
             
             if (allUsers.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">No users found</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No users found</td></tr>';
                 return;
             }
             
@@ -688,7 +708,7 @@
                     <td>${user.full_name || '-'}</td>
                     <td>
                         <span class="role-badge ${user.role === 'super_admin' ? 'role-super-admin' : 'role-clinic-admin'}">
-                            ${user.role === 'super_admin' ? 'Super Admin' : 'Clinic Admin'}
+                            ${user.role === 'super_admin' ? 'Super Admin' : 'Clinic User'}
                         </span>
                     </td>
                     <td>${user.clinic_name || '-'}</td>
@@ -700,15 +720,15 @@
                     <td>${new Date(user.created_at).toLocaleDateString('en-GB')}</td>
                     <td>
                         <div class="action-buttons">
-                            <button class="btn btn-primary btn-small" onclick="showResetPasswordModal('${user.role}', '${user.id}', '${user.email || user.username || user.clinic_name}')">
+                            <button class="btn btn-primary btn-small" onclick="showResetPasswordModal('${user.table}', '${user.id}', '${user.email || user.username}')">
                                 Reset Pass
                             </button>
                             <button class="btn ${user.is_active !== false ? 'btn-warning' : 'btn-primary'} btn-small" 
-                                    onclick="toggleUserStatus('${user.role}', '${user.id}', ${user.is_active !== false})">
+                                    onclick="toggleUserStatus('${user.table}', '${user.id}', ${user.is_active !== false})">
                                 ${user.is_active !== false ? 'Deactivate' : 'Activate'}
                             </button>
-                            <button class="btn btn-danger btn-small" onclick="deleteUser('${user.role}', '${user.id}', '${user.email || user.username || user.clinic_name}')">
-                                Remove
+                            <button class="btn btn-danger btn-small" onclick="deleteUser('${user.table}', '${user.id}', '${user.email || user.username}')">
+                                Delete
                             </button>
                         </div>
                     </td>
@@ -716,33 +736,36 @@
             `).join('');
         }
         
-        function displayClinicAdmins() {
+        function displayClinicUsers() {
             const tbody = document.getElementById('clinicTableBody');
             
-            if (clinicAdmins.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No clinic admins found</td></tr>';
+            if (clinicUsers.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No clinic users found</td></tr>';
                 return;
             }
             
-            tbody.innerHTML = clinicAdmins.map(admin => `
+            tbody.innerHTML = clinicUsers.map(user => `
                 <tr>
-                    <td><strong>${admin.username || '-'}</strong></td>
-                    <td>${admin.clinic_name}</td>
-                    <td>${admin.email || '-'}</td>
-                    <td>${admin.phone || '-'}</td>
+                    <td><strong>${user.email}</strong></td>
+                    <td>${user.full_name || '-'}</td>
+                    <td>${user.clinic_name}</td>
                     <td>
-                        <span class="${admin.is_active !== false ? 'status-active' : 'status-inactive'}">
-                            ● ${admin.is_active !== false ? 'Active' : 'Inactive'}
+                        <span class="${user.is_active ? 'status-active' : 'status-inactive'}">
+                            ● ${user.is_active ? 'Active' : 'Inactive'}
                         </span>
                     </td>
+                    <td>${new Date(user.created_at).toLocaleDateString('en-GB')}</td>
                     <td>
                         <div class="action-buttons">
-                            <button class="btn btn-primary btn-small" onclick="showResetPasswordModal('clinic_admin', '${admin.id}', '${admin.username || admin.clinic_name}')">
+                            <button class="btn btn-primary btn-small" onclick="showResetPasswordModal('clinic_users', '${user.id}', '${user.email}')">
                                 Reset Password
                             </button>
-                            <button class="btn ${admin.is_active !== false ? 'btn-warning' : 'btn-primary'} btn-small" 
-                                    onclick="toggleUserStatus('clinic_admin', '${admin.id}', ${admin.is_active !== false})">
-                                ${admin.is_active !== false ? 'Deactivate' : 'Activate'}
+                            <button class="btn ${user.is_active ? 'btn-warning' : 'btn-primary'} btn-small" 
+                                    onclick="toggleUserStatus('clinic_users', '${user.id}', ${user.is_active})">
+                                ${user.is_active ? 'Deactivate' : 'Activate'}
+                            </button>
+                            <button class="btn btn-danger btn-small" onclick="deleteUser('clinic_users', '${user.id}', '${user.email}')">
+                                Delete
                             </button>
                         </div>
                     </td>
@@ -754,15 +777,14 @@
             const tbody = document.getElementById('superTableBody');
             
             if (superAdmins.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No super admins found</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No super admins found</td></tr>';
                 return;
             }
             
             tbody.innerHTML = superAdmins.map(admin => `
                 <tr>
-                    <td><strong>${admin.username}</strong></td>
+                    <td><strong>${admin.email || admin.username}</strong></td>
                     <td>${admin.full_name}</td>
-                    <td>${admin.email}</td>
                     <td>
                         <span class="${admin.is_active !== false ? 'status-active' : 'status-inactive'}">
                             ● ${admin.is_active !== false ? 'Active' : 'Inactive'}
@@ -771,15 +793,15 @@
                     <td>${new Date(admin.created_at).toLocaleDateString('en-GB')}</td>
                     <td>
                         <div class="action-buttons">
-                            <button class="btn btn-primary btn-small" onclick="showResetPasswordModal('super_admin', '${admin.id}', '${admin.username}')">
+                            <button class="btn btn-primary btn-small" onclick="showResetPasswordModal('super_admin_users', '${admin.id}', '${admin.email || admin.username}')">
                                 Reset Pass
                             </button>
                             <button class="btn ${admin.is_active !== false ? 'btn-warning' : 'btn-primary'} btn-small" 
-                                    onclick="toggleUserStatus('super_admin', '${admin.id}', ${admin.is_active !== false})">
+                                    onclick="toggleUserStatus('super_admin_users', '${admin.id}', ${admin.is_active !== false})">
                                 ${admin.is_active !== false ? 'Deactivate' : 'Activate'}
                             </button>
-                            <button class="btn btn-danger btn-small" onclick="deleteUser('super_admin', '${admin.id}', '${admin.username}')">
-                                Remove
+                            <button class="btn btn-danger btn-small" onclick="deleteUser('super_admin_users', '${admin.id}', '${admin.username}')">
+                                Delete
                             </button>
                         </div>
                     </td>
@@ -830,10 +852,6 @@
             if (modalId === 'addUserModal') {
                 document.getElementById('addUserForm').reset();
             }
-            if (modalId === 'resetPasswordModal') {
-                currentResetUser = null;
-                currentGeneratedPassword = '';
-            }
         };
         
         window.toggleUserFields = function() {
@@ -842,40 +860,18 @@
             
             if (userType === 'super_admin') {
                 clinicField.style.display = 'none';
+                document.getElementById('clinicSelect').removeAttribute('required');
             } else {
                 clinicField.style.display = 'block';
+                document.getElementById('clinicSelect').setAttribute('required', 'required');
             }
         };
         
-        window.showResetPasswordModal = function(role, userId, username) {
-            currentResetUser = { role, userId, username };
-            document.getElementById('resetUsername').textContent = username;
-            
-            selectPasswordOption('auto');
+        window.showResetPasswordModal = function(table, userId, email) {
+            currentResetUser = { table, userId, email };
+            document.getElementById('resetUsername').textContent = email;
             generateNewPassword();
-            
             document.getElementById('resetPasswordModal').classList.add('show');
-        };
-        
-        window.selectPasswordOption = function(option) {
-            passwordOption = option;
-            
-            const autoBtn = document.getElementById('autoGenOption');
-            const manualBtn = document.getElementById('manualOption');
-            const autoSection = document.getElementById('autoPasswordSection');
-            const manualSection = document.getElementById('manualPasswordSection');
-            
-            if (option === 'auto') {
-                autoBtn.classList.add('selected');
-                manualBtn.classList.remove('selected');
-                autoSection.style.display = 'block';
-                manualSection.style.display = 'none';
-            } else {
-                autoBtn.classList.remove('selected');
-                manualBtn.classList.add('selected');
-                autoSection.style.display = 'none';
-                manualSection.style.display = 'block';
-            }
         };
         
         window.generateNewPassword = function() {
@@ -893,37 +889,20 @@
         };
         
         window.confirmPasswordReset = async function() {
-            if (!currentResetUser) return;
-            
-            let newPassword;
-            if (passwordOption === 'auto') {
-                newPassword = currentGeneratedPassword;
-                if (!newPassword || newPassword === 'Click "Generate" to create a new password') {
-                    showAlert('Please generate a password first', 'error');
-                    return;
-                }
-            } else {
-                newPassword = document.getElementById('manualPassword').value;
-                if (!newPassword || newPassword.length < 8) {
-                    showAlert('Password must be at least 8 characters', 'error');
-                    return;
-                }
-            }
+            if (!currentResetUser || !currentGeneratedPassword) return;
             
             try {
-                const table = currentResetUser.role === 'super_admin' ? 'super_admin_users' : 'clinics';
-                
-                const { data, error } = await supabase
-                    .from(table)
+                const { error } = await supabase
+                    .from(currentResetUser.table)
                     .update({ 
-                        password_hash: newPassword,
+                        password_hash: currentGeneratedPassword,
                         updated_at: new Date().toISOString()
                     })
                     .eq('id', currentResetUser.userId);
                 
                 if (error) throw error;
                 
-                showAlert(`Password reset successfully for ${currentResetUser.username}!`, 'success');
+                showAlert(`Password reset successfully for ${currentResetUser.email}!`, 'success');
                 closeModal('resetPasswordModal');
                 
             } catch (error) {
@@ -946,10 +925,11 @@
             
             try {
                 if (userType === 'super_admin') {
+                    // Create super admin user
                     const { data, error } = await supabase
                         .from('super_admin_users')
                         .insert([{
-                            username: email,  // Using email as username
+                            username: email,
                             password_hash: password,
                             full_name: fullName,
                             email: email,
@@ -959,24 +939,12 @@
                         }])
                         .select();
                     
-                    if (error) {
-                        console.error('Insert error:', error);
-                        throw error;
-                    }
+                    if (error) throw error;
                     
-                    const alertMsg = `Super Admin created successfully!\n\nLogin Email: ${email}\nPassword: ${password}\n\nPlease save these credentials securely.`;
-                    alert(alertMsg);
-                    
-                    // Close modal first
-                    closeModal('addUserModal');
-                    
-                    // Show success message
-                    showAlert('Super Admin created successfully!', 'success');
-                    
-                    // Reload the users list
-                    await loadUsers();
+                    alert(`Super Admin created successfully!\n\nLogin Email: ${email}\nPassword: ${password}\n\nPlease save these credentials securely.`);
                     
                 } else {
+                    // Create clinic user
                     const clinicId = document.getElementById('clinicSelect').value;
                     if (!clinicId) {
                         showAlert('Please select a clinic', 'error');
@@ -984,48 +952,45 @@
                     }
                     
                     const { data, error } = await supabase
-                        .from('clinics')
-                        .update({
-                            username: email,  // Using email as username
-                            password_hash: password,
+                        .from('clinic_users')
+                        .insert([{
+                            clinic_id: parseInt(clinicId),
                             email: email,
-                            owner_name: fullName
-                        })
-                        .eq('id', clinicId);
+                            password_hash: password,
+                            full_name: fullName,
+                            role: 'clinic_admin',
+                            is_active: true,
+                            created_at: new Date().toISOString()
+                        }])
+                        .select();
                     
-                    if (error) {
-                        console.error('Update error:', error);
-                        throw error;
-                    }
+                    if (error) throw error;
                     
-                    const alertMsg = `Clinic Admin updated successfully!\n\nLogin Email: ${email}\nPassword: ${password}\n\nPlease save these credentials securely.`;
-                    alert(alertMsg);
-                    
-                    // Close modal first
-                    closeModal('addUserModal');
-                    
-                    // Show success message
-                    showAlert('Clinic Admin updated successfully!', 'success');
-                    
-                    // Reload the users list
-                    await loadUsers();
+                    alert(`Clinic User created successfully!\n\nLogin Email: ${email}\nPassword: ${password}\n\nPlease save these credentials securely.`);
                 }
+                
+                closeModal('addUserModal');
+                showAlert('User created successfully!', 'success');
+                await loadUsers();
                 
             } catch (error) {
                 console.error('Error adding user:', error);
-                showAlert(`Error: ${error.message || 'Failed to add user'}`, 'error');
+                if (error.code === '23505') {
+                    showAlert('This email is already registered', 'error');
+                } else {
+                    showAlert(`Error: ${error.message || 'Failed to add user'}`, 'error');
+                }
             }
         };
         
-        window.toggleUserStatus = async function(role, userId, currentStatus) {
+        window.toggleUserStatus = async function(table, userId, currentStatus) {
             const action = currentStatus ? 'deactivate' : 'activate';
             if (!confirm(`Are you sure you want to ${action} this user?`)) return;
             
             try {
-                const table = role === 'super_admin' ? 'super_admin_users' : 'clinics';
                 const newStatus = !currentStatus;
                 
-                const { data, error } = await supabase
+                const { error } = await supabase
                     .from(table)
                     .update({ 
                         is_active: newStatus,
@@ -1044,63 +1009,23 @@
             }
         };
         
-        window.deleteUser = async function(role, userId, userName) {
-            const isSuperAdmin = role === 'super_admin';
-            const userType = isSuperAdmin ? 'Super Admin' : 'Clinic Admin';
-            
-            if (isSuperAdmin && superAdmins.length === 1) {
-                alert('Cannot delete the last Super Admin!\n\nYou must have at least one Super Admin in the system.');
+        window.deleteUser = async function(table, userId, email) {
+            if (table === 'super_admin_users' && superAdmins.length === 1) {
+                alert('Cannot delete the last Super Admin!');
                 return;
             }
             
-            let warningMessage = `⚠️ WARNING: Delete ${userType} User\n\n`;
-            warningMessage += `User: ${userName}\n`;
-            warningMessage += `Type: ${userType}\n\n`;
-            
-            if (!isSuperAdmin) {
-                warningMessage += `Note: Deleting a clinic admin will remove their access but preserve the clinic data.\n\n`;
-            } else {
-                warningMessage += `This action is permanent and cannot be undone!\n\n`;
-            }
-            
-            warningMessage += `Are you sure you want to permanently delete this user?`;
-            
-            if (!confirm(warningMessage)) return;
-            
-            if (isSuperAdmin) {
-                const secondConfirm = prompt(`Type "DELETE" to confirm deletion of Super Admin: ${userName}`);
-                if (secondConfirm !== 'DELETE') {
-                    showAlert('Deletion cancelled', 'error');
-                    return;
-                }
-            }
+            if (!confirm(`Are you sure you want to permanently delete user: ${email}?`)) return;
             
             try {
-                if (isSuperAdmin) {
-                    const { error } = await supabase
-                        .from('super_admin_users')
-                        .delete()
-                        .eq('id', userId);
-                    
-                    if (error) throw error;
-                    
-                    showAlert(`Super Admin "${userName}" has been permanently deleted.`, 'success');
-                } else {
-                    const { error } = await supabase
-                        .from('clinics')
-                        .update({
-                            username: null,
-                            password_hash: null,
-                            is_active: false,
-                            updated_at: new Date().toISOString()
-                        })
-                        .eq('id', userId);
-                    
-                    if (error) throw error;
-                    
-                    showAlert(`Clinic Admin access for "${userName}" has been removed.`, 'success');
-                }
+                const { error } = await supabase
+                    .from(table)
+                    .delete()
+                    .eq('id', userId);
                 
+                if (error) throw error;
+                
+                showAlert(`User "${email}" has been deleted.`, 'success');
                 await loadUsers();
                 
             } catch (error) {
@@ -1116,27 +1041,27 @@
         
         window.searchUsers = function() {
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            
             const filteredUsers = allUsers.filter(user => 
+                (user.email && user.email.toLowerCase().includes(searchTerm)) ||
                 (user.username && user.username.toLowerCase().includes(searchTerm)) ||
                 (user.full_name && user.full_name.toLowerCase().includes(searchTerm)) ||
-                (user.email && user.email.toLowerCase().includes(searchTerm)) ||
                 (user.clinic_name && user.clinic_name.toLowerCase().includes(searchTerm))
             );
             
             const tbody = document.getElementById('userTableBody');
             if (filteredUsers.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">No matching users found</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No matching users found</td></tr>';
                 return;
             }
             
             tbody.innerHTML = filteredUsers.map(user => `
                 <tr>
-                    <td><strong>${user.username || '-'}</strong></td>
+                    <td><strong>${user.email || user.username || '-'}</strong></td>
                     <td>${user.full_name || '-'}</td>
-                    <td>${user.email || '-'}</td>
                     <td>
                         <span class="role-badge ${user.role === 'super_admin' ? 'role-super-admin' : 'role-clinic-admin'}">
-                            ${user.role === 'super_admin' ? 'Super Admin' : 'Clinic Admin'}
+                            ${user.role === 'super_admin' ? 'Super Admin' : 'Clinic User'}
                         </span>
                     </td>
                     <td>${user.clinic_name || '-'}</td>
@@ -1148,15 +1073,15 @@
                     <td>${new Date(user.created_at).toLocaleDateString('en-GB')}</td>
                     <td>
                         <div class="action-buttons">
-                            <button class="btn btn-primary btn-small" onclick="showResetPasswordModal('${user.role}', '${user.id}', '${user.username || user.clinic_name}')">
+                            <button class="btn btn-primary btn-small" onclick="showResetPasswordModal('${user.table}', '${user.id}', '${user.email || user.username}')">
                                 Reset Pass
                             </button>
                             <button class="btn ${user.is_active !== false ? 'btn-warning' : 'btn-primary'} btn-small" 
-                                    onclick="toggleUserStatus('${user.role}', '${user.id}', ${user.is_active !== false})">
+                                    onclick="toggleUserStatus('${user.table}', '${user.id}', ${user.is_active !== false})">
                                 ${user.is_active !== false ? 'Deactivate' : 'Activate'}
                             </button>
-                            <button class="btn btn-danger btn-small" onclick="deleteUser('${user.role}', '${user.id}', '${user.username || user.clinic_name}')">
-                                Remove
+                            <button class="btn btn-danger btn-small" onclick="deleteUser('${user.table}', '${user.id}', '${user.email || user.username}')">
+                                Delete
                             </button>
                         </div>
                     </td>
