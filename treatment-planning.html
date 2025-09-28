@@ -588,7 +588,7 @@
                 const { data, error } = await supabase
                     .from('therapy_protocols')
                     .select('*')
-                    .eq('is_active', true)
+                    .eq('active', true)
                     .order('therapy_name');
                     
                 if (error) throw error;
@@ -597,7 +597,7 @@
                 console.log('Loaded therapies:', availableTherapies.length);
             } catch (error) {
                 console.error('Error loading therapy protocols:', error);
-                // Use default therapies if table doesn't exist
+                // Use default therapies if table doesn't exist or has errors
                 availableTherapies = [
                     { id: 1, therapy_code: '601', therapy_name: 'Stress Relief', total_sessions: 12, session_duration_minutes: 45 },
                     { id: 2, therapy_code: '701', therapy_name: 'Energy Boost', total_sessions: 8, session_duration_minutes: 40 }
