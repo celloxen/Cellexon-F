@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Medical Reports - Celloxen Platform</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
     <style>
         * {
             margin: 0;
@@ -20,42 +23,17 @@
         .header {
             background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
             color: white;
-            padding: 20px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            padding: 20px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
         
         .header-container {
             max-width: 1400px;
             margin: 0 auto;
+            padding: 0 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-        }
-        
-        .header h1 {
-            font-size: 28px;
-            font-weight: 700;
-        }
-        
-        .header p {
-            color: #cbd5e1;
-            margin-top: 5px;
-            font-size: 14px;
-        }
-        
-        .back-btn {
-            background: rgba(255,255,255,0.2);
-            border: 1px solid rgba(255,255,255,0.3);
-            color: white;
-            padding: 8px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-            text-decoration: none;
-            transition: all 0.3s ease;
-        }
-        
-        .back-btn:hover {
-            background: rgba(255,255,255,0.3);
         }
         
         .container {
@@ -64,702 +42,475 @@
             padding: 0 20px;
         }
         
-        .filters-bar {
+        .search-section {
             background: white;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 25px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        }
+        
+        .search-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 20px;
+        }
+        
+        .search-box {
             display: flex;
             gap: 15px;
-            flex-wrap: wrap;
-            align-items: end;
+            margin-bottom: 15px;
         }
         
-        .filter-group {
+        .search-input {
             flex: 1;
-            min-width: 200px;
-        }
-        
-        .filter-group label {
-            display: block;
-            font-size: 12px;
-            color: #64748b;
-            text-transform: uppercase;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-        
-        .filter-group select,
-        .filter-group input {
-            width: 100%;
-            padding: 10px;
-            border: 2px solid #e2e8f0;
+            padding: 12px 20px;
+            border: 2px solid #e5e7eb;
             border-radius: 8px;
-            font-size: 14px;
-            transition: all 0.3s ease;
+            font-size: 15px;
         }
         
-        .filter-group select:focus,
-        .filter-group input:focus {
+        .search-input:focus {
             outline: none;
-            border-color: #1e3a8a;
-            box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
         }
         
         .btn {
-            padding: 10px 20px;
+            padding: 12px 24px;
             border: none;
             border-radius: 8px;
             cursor: pointer;
-            font-size: 14px;
             font-weight: 600;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
+            transition: all 0.3s;
         }
         
         .btn-primary {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
             color: white;
         }
         
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
         }
         
         .btn-secondary {
-            background: #f1f5f9;
-            color: #475569;
+            background: #f3f4f6;
+            color: #374151;
         }
         
         .btn-secondary:hover {
-            background: #e2e8f0;
+            background: #e5e7eb;
         }
         
-        .reports-grid {
+        .btn-success {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+        
+        .filters {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-chip {
+            padding: 6px 12px;
+            background: #f3f4f6;
+            border-radius: 20px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .filter-chip:hover {
+            background: #e5e7eb;
+        }
+        
+        .filter-chip.active {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .patients-grid {
             display: grid;
             gap: 20px;
         }
         
-        .report-card {
+        .patient-card {
             background: white;
             border-radius: 12px;
-            padding: 25px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-            transition: all 0.3s ease;
-            border: 2px solid transparent;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            transition: all 0.3s;
         }
         
-        .report-card:hover {
-            border-color: #1e3a8a;
+        .patient-card:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
         
-        .report-header {
+        .patient-header {
             display: flex;
             justify-content: space-between;
             align-items: start;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
         
-        .report-title {
+        .patient-info {
+            flex: 1;
+        }
+        
+        .patient-name {
             font-size: 18px;
             font-weight: 600;
             color: #1e293b;
             margin-bottom: 5px;
         }
         
-        .report-meta {
-            font-size: 13px;
+        .patient-id {
             color: #64748b;
+            font-size: 14px;
         }
         
-        .report-type-badge {
-            padding: 4px 12px;
+        .patient-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .detail-item {
+            background: #f8fafc;
+            padding: 10px;
+            border-radius: 8px;
+        }
+        
+        .detail-label {
+            font-size: 11px;
+            color: #64748b;
+            text-transform: uppercase;
+            margin-bottom: 3px;
+        }
+        
+        .detail-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .report-status {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .status-badge {
+            padding: 4px 10px;
             border-radius: 20px;
             font-size: 12px;
             font-weight: 600;
-            text-transform: uppercase;
         }
         
-        .type-comprehensive {
-            background: #dbeafe;
-            color: #1e3a8a;
-        }
-        
-        .type-assessment {
+        .status-complete {
             background: #d1fae5;
             color: #065f46;
         }
         
-        .type-progress {
-            background: #fef3c7;
+        .status-pending {
+            background: #fed7aa;
             color: #92400e;
         }
         
-        .type-final {
-            background: #e9d5ff;
-            color: #6b21a8;
+        .status-none {
+            background: #f3f4f6;
+            color: #6b7280;
         }
         
-        .report-content {
-            margin: 20px 0;
-        }
-        
-        .report-section {
-            margin-bottom: 15px;
-        }
-        
-        .section-label {
-            font-size: 12px;
-            color: #64748b;
-            text-transform: uppercase;
-            font-weight: 600;
-            margin-bottom: 5px;
-        }
-        
-        .section-value {
-            font-size: 14px;
-            color: #1e293b;
-            line-height: 1.6;
-        }
-        
-        .recommendations-list {
-            list-style: none;
-            padding: 0;
-        }
-        
-        .recommendation-item {
-            padding: 8px 0;
-            border-bottom: 1px solid #f1f5f9;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .recommendation-item:last-child {
-            border-bottom: none;
-        }
-        
-        .recommendation-bullet {
-            width: 6px;
-            height: 6px;
-            background: #10b981;
-            border-radius: 50%;
-        }
-        
-        .report-actions {
+        .action-buttons {
             display: flex;
             gap: 10px;
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid #e2e8f0;
+            padding-top: 15px;
+            border-top: 1px solid #e5e7eb;
         }
         
-        .action-btn {
-            flex: 1;
-            padding: 8px;
-            border: 1px solid #e2e8f0;
-            background: white;
-            border-radius: 6px;
-            cursor: pointer;
+        .btn-sm {
+            padding: 8px 16px;
             font-size: 13px;
-            transition: all 0.3s ease;
-            text-align: center;
-        }
-        
-        .action-btn:hover {
-            background: #f8fafc;
-            border-color: #1e3a8a;
-        }
-        
-        .stats-bar {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 25px;
-        }
-        
-        .stat-card {
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            text-align: center;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        }
-        
-        .stat-value {
-            font-size: 32px;
-            font-weight: 700;
-            color: #1e3a8a;
-            margin-bottom: 5px;
-        }
-        
-        .stat-label {
-            font-size: 12px;
-            color: #64748b;
-            text-transform: uppercase;
         }
         
         .empty-state {
             text-align: center;
             padding: 60px 20px;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            color: #9ca3af;
         }
         
         .empty-state-icon {
-            font-size: 64px;
-            margin-bottom: 20px;
-            opacity: 0.5;
+            font-size: 48px;
+            margin-bottom: 15px;
         }
         
-        .empty-state-text {
-            color: #64748b;
-            font-size: 16px;
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
         }
         
-        /* Modal for report details */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-        
-        .modal.show {
-            display: flex;
-        }
-        
-        .modal-content {
+        .stat-card {
             background: white;
-            border-radius: 20px;
-            max-width: 900px;
-            width: 100%;
-            max-height: 90vh;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
         }
         
-        .modal-header {
-            padding: 25px;
-            border-bottom: 1px solid #e2e8f0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .modal-title {
-            font-size: 24px;
-            font-weight: 600;
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
             color: #1e293b;
+            margin-bottom: 5px;
         }
         
-        .close-btn {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            border: none;
-            background: #f1f5f9;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-        }
-        
-        .close-btn:hover {
-            background: #e2e8f0;
-        }
-        
-        .modal-body {
-            padding: 25px;
-            overflow-y: auto;
-            flex: 1;
-        }
-        
-        .modal-footer {
-            padding: 20px 25px;
-            border-top: 1px solid #e2e8f0;
-            display: flex;
-            gap: 10px;
-            justify-content: flex-end;
-        }
-        
-        .loading {
-            text-align: center;
-            padding: 40px;
+        .stat-label {
             color: #64748b;
-        }
-        
-        .spinner {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #1e3a8a;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .email-status {
-            display: inline-block;
-            margin-left: 10px;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-        
-        .email-sending {
-            background: #fef3c7;
-            color: #92400e;
-        }
-        
-        .email-success {
-            background: #d1fae5;
-            color: #065f46;
-        }
-        
-        .email-error {
-            background: #fee2e2;
-            color: #991b1b;
+            font-size: 14px;
         }
     </style>
 </head>
 <body>
     <div class="header">
         <div class="header-container">
-            <div>
-                <h1>Medical Reports</h1>
-                <p>View and manage all patient reports</p>
-            </div>
-            <a href="clinic-dashboard.html" class="back-btn">← Back to Dashboard</a>
+            <h1>Medical Reports Management</h1>
+            <button class="btn btn-secondary" onclick="goBack()" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid white;">
+                Back to Dashboard
+            </button>
         </div>
     </div>
-    
+
     <div class="container">
         <!-- Statistics -->
-        <div class="stats-bar">
+        <div class="stats-row">
             <div class="stat-card">
-                <div class="stat-value" id="totalReports">0</div>
-                <div class="stat-label">Total Reports</div>
+                <div class="stat-value" id="totalPatients">0</div>
+                <div class="stat-label">Total Patients</div>
             </div>
             <div class="stat-card">
-                <div class="stat-value" id="comprehensiveReports">0</div>
-                <div class="stat-label">Comprehensive</div>
+                <div class="stat-value" id="completeReports">0</div>
+                <div class="stat-label">Complete Reports</div>
             </div>
             <div class="stat-card">
-                <div class="stat-value" id="assessmentReports">0</div>
-                <div class="stat-label">Assessments</div>
+                <div class="stat-value" id="pendingAssessments">0</div>
+                <div class="stat-label">Pending Assessments</div>
             </div>
             <div class="stat-card">
-                <div class="stat-value" id="thisMonthReports">0</div>
-                <div class="stat-label">This Month</div>
+                <div class="stat-value" id="reportsThisMonth">0</div>
+                <div class="stat-label">Reports This Month</div>
             </div>
         </div>
         
-        <!-- Filters -->
-        <div class="filters-bar">
-            <div class="filter-group">
-                <label>Patient</label>
-                <select id="patientFilter">
-                    <option value="">All Patients</option>
-                </select>
+        <!-- Search Section -->
+        <div class="search-section">
+            <h2 class="search-title">Search Patients</h2>
+            <div class="search-box">
+                <input type="text" class="search-input" id="searchInput" 
+                       placeholder="Search by patient name or ID...">
+                <button class="btn btn-primary" onclick="searchPatients()">Search</button>
+                <button class="btn btn-secondary" onclick="clearSearch()">Clear</button>
             </div>
-            <div class="filter-group">
-                <label>Report Type</label>
-                <select id="typeFilter">
-                    <option value="">All Types</option>
-                    <option value="comprehensive_diagnostic">Comprehensive Diagnostic</option>
-                    <option value="health_assessment">Health Assessment</option>
-                    <option value="iris_assessment">IRIS Assessment</option>
-                    <option value="progress_report">Progress Report</option>
-                    <option value="final_report">Final Report</option>
-                </select>
+            
+            <div class="filters">
+                <span style="margin-right: 10px; font-size: 14px; color: #6b7280;">Filter:</span>
+                <button class="filter-chip active" onclick="filterPatients('all')">All Patients</button>
+                <button class="filter-chip" onclick="filterPatients('complete')">Complete Reports</button>
+                <button class="filter-chip" onclick="filterPatients('pending')">Pending Reports</button>
+                <button class="filter-chip" onclick="filterPatients('no-report')">No Reports</button>
             </div>
-            <div class="filter-group">
-                <label>Date Range</label>
-                <input type="month" id="monthFilter" value="">
-            </div>
-            <button class="btn btn-primary" onclick="applyFilters()">Apply Filters</button>
-            <button class="btn btn-secondary" onclick="clearFilters()">Clear</button>
         </div>
         
-        <!-- Reports List -->
-        <div class="reports-grid" id="reportsList">
-            <div class="loading">
-                <div class="spinner"></div>
-                <p>Loading reports...</p>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Report Details Modal -->
-    <div class="modal" id="reportModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="modal-title" id="modalTitle">Report Details</h2>
-                <button class="close-btn" onclick="closeModal()">✕</button>
-            </div>
-            <div class="modal-body" id="modalBody">
-                <!-- Report details will be loaded here -->
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-primary" onclick="printReport()">Print Report</button>
-                <button class="btn btn-primary" onclick="downloadReport()">Download PDF</button>
-                <button class="btn btn-primary" onclick="emailReportToPatient()">📧 Email to Patient</button>
-                <button class="btn btn-secondary" onclick="closeModal()">Close</button>
+        <!-- Patients List -->
+        <div class="patients-grid" id="patientsGrid">
+            <div class="empty-state">
+                <div class="empty-state-icon">📋</div>
+                <p>Loading patients...</p>
             </div>
         </div>
     </div>
 
-    <script src="email-sender.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script type="module">
-        import { supabase } from './supabase-config.js';
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
         
-        let allReports = [];
-        let filteredReports = [];
-        let currentReport = null;
-        let patients = {};
+        const SUPABASE_URL = 'https://defifwzgazqlrigwumqn.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlZmlmd3pnYXpxbHJpZ3d1bXFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcyNTM0MjYsImV4cCI6MjA3MjgyOTQyNn0.wcUBq6Pszjtqn5aBtuu3iXBE4BLmu8x9LtJbsMWlIiA';
+        
+        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        let currentClinicId = null;
+        let allPatients = [];
+        let filteredPatients = [];
+        let currentFilter = 'all';
         
         // Initialize
-        document.addEventListener('DOMContentLoaded', async function() {
-            // Set current month filter
-            const today = new Date();
-            document.getElementById('monthFilter').value = 
-                `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Check authentication
+            const authData = localStorage.getItem('celloxen_auth');
+            if (!authData) {
+                window.location.href = 'unified-login.html';
+                return;
+            }
+            
+            const auth = JSON.parse(authData);
+            currentClinicId = auth.clinicId;
             
             await loadPatients();
-            await loadReports();
+            await loadStatistics();
+            setupSearch();
         });
         
         async function loadPatients() {
             try {
-                const authData = JSON.parse(localStorage.getItem('celloxen_auth') || '{}');
-                const clinicId = authData.clinicId || sessionStorage.getItem('currentClinicId');
-                
-                if (!clinicId) return;
-                
-                const { data, error } = await supabase
+                // Load patients with their assessment status
+                const { data: patients, error } = await supabase
                     .from('patients')
-                    .select('id, first_name, last_name, patient_id, email')
-                    .eq('clinic_id', clinicId)
-                    .order('first_name');
-                
-                if (error) throw error;
-                
-                const patientSelect = document.getElementById('patientFilter');
-                patientSelect.innerHTML = '<option value="">All Patients</option>';
-                
-                if (data) {
-                    data.forEach(patient => {
-                        patients[patient.id] = patient;
-                        patientSelect.innerHTML += `
-                            <option value="${patient.id}">
-                                ${patient.first_name} ${patient.last_name} (${patient.patient_id})
-                            </option>
-                        `;
-                    });
-                }
-            } catch (error) {
-                console.error('Error loading patients:', error);
-            }
-        }
-        
-        async function loadReports() {
-            try {
-                const authData = JSON.parse(localStorage.getItem('celloxen_auth') || '{}');
-                const clinicId = authData.clinicId || sessionStorage.getItem('currentClinicId');
-                
-                if (!clinicId) return;
-                
-                const { data, error } = await supabase
-                    .from('medical_reports')
-                    .select('*')
-                    .eq('clinic_id', clinicId)
+                    .select(`
+                        *,
+                        health_assessments (id, created_at),
+                        iris_assessments (id, created_at)
+                    `)
+                    .eq('clinic_id', currentClinicId)
                     .order('created_at', { ascending: false });
                 
                 if (error) throw error;
                 
-                allReports = data || [];
+                allPatients = patients || [];
+                filteredPatients = allPatients;
                 
-                // Apply initial filters
-                filteredReports = allReports;
-                displayReports();
-                updateStatistics();
+                displayPatients();
                 
             } catch (error) {
-                console.error('Error loading reports:', error);
-                document.getElementById('reportsList').innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-state-icon">⚠️</div>
-                        <div class="empty-state-text">Error loading reports</div>
-                    </div>
-                `;
+                console.error('Error loading patients:', error);
+                document.getElementById('patientsGrid').innerHTML = 
+                    '<div class="empty-state"><p style="color: #ef4444;">Error loading patients</p></div>';
             }
         }
         
-        function updateStatistics() {
-            // Total reports
-            document.getElementById('totalReports').textContent = allReports.length;
-            
-            // Comprehensive reports
-            const comprehensive = allReports.filter(r => 
-                r.report_type === 'comprehensive_diagnostic'
-            ).length;
-            document.getElementById('comprehensiveReports').textContent = comprehensive;
-            
-            // Assessment reports
-            const assessments = allReports.filter(r => 
-                r.report_type?.includes('assessment')
-            ).length;
-            document.getElementById('assessmentReports').textContent = assessments;
-            
-            // This month's reports
-            const currentMonth = new Date().getMonth();
-            const currentYear = new Date().getFullYear();
-            const thisMonth = allReports.filter(r => {
-                const reportDate = new Date(r.created_at);
-                return reportDate.getMonth() === currentMonth && 
-                       reportDate.getFullYear() === currentYear;
-            }).length;
-            document.getElementById('thisMonthReports').textContent = thisMonth;
+        async function loadStatistics() {
+            try {
+                const today = new Date();
+                const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+                
+                // Total patients
+                document.getElementById('totalPatients').textContent = allPatients.length;
+                
+                // Complete reports (both assessments done)
+                const completeCount = allPatients.filter(p => 
+                    p.health_assessments && p.health_assessments.length > 0 &&
+                    p.iris_assessments && p.iris_assessments.length > 0
+                ).length;
+                document.getElementById('completeReports').textContent = completeCount;
+                
+                // Pending assessments
+                const pendingCount = allPatients.filter(p => 
+                    (!p.health_assessments || p.health_assessments.length === 0) ||
+                    (!p.iris_assessments || p.iris_assessments.length === 0)
+                ).length;
+                document.getElementById('pendingAssessments').textContent = pendingCount;
+                
+                // Reports this month
+                const monthCount = allPatients.filter(p => {
+                    if (p.health_assessments && p.health_assessments.length > 0) {
+                        const assessmentDate = new Date(p.health_assessments[0].created_at);
+                        return assessmentDate >= monthStart;
+                    }
+                    return false;
+                }).length;
+                document.getElementById('reportsThisMonth').textContent = monthCount;
+                
+            } catch (error) {
+                console.error('Error loading statistics:', error);
+            }
         }
         
-        window.applyFilters = function() {
-            const patientId = document.getElementById('patientFilter').value;
-            const reportType = document.getElementById('typeFilter').value;
-            const monthFilter = document.getElementById('monthFilter').value;
+        function displayPatients() {
+            const grid = document.getElementById('patientsGrid');
             
-            filteredReports = allReports.filter(report => {
-                // Patient filter
-                if (patientId && report.patient_id !== parseInt(patientId)) {
-                    return false;
-                }
-                
-                // Type filter
-                if (reportType && report.report_type !== reportType) {
-                    return false;
-                }
-                
-                // Month filter
-                if (monthFilter) {
-                    const reportDate = new Date(report.created_at);
-                    const [year, month] = monthFilter.split('-');
-                    if (reportDate.getFullYear() !== parseInt(year) || 
-                        reportDate.getMonth() + 1 !== parseInt(month)) {
-                        return false;
-                    }
-                }
-                
-                return true;
-            });
-            
-            displayReports();
-        };
-        
-        window.clearFilters = function() {
-            document.getElementById('patientFilter').value = '';
-            document.getElementById('typeFilter').value = '';
-            document.getElementById('monthFilter').value = '';
-            
-            filteredReports = allReports;
-            displayReports();
-        };
-        
-        function displayReports() {
-            const reportsList = document.getElementById('reportsList');
-            
-            if (filteredReports.length === 0) {
-                reportsList.innerHTML = `
+            if (filteredPatients.length === 0) {
+                grid.innerHTML = `
                     <div class="empty-state">
-                        <div class="empty-state-icon">📋</div>
-                        <div class="empty-state-text">No reports found</div>
+                        <div class="empty-state-icon">👥</div>
+                        <p>No patients found</p>
                     </div>
                 `;
                 return;
             }
             
-            reportsList.innerHTML = filteredReports.map(report => {
-                const patient = patients[report.patient_id] || {};
-                const reportDate = new Date(report.created_at);
-                const reportType = formatReportType(report.report_type);
-                const typeClass = getTypeClass(report.report_type);
+            grid.innerHTML = filteredPatients.map(patient => {
+                const hasHealthAssessment = patient.health_assessments && patient.health_assessments.length > 0;
+                const hasIrisAssessment = patient.iris_assessments && patient.iris_assessments.length > 0;
+                const hasCompleteReport = hasHealthAssessment && hasIrisAssessment;
                 
-                // Extract key information
-                const reportData = report.report_data || {};
-                const recommendations = report.recommendations || [];
+                const age = patient.date_of_birth ? 
+                    new Date().getFullYear() - new Date(patient.date_of_birth).getFullYear() : 'N/A';
                 
                 return `
-                    <div class="report-card">
-                        <div class="report-header">
-                            <div>
-                                <div class="report-title">${report.report_title || reportType}</div>
-                                <div class="report-meta">
-                                    ${patient.first_name || 'Unknown'} ${patient.last_name || 'Patient'} • 
-                                    ${reportDate.toLocaleDateString('en-GB')}
-                                </div>
+                    <div class="patient-card">
+                        <div class="patient-header">
+                            <div class="patient-info">
+                                <div class="patient-name">${patient.first_name} ${patient.last_name}</div>
+                                <div class="patient-id">ID: ${patient.patient_id}</div>
                             </div>
-                            <span class="report-type-badge ${typeClass}">${reportType}</span>
                         </div>
                         
-                        <div class="report-content">
-                            ${reportData.patient_info ? `
-                                <div class="report-section">
-                                    <div class="section-label">Patient</div>
-                                    <div class="section-value">
-                                        ${reportData.patient_info.name || `${patient.first_name} ${patient.last_name}`}
-                                        (ID: ${reportData.patient_info.patient_id || patient.patient_id})
-                                    </div>
-                                </div>
-                            ` : ''}
-                            
-                            ${recommendations.length > 0 ? `
-                                <div class="report-section">
-                                    <div class="section-label">Recommendations</div>
-                                    <ul class="recommendations-list">
-                                        ${recommendations.slice(0, 3).map(rec => `
-                                            <li class="recommendation-item">
-                                                <div class="recommendation-bullet"></div>
-                                                <span>${rec}</span>
-                                            </li>
-                                        `).join('')}
-                                        ${recommendations.length > 3 ? `
-                                            <li class="recommendation-item">
-                                                <div class="recommendation-bullet"></div>
-                                                <span>+${recommendations.length - 3} more...</span>
-                                            </li>
-                                        ` : ''}
-                                    </ul>
-                                </div>
-                            ` : ''}
+                        <div class="patient-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Age</div>
+                                <div class="detail-value">${age} years</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Gender</div>
+                                <div class="detail-value">${patient.gender || 'N/A'}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Phone</div>
+                                <div class="detail-value">${patient.phone || 'N/A'}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Registration</div>
+                                <div class="detail-value">${new Date(patient.created_at).toLocaleDateString('en-GB')}</div>
+                            </div>
                         </div>
                         
-                        <div class="report-actions">
-                            <button class="action-btn" onclick="viewReport(${report.id})">View Details</button>
-                            <button class="action-btn" onclick="printReportDirect(${report.id})">Print</button>
-                            <button class="action-btn" onclick="emailReportDirect(${report.id})">
-                                📧 Email
+                        <div class="report-status">
+                            <span class="status-badge ${hasHealthAssessment ? 'status-complete' : 'status-none'}">
+                                ${hasHealthAssessment ? '✓' : '○'} Health Assessment
+                            </span>
+                            <span class="status-badge ${hasIrisAssessment ? 'status-complete' : 'status-none'}">
+                                ${hasIrisAssessment ? '✓' : '○'} IRIS Assessment
+                            </span>
+                            <span class="status-badge ${hasCompleteReport ? 'status-complete' : 'status-pending'}">
+                                ${hasCompleteReport ? 'Complete Report' : 'Pending Report'}
+                            </span>
+                        </div>
+                        
+                        <div class="action-buttons">
+                            ${hasCompleteReport ? `
+                                <button class="btn btn-success btn-sm" onclick="viewReport('${patient.id}')">
+                                    View Comprehensive Report
+                                </button>
+                            ` : `
+                                <button class="btn btn-secondary btn-sm" onclick="startAssessments('${patient.id}')">
+                                    Complete Assessments
+                                </button>
+                            `}
+                            <button class="btn btn-primary btn-sm" onclick="viewPatientDetails('${patient.id}')">
+                                Patient Details
                             </button>
                         </div>
                     </div>
@@ -767,302 +518,90 @@
             }).join('');
         }
         
-        function formatReportType(type) {
-            if (!type) return 'Report';
-            return type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-        }
-        
-        function getTypeClass(type) {
-            if (!type) return 'type-assessment';
-            if (type.includes('comprehensive')) return 'type-comprehensive';
-            if (type.includes('assessment')) return 'type-assessment';
-            if (type.includes('progress')) return 'type-progress';
-            if (type.includes('final')) return 'type-final';
-            return 'type-assessment';
-        }
-        
-        window.viewReport = async function(reportId) {
-            currentReport = allReports.find(r => r.id === reportId);
-            if (!currentReport) return;
-            
-            const patient = patients[currentReport.patient_id] || {};
-            const reportData = currentReport.report_data || {};
-            
-            document.getElementById('modalTitle').textContent = 
-                currentReport.report_title || 'Medical Report';
-            
-            let modalContent = `
-                <div style="padding: 20px;" id="reportContent">
-                    <h3 style="color: #1e293b; margin-bottom: 20px;">Report Information</h3>
-                    
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;">
-                        <div>
-                            <p style="color: #64748b; font-size: 12px; margin-bottom: 5px;">Patient Name</p>
-                            <p style="color: #1e293b; font-weight: 600;">
-                                ${patient.first_name || ''} ${patient.last_name || 'Unknown Patient'}
-                            </p>
-                        </div>
-                        <div>
-                            <p style="color: #64748b; font-size: 12px; margin-bottom: 5px;">Report Date</p>
-                            <p style="color: #1e293b; font-weight: 600;">
-                                ${new Date(currentReport.created_at).toLocaleDateString('en-GB')}
-                            </p>
-                        </div>
-                        <div>
-                            <p style="color: #64748b; font-size: 12px; margin-bottom: 5px;">Report Type</p>
-                            <p style="color: #1e293b; font-weight: 600;">
-                                ${formatReportType(currentReport.report_type)}
-                            </p>
-                        </div>
-                        <div>
-                            <p style="color: #64748b; font-size: 12px; margin-bottom: 5px;">Patient ID</p>
-                            <p style="color: #1e293b; font-weight: 600;">
-                                ${patient.patient_id || 'N/A'}
-                            </p>
-                        </div>
-                    </div>
-            `;
-            
-            // Add assessment scores if available
-            if (reportData.health_assessment?.scores) {
-                modalContent += `
-                    <h3 style="color: #1e293b; margin: 30px 0 20px;">Assessment Results</h3>
-                    <h4 style="color: #475569; margin: 20px 0 15px;">Health Assessment Scores</h4>
-                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
-                        ${Object.entries(reportData.health_assessment.scores).map(([domain, score]) => `
-                            <div style="background: #f8fafc; padding: 10px; border-radius: 8px;">
-                                <span style="color: #64748b; font-size: 13px;">${formatDomain(domain)}:</span>
-                                <span style="float: right; font-weight: 600; color: ${getScoreColor(100 - score)}">
-                                    ${100 - score}% wellness
-                                </span>
-                            </div>
-                        `).join('')}
-                    </div>
-                `;
-            }
-            
-            // Add recommendations
-            if (currentReport.recommendations?.length > 0) {
-                modalContent += `
-                    <h3 style="color: #1e293b; margin: 30px 0 20px;">Recommendations</h3>
-                    <div style="background: #f0f9ff; padding: 20px; border-radius: 8px; border-left: 4px solid #1e3a8a;">
-                        <ul style="margin: 0; padding-left: 20px;">
-                            ${currentReport.recommendations.map(rec => `<li style="margin: 8px 0;">${rec}</li>`).join('')}
-                        </ul>
-                    </div>
-                `;
-            }
-            
-            modalContent += '</div>';
-            
-            // Store patient info for email
-            currentReport.patient = patient;
-            
-            document.getElementById('modalBody').innerHTML = modalContent;
-            document.getElementById('reportModal').classList.add('show');
-        };
-        
-        function formatDomain(domain) {
-            const formats = {
-                sleep: 'Sleep Quality',
-                stress: 'Stress Management',
-                cardiovascular: 'Cardiovascular Health',
-                joint: 'Joint Health',
-                digestive: 'Digestive Wellness',
-                kidney: 'Kidney Function',
-                energy: 'Energy Levels',
-                metabolic: 'Metabolic Health'
-            };
-            return formats[domain] || domain;
-        }
-        
-        function getScoreColor(score) {
-            if (score >= 70) return '#10b981';
-            if (score >= 50) return '#f59e0b';
-            return '#ef4444';
-        }
-        
-        window.closeModal = function() {
-            document.getElementById('reportModal').classList.remove('show');
-            currentReport = null;
-        };
-        
-        window.printReport = function() {
-            if (!currentReport) return;
-            window.print();
-        };
-        
-        window.downloadReport = function() {
-            if (!currentReport) return;
-            
-            const element = document.getElementById('reportContent');
-            const patientName = currentReport.patient ? 
-                `${currentReport.patient.first_name}_${currentReport.patient.last_name}` : 
-                'Patient';
-            const filename = `Report_${patientName}_${new Date().toISOString().split('T')[0]}.pdf`;
-            
-            const opt = {
-                margin: 1,
-                filename: filename,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2 },
-                jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-            };
-            
-            html2pdf().set(opt).from(element).save();
-        };
-        
-        // Email report to patient function (updated to use email-sender.js)
-        window.emailReportToPatient = async function() {
-            if (!currentReport) {
-                alert('No report loaded');
-                return;
-            }
-            
-            const patient = currentReport.patient || patients[currentReport.patient_id];
-            if (!patient) {
-                alert('Patient information not available');
-                return;
-            }
-            
-            const patientEmail = patient.email;
-            const patientName = `${patient.first_name} ${patient.last_name}`;
-            
-            if (!patientEmail) {
-                const enteredEmail = prompt(`Enter email address for ${patientName}:`);
-                if (!enteredEmail) return;
-                patient.email = enteredEmail;
-            }
-            
-            // Show sending status
-            const modalFooter = document.querySelector('.modal-footer');
-            const emailBtn = modalFooter.querySelector('button[onclick="emailReportToPatient()"]');
-            emailBtn.innerHTML = '<span class="email-status email-sending">📧 Sending...</span>';
-            emailBtn.disabled = true;
-            
-            try {
-                // Generate PDF from report content
-                const element = document.getElementById('reportContent');
-                const opt = {
-                    margin: 1,
-                    image: { type: 'jpeg', quality: 0.98 },
-                    html2canvas: { scale: 2 },
-                    jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-                };
-                
-                const pdfBlob = await html2pdf().set(opt).from(element).outputPdf('blob');
-                
-                // Use the email-sender.js function
-                const success = await window.sendReportEmail(
-                    pdfBlob, 
-                    patient.email,
-                    patientName
-                );
-                
-                if (success) {
-                    emailBtn.innerHTML = '<span class="email-status email-success">✓ Email sent!</span>';
-                    
-                    // Log email sent to database
-                    await supabase
-                        .from('email_logs')
-                        .insert([{
-                            patient_id: currentReport.patient_id,
-                            clinic_id: currentReport.clinic_id,
-                            report_id: currentReport.id,
-                            email_type: 'report',
-                            recipient: patient.email,
-                            sent_at: new Date().toISOString(),
-                            status: 'sent'
-                        }]);
-                    
-                    setTimeout(() => {
-                        emailBtn.innerHTML = '📧 Email to Patient';
-                        emailBtn.disabled = false;
-                    }, 3000);
-                } else {
-                    emailBtn.innerHTML = '<span class="email-status email-error">✗ Failed</span>';
-                    setTimeout(() => {
-                        emailBtn.innerHTML = '📧 Email to Patient';
-                        emailBtn.disabled = false;
-                    }, 3000);
+        function setupSearch() {
+            const searchInput = document.getElementById('searchInput');
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    searchPatients();
                 }
-            } catch (error) {
-                console.error('Error sending email:', error);
-                emailBtn.innerHTML = '<span class="email-status email-error">✗ Error</span>';
-                alert('Failed to send email: ' + error.message);
-                setTimeout(() => {
-                    emailBtn.innerHTML = '📧 Email to Patient';
-                    emailBtn.disabled = false;
-                }, 3000);
-            }
-        };
+            });
+        }
         
-        window.emailReportDirect = async function(reportId) {
-            const report = allReports.find(r => r.id === reportId);
-            if (!report) return;
+        window.searchPatients = function() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
             
-            const patient = patients[report.patient_id];
-            if (!patient || !patient.email) {
-                alert('Patient email not available. Please view the report to add email.');
-                return;
-            }
-            
-            // Create a simple PDF content
-            const htmlContent = `
-                <div style="font-family: Arial, sans-serif; padding: 20px;">
-                    <h1>Medical Report</h1>
-                    <p><strong>Patient:</strong> ${patient.first_name} ${patient.last_name}</p>
-                    <p><strong>Date:</strong> ${new Date(report.created_at).toLocaleDateString('en-GB')}</p>
-                    <p><strong>Type:</strong> ${formatReportType(report.report_type)}</p>
-                    ${report.recommendations?.length > 0 ? `
-                        <h3>Recommendations:</h3>
-                        <ul>${report.recommendations.map(r => `<li>${r}</li>`).join('')}</ul>
-                    ` : ''}
-                </div>
-            `;
-            
-            // Create temporary div for PDF generation
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = htmlContent;
-            document.body.appendChild(tempDiv);
-            
-            try {
-                const opt = {
-                    margin: 1,
-                    image: { type: 'jpeg', quality: 0.98 },
-                    html2canvas: { scale: 2 },
-                    jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-                };
-                
-                const pdfBlob = await html2pdf().set(opt).from(tempDiv).outputPdf('blob');
-                
-                const success = await window.sendReportEmail(
-                    pdfBlob,
-                    patient.email,
-                    `${patient.first_name} ${patient.last_name}`
+            if (!searchTerm) {
+                filteredPatients = allPatients;
+            } else {
+                filteredPatients = allPatients.filter(patient => 
+                    patient.first_name.toLowerCase().includes(searchTerm) ||
+                    patient.last_name.toLowerCase().includes(searchTerm) ||
+                    patient.patient_id.toLowerCase().includes(searchTerm)
                 );
-                
-                if (success) {
-                    alert(`Report sent to ${patient.email}`);
-                }
-            } finally {
-                document.body.removeChild(tempDiv);
             }
-        };
+            
+            applyFilter();
+        }
         
-        window.printReportDirect = async function(reportId) {
-            await viewReport(reportId);
-            setTimeout(() => {
-                window.print();
-            }, 500);
-        };
+        window.clearSearch = function() {
+            document.getElementById('searchInput').value = '';
+            filteredPatients = allPatients;
+            applyFilter();
+        }
         
-        // Close modal on outside click
-        window.onclick = function(event) {
-            if (event.target === document.getElementById('reportModal')) {
-                closeModal();
+        window.filterPatients = function(filter) {
+            currentFilter = filter;
+            
+            // Update active filter
+            document.querySelectorAll('.filter-chip').forEach(chip => {
+                chip.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            applyFilter();
+        }
+        
+        function applyFilter() {
+            let filtered = filteredPatients;
+            
+            if (currentFilter === 'complete') {
+                filtered = filteredPatients.filter(p => 
+                    p.health_assessments && p.health_assessments.length > 0 &&
+                    p.iris_assessments && p.iris_assessments.length > 0
+                );
+            } else if (currentFilter === 'pending') {
+                filtered = filteredPatients.filter(p => 
+                    (p.health_assessments && p.health_assessments.length > 0) ||
+                    (p.iris_assessments && p.iris_assessments.length > 0)
+                );
+            } else if (currentFilter === 'no-report') {
+                filtered = filteredPatients.filter(p => 
+                    (!p.health_assessments || p.health_assessments.length === 0) &&
+                    (!p.iris_assessments || p.iris_assessments.length === 0)
+                );
             }
-        };
+            
+            const tempFiltered = filteredPatients;
+            filteredPatients = filtered;
+            displayPatients();
+            filteredPatients = tempFiltered; // Restore for next filter
+        }
+        
+        window.viewReport = function(patientId) {
+            window.location.href = `comprehensive-report.html?patientId=${patientId}`;
+        }
+        
+        window.startAssessments = function(patientId) {
+            window.location.href = `lily-ai-agent-integrated.html?patientId=${patientId}`;
+        }
+        
+        window.viewPatientDetails = function(patientId) {
+            window.location.href = `patient-management.html?patientId=${patientId}`;
+        }
+        
+        window.goBack = function() {
+            window.location.href = 'clinic-dashboard.html';
+        }
     </script>
 </body>
 </html>
