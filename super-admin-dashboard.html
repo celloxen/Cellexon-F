@@ -365,14 +365,14 @@
                 <div class="overview-trend">↑ 23% this month</div>
             </div>
             <div class="overview-card">
-                <div class="overview-value" id="activeAssessments">0</div>
-                <div class="overview-label">Active Assessments</div>
-                <div class="overview-trend">In progress today</div>
+                <div class="overview-value" id="totalLeads">0</div>
+                <div class="overview-label">New Leads</div>
+                <div class="overview-trend">This month</div>
             </div>
             <div class="overview-card">
-                <div class="overview-value" id="totalSessions">0</div>
-                <div class="overview-label">Sessions Today</div>
-                <div class="overview-trend">Across all clinics</div>
+                <div class="overview-value" id="totalUsers">0</div>
+                <div class="overview-label">System Users</div>
+                <div class="overview-trend">All active users</div>
             </div>
             <div class="overview-card">
                 <div class="overview-value" id="monthlyRevenue">£0</div>
@@ -389,51 +389,61 @@
         <!-- Quick Actions -->
         <div class="quick-actions">
             <button class="quick-action-btn primary" onclick="registerNewClinic()">+ Register New Clinic</button>
-            <button class="quick-action-btn" onclick="viewAllClinics()">View All Clinics</button>
+            <button class="quick-action-btn" onclick="window.location.href='leads-management.html'">Manage Leads</button>
+            <button class="quick-action-btn" onclick="window.location.href='user-management.html'">User Management</button>
             <button class="quick-action-btn" onclick="navigateTo('therapy-config')">Therapy Configuration</button>
             <button class="quick-action-btn" onclick="viewSystemReports()">System Reports</button>
             <button class="quick-action-btn" onclick="viewFinancials()">Financial Overview</button>
-            <button class="quick-action-btn" onclick="manageUsers()">User Management</button>
-        </div>
-
-        <!-- Clinic Management -->
-        <div class="control-section">
-            <div class="section-header">
-                <h2 class="section-title">Clinic Management</h2>
-                <div style="display: flex; gap: 10px;">
-                    <button class="filter-btn" onclick="filterClinics()">Filter</button>
-                    <input type="text" class="search-box" placeholder="Search clinics..." id="clinicSearch">
-                </div>
-            </div>
-            
-            <div class="clinics-table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Clinic Name</th>
-                            <th>Code</th>
-                            <th>Status</th>
-                            <th>Patients</th>
-                            <th>Active Plans</th>
-                            <th>This Month</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="clinicsTableBody">
-                        <tr><td colspan="7">Loading...</td></tr>
-                    </tbody>
-                </table>
-            </div>
         </div>
 
         <!-- System Control -->
         <div class="control-section">
             <div class="section-header">
-                <h2 class="section-title">System Control</h2>
+                <h2 class="section-title">System Control Modules</h2>
             </div>
             
             <div class="modules-grid">
-                <!-- Therapy Configuration (NEW) -->
+                <!-- User Management Module -->
+                <div class="module-card" onclick="window.location.href='user-management.html'">
+                    <div class="module-header">
+                        <div class="module-icon">👤</div>
+                        <span class="module-status status-active">ACTIVE</span>
+                    </div>
+                    <div class="module-title">User Management</div>
+                    <div class="module-description">Manage all system users, create super admins, control clinic access</div>
+                    <div class="module-stats">
+                        <div class="module-stat">
+                            <div class="stat-value" id="clinicUsers">0</div>
+                            <div class="stat-label">Clinic Users</div>
+                        </div>
+                        <div class="module-stat">
+                            <div class="stat-value" id="superAdmins">0</div>
+                            <div class="stat-label">Super Admins</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Leads Management Module -->
+                <div class="module-card" onclick="window.location.href='leads-management.html'">
+                    <div class="module-header">
+                        <div class="module-icon">📧</div>
+                        <span class="module-status status-active">ACTIVE</span>
+                    </div>
+                    <div class="module-title">Leads Management</div>
+                    <div class="module-description">Track and manage all platform inquiries and leads from the website</div>
+                    <div class="module-stats">
+                        <div class="module-stat">
+                            <div class="stat-value" id="newLeads">0</div>
+                            <div class="stat-label">New Leads</div>
+                        </div>
+                        <div class="module-stat">
+                            <div class="stat-value" id="convertedLeads">0</div>
+                            <div class="stat-label">Converted</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Therapy Configuration -->
                 <div class="module-card" onclick="navigateTo('therapy-config')">
                     <div class="module-header">
                         <div class="module-icon">⚙️</div>
@@ -456,7 +466,7 @@
                 <!-- Global Patient Database -->
                 <div class="module-card" onclick="navigateTo('global-patients')">
                     <div class="module-header">
-                        <div class="module-icon">🌐</div>
+                        <div class="module-icon">🌍</div>
                         <span class="module-status status-active">ACTIVE</span>
                     </div>
                     <div class="module-title">Global Patient Database</div>
@@ -469,46 +479,6 @@
                         <div class="module-stat">
                             <div class="stat-value" id="activePatientCount">0</div>
                             <div class="stat-label">Active</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Assessment Management -->
-                <div class="module-card" onclick="navigateTo('assessment-overview')">
-                    <div class="module-header">
-                        <div class="module-icon">📊</div>
-                        <span class="module-status status-active">ACTIVE</span>
-                    </div>
-                    <div class="module-title">Assessment Overview</div>
-                    <div class="module-description">Monitor all health and iris assessments</div>
-                    <div class="module-stats">
-                        <div class="module-stat">
-                            <div class="stat-value" id="pendingAssessments">0</div>
-                            <div class="stat-label">Pending</div>
-                        </div>
-                        <div class="module-stat">
-                            <div class="stat-value" id="completedToday">0</div>
-                            <div class="stat-label">Today</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Treatment Monitoring -->
-                <div class="module-card" onclick="navigateTo('treatment-monitoring')">
-                    <div class="module-header">
-                        <div class="module-icon">⚡</div>
-                        <span class="module-status status-active">ACTIVE</span>
-                    </div>
-                    <div class="module-title">Treatment Monitoring</div>
-                    <div class="module-description">Real-time treatment session monitoring</div>
-                    <div class="module-stats">
-                        <div class="module-stat">
-                            <div class="stat-value" id="activeTreatments">0</div>
-                            <div class="stat-label">Active</div>
-                        </div>
-                        <div class="module-stat">
-                            <div class="stat-value" id="todaySessions">0</div>
-                            <div class="stat-label">Today</div>
                         </div>
                     </div>
                 </div>
@@ -554,12 +524,42 @@
                 </div>
             </div>
         </div>
+
+        <!-- Clinic Management -->
+        <div class="control-section">
+            <div class="section-header">
+                <h2 class="section-title">Recent Clinics</h2>
+                <div style="display: flex; gap: 10px;">
+                    <button class="filter-btn" onclick="viewAllClinics()">View All</button>
+                    <input type="text" class="search-box" placeholder="Search clinics..." id="clinicSearch">
+                </div>
+            </div>
+            
+            <div class="clinics-table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Clinic Name</th>
+                            <th>Code</th>
+                            <th>Status</th>
+                            <th>Patients</th>
+                            <th>Created</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="clinicsTableBody">
+                        <tr><td colspan="6">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
-    <script>
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+        
         const SUPABASE_URL = 'https://defifwzgazqlrigwumqn.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlZmlmd3pnYXpxbHJpZ3d1bXFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcyNTM0MjYsImV4cCI6MjA3MjgyOTQyNn0.wcUBq6Pszjtqn5aBtuu3iXBE4BLmu8x9LtJbsMWlIiA';
-        const { createClient } = window.supabase;
         const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         
         document.addEventListener('DOMContentLoaded', async function() {
@@ -592,6 +592,7 @@
                     .from('clinics')
                     .select('*', { count: 'exact', head: true });
                 document.getElementById('totalClinics').textContent = clinicsCount || 0;
+                document.getElementById('clinicUsers').textContent = clinicsCount || 0;
                 
                 // Load patients
                 const { count: patientsCount } = await supabase
@@ -600,17 +601,29 @@
                 document.getElementById('totalPatients').textContent = patientsCount || 0;
                 document.getElementById('globalPatientCount').textContent = patientsCount || 0;
                 
+                // Load leads
+                const { count: leadsCount } = await supabase
+                    .from('leads')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('status', 'new');
+                document.getElementById('totalLeads').textContent = leadsCount || 0;
+                document.getElementById('newLeads').textContent = leadsCount || 0;
+                
+                // Load super admins
+                const { count: superAdminCount } = await supabase
+                    .from('super_admin_users')
+                    .select('*', { count: 'exact', head: true });
+                document.getElementById('superAdmins').textContent = superAdminCount || 0;
+                
+                // Calculate total users
+                const totalUsers = (clinicsCount || 0) + (superAdminCount || 0);
+                document.getElementById('totalUsers').textContent = totalUsers;
+                
                 // Load therapy protocols
                 const { count: protocolsCount } = await supabase
                     .from('therapy_protocols')
                     .select('*', { count: 'exact', head: true });
                 document.getElementById('protocolCount').textContent = protocolsCount || 0;
-                
-                // Load probe diagrams
-                const { count: diagramsCount } = await supabase
-                    .from('probe_diagrams')
-                    .select('*', { count: 'exact', head: true });
-                document.getElementById('diagramCount').textContent = diagramsCount || 0;
                 
                 // Calculate revenue
                 const monthlyRevenue = (clinicsCount || 0) * 299;
@@ -628,13 +641,13 @@
                     .from('clinics')
                     .select('*')
                     .order('created_at', { ascending: false })
-                    .limit(10);
+                    .limit(5);
                 
                 if (error) throw error;
                 
                 const tbody = document.getElementById('clinicsTableBody');
                 if (!clinics || clinics.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="7">No clinics found</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="6">No clinics found</td></tr>';
                     return;
                 }
                 
@@ -643,12 +656,10 @@
                         <td class="clinic-name">${clinic.clinic_name || 'Unnamed'}</td>
                         <td>${clinic.clinic_code || '-'}</td>
                         <td><span class="clinic-status status-active">Active</span></td>
-                        <td>0</td>
                         <td>-</td>
-                        <td>£299</td>
+                        <td>${new Date(clinic.created_at).toLocaleDateString('en-GB')}</td>
                         <td class="action-links">
                             <a class="action-link" onclick="viewClinic('${clinic.id}')">View</a>
-                            <a class="action-link" onclick="editClinic('${clinic.id}')">Edit</a>
                             <a class="action-link" onclick="accessAsClinic('${clinic.id}')">Access</a>
                         </td>
                     </tr>
@@ -660,14 +671,10 @@
         }
         
         window.navigateTo = function(module) {
-            sessionStorage.setItem('viewMode', 'super_admin');
-            
             const routes = {
-                'global-patients': 'global-patients.html',
-                'assessment-overview': 'assessment-overview.html',
-                'treatment-monitoring': 'treatment-monitoring.html',
-                'financial-control': 'financial-overview.html',
                 'therapy-config': 'therapy-configuration.html',
+                'global-patients': 'global-patients.html',
+                'financial-control': 'financial-overview.html',
                 'analytics': 'analytics-dashboard.html'
             };
             
@@ -687,15 +694,21 @@
             window.location.href = 'clinic-details.html';
         };
         
-        window.editClinic = function(clinicId) {
-            sessionStorage.setItem('selectedClinicId', clinicId);
-            window.location.href = 'edit-clinic.html';
-        };
-        
         window.accessAsClinic = function(clinicId) {
             sessionStorage.setItem('superAdminMode', 'true');
             sessionStorage.setItem('currentClinicId', clinicId);
+            const authData = JSON.parse(localStorage.getItem('celloxen_auth'));
+            authData.clinicId = clinicId;
+            localStorage.setItem('celloxen_auth', JSON.stringify(authData));
             window.location.href = 'clinic-dashboard.html';
+        };
+        
+        window.viewSystemReports = function() {
+            window.location.href = 'system-reports.html';
+        };
+        
+        window.viewFinancials = function() {
+            window.location.href = 'financial-overview.html';
         };
         
         window.logout = async function() {
