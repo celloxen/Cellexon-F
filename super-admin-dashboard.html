@@ -5,11 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Super Admin - Celloxen Platform Control</title>
     
-    <!-- ADD THIS LINE - REQUIRED FOR SUPABASE -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <style>
-        /* Keep all existing styles exactly as they are */
         * {
             margin: 0;
             padding: 0;
@@ -23,7 +21,6 @@
             min-height: 100vh;
         }
         
-        /* Header - Darker for Super Admin */
         .header {
             background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
             color: white;
@@ -71,14 +68,12 @@
             gap: 20px;
         }
         
-        /* Container */
         .container {
             max-width: 1600px;
             margin: 0 auto;
             padding: 30px 20px;
         }
         
-        /* Platform Overview Cards */
         .platform-overview {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -126,11 +121,6 @@
             color: #10b981;
         }
         
-        .trend-down {
-            color: #ef4444;
-        }
-        
-        /* Quick Actions Bar */
         .quick-actions {
             background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
             border-radius: 12px;
@@ -164,11 +154,6 @@
             border: none;
         }
         
-        .quick-action-btn.primary:hover {
-            background: #f8fafc;
-        }
-        
-        /* Main Control Sections */
         .control-section {
             margin-bottom: 40px;
         }
@@ -188,12 +173,6 @@
             color: #1e293b;
         }
         
-        .section-actions {
-            display: flex;
-            gap: 10px;
-        }
-        
-        /* Module Cards Grid */
         .modules-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -248,16 +227,6 @@
             color: #065f46;
         }
         
-        .status-warning {
-            background: #fed7aa;
-            color: #92400e;
-        }
-        
-        .status-critical {
-            background: #fee2e2;
-            color: #991b1b;
-        }
-        
         .module-title {
             font-size: 16px;
             font-weight: 600;
@@ -295,19 +264,11 @@
             text-transform: uppercase;
         }
         
-        /* Clinics Table */
         .clinics-table-container {
             background: white;
             border-radius: 12px;
             padding: 20px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-        }
-        
-        .table-controls {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
         }
         
         .search-box {
@@ -363,11 +324,6 @@
             font-weight: 600;
         }
         
-        .status-active {
-            background: #d1fae5;
-            color: #065f46;
-        }
-        
         .action-links {
             display: flex;
             gap: 10px;
@@ -379,45 +335,9 @@
             font-size: 13px;
             cursor: pointer;
         }
-        
-        .action-link:hover {
-            text-decoration: underline;
-        }
-        
-        /* Alert System */
-        .alerts-container {
-            background: #fef3c7;
-            border: 1px solid #fbbf24;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 30px;
-            display: none;
-        }
-        
-        .alert-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-        
-        .alert-item:last-child {
-            margin-bottom: 0;
-        }
-        
-        .alert-icon {
-            color: #f59e0b;
-        }
-        
-        .alert-text {
-            flex: 1;
-            color: #92400e;
-            font-size: 14px;
-        }
     </style>
 </head>
 <body>
-    <!-- Header -->
     <div class="header">
         <div class="header-container">
             <div class="logo-section">
@@ -431,16 +351,7 @@
         </div>
     </div>
 
-    <!-- Main Container -->
     <div class="container">
-        <!-- Alerts Container -->
-        <div class="alerts-container" id="alertsContainer">
-            <div class="alert-item">
-                <span class="alert-icon">⚠️</span>
-                <span class="alert-text" id="alertText">System alerts will appear here</span>
-            </div>
-        </div>
-
         <!-- Platform Overview -->
         <div class="platform-overview">
             <div class="overview-card">
@@ -475,28 +386,28 @@
             </div>
         </div>
 
-        <!-- Quick Actions Bar -->
+        <!-- Quick Actions -->
         <div class="quick-actions">
             <button class="quick-action-btn primary" onclick="registerNewClinic()">+ Register New Clinic</button>
             <button class="quick-action-btn" onclick="viewAllClinics()">View All Clinics</button>
+            <button class="quick-action-btn" onclick="navigateTo('therapy-config')">Therapy Configuration</button>
             <button class="quick-action-btn" onclick="viewSystemReports()">System Reports</button>
             <button class="quick-action-btn" onclick="viewFinancials()">Financial Overview</button>
-            <button class="quick-action-btn" onclick="viewSystemLogs()">System Logs</button>
             <button class="quick-action-btn" onclick="manageUsers()">User Management</button>
         </div>
 
-        <!-- Clinic Management Section -->
+        <!-- Clinic Management -->
         <div class="control-section">
             <div class="section-header">
                 <h2 class="section-title">Clinic Management</h2>
-                <div class="section-actions">
+                <div style="display: flex; gap: 10px;">
                     <button class="filter-btn" onclick="filterClinics()">Filter</button>
                     <input type="text" class="search-box" placeholder="Search clinics..." id="clinicSearch">
                 </div>
             </div>
             
             <div class="clinics-table-container">
-                <table id="clinicsTable">
+                <table>
                     <thead>
                         <tr>
                             <th>Clinic Name</th>
@@ -509,23 +420,43 @@
                         </tr>
                     </thead>
                     <tbody id="clinicsTableBody">
-                        <!-- Dynamic content -->
+                        <tr><td colspan="7">Loading...</td></tr>
                     </tbody>
                 </table>
             </div>
         </div>
 
-        <!-- System Control Modules -->
+        <!-- System Control -->
         <div class="control-section">
             <div class="section-header">
                 <h2 class="section-title">System Control</h2>
             </div>
             
             <div class="modules-grid">
-                <!-- Clinical Data Management -->
+                <!-- Therapy Configuration (NEW) -->
+                <div class="module-card" onclick="navigateTo('therapy-config')">
+                    <div class="module-header">
+                        <div class="module-icon">⚙️</div>
+                        <span class="module-status status-active">ACTIVE</span>
+                    </div>
+                    <div class="module-title">Therapy Configuration</div>
+                    <div class="module-description">Manage therapy protocols, session counts, and probe diagrams</div>
+                    <div class="module-stats">
+                        <div class="module-stat">
+                            <div class="stat-value" id="protocolCount">0</div>
+                            <div class="stat-label">Protocols</div>
+                        </div>
+                        <div class="module-stat">
+                            <div class="stat-value" id="diagramCount">0</div>
+                            <div class="stat-label">Diagrams</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Global Patient Database -->
                 <div class="module-card" onclick="navigateTo('global-patients')">
                     <div class="module-header">
-                        <div class="module-icon">🌍</div>
+                        <div class="module-icon">🌐</div>
                         <span class="module-status status-active">ACTIVE</span>
                     </div>
                     <div class="module-title">Global Patient Database</div>
@@ -602,26 +533,6 @@
                     </div>
                 </div>
 
-                <!-- System Configuration -->
-                <div class="module-card" onclick="navigateTo('system-config')">
-                    <div class="module-header">
-                        <div class="module-icon">⚙️</div>
-                        <span class="module-status status-active">ACTIVE</span>
-                    </div>
-                    <div class="module-title">System Configuration</div>
-                    <div class="module-description">Therapy protocols, supplements and system settings</div>
-                    <div class="module-stats">
-                        <div class="module-stat">
-                            <div class="stat-value">33</div>
-                            <div class="stat-label">Protocols</div>
-                        </div>
-                        <div class="module-stat">
-                            <div class="stat-value">45</div>
-                            <div class="stat-label">Supplements</div>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- Analytics & Reports -->
                 <div class="module-card" onclick="navigateTo('analytics')">
                     <div class="module-header">
@@ -643,69 +554,20 @@
                 </div>
             </div>
         </div>
-
-        <!-- Clinical Access Section -->
-        <div class="control-section">
-            <div class="section-header">
-                <h2 class="section-title">Clinical Module Access</h2>
-            </div>
-            
-            <div class="modules-grid">
-                <div class="module-card" onclick="accessClinicModule('lily-assessment')">
-                    <div class="module-header">
-                        <div class="module-icon">🤖</div>
-                        <span class="module-status status-active">ACTIVE</span>
-                    </div>
-                    <div class="module-title">Lily AI Assessment</div>
-                    <div class="module-description">Access health assessment system</div>
-                </div>
-
-                <div class="module-card" onclick="accessClinicModule('iris-analysis')">
-                    <div class="module-header">
-                        <div class="module-icon">👁️</div>
-                        <span class="module-status status-active">ACTIVE</span>
-                    </div>
-                    <div class="module-title">Iris Analysis</div>
-                    <div class="module-description">Access iris assessment system</div>
-                </div>
-
-                <div class="module-card" onclick="accessClinicModule('treatment-interface')">
-                    <div class="module-header">
-                        <div class="module-icon">⚡</div>
-                        <span class="module-status status-active">ACTIVE</span>
-                    </div>
-                    <div class="module-title">Treatment Interface</div>
-                    <div class="module-description">Deliver therapy sessions</div>
-                </div>
-
-                <div class="module-card" onclick="accessClinicModule('therapy-guide')">
-                    <div class="module-header">
-                        <div class="module-icon">📚</div>
-                        <span class="module-status status-active">ACTIVE</span>
-                    </div>
-                    <div class="module-title">Therapy Guide</div>
-                    <div class="module-description">All 33 therapy protocols</div>
-                </div>
-            </div>
-        </div>
     </div>
 
     <script>
-        // Initialize Supabase client directly in the page
         const SUPABASE_URL = 'https://defifwzgazqlrigwumqn.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlZmlmd3pnYXpxbHJpZ3d1bXFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcyNTM0MjYsImV4cCI6MjA3MjgyOTQyNn0.wcUBq6Pszjtqn5aBtuu3iXBE4BLmu8x9LtJbsMWlIiA';
         const { createClient } = window.supabase;
         const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         
-        // Initialize dashboard
         document.addEventListener('DOMContentLoaded', async function() {
             await checkAuthentication();
             await loadDashboardData();
             await loadClinicsTable();
-            startRealTimeUpdates();
         });
         
-        // Check authentication
         async function checkAuthentication() {
             const authData = localStorage.getItem('celloxen_auth');
             if (!authData) {
@@ -723,42 +585,34 @@
             document.getElementById('userDisplay').textContent = auth.username || 'Super Administrator';
         }
         
-        // Load dashboard data
         async function loadDashboardData() {
             try {
-                // Load clinics count
+                // Load clinics
                 const { count: clinicsCount } = await supabase
                     .from('clinics')
                     .select('*', { count: 'exact', head: true });
-                    
                 document.getElementById('totalClinics').textContent = clinicsCount || 0;
                 
-                // Load patients count
+                // Load patients
                 const { count: patientsCount } = await supabase
                     .from('patients')
                     .select('*', { count: 'exact', head: true });
-                    
                 document.getElementById('totalPatients').textContent = patientsCount || 0;
                 document.getElementById('globalPatientCount').textContent = patientsCount || 0;
                 
-                // Load active assessments
-                const { count: assessmentsCount } = await supabase
-                    .from('health_assessments')
+                // Load therapy protocols
+                const { count: protocolsCount } = await supabase
+                    .from('therapy_protocols')
                     .select('*', { count: 'exact', head: true });
-                    
-                document.getElementById('activeAssessments').textContent = assessmentsCount || 0;
+                document.getElementById('protocolCount').textContent = protocolsCount || 0;
                 
-                // Load today's sessions
-                const today = new Date().toISOString().split('T')[0];
-                const { count: sessionsCount } = await supabase
-                    .from('appointments')
-                    .select('*', { count: 'exact', head: true })
-                    .eq('appointment_date', today)
-                    .eq('status', 'scheduled');
-                    
-                document.getElementById('totalSessions').textContent = sessionsCount || 0;
+                // Load probe diagrams
+                const { count: diagramsCount } = await supabase
+                    .from('probe_diagrams')
+                    .select('*', { count: 'exact', head: true });
+                document.getElementById('diagramCount').textContent = diagramsCount || 0;
                 
-                // Calculate revenue (example)
+                // Calculate revenue
                 const monthlyRevenue = (clinicsCount || 0) * 299;
                 document.getElementById('monthlyRevenue').textContent = `£${monthlyRevenue.toLocaleString()}`;
                 document.getElementById('thisMonth').textContent = monthlyRevenue.toLocaleString();
@@ -768,7 +622,6 @@
             }
         }
         
-        // Load clinics table
         async function loadClinicsTable() {
             try {
                 const { data: clinics, error } = await supabase
@@ -803,11 +656,9 @@
                 
             } catch (error) {
                 console.error('Error loading clinics:', error);
-                document.getElementById('clinicsTableBody').innerHTML = '<tr><td colspan="7">Error loading clinics</td></tr>';
             }
         }
         
-        // Navigation functions
         window.navigateTo = function(module) {
             sessionStorage.setItem('viewMode', 'super_admin');
             
@@ -816,21 +667,8 @@
                 'assessment-overview': 'assessment-overview.html',
                 'treatment-monitoring': 'treatment-monitoring.html',
                 'financial-control': 'financial-overview.html',
-                'system-config': 'system-configuration.html',
+                'therapy-config': 'therapy-configuration.html',
                 'analytics': 'analytics-dashboard.html'
-            };
-            
-            window.location.href = routes[module] || '#';
-        };
-        
-        window.accessClinicModule = function(module) {
-            sessionStorage.setItem('viewMode', 'super_admin');
-            
-            const routes = {
-                'lily-assessment': 'lily-ai-agent.html',
-                'iris-analysis': 'iris-assessment.html',
-                'treatment-interface': 'treatment-interface.html',
-                'therapy-guide': 'celloxen-complete-guide.html'
             };
             
             window.location.href = routes[module] || '#';
@@ -869,14 +707,6 @@
             }
         };
         
-        // Real-time updates
-        function startRealTimeUpdates() {
-            setInterval(async () => {
-                await loadDashboardData();
-            }, 30000); // Update every 30 seconds
-        }
-        
-        // Search functionality
         document.getElementById('clinicSearch')?.addEventListener('input', function(e) {
             const searchTerm = e.target.value.toLowerCase();
             const rows = document.querySelectorAll('#clinicsTableBody tr');
