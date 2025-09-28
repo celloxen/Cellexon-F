@@ -403,9 +403,8 @@
                 <table class="user-table">
                     <thead>
                         <tr>
-                            <th>Username</th>
+                            <th>Login Email</th>
                             <th>Name</th>
-                            <th>Email</th>
                             <th>Role</th>
                             <th>Clinic</th>
                             <th>Status</th>
@@ -496,18 +495,14 @@
                 </div>
                 
                 <div class="form-group">
-                    <label class="form-label">Username</label>
-                    <input type="text" class="form-input" id="newUsername" required>
+                    <label class="form-label">Email (Login Username)</label>
+                    <input type="email" class="form-input" id="newEmail" required placeholder="user@example.com">
+                    <small style="color: #6b7280;">This email will be used as the login username</small>
                 </div>
                 
                 <div class="form-group">
                     <label class="form-label">Full Name</label>
-                    <input type="text" class="form-input" id="newFullName" required>
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Email</label>
-                    <input type="email" class="form-input" id="newEmail" required>
+                    <input type="text" class="form-input" id="newFullName" required placeholder="John Smith">
                 </div>
                 
                 <div class="form-group">
@@ -689,9 +684,8 @@
             
             tbody.innerHTML = allUsers.map(user => `
                 <tr>
-                    <td><strong>${user.username || '-'}</strong></td>
+                    <td><strong>${user.email || user.username || '-'}</strong></td>
                     <td>${user.full_name || '-'}</td>
-                    <td>${user.email || user.email || '-'}</td>
                     <td>
                         <span class="role-badge ${user.role === 'super_admin' ? 'role-super-admin' : 'role-clinic-admin'}">
                             ${user.role === 'super_admin' ? 'Super Admin' : 'Clinic Admin'}
@@ -706,14 +700,14 @@
                     <td>${new Date(user.created_at).toLocaleDateString('en-GB')}</td>
                     <td>
                         <div class="action-buttons">
-                            <button class="btn btn-primary btn-small" onclick="showResetPasswordModal('${user.role}', '${user.id}', '${user.username || user.clinic_name}')">
+                            <button class="btn btn-primary btn-small" onclick="showResetPasswordModal('${user.role}', '${user.id}', '${user.email || user.username || user.clinic_name}')">
                                 Reset Pass
                             </button>
                             <button class="btn ${user.is_active !== false ? 'btn-warning' : 'btn-primary'} btn-small" 
                                     onclick="toggleUserStatus('${user.role}', '${user.id}', ${user.is_active !== false})">
                                 ${user.is_active !== false ? 'Deactivate' : 'Activate'}
                             </button>
-                            <button class="btn btn-danger btn-small" onclick="deleteUser('${user.role}', '${user.id}', '${user.username || user.clinic_name}')">
+                            <button class="btn btn-danger btn-small" onclick="deleteUser('${user.role}', '${user.id}', '${user.email || user.username || user.clinic_name}')">
                                 Remove
                             </button>
                         </div>
@@ -942,9 +936,8 @@
             event.preventDefault();
             
             const userType = document.getElementById('userType').value;
-            const username = document.getElementById('newUsername').value;
-            const fullName = document.getElementById('newFullName').value;
             const email = document.getElementById('newEmail').value;
+            const fullName = document.getElementById('newFullName').value;
             let password = document.getElementById('newPassword').value;
             
             if (!password) {
@@ -956,7 +949,7 @@
                     const { data, error } = await supabase
                         .from('super_admin_users')
                         .insert([{
-                            username: username,
+                            username: email,  // Using email as username
                             password_hash: password,
                             full_name: fullName,
                             email: email,
@@ -971,7 +964,7 @@
                         throw error;
                     }
                     
-                    const alertMsg = `Super Admin created successfully!\n\nUsername: ${username}\nPassword: ${password}\n\nPlease save these credentials securely.`;
+                    const alertMsg = `Super Admin created successfully!\n\nLogin Email: ${email}\nPassword: ${password}\n\nPlease save these credentials securely.`;
                     alert(alertMsg);
                     
                     // Close modal first
@@ -993,7 +986,7 @@
                     const { data, error } = await supabase
                         .from('clinics')
                         .update({
-                            username: username,
+                            username: email,  // Using email as username
                             password_hash: password,
                             email: email,
                             owner_name: fullName
@@ -1005,7 +998,7 @@
                         throw error;
                     }
                     
-                    const alertMsg = `Clinic Admin updated successfully!\n\nUsername: ${username}\nPassword: ${password}\n\nPlease save these credentials securely.`;
+                    const alertMsg = `Clinic Admin updated successfully!\n\nLogin Email: ${email}\nPassword: ${password}\n\nPlease save these credentials securely.`;
                     alert(alertMsg);
                     
                     // Close modal first
