@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leads Table Diagnostic - Celloxen</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f8fafc;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .section {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .success {
+            color: #10b981;
+            font-weight: bold;
+        }
+        .error {
+            color: #ef4444;
+            font-weight: bold;
+        }
+        .info {
+            color: #3b82f6;
+        }
+        pre {
+            background: #f3f4f6;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        button {
+            background: #3b82f6;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #2563eb;
+        }
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            border-left: 4px solid #e5e7eb;
+        }
+        .test-result.success {
+            border-left-color: #10b981;
+            background: #f0fdf4;
+        }
+        .test-result.error {
+            border-left-color: #ef4444;
+            background: #fef2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>Leads Table Diagnostic Tool</h1>
+    
+    <div class="section">
+        <h2>1. Supabase Connection Test</h2>
+        <button onclick="testConnection()">Test Connection</button>
+        <div id="connectionResult"></div>
+    </div>
+
+    <div class="section">
+        <h2>2. Check Leads Table</h2>
+        <button onclick="checkTable()">Check Table Structure</button>
+        <div id="tableResult"></div>
+    </div>
+
+    <div class="section">
+        <h2>3. Test Data Operations</h2>
+        <button onclick="testSelect()">Test SELECT</button>
+        <button onclick="testInsert()">Test INSERT</button>
+        <button onclick="testUpdate()">Test UPDATE</button>
+        <button onclick="testDelete()">Test DELETE</button>
+        <div id="operationResult"></div>
+    </div>
+
+    <div class="section">
+        <h2>4. Current Data</h2>
+        <button onclick="loadAllData()">Load All Leads</button>
+        <button onclick="insertSampleData()">Insert Sample Data</button>
+        <div id="dataResult"></div>
+    </div>
+
+    <div class="section">
+        <h2>5. Fix Common Issues</h2>
+        <button onclick="fixPermissions()">Check RLS Policies</button>
+        <button onclick="checkAuth()">Check Authentication</button>
+        <div id="fixResult"></div>
+    </div>
+
+    <script>
+        // Initialize Supabase
+        const SUPABASE_URL = 'https://njdkumkhzdcoyumcrlgb.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5qZGt1bWtoemRjb3l1bWNybGdiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzE0MDQwMDQsImV4cCI6MjA0Njk4MDAwNH0.9IJu6fajXHJlOKp9WT9WLSozWP5FPNw1z1n7U4vXGnU';
+        
+        const { createClient } = supabase;
+        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
+        
+        // Test connection
+        async function testConnection() {
+            const resultDiv = document.getElementById('connectionResult');
+            resultDiv.innerHTML = '<div class="info">Testing connection...</div>';
+            
+            try {
+                const { data, error } = await supabaseClient
+                    .from('leads')
+                    .select('count', { count: 'exact' });
+                
+                if (error) throw error;
+                
+                resultDiv.innerHTML = `
+                    <div class="test-result success">
+                        <span class="success">✓ Connection successful!</span><br>
+                        Supabase client is working properly.
+                    </div>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="test-result error">
+                        <span class="error">✗ Connection failed</span><br>
+                        Error: ${error.message}
+                    </div>
+                `;
+            }
+        }
+        
+        // Check table structure
+        async function checkTable() {
+            const resultDiv = document.getElementById('tableResult');
+            resultDiv.innerHTML = '<div class="info">Checking table structure...</div>';
+            
+            try {
+                // Try to select one row to check columns
+                const { data, error } = await supabaseClient
+                    .from('leads')
+                    .select('*')
+                    .limit(1);
+                
+                if (error) throw error;
+                
+                const columns = data && data.length > 0 
+                    ? Object.keys(data[0]) 
+                    : ['Table exists but is empty'];
+                
+                resultDiv.innerHTML = `
+                    <div class="test-result success">
+                        <span class="success">✓ Table structure verified!</span><br>
+                        <strong>Columns found:</strong>
+                        <pre>${JSON.stringify(columns, null, 2)}</pre>
+                    </div>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="test-result error">
+                        <span class="error">✗ Table check failed</span><br>
+                        Error: ${error.message}<br>
+                        <small>This might indicate RLS (Row Level Security) is enabled without proper policies.</small>
+                    </div>
+                `;
+            }
+        }
+        
+        // Test SELECT
+        async function testSelect() {
+            const resultDiv = document.getElementById('operationResult');
+            resultDiv.innerHTML = '<div class="info">Testing SELECT operation...</div>';
+            
+            try {
+                const { data, error, count } = await supabaseClient
+                    .from('leads')
+                    .select('*', { count: 'exact' });
+                
+                if (error) throw error;
+                
+                resultDiv.innerHTML = `
+                    <div class="test-result success">
+                        <span class="success">✓ SELECT successful!</span><br>
+                        Found ${count || data?.length || 0} records
+                    </div>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="test-result error">
+                        <span class="error">✗ SELECT failed</span><br>
+                        Error: ${error.message}
+                    </div>
+                `;
+            }
+        }
+        
+        // Test INSERT
+        async function testInsert() {
+            const resultDiv = document.getElementById('operationResult');
+            resultDiv.innerHTML = '<div class="info">Testing INSERT operation...</div>';
+            
+            const testLead = {
+                first_name: 'Test',
+                last_name: 'User',
+                clinic_name: 'Test Clinic',
+                email: `test${Date.now()}@example.com`,
+                telephone: '+44 123 456 7890',
+                status: 'new'
+            };
+            
+            try {
+                const { data, error } = await supabaseClient
+                    .from('leads')
+                    .insert([testLead])
+                    .select();
+                
+                if (error) throw error;
+                
+                resultDiv.innerHTML = `
+                    <div class="test-result success">
+                        <span class="success">✓ INSERT successful!</span><br>
+                        Created lead ID: ${data[0]?.id}<br>
+                        <pre>${JSON.stringify(data[0], null, 2)}</pre>
+                    </div>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="test-result error">
+                        <span class="error">✗ INSERT failed</span><br>
+                        Error: ${error.message}
+                    </div>
+                `;
+            }
+        }
+        
+        // Test UPDATE
+        async function testUpdate() {
+            const resultDiv = document.getElementById('operationResult');
+            resultDiv.innerHTML = '<div class="info">Testing UPDATE operation...</div>';
+            
+            try {
+                // First get a lead to update
+                const { data: leads } = await supabaseClient
+                    .from('leads')
+                    .select('id')
+                    .limit(1);
+                
+                if (!leads || leads.length === 0) {
+                    throw new Error('No leads found to update');
+                }
+                
+                const { data, error } = await supabaseClient
+                    .from('leads')
+                    .update({ status: 'contacted', updated_at: new Date().toISOString() })
+                    .eq('id', leads[0].id)
+                    .select();
+                
+                if (error) throw error;
+                
+                resultDiv.innerHTML = `
+                    <div class="test-result success">
+                        <span class="success">✓ UPDATE successful!</span><br>
+                        Updated lead ID: ${leads[0].id}
+                    </div>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="test-result error">
+                        <span class="error">✗ UPDATE failed</span><br>
+                        Error: ${error.message}
+                    </div>
+                `;
+            }
+        }
+        
+        // Test DELETE
+        async function testDelete() {
+            const resultDiv = document.getElementById('operationResult');
+            resultDiv.innerHTML = '<div class="info">Testing DELETE operation...</div>';
+            
+            try {
+                // First create a test lead to delete
+                const { data: inserted } = await supabaseClient
+                    .from('leads')
+                    .insert([{
+                        first_name: 'Delete',
+                        last_name: 'Test',
+                        clinic_name: 'Delete Test Clinic',
+                        email: `delete${Date.now()}@test.com`,
+                        telephone: '+44 000 000 0000',
+                        status: 'new'
+                    }])
+                    .select();
+                
+                if (inserted && inserted[0]) {
+                    const { error } = await supabaseClient
+                        .from('leads')
+                        .delete()
+                        .eq('id', inserted[0].id);
+                    
+                    if (error) throw error;
+                    
+                    resultDiv.innerHTML = `
+                        <div class="test-result success">
+                            <span class="success">✓ DELETE successful!</span><br>
+                            Deleted test lead ID: ${inserted[0].id}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="test-result error">
+                        <span class="error">✗ DELETE failed</span><br>
+                        Error: ${error.message}
+                    </div>
+                `;
+            }
+        }
+        
+        // Load all data
+        async function loadAllData() {
+            const resultDiv = document.getElementById('dataResult');
+            resultDiv.innerHTML = '<div class="info">Loading all leads...</div>';
+            
+            try {
+                const { data, error } = await supabaseClient
+                    .from('leads')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+                
+                if (error) throw error;
+                
+                resultDiv.innerHTML = `
+                    <div class="test-result success">
+                        <span class="success">✓ Data loaded successfully!</span><br>
+                        <strong>Total leads: ${data.length}</strong>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    </div>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="test-result error">
+                        <span class="error">✗ Failed to load data</span><br>
+                        Error: ${error.message}
+                    </div>
+                `;
+            }
+        }
+        
+        // Insert sample data
+        async function insertSampleData() {
+            const resultDiv = document.getElementById('dataResult');
+            resultDiv.innerHTML = '<div class="info">Inserting sample data...</div>';
+            
+            const sampleLeads = [
+                {
+                    first_name: 'Emma',
+                    last_name: 'Watson',
+                    clinic_name: 'Wellness Hub London',
+                    email: 'emma.watson@wellnesshub.co.uk',
+                    telephone: '+44 20 7123 4567',
+                    status: 'new',
+                    notes: 'Interested in premium package'
+                },
+                {
+                    first_name: 'James',
+                    last_name: 'Oliver',
+                    clinic_name: 'Health Solutions Manchester',
+                    email: 'j.oliver@healthsolutions.com',
+                    telephone: '+44 161 234 5678',
+                    status: 'contacted',
+                    notes: 'Follow up next week'
+                },
+                {
+                    first_name: 'Sophie',
+                    last_name: 'Turner',
+                    clinic_name: 'Vitality Centre Birmingham',
+                    email: 'sophie@vitalitycentre.uk',
+                    telephone: '+44 121 456 7890',
+                    status: 'qualified',
+                    notes: 'Ready to sign contract'
+                }
+            ];
+            
+            try {
+                const { data, error } = await supabaseClient
+                    .from('leads')
+                    .insert(sampleLeads)
+                    .select();
+                
+                if (error) throw error;
+                
+                resultDiv.innerHTML = `
+                    <div class="test-result success">
+                        <span class="success">✓ Sample data inserted!</span><br>
+                        Inserted ${data.length} leads
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    </div>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="test-result error">
+                        <span class="error">✗ Failed to insert sample data</span><br>
+                        Error: ${error.message}
+                    </div>
+                `;
+            }
+        }
+        
+        // Check RLS policies
+        async function fixPermissions() {
+            const resultDiv = document.getElementById('fixResult');
+            resultDiv.innerHTML = `
+                <div class="test-result info">
+                    <span class="info">ℹ Row Level Security (RLS) Information</span><br>
+                    <p>If RLS is enabled on the leads table, you need proper policies.</p>
+                    <p><strong>Run this SQL in Supabase SQL Editor:</strong></p>
+                    <pre>
+-- Check if RLS is enabled
+SELECT tablename, rowsecurity 
+FROM pg_tables 
+WHERE tablename = 'leads';
+
+-- If RLS is enabled but causing issues, you can:
+
+-- Option 1: Disable RLS (less secure but simpler)
+ALTER TABLE leads DISABLE ROW LEVEL SECURITY;
+
+-- Option 2: Create a policy that allows all operations (for testing)
+CREATE POLICY "Enable all operations for authenticated users" 
+ON leads FOR ALL 
+USING (true) 
+WITH CHECK (true);
+
+-- Option 3: Create specific policies
+CREATE POLICY "Enable read for all" 
+ON leads FOR SELECT 
+USING (true);
+
+CREATE POLICY "Enable insert for all" 
+ON leads FOR INSERT 
+WITH CHECK (true);
+
+CREATE POLICY "Enable update for all" 
+ON leads FOR UPDATE 
+USING (true) 
+WITH CHECK (true);
+                    </pre>
+                </div>
+            `;
+        }
+        
+        // Check authentication
+        async function checkAuth() {
+            const resultDiv = document.getElementById('fixResult');
+            const authData = localStorage.getItem('celloxen_auth');
+            
+            if (authData) {
+                const auth = JSON.parse(authData);
+                resultDiv.innerHTML = `
+                    <div class="test-result success">
+                        <span class="success">✓ Authentication data found</span><br>
+                        <strong>User Type:</strong> ${auth.userType}<br>
+                        <strong>Email:</strong> ${auth.email}<br>
+                        <strong>User ID:</strong> ${auth.userId}
+                    </div>
+                `;
+            } else {
+                resultDiv.innerHTML = `
+                    <div class="test-result error">
+                        <span class="error">✗ No authentication data found</span><br>
+                        You may need to login first.
+                    </div>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>
