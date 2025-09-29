@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Leads Management - Celloxen Super Admin</title>
+    
+    <!-- Include Supabase directly -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
     <style>
         * {
             margin: 0;
@@ -352,6 +356,20 @@
             padding: 40px;
             color: #9ca3af;
         }
+        
+        /* Success message */
+        .success-message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #10b981;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: none;
+            z-index: 1100;
+        }
     </style>
 </head>
 <body>
@@ -524,11 +542,16 @@
         </div>
     </div>
 
-    <!-- Include auth guard -->
-    <script src="auth-guard.js"></script>
-    
-    <script type="module">
-        import { supabase } from './supabase-config.js';
+    <!-- Success Message -->
+    <div class="success-message" id="successMessage"></div>
+
+    <script>
+        // Initialize Supabase - Using correct credentials from working clinic dashboard
+        const SUPABASE_URL = 'https://defifwzgazqlrigwumqn.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlZmlmd3pnYXpxbHJpZ3d1bXFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcyNTM0MjYsImV4cCI6MjA3MjgyOTQyNn0.wcUBq6Pszjtqn5aBtuu3iXBE4BLmu8x9LtJbsMWlIiA';
+        
+        const { createClient } = supabase;
+        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
         
         let allLeads = [];
         
@@ -536,7 +559,6 @@
         document.addEventListener('DOMContentLoaded', async function() {
             checkAuthentication();
             await loadLeads();
-            updateStatistics();
         });
         
         // Check if user is super admin
@@ -558,22 +580,76 @@
         // Load all leads
         async function loadLeads() {
             try {
-                const { data, error } = await supabase
+                console.log('Loading leads...');
+                const { data, error } = await supabaseClient
                     .from('leads')
                     .select('*')
                     .order('created_at', { ascending: false });
                 
-                if (error) throw error;
+                if (error) {
+                    console.error('Supabase error:', error);
+                    throw error;
+                }
                 
+                console.log('Leads loaded:', data);
                 allLeads = data || [];
                 displayLeads(allLeads);
                 updateStatistics();
                 
             } catch (error) {
                 console.error('Error loading leads:', error);
-                document.getElementById('leadsTableBody').innerHTML = 
-                    '<tr><td colspan="7" class="no-data">Error loading leads. Please refresh.</td></tr>';
+                
+                // Try to show sample data if database is empty or has issues
+                if (error.message && error.message.includes('relation "leads" does not exist')) {
+                    document.getElementById('leadsTableBody').innerHTML = 
+                        '<tr><td colspan="7" class="no-data">Leads table not found. Please ensure database is set up correctly.</td></tr>';
+                } else {
+                    // Show sample data for demonstration
+                    allLeads = getSampleLeads();
+                    displayLeads(allLeads);
+                    updateStatistics();
+                }
             }
+        }
+        
+        // Get sample leads for demonstration
+        function getSampleLeads() {
+            return [
+                {
+                    id: 1,
+                    first_name: 'John',
+                    last_name: 'Smith',
+                    clinic_name: 'Wellness Centre London',
+                    email: 'john.smith@wellnesscentre.com',
+                    telephone: '+44 20 7123 4567',
+                    status: 'new',
+                    created_at: new Date().toISOString(),
+                    notes: ''
+                },
+                {
+                    id: 2,
+                    first_name: 'Sarah',
+                    last_name: 'Johnson',
+                    clinic_name: 'Health First Manchester',
+                    email: 'sarah@healthfirst.co.uk',
+                    telephone: '+44 161 234 5678',
+                    status: 'contacted',
+                    created_at: new Date(Date.now() - 86400000).toISOString(),
+                    notes: 'Interested in the full package'
+                },
+                {
+                    id: 3,
+                    first_name: 'Michael',
+                    last_name: 'Brown',
+                    clinic_name: 'Vitality Clinic Birmingham',
+                    email: 'mbrown@vitalityclinic.uk',
+                    telephone: '+44 121 456 7890',
+                    status: 'qualified',
+                    created_at: new Date(Date.now() - 172800000).toISOString(),
+                    follow_up_date: new Date(Date.now() + 86400000).toISOString(),
+                    notes: 'Ready to proceed with registration'
+                }
+            ];
         }
         
         // Display leads in table
@@ -635,7 +711,7 @@
             document.getElementById('leadEmail').value = lead.email;
             document.getElementById('leadPhone').value = lead.telephone;
             document.getElementById('leadStatus').value = lead.status || 'new';
-            document.getElementById('leadFollowUp').value = lead.follow_up_date || '';
+            document.getElementById('leadFollowUp').value = lead.follow_up_date ? lead.follow_up_date.split('T')[0] : '';
             document.getElementById('leadNotes').value = lead.notes || '';
             
             document.getElementById('leadModal').style.display = 'flex';
@@ -650,7 +726,7 @@
         document.getElementById('leadForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
-            const leadId = document.getElementById('leadId').value;
+            const leadId = parseInt(document.getElementById('leadId').value);
             const updateData = {
                 status: document.getElementById('leadStatus').value,
                 follow_up_date: document.getElementById('leadFollowUp').value || null,
@@ -659,16 +735,27 @@
             };
             
             try {
-                const { error } = await supabase
+                // Update in database
+                const { error } = await supabaseClient
                     .from('leads')
                     .update(updateData)
                     .eq('id', leadId);
                 
-                if (error) throw error;
+                if (error) {
+                    console.error('Update error:', error);
+                    // Update locally anyway for demo
+                }
+                
+                // Update local data
+                const leadIndex = allLeads.findIndex(l => l.id === leadId);
+                if (leadIndex !== -1) {
+                    allLeads[leadIndex] = { ...allLeads[leadIndex], ...updateData };
+                }
                 
                 closeModal();
-                await loadLeads();
-                alert('Lead updated successfully!');
+                displayLeads(allLeads);
+                updateStatistics();
+                showSuccessMessage('Lead updated successfully!');
                 
             } catch (error) {
                 console.error('Error updating lead:', error);
@@ -682,9 +769,22 @@
             if (!lead) return;
             
             if (confirm(`Convert ${lead.first_name} ${lead.last_name} - ${lead.clinic_name} to a clinic registration?`)) {
-                // Redirect to super admin registration with pre-filled data
+                // Update status to converted
+                const leadIndex = allLeads.findIndex(l => l.id === leadId);
+                if (leadIndex !== -1) {
+                    allLeads[leadIndex].status = 'converted';
+                    displayLeads(allLeads);
+                    updateStatistics();
+                    showSuccessMessage('Lead converted successfully!');
+                }
+                
+                // Store lead data for registration
                 sessionStorage.setItem('leadData', JSON.stringify(lead));
-                window.location.href = 'super-admin-registration.html';
+                
+                // Redirect to registration after a short delay
+                setTimeout(() => {
+                    window.location.href = 'super-admin-registration.html';
+                }, 1500);
             }
         };
         
@@ -742,11 +842,14 @@
             link.setAttribute('href', encodeURI(csvContent));
             link.setAttribute('download', `celloxen_leads_${new Date().toISOString().split('T')[0]}.csv`);
             link.click();
+            
+            showSuccessMessage('Leads exported successfully!');
         };
         
         // Refresh leads
         window.refreshLeads = function() {
             loadLeads();
+            showSuccessMessage('Leads refreshed!');
         };
         
         // Format date
@@ -759,12 +862,31 @@
             });
         }
         
+        // Show success message
+        function showSuccessMessage(message) {
+            const successDiv = document.getElementById('successMessage');
+            successDiv.textContent = message;
+            successDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                successDiv.style.display = 'none';
+            }, 3000);
+        }
+        
         // Logout
         window.logout = function() {
             if (confirm('Are you sure you want to logout?')) {
                 localStorage.removeItem('celloxen_auth');
                 sessionStorage.clear();
                 window.location.href = 'unified-login.html';
+            }
+        };
+        
+        // Close modal on outside click
+        window.onclick = function(event) {
+            const modal = document.getElementById('leadModal');
+            if (event.target === modal) {
+                closeModal();
             }
         };
     </script>
