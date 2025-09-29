@@ -6,6 +6,8 @@
     <title>User Management - Celloxen Super Admin</title>
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Bcrypt for password hashing -->
+    <script src="https://cdn.jsdelivr.net/npm/bcryptjs@2.4.3/dist/bcrypt.min.js"></script>
     
     <style>
         * {
@@ -360,13 +362,36 @@
         .copy-btn:hover {
             background: #2563eb;
         }
+        
+        .password-requirements {
+            background: #fef3c7;
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 10px;
+            font-size: 12px;
+            color: #92400e;
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f4f6;
+            border-radius: 50%;
+            border-top-color: #10b981;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
     <div class="header">
         <div class="header-container">
             <div class="logo">
-                <h1>CELLOXEN - User Management</h1>
+                <h1>CELLOXEN - Secure User Management</h1>
             </div>
             <div>
                 <button class="btn btn-secondary" onclick="window.location.href='super-admin-dashboard.html'">
@@ -427,7 +452,7 @@
                             <th>Role</th>
                             <th>Clinic</th>
                             <th>Status</th>
-                            <th>Created</th>
+                            <th>Last Login</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -453,7 +478,7 @@
                             <th>Name</th>
                             <th>Clinic</th>
                             <th>Status</th>
-                            <th>Created</th>
+                            <th>Last Login</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -478,7 +503,7 @@
                             <th>Login Email</th>
                             <th>Full Name</th>
                             <th>Status</th>
-                            <th>Created</th>
+                            <th>Last Login</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -528,13 +553,23 @@
                 
                 <div class="form-group">
                     <label class="form-label">Password</label>
-                    <input type="text" class="form-input" id="newPassword" value="" placeholder="Auto-generated">
-                    <small style="color: #6b7280;">Leave blank to auto-generate</small>
+                    <input type="password" class="form-input" id="newPassword" required minlength="8" placeholder="Minimum 8 characters">
+                    <div class="password-requirements">
+                        <strong>Password Requirements:</strong><br>
+                        • Minimum 8 characters<br>
+                        • At least 1 uppercase letter<br>
+                        • At least 1 lowercase letter<br>
+                        • At least 1 number<br>
+                        • At least 1 special character (!@#$%^&*)
+                    </div>
                 </div>
                 
                 <div style="display: flex; gap: 10px; justify-content: flex-end;">
                     <button type="button" class="btn btn-secondary" onclick="closeModal('addUserModal')">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Add User</button>
+                    <button type="submit" class="btn btn-primary" id="submitBtn">
+                        <span id="submitText">Add User</span>
+                        <span id="submitSpinner" class="loading-spinner" style="display: none;"></span>
+                    </button>
                 </div>
             </form>
         </div>
@@ -554,19 +589,19 @@
             
             <div class="form-group">
                 <label class="form-label">New Password</label>
-                <div class="password-display" id="generatedPassword">
-                    Click "Generate" to create a new password
+                <input type="password" class="form-input" id="resetPassword" required minlength="8" placeholder="Enter new password">
+                <div class="password-requirements">
+                    <strong>Password Requirements:</strong><br>
+                    • Minimum 8 characters<br>
+                    • At least 1 uppercase letter<br>
+                    • At least 1 lowercase letter<br>
+                    • At least 1 number<br>
+                    • At least 1 special character (!@#$%^&*)
                 </div>
-                <button type="button" class="btn btn-primary" onclick="generateNewPassword()">
-                    Generate New Password
-                </button>
-                <button type="button" class="copy-btn" onclick="copyPassword()">
-                    Copy
-                </button>
             </div>
             
             <div style="background: #dcfce7; padding: 10px; border-radius: 6px; margin: 15px 0; color: #166534;">
-                ⚠️ Make sure to save this password! It cannot be recovered once this window is closed.
+                ⚠️ User will need this password to login. Make sure to securely share it with them.
             </div>
             
             <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
@@ -591,7 +626,6 @@
         let superAdmins = [];
         let clinicsList = [];
         let currentResetUser = null;
-        let currentGeneratedPassword = '';
         
         // Load users on page load
         document.addEventListener('DOMContentLoaded', function() {
@@ -612,6 +646,28 @@
                 alert('Access denied. Super Admin privileges required.');
                 window.location.href = 'unified-login.html';
             }
+        }
+        
+        // Secure password validation
+        function validatePassword(password) {
+            const minLength = password.length >= 8;
+            const hasUpper = /[A-Z]/.test(password);
+            const hasLower = /[a-z]/.test(password);
+            const hasNumber = /[0-9]/.test(password);
+            const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+            
+            return minLength && hasUpper && hasLower && hasNumber && hasSpecial;
+        }
+        
+        // Hash password using bcrypt
+        async function hashPassword(password) {
+            const salt = bcrypt.genSaltSync(10);
+            return bcrypt.hashSync(password, salt);
+        }
+        
+        // Verify password against hash
+        function verifyPassword(password, hash) {
+            return bcrypt.compareSync(password, hash);
         }
         
         async function loadUsers() {
@@ -694,6 +750,12 @@
             document.getElementById('activeUserCount').textContent = activeUsers;
         }
         
+        function formatLastLogin(lastLogin) {
+            if (!lastLogin) return 'Never';
+            const date = new Date(lastLogin);
+            return date.toLocaleDateString('en-GB') + ' ' + date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+        }
+        
         function displayAllUsers() {
             const tbody = document.getElementById('userTableBody');
             
@@ -717,7 +779,7 @@
                             ● ${user.is_active !== false ? 'Active' : 'Inactive'}
                         </span>
                     </td>
-                    <td>${new Date(user.created_at).toLocaleDateString('en-GB')}</td>
+                    <td>${formatLastLogin(user.last_login)}</td>
                     <td>
                         <div class="action-buttons">
                             <button class="btn btn-primary btn-small" onclick="showResetPasswordModal('${user.table}', '${user.id}', '${user.email || user.username}')">
@@ -754,7 +816,7 @@
                             ● ${user.is_active ? 'Active' : 'Inactive'}
                         </span>
                     </td>
-                    <td>${new Date(user.created_at).toLocaleDateString('en-GB')}</td>
+                    <td>${formatLastLogin(user.last_login)}</td>
                     <td>
                         <div class="action-buttons">
                             <button class="btn btn-primary btn-small" onclick="showResetPasswordModal('clinic_users', '${user.id}', '${user.email}')">
@@ -790,7 +852,7 @@
                             ● ${admin.is_active !== false ? 'Active' : 'Inactive'}
                         </span>
                     </td>
-                    <td>${new Date(admin.created_at).toLocaleDateString('en-GB')}</td>
+                    <td>${formatLastLogin(admin.last_login)}</td>
                     <td>
                         <div class="action-buttons">
                             <button class="btn btn-primary btn-small" onclick="showResetPasswordModal('super_admin_users', '${admin.id}', '${admin.email || admin.username}')">
@@ -807,15 +869,6 @@
                     </td>
                 </tr>
             `).join('');
-        }
-        
-        function generatePassword() {
-            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%';
-            let password = '';
-            for (let i = 0; i < 12; i++) {
-                password += chars.charAt(Math.floor(Math.random() * chars.length));
-            }
-            return password;
         }
         
         function showAlert(message, type) {
@@ -840,10 +893,6 @@
         window.showAddUserModal = function(type = 'clinic_admin') {
             document.getElementById('userType').value = type;
             toggleUserFields();
-            
-            const password = generatePassword();
-            document.getElementById('newPassword').value = password;
-            
             document.getElementById('addUserModal').classList.add('show');
         };
         
@@ -870,32 +919,26 @@
         window.showResetPasswordModal = function(table, userId, email) {
             currentResetUser = { table, userId, email };
             document.getElementById('resetUsername').textContent = email;
-            generateNewPassword();
             document.getElementById('resetPasswordModal').classList.add('show');
         };
         
-        window.generateNewPassword = function() {
-            currentGeneratedPassword = generatePassword();
-            document.getElementById('generatedPassword').textContent = currentGeneratedPassword;
-        };
-        
-        window.copyPassword = function() {
-            const password = document.getElementById('generatedPassword').textContent;
-            if (password && password !== 'Click "Generate" to create a new password') {
-                navigator.clipboard.writeText(password).then(() => {
-                    showAlert('Password copied to clipboard!', 'success');
-                });
-            }
-        };
-        
         window.confirmPasswordReset = async function() {
-            if (!currentResetUser || !currentGeneratedPassword) return;
+            const newPassword = document.getElementById('resetPassword').value;
+            
+            if (!validatePassword(newPassword)) {
+                showAlert('Password does not meet security requirements', 'error');
+                return;
+            }
+            
+            if (!currentResetUser) return;
             
             try {
+                const hashedPassword = await hashPassword(newPassword);
+                
                 const { error } = await supabase
                     .from(currentResetUser.table)
                     .update({ 
-                        password_hash: currentGeneratedPassword,
+                        password_hash: hashedPassword,
                         updated_at: new Date().toISOString()
                     })
                     .eq('id', currentResetUser.userId);
@@ -904,6 +947,7 @@
                 
                 showAlert(`Password reset successfully for ${currentResetUser.email}!`, 'success');
                 closeModal('resetPasswordModal');
+                document.getElementById('resetPassword').value = '';
                 
             } catch (error) {
                 console.error('Error resetting password:', error);
@@ -915,22 +959,36 @@
             event.preventDefault();
             
             const userType = document.getElementById('userType').value;
-            const email = document.getElementById('newEmail').value;
+            const email = document.getElementById('newEmail').value.toLowerCase().trim();
             const fullName = document.getElementById('newFullName').value;
-            let password = document.getElementById('newPassword').value;
+            const password = document.getElementById('newPassword').value;
             
-            if (!password) {
-                password = generatePassword();
+            // Validate password
+            if (!validatePassword(password)) {
+                showAlert('Password does not meet security requirements', 'error');
+                return;
             }
             
+            // Show loading state
+            const submitBtn = document.getElementById('submitBtn');
+            const submitText = document.getElementById('submitText');
+            const submitSpinner = document.getElementById('submitSpinner');
+            
+            submitBtn.disabled = true;
+            submitText.style.display = 'none';
+            submitSpinner.style.display = 'inline-block';
+            
             try {
+                // Hash the password
+                const hashedPassword = await hashPassword(password);
+                
                 if (userType === 'super_admin') {
                     // Create super admin user
                     const { data, error } = await supabase
                         .from('super_admin_users')
                         .insert([{
                             username: email,
-                            password_hash: password,
+                            password_hash: hashedPassword,
                             full_name: fullName,
                             email: email,
                             role: 'super_admin',
@@ -941,7 +999,7 @@
                     
                     if (error) throw error;
                     
-                    alert(`Super Admin created successfully!\n\nLogin Email: ${email}\nPassword: ${password}\n\nPlease save these credentials securely.`);
+                    showAlert('Super Admin created successfully!', 'success');
                     
                 } else {
                     // Create clinic user
@@ -956,7 +1014,7 @@
                         .insert([{
                             clinic_id: parseInt(clinicId),
                             email: email,
-                            password_hash: password,
+                            password_hash: hashedPassword,
                             full_name: fullName,
                             role: 'clinic_admin',
                             is_active: true,
@@ -966,11 +1024,10 @@
                     
                     if (error) throw error;
                     
-                    alert(`Clinic User created successfully!\n\nLogin Email: ${email}\nPassword: ${password}\n\nPlease save these credentials securely.`);
+                    showAlert('Clinic User created successfully!', 'success');
                 }
                 
                 closeModal('addUserModal');
-                showAlert('User created successfully!', 'success');
                 await loadUsers();
                 
             } catch (error) {
@@ -980,6 +1037,10 @@
                 } else {
                     showAlert(`Error: ${error.message || 'Failed to add user'}`, 'error');
                 }
+            } finally {
+                submitBtn.disabled = false;
+                submitText.style.display = 'inline';
+                submitSpinner.style.display = 'none';
             }
         };
         
@@ -1011,11 +1072,11 @@
         
         window.deleteUser = async function(table, userId, email) {
             if (table === 'super_admin_users' && superAdmins.length === 1) {
-                alert('Cannot delete the last Super Admin!');
+                alert('Cannot delete the last Super Admin!\n\nAt least one super admin must remain in the system for security.');
                 return;
             }
             
-            if (!confirm(`Are you sure you want to permanently delete user: ${email}?`)) return;
+            if (!confirm(`⚠️ WARNING: Permanently delete user?\n\nEmail: ${email}\n\nThis action cannot be undone.`)) return;
             
             try {
                 const { error } = await supabase
@@ -1025,7 +1086,7 @@
                 
                 if (error) throw error;
                 
-                showAlert(`User "${email}" has been deleted.`, 'success');
+                showAlert(`User "${email}" has been permanently deleted.`, 'success');
                 await loadUsers();
                 
             } catch (error) {
@@ -1070,7 +1131,7 @@
                             ● ${user.is_active !== false ? 'Active' : 'Inactive'}
                         </span>
                     </td>
-                    <td>${new Date(user.created_at).toLocaleDateString('en-GB')}</td>
+                    <td>${formatLastLogin(user.last_login)}</td>
                     <td>
                         <div class="action-buttons">
                             <button class="btn btn-primary btn-small" onclick="showResetPasswordModal('${user.table}', '${user.id}', '${user.email || user.username}')">
@@ -1091,8 +1152,15 @@
         
         window.logout = function() {
             if (confirm('Are you sure you want to logout?')) {
+                // Clear all sensitive data
                 localStorage.removeItem('celloxen_auth');
                 sessionStorage.clear();
+                
+                // Clear any cached data
+                allUsers = [];
+                clinicUsers = [];
+                superAdmins = [];
+                
                 window.location.href = 'unified-login.html';
             }
         };
