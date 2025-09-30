@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Treatment Session Scheduling - Celloxen Platform</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+            color: white;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        
+        .header-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+        }
+        
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 6px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+            margin-bottom: 25px;
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f1f5f9;
+        }
+        
+        .card-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .patient-info {
+            background: linear-gradient(135deg, #1e3a8a, #1e40af);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        
+        .info-item {
+            background: rgba(255,255,255,0.1);
+            padding: 10px;
+            border-radius: 8px;
+        }
+        
+        .info-label {
+            font-size: 12px;
+            opacity: 0.9;
+            text-transform: uppercase;
+        }
+        
+        .info-value {
+            font-size: 18px;
+            font-weight: 600;
+            margin-top: 5px;
+        }
+        
+        .therapy-selection {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #374151;
+        }
+        
+        .form-input, .form-select {
+            width: 100%;
+            padding: 10px 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: #1e3a8a;
+            box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .scheduling-controls {
+            background: #f0f9ff;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #374151;
+            margin-left: 10px;
+        }
+        
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 13px;
+        }
+        
+        .sessions-table {
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th {
+            background: #f8fafc;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #475569;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        
+        tr:hover {
+            background: #f8fafc;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .status-scheduled {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        
+        .status-completed {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .edit-mode input {
+            width: 100%;
+            padding: 4px 8px;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+        }
+        
+        .auto-schedule-options {
+            background: #fef3c7;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border-left: 4px solid #f59e0b;
+        }
+        
+        .quick-actions {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .calendar-input {
+            position: relative;
+        }
+        
+        .summary-card {
+            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .summary-item {
+            text-align: center;
+        }
+        
+        .summary-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1e3a8a;
+        }
+        
+        .summary-label {
+            font-size: 14px;
+            color: #64748b;
+            margin-top: 5px;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+        }
+        
+        .modal-header {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f1f5f9;
+        }
+        
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            z-index: 1001;
+            animation: slideIn 0.3s ease;
+            display: none;
+        }
+        
+        .notification.success {
+            background: #10b981;
+        }
+        
+        .notification.error {
+            background: #ef4444;
+        }
+        
+        .notification.show {
+            display: block;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-container">
+            <h1>Session Scheduling</h1>
+            <a href="treatment-planning.html" class="back-btn">← Back to Treatment Planning</a>
+        </div>
+    </div>
+    
+    <div class="container">
+        <!-- Patient Info -->
+        <div class="card">
+            <div class="patient-info" id="patientInfo">
+                <!-- Patient info will be populated here -->
+            </div>
+        </div>
+        
+        <!-- Treatment Plan Setup -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Treatment Plan Configuration</h2>
+            </div>
+            
+            <div class="therapy-selection">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Primary Therapy</label>
+                        <select class="form-select" id="primaryTherapy">
+                            <!-- Will be populated with therapies -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Total Sessions</label>
+                        <input type="number" class="form-input" id="totalSessions" 
+                               min="1" max="50" value="12">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Sessions per Week</label>
+                        <select class="form-select" id="sessionsPerWeek">
+                            <option value="1">1 per week</option>
+                            <option value="2" selected>2 per week</option>
+                            <option value="3">3 per week</option>
+                            <option value="custom">Custom schedule</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Session Duration (minutes)</label>
+                        <input type="number" class="form-input" id="sessionDuration" 
+                               min="15" max="120" value="45">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Start Date</label>
+                    <input type="text" class="form-input" id="startDate" 
+                           placeholder="Select start date">
+                </div>
+            </div>
+            
+            <div class="auto-schedule-options">
+                <h3 style="margin-bottom: 15px;">Auto-Schedule Options</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Preferred Days</label>
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                            <label><input type="checkbox" value="1" class="day-checkbox"> Mon</label>
+                            <label><input type="checkbox" value="2" class="day-checkbox"> Tue</label>
+                            <label><input type="checkbox" value="3" class="day-checkbox" checked> Wed</label>
+                            <label><input type="checkbox" value="4" class="day-checkbox"> Thu</label>
+                            <label><input type="checkbox" value="5" class="day-checkbox" checked> Fri</label>
+                            <label><input type="checkbox" value="6" class="day-checkbox"> Sat</label>
+                            <label><input type="checkbox" value="0" class="day-checkbox"> Sun</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Preferred Time</label>
+                        <input type="time" class="form-input" id="preferredTime" value="10:00">
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="autoGenerateSessions()">
+                    Auto-Generate Sessions
+                </button>
+                <button class="btn btn-secondary" onclick="clearAllSessions()">
+                    Clear All
+                </button>
+            </div>
+        </div>
+        
+        <!-- Session Schedule -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Session Schedule</h2>
+                <div class="quick-actions">
+                    <button class="btn btn-primary btn-sm" onclick="addManualSession()">
+                        + Add Session
+                    </button>
+                    <button class="btn btn-secondary btn-sm" onclick="saveSchedule()">
+                        💾 Save Schedule
+                    </button>
+                </div>
+            </div>
+            
+            <div class="summary-card">
+                <h3>Schedule Summary</h3>
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <div class="summary-value" id="totalSessionsCount">0</div>
+                        <div class="summary-label">Total Sessions</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-value" id="durationWeeks">0</div>
+                        <div class="summary-label">Weeks</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-value" id="endDate">-</div>
+                        <div class="summary-label">End Date</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="sessions-table">
+                <table id="sessionsTable">
+                    <thead>
+                        <tr>
+                            <th width="60">Session</th>
+                            <th width="120">Date</th>
+                            <th width="100">Time</th>
+                            <th width="100">Duration</th>
+                            <th width="100">Status</th>
+                            <th width="150">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sessionsTableBody">
+                        <!-- Sessions will be populated here -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div style="margin-top: 30px; text-align: center;">
+                <button class="btn btn-primary" onclick="proceedToDelivery()" 
+                        style="padding: 15px 40px; font-size: 18px;">
+                    Confirm Schedule & Start Treatment Delivery →
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Add Session Modal -->
+    <div class="modal" id="addSessionModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Add Session Manually</h3>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Session Date</label>
+                <input type="text" class="form-input" id="modalSessionDate">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Session Time</label>
+                <input type="time" class="form-input" id="modalSessionTime" value="10:00">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Duration (minutes)</label>
+                <input type="number" class="form-input" id="modalSessionDuration" value="45">
+            </div>
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="confirmAddSession()">Add Session</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Notification -->
+    <div class="notification" id="notification"></div>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+        
+        const SUPABASE_URL = 'https://defifwzgazqlrigwumqn.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlZmlmd3pnYXpxbHJpZ3d1bXFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcyNTM0MjYsImV4cCI6MjA3MjgyOTQyNn0.wcUBq6Pszjtqn5aBtuu3iXBE4BLmu8x9LtJbsMWlIiA';
+        
+        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        let currentClinicId = null;
+        let selectedPatient = null;
+        let sessions = [];
+        let therapies = [];
+        let editingSessionId = null;
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            const authData = localStorage.getItem('celloxen_auth');
+            if (!authData) {
+                window.location.href = 'unified-login.html';
+                return;
+            }
+            
+            const auth = JSON.parse(authData);
+            currentClinicId = auth.clinicId;
+            
+            // Get patient from URL or localStorage
+            const urlParams = new URLSearchParams(window.location.search);
+            const patientId = urlParams.get('patientId');
+            
+            if (patientId) {
+                await loadPatient(patientId);
+            } else {
+                // Try to get from localStorage (from treatment planning)
+                const planData = localStorage.getItem('treatment_plan_data');
+                if (planData) {
+                    const data = JSON.parse(planData);
+                    await loadPatient(data.patientId);
+                }
+            }
+            
+            // Initialize date pickers
+            flatpickr("#startDate", {
+                dateFormat: "Y-m-d",
+                minDate: "today",
+                defaultDate: new Date()
+            });
+            
+            flatpickr("#modalSessionDate", {
+                dateFormat: "Y-m-d",
+                minDate: "today"
+            });
+            
+            // Load therapies
+            await loadTherapies();
+        });
+        
+        async function loadPatient(patientId) {
+            try {
+                const { data, error } = await supabase
+                    .from('patients')
+                    .select('*')
+                    .eq('id', patientId)
+                    .single();
+                    
+                if (error) throw error;
+                
+                selectedPatient = data;
+                displayPatientInfo();
+                
+            } catch (error) {
+                console.error('Error loading patient:', error);
+                showNotification('Error loading patient', 'error');
+            }
+        }
+        
+        function displayPatientInfo() {
+            const age = calculateAge(selectedPatient.date_of_birth);
+            document.getElementById('patientInfo').innerHTML = `
+                <div class="info-item">
+                    <div class="info-label">Patient Name</div>
+                    <div class="info-value">${selectedPatient.first_name} ${selectedPatient.last_name}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Patient ID</div>
+                    <div class="info-value">${selectedPatient.patient_id}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Age</div>
+                    <div class="info-value">${age} years</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Email</div>
+                    <div class="info-value">${selectedPatient.email || 'N/A'}</div>
+                </div>
+            `;
+        }
+        
+        async function loadTherapies() {
+            try {
+                const { data, error } = await supabase
+                    .from('therapy_protocols')
+                    .select('*')
+                    .eq('active', true)
+                    .order('therapy_name');
+                    
+                if (error) throw error;
+                
+                therapies = data || [];
+                
+                // Populate therapy dropdown
+                const select = document.getElementById('primaryTherapy');
+                select.innerHTML = therapies.map(t => 
+                    `<option value="${t.therapy_code}">${t.therapy_name} (${t.therapy_code})</option>`
+                ).join('');
+                
+                // Check if we have pre-selected therapies from treatment planning
+                const planData = localStorage.getItem('treatment_plan_data');
+                if (planData) {
+                    const data = JSON.parse(planData);
+                    if (data.therapyCodes && data.therapyCodes[0]) {
+                        select.value = data.therapyCodes[0];
+                    }
+                }
+                
+            } catch (error) {
+                console.error('Error loading therapies:', error);
+            }
+        }
+        
+        window.autoGenerateSessions = function() {
+            const totalSessions = parseInt(document.getElementById('totalSessions').value);
+            const sessionsPerWeek = document.getElementById('sessionsPerWeek').value;
+            const duration = parseInt(document.getElementById('sessionDuration').value);
+            const startDate = document.getElementById('startDate').value;
+            const preferredTime = document.getElementById('preferredTime').value;
+            
+            if (!startDate) {
+                showNotification('Please select a start date', 'error');
+                return;
+            }
+            
+            // Get selected days
+            const selectedDays = [];
+            document.querySelectorAll('.day-checkbox:checked').forEach(cb => {
+                selectedDays.push(parseInt(cb.value));
+            });
+            
+            if (selectedDays.length === 0) {
+                showNotification('Please select at least one day', 'error');
+                return;
+            }
+            
+            sessions = [];
+            let currentDate = new Date(startDate);
+            let sessionCount = 0;
+            
+            while (sessionCount < totalSessions) {
+                const dayOfWeek = currentDate.getDay();
+                
+                if (selectedDays.includes(dayOfWeek)) {
+                    sessions.push({
+                        session_number: sessionCount + 1,
+                        scheduled_date: currentDate.toISOString().split('T')[0],
+                        scheduled_time: preferredTime + ':00',
+                        duration_minutes: duration,
+                        status: 'scheduled'
+                    });
+                    sessionCount++;
+                }
+                
+                currentDate.setDate(currentDate.getDate() + 1);
+                
+                // Safety check to prevent infinite loop
+                if (currentDate > new Date(Date.now() + 365 * 24 * 60 * 60 * 1000)) {
+                    break;
+                }
+            }
+            
+            displaySessions();
+            updateSummary();
+            showNotification(`Generated ${sessions.length} sessions`, 'success');
+        };
+        
+        function displaySessions() {
+            const tbody = document.getElementById('sessionsTableBody');
+            
+            if (sessions.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #64748b;">No sessions scheduled. Use auto-generate or add manually.</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = sessions.map((session, index) => `
+                <tr data-index="${index}">
+                    <td><strong>#${session.session_number}</strong></td>
+                    <td class="editable-date">${session.scheduled_date}</td>
+                    <td class="editable-time">${session.scheduled_time.substring(0, 5)}</td>
+                    <td class="editable-duration">${session.duration_minutes} min</td>
+                    <td><span class="status-badge status-scheduled">Scheduled</span></td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn btn-sm btn-secondary" onclick="editSession(${index})">Edit</button>
+                            <button class="btn btn-sm btn-danger" onclick="removeSession(${index})">Delete</button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+        
+        window.editSession = function(index) {
+            const session = sessions[index];
+            const row = document.querySelector(`tr[data-index="${index}"]`);
+            
+            row.cells[1].innerHTML = `<input type="date" value="${session.scheduled_date}" onchange="updateSession(${index}, 'date', this.value)">`;
+            row.cells[2].innerHTML = `<input type="time" value="${session.scheduled_time.substring(0, 5)}" onchange="updateSession(${index}, 'time', this.value)">`;
+            row.cells[3].innerHTML = `<input type="number" value="${session.duration_minutes}" style="width: 80px;" onchange="updateSession(${index}, 'duration', this.value)"> min`;
+            
+            row.cells[5].innerHTML = `
+                <div class="action-buttons">
+                    <button class="btn btn-sm btn-primary" onclick="saveEdit(${index})">Save</button>
+                    <button class="btn btn-sm btn-secondary" onclick="cancelEdit(${index})">Cancel</button>
+                </div>
+            `;
+        };
+        
+        window.updateSession = function(index, field, value) {
+            if (field === 'date') {
+                sessions[index].scheduled_date = value;
+            } else if (field === 'time') {
+                sessions[index].scheduled_time = value + ':00';
+            } else if (field === 'duration') {
+                sessions[index].duration_minutes = parseInt(value);
+            }
+        };
+        
+        window.saveEdit = function(index) {
+            displaySessions();
+            updateSummary();
+            showNotification('Session updated', 'success');
+        };
+        
+        window.cancelEdit = function(index) {
+            displaySessions();
+        };
+        
+        window.removeSession = function(index) {
+            if (confirm('Remove this session?')) {
+                sessions.splice(index, 1);
+                // Renumber sessions
+                sessions.forEach((s, i) => {
+                    s.session_number = i + 1;
+                });
+                displaySessions();
+                updateSummary();
+                showNotification('Session removed', 'success');
+            }
+        };
+        
+        window.addManualSession = function() {
+            document.getElementById('addSessionModal').classList.add('active');
+        };
+        
+        window.closeModal = function() {
+            document.getElementById('addSessionModal').classList.remove('active');
+        };
+        
+        window.confirmAddSession = function() {
+            const date = document.getElementById('modalSessionDate').value;
+            const time = document.getElementById('modalSessionTime').value;
+            const duration = parseInt(document.getElementById('modalSessionDuration').value);
+            
+            if (!date || !time) {
+                showNotification('Please fill all fields', 'error');
+                return;
+            }
+            
+            sessions.push({
+                session_number: sessions.length + 1,
+                scheduled_date: date,
+                scheduled_time: time + ':00',
+                duration_minutes: duration,
+                status: 'scheduled'
+            });
+            
+            // Sort sessions by date
+            sessions.sort((a, b) => new Date(a.scheduled_date) - new Date(b.scheduled_date));
+            
+            // Renumber
+            sessions.forEach((s, i) => {
+                s.session_number = i + 1;
+            });
+            
+            displaySessions();
+            updateSummary();
+            closeModal();
+            showNotification('Session added', 'success');
+        };
+        
+        window.clearAllSessions = function() {
+            if (confirm('Clear all sessions?')) {
+                sessions = [];
+                displaySessions();
+                updateSummary();
+            }
+        };
+        
+        function updateSummary() {
+            document.getElementById('totalSessionsCount').textContent = sessions.length;
+            
+            if (sessions.length > 0) {
+                const firstDate = new Date(sessions[0].scheduled_date);
+                const lastDate = new Date(sessions[sessions.length - 1].scheduled_date);
+                const weeks = Math.ceil((lastDate - firstDate) / (7 * 24 * 60 * 60 * 1000));
+                
+                document.getElementById('durationWeeks').textContent = weeks;
+                document.getElementById('endDate').textContent = lastDate.toLocaleDateString('en-GB');
+            } else {
+                document.getElementById('durationWeeks').textContent = '0';
+                document.getElementById('endDate').textContent = '-';
+            }
+        }
+        
+        window.saveSchedule = async function() {
+            // This saves as draft - the actual database save happens in proceedToDelivery
+            localStorage.setItem('treatment_sessions_draft', JSON.stringify({
+                patientId: selectedPatient.id,
+                sessions: sessions,
+                therapyCode: document.getElementById('primaryTherapy').value
+            }));
+            showNotification('Schedule saved as draft', 'success');
+        };
+        
+        window.proceedToDelivery = async function() {
+            if (sessions.length === 0) {
+                showNotification('Please add at least one session', 'error');
+                return;
+            }
+            
+            try {
+                const therapyCode = document.getElementById('primaryTherapy').value;
+                const therapy = therapies.find(t => t.therapy_code === therapyCode);
+                
+                // Create treatment plan
+                const { data: treatmentPlan, error: planError } = await supabase
+                    .from('treatment_plans')
+                    .insert({
+                        clinic_id: currentClinicId,
+                        patient_id: selectedPatient.id,
+                        primary_therapy_code: therapyCode,
+                        primary_therapy_name: therapy.therapy_name,
+                        primary_sessions_total: sessions.length,
+                        primary_frequency: document.getElementById('sessionsPerWeek').value + ' per week',
+                        start_date: sessions[0].scheduled_date,
+                        end_date: sessions[sessions.length - 1].scheduled_date,
+                        total_weeks: Math.ceil((new Date(sessions[sessions.length - 1].scheduled_date) - new Date(sessions[0].scheduled_date)) / (7 * 24 * 60 * 60 * 1000)),
+                        status: 'active',
+                        created_at: new Date().toISOString(),
+                        created_by: currentClinicId,
+                        completed_sessions: 0
+                    })
+                    .select()
+                    .single();
+                
+                if (planError) throw planError;
+                
+                // Create sessions
+                const sessionsToInsert = sessions.map(s => ({
+                    treatment_plan_id: treatmentPlan.id,
+                    patient_id: selectedPatient.id,
+                    clinic_id: currentClinicId,
+                    ...s,
+                    created_at: new Date().toISOString()
+                }));
+                
+                const { error: sessionsError } = await supabase
+                    .from('treatment_sessions')
+                    .insert(sessionsToInsert);
+                
+                if (sessionsError) throw sessionsError;
+                
+                showNotification('Treatment plan created successfully!', 'success');
+                
+                setTimeout(() => {
+                    window.location.href = `treatment-delivery.html?patientId=${selectedPatient.id}`;
+                }, 1500);
+                
+            } catch (error) {
+                console.error('Error creating treatment plan:', error);
+                showNotification('Error creating treatment plan', 'error');
+            }
+        };
+        
+        function showNotification(message, type) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type} show`;
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+        
+        function calculateAge(dateOfBirth) {
+            if (!dateOfBirth) return 'Unknown';
+            const birthDate = new Date(dateOfBirth);
+            const today = new Date();
+            let age = today.getFullYear() - birthDate.getFullYear();
+            const monthDiff = today.getMonth() - birthDate.getMonth();
+            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                age--;
+            }
+            return age;
+        }
+    </script>
+</body>
+</html>
