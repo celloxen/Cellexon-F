@@ -535,9 +535,6 @@
             <div class="card">
                 <div class="card-header">
                     <h2 class="card-title">Therapy Categories</h2>
-                    <button class="btn btn-primary" onclick="openAddCategoryModal()">
-                        + Add Category
-                    </button>
                 </div>
                 
                 <div id="categoriesList">
@@ -554,55 +551,37 @@
     <div id="protocolModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 class="modal-title" id="protocolModalTitle">Add Therapy Protocol</h3>
+                <h3 class="modal-title" id="protocolModalTitle">Edit Therapy Protocol</h3>
                 <button class="close-btn" onclick="closeModal('protocolModal')">×</button>
             </div>
             
             <form id="protocolForm">
                 <div class="form-row">
                     <div class="form-group">
-                        <label class="form-label">Therapy Code *</label>
-                        <input type="text" class="form-input" id="therapyCode" required 
-                               placeholder="e.g., STRESS-001">
+                        <label class="form-label">Therapy Code</label>
+                        <input type="text" class="form-input" id="therapyCode" readonly>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Category *</label>
-                        <select class="form-select" id="therapyCategory" required>
-                            <option value="">Select Category</option>
-                            <option value="Mental Wellness">Mental Wellness</option>
-                            <option value="Digestive Health">Digestive Health</option>
-                            <option value="Immune Support">Immune Support</option>
-                            <option value="Pain Relief">Pain Relief</option>
-                            <option value="Vitality">Vitality</option>
-                            <option value="Detoxification">Detoxification</option>
-                            <option value="Sleep Health">Sleep Health</option>
-                            <option value="Heart Health">Heart Health</option>
-                        </select>
+                        <label class="form-label">Category</label>
+                        <input type="text" class="form-input" id="therapyCategory" readonly>
                     </div>
                 </div>
                 
                 <div class="form-group">
-                    <label class="form-label">Therapy Name *</label>
-                    <input type="text" class="form-input" id="therapyName" required 
-                           placeholder="e.g., Stress Relief Protocol">
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Description</label>
-                    <textarea class="form-textarea" id="therapyDescription" 
-                              placeholder="Describe the therapy protocol..."></textarea>
+                    <label class="form-label">Therapy Name</label>
+                    <input type="text" class="form-input" id="therapyName" readonly>
                 </div>
                 
                 <div class="form-row">
                     <div class="form-group">
                         <label class="form-label">Total Sessions *</label>
                         <input type="number" class="form-input" id="totalSessions" 
-                               required min="1" max="50" value="6">
+                               required min="1" max="50">
                     </div>
                     <div class="form-group">
                         <label class="form-label">Session Duration (minutes) *</label>
                         <input type="number" class="form-input" id="sessionDuration" 
-                               required min="15" max="120" value="45">
+                               required min="15" max="120">
                     </div>
                 </div>
                 
@@ -610,7 +589,7 @@
                     <div class="form-group">
                         <label class="form-label">Sessions Per Week</label>
                         <input type="number" class="form-input" id="sessionsPerWeek" 
-                               min="1" max="7" value="2">
+                               min="1" max="7">
                     </div>
                     <div class="form-group">
                         <label class="form-label">Status</label>
@@ -621,43 +600,19 @@
                     </div>
                 </div>
                 
-                <div class="form-group">
-                    <label class="form-label">Conditions Treated</label>
-                    <input type="text" class="form-input" id="conditionsTreated" 
-                           placeholder="e.g., Anxiety, Stress, Tension">
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Contraindications</label>
-                    <textarea class="form-textarea" id="contraindications" 
-                              placeholder="List any contraindications..."></textarea>
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Expected Outcomes</label>
-                    <textarea class="form-textarea" id="expectedOutcomes" 
-                              placeholder="Describe expected treatment outcomes..."></textarea>
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Clinical Instructions</label>
-                    <textarea class="form-textarea" id="instructions" 
-                              placeholder="Instructions for practitioners..."></textarea>
-                </div>
-                
                 <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 30px;">
                     <button type="button" class="btn btn-secondary" onclick="closeModal('protocolModal')">
                         Cancel
                     </button>
                     <button type="submit" class="btn btn-primary">
-                        Save Protocol
+                        Save Changes
                     </button>
                 </div>
             </form>
         </div>
     </div>
     
-    <!-- Add/Edit Diagram Modal -->
+    <!-- Simplified Diagram Upload Modal -->
     <div id="diagramModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -673,31 +628,12 @@
                     </select>
                 </div>
                 
-                <div class="form-group">
-                    <label class="form-label">Diagram Name *</label>
-                    <input type="text" class="form-input" id="diagramName" required 
-                           placeholder="e.g., Primary Probe Placement">
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Diagram Type</label>
-                    <select class="form-select" id="diagramType">
-                        <option value="primary">Primary</option>
-                        <option value="alternative">Alternative</option>
-                        <option value="supplementary">Supplementary</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Diagram URL or Upload *</label>
-                    <input type="text" class="form-input" id="diagramUrl" 
-                           placeholder="Enter image URL or upload below">
-                </div>
+                <input type="hidden" id="diagramUrl" />
                 
                 <div class="form-group">
                     <div class="diagram-upload-area" onclick="document.getElementById('diagramFile').click()">
                         <p style="font-size: 48px; margin-bottom: 10px;">📸</p>
-                        <p style="font-weight: 600; color: #1e293b;">Click to Upload Image</p>
+                        <p style="font-weight: 600; color: #1e293b;">Click to Upload Probe Diagram</p>
                         <p style="font-size: 12px; color: #64748b; margin-top: 5px;">
                             PNG, JPG up to 5MB
                         </p>
@@ -709,23 +645,12 @@
                     </div>
                 </div>
                 
-                <div class="form-group">
-                    <label class="form-label">Placement Instructions</label>
-                    <textarea class="form-textarea" id="diagramInstructions" rows="5"
-                              placeholder="Step-by-step probe placement instructions..."></textarea>
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Display Order</label>
-                    <input type="number" class="form-input" id="displayOrder" value="1" min="1">
-                </div>
-                
                 <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 30px;">
                     <button type="button" class="btn btn-secondary" onclick="closeModal('diagramModal')">
                         Cancel
                     </button>
                     <button type="submit" class="btn btn-primary">
-                        Save Diagram
+                        Upload Diagram
                     </button>
                 </div>
             </form>
@@ -743,13 +668,13 @@
         let protocols = [];
         let diagrams = [];
         let editingProtocolId = null;
-        let editingDiagramId = null;
         
         // Initialize
         document.addEventListener('DOMContentLoaded', async () => {
             await checkAuthentication();
             await loadProtocols();
             await loadDiagrams();
+            await loadCategories();
             setupEventListeners();
         });
         
@@ -770,16 +695,14 @@
         
         async function loadProtocols() {
             try {
-                // First try with 'active' column, fallback to 'is_active' if that fails
-                let { data, error } = await supabase
+                const { data, error } = await supabase
                     .from('therapy_protocols')
                     .select('*')
-                    .order('therapy_name');
+                    .order('therapy_code');
                     
                 if (error) throw error;
                 
-                // Filter active protocols (handle both column names)
-                protocols = (data || []).filter(p => p.active !== false && p.is_active !== false);
+                protocols = data || [];
                 displayProtocols();
                 populateTherapySelects();
                 
@@ -798,60 +721,60 @@
                 return;
             }
             
-            container.innerHTML = protocols.map(protocol => {
-                // Handle both column names for active status
-                const isActive = protocol.active !== false && protocol.is_active !== false;
-                
-                return `
-                <div class="therapy-card ${isActive ? 'active' : ''}">
-                    <div class="therapy-header">
-                        <div>
-                            <div class="therapy-name">${protocol.therapy_name}</div>
-                            <span class="status-badge ${isActive ? 'status-active' : 'status-inactive'}">
-                                ${isActive ? 'Active' : 'Inactive'}
-                            </span>
-                        </div>
-                        <div class="therapy-code">${protocol.therapy_code}</div>
-                    </div>
-                    
-                    <div class="therapy-details">
-                        <div class="detail-item">
-                            <div class="detail-label">Sessions</div>
-                            <div class="detail-value">${protocol.total_sessions || 6}</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Duration</div>
-                            <div class="detail-value">${protocol.session_duration_minutes || 45} min</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Per Week</div>
-                            <div class="detail-value">${protocol.sessions_per_week || 2}</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Category</div>
-                            <div class="detail-value">${protocol.category || 'General'}</div>
-                        </div>
-                    </div>
-                    
-                    ${protocol.description ? `
-                        <p style="font-size: 13px; color: #64748b; margin: 15px 0;">
-                            ${protocol.description}
-                        </p>
-                    ` : ''}
-                    
-                    <div class="therapy-actions">
-                        <button class="btn btn-secondary" onclick="editProtocol(${protocol.id})">
-                            Edit
-                        </button>
-                        <button class="btn btn-secondary" onclick="viewDiagrams('${protocol.therapy_code}')">
-                            View Diagrams
-                        </button>
-                        <button class="btn btn-danger" onclick="deleteProtocol(${protocol.id})">
-                            Delete
-                        </button>
+            // Group protocols by category
+            const grouped = {};
+            protocols.forEach(protocol => {
+                const cat = protocol.category || 'Uncategorized';
+                if (!grouped[cat]) grouped[cat] = [];
+                grouped[cat].push(protocol);
+            });
+            
+            container.innerHTML = Object.entries(grouped).map(([category, prots]) => `
+                <div style="margin-bottom: 30px;">
+                    <h3 style="color: #1e293b; margin-bottom: 15px; font-size: 18px;">${category}</h3>
+                    <div class="therapy-grid">
+                        ${prots.map(protocol => {
+                            const isActive = protocol.active !== false;
+                            return `
+                            <div class="therapy-card ${isActive ? 'active' : ''}">
+                                <div class="therapy-header">
+                                    <div>
+                                        <div class="therapy-name">${protocol.therapy_name}</div>
+                                        <span class="status-badge ${isActive ? 'status-active' : 'status-inactive'}">
+                                            ${isActive ? 'Active' : 'Inactive'}
+                                        </span>
+                                    </div>
+                                    <div class="therapy-code">${protocol.therapy_code}</div>
+                                </div>
+                                
+                                <div class="therapy-details">
+                                    <div class="detail-item">
+                                        <div class="detail-label">Sessions</div>
+                                        <div class="detail-value">${protocol.total_sessions || 6}</div>
+                                    </div>
+                                    <div class="detail-item">
+                                        <div class="detail-label">Duration</div>
+                                        <div class="detail-value">${protocol.session_duration_minutes || 45} min</div>
+                                    </div>
+                                    <div class="detail-item">
+                                        <div class="detail-label">Per Week</div>
+                                        <div class="detail-value">${protocol.sessions_per_week || 2}</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="therapy-actions">
+                                    <button class="btn btn-secondary" onclick="editProtocol(${protocol.id})">
+                                        Edit Settings
+                                    </button>
+                                    <button class="btn btn-secondary" onclick="viewDiagrams('${protocol.therapy_code}')">
+                                        View Diagrams
+                                    </button>
+                                </div>
+                            </div>
+                        `}).join('')}
                     </div>
                 </div>
-            `}).join('');
+            `).join('');
         }
         
         async function loadDiagrams() {
@@ -859,7 +782,7 @@
                 const { data, error } = await supabase
                     .from('probe_diagrams')
                     .select('*')
-                    .order('therapy_code, display_order');
+                    .order('therapy_code');
                     
                 if (error) throw error;
                 
@@ -883,7 +806,7 @@
             container.innerHTML = diagramsToShow.map(diagram => `
                 <div class="diagram-item">
                     ${diagram.diagram_url ? `
-                        <img src="${diagram.diagram_url}" alt="${diagram.diagram_name}" 
+                        <img src="${diagram.diagram_url}" alt="${diagram.therapy_code}" 
                              class="diagram-thumbnail"
                              onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22150%22%3E%3Crect width=%22200%22 height=%22150%22 fill=%22%23e5e7eb%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%2364748b%22 font-family=%22sans-serif%22%3ENo Image%3C/text%3E%3C/svg%3E'">
                     ` : `
@@ -891,15 +814,11 @@
                             No Image
                         </div>
                     `}
-                    <div class="diagram-name">${diagram.diagram_name}</div>
+                    <div class="diagram-name">${diagram.therapy_name || diagram.therapy_code}</div>
                     <div style="font-size: 11px; color: #64748b;">
-                        ${diagram.therapy_code} | ${diagram.diagram_type}
+                        Code: ${diagram.therapy_code}
                     </div>
                     <div class="diagram-actions">
-                        <button class="btn btn-secondary" style="padding: 5px 10px; font-size: 12px;" 
-                                onclick="editDiagram(${diagram.id})">
-                            Edit
-                        </button>
                         <button class="btn btn-danger" style="padding: 5px 10px; font-size: 12px;" 
                                 onclick="deleteDiagram(${diagram.id})">
                             Delete
@@ -907,6 +826,29 @@
                     </div>
                 </div>
             `).join('');
+        }
+        
+        async function loadCategories() {
+            try {
+                const { data } = await supabase
+                    .from('therapy_protocols')
+                    .select('category')
+                    .order('category');
+                
+                const categories = [...new Set(data.map(d => d.category).filter(c => c))];
+                
+                document.getElementById('categoriesList').innerHTML = categories.map(cat => {
+                    const count = protocols.filter(p => p.category === cat).length;
+                    return `
+                        <div style="padding: 15px; background: #f8fafc; border-radius: 8px; margin-bottom: 10px;">
+                            <strong>${cat}</strong> - ${count} therapies
+                        </div>
+                    `;
+                }).join('');
+                
+            } catch (error) {
+                console.error('Error loading categories:', error);
+            }
         }
         
         function populateTherapySelects() {
@@ -951,15 +893,7 @@
             event.target.classList.add('active');
         };
         
-        window.openAddProtocolModal = function() {
-            editingProtocolId = null;
-            document.getElementById('protocolModalTitle').textContent = 'Add Therapy Protocol';
-            document.getElementById('protocolForm').reset();
-            document.getElementById('protocolModal').classList.add('active');
-        };
-        
         window.openAddDiagramModal = function() {
-            editingDiagramId = null;
             document.getElementById('diagramForm').reset();
             document.getElementById('diagramPreview').style.display = 'none';
             document.getElementById('diagramModal').classList.add('active');
@@ -974,58 +908,35 @@
             if (!protocol) return;
             
             editingProtocolId = id;
-            document.getElementById('protocolModalTitle').textContent = 'Edit Therapy Protocol';
             
             // Fill form with protocol data
             document.getElementById('therapyCode').value = protocol.therapy_code;
             document.getElementById('therapyName').value = protocol.therapy_name;
             document.getElementById('therapyCategory').value = protocol.category || '';
-            document.getElementById('therapyDescription').value = protocol.description || '';
             document.getElementById('totalSessions').value = protocol.total_sessions || 6;
             document.getElementById('sessionDuration').value = protocol.session_duration_minutes || 45;
             document.getElementById('sessionsPerWeek').value = protocol.sessions_per_week || 2;
-            document.getElementById('therapyStatus').value = protocol.is_active ? 'true' : 'false';
-            document.getElementById('conditionsTreated').value = protocol.conditions_treated || '';
-            document.getElementById('contraindications').value = protocol.contraindications || '';
-            document.getElementById('expectedOutcomes').value = protocol.expected_outcomes || '';
-            document.getElementById('instructions').value = protocol.instructions || '';
+            document.getElementById('therapyStatus').value = protocol.active ? 'true' : 'false';
             
             document.getElementById('protocolModal').classList.add('active');
         };
         
         async function saveProtocol() {
             const formData = {
-                therapy_code: document.getElementById('therapyCode').value,
-                therapy_name: document.getElementById('therapyName').value,
-                category: document.getElementById('therapyCategory').value,
-                description: document.getElementById('therapyDescription').value,
                 total_sessions: parseInt(document.getElementById('totalSessions').value),
                 session_duration_minutes: parseInt(document.getElementById('sessionDuration').value),
                 sessions_per_week: parseInt(document.getElementById('sessionsPerWeek').value),
-                active: document.getElementById('therapyStatus').value === 'true',
-                conditions_treated: document.getElementById('conditionsTreated').value,
-                contraindications: document.getElementById('contraindications').value,
-                expected_outcomes: document.getElementById('expectedOutcomes').value,
-                instructions: document.getElementById('instructions').value
+                active: document.getElementById('therapyStatus').value === 'true'
             };
             
             try {
-                if (editingProtocolId) {
-                    const { error } = await supabase
-                        .from('therapy_protocols')
-                        .update(formData)
-                        .eq('id', editingProtocolId);
-                        
-                    if (error) throw error;
-                    alert('Protocol updated successfully!');
-                } else {
-                    const { error } = await supabase
-                        .from('therapy_protocols')
-                        .insert(formData);
-                        
-                    if (error) throw error;
-                    alert('Protocol added successfully!');
-                }
+                const { error } = await supabase
+                    .from('therapy_protocols')
+                    .update(formData)
+                    .eq('id', editingProtocolId);
+                    
+                if (error) throw error;
+                alert('Protocol settings updated successfully!');
                 
                 closeModal('protocolModal');
                 await loadProtocols();
@@ -1036,26 +947,6 @@
             }
         }
         
-        window.deleteProtocol = async function(id) {
-            if (!confirm('Delete this therapy protocol? This action cannot be undone.')) return;
-            
-            try {
-                const { error } = await supabase
-                    .from('therapy_protocols')
-                    .delete()
-                    .eq('id', id);
-                    
-                if (error) throw error;
-                
-                await loadProtocols();
-                alert('Protocol deleted successfully!');
-                
-            } catch (error) {
-                console.error('Error deleting protocol:', error);
-                alert('Error deleting protocol: ' + error.message);
-            }
-        };
-        
         window.previewDiagram = function(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -1064,7 +955,6 @@
             reader.onload = function(e) {
                 document.getElementById('previewImage').src = e.target.result;
                 document.getElementById('diagramPreview').style.display = 'block';
-                // In production, you would upload this to cloud storage and get URL
                 document.getElementById('diagramUrl').value = e.target.result;
             };
             reader.readAsDataURL(file);
@@ -1072,36 +962,31 @@
         
         async function saveDiagram() {
             const selectedTherapy = document.getElementById('diagramTherapy').value;
+            const diagramUrl = document.getElementById('diagramUrl').value;
+            
+            if (!selectedTherapy || !diagramUrl) {
+                alert('Please select a therapy and upload an image');
+                return;
+            }
+            
             const therapy = protocols.find(p => p.therapy_code === selectedTherapy);
             
             const formData = {
                 therapy_code: selectedTherapy,
                 therapy_name: therapy ? therapy.therapy_name : '',
-                diagram_name: document.getElementById('diagramName').value,
-                diagram_url: document.getElementById('diagramUrl').value,
-                diagram_type: document.getElementById('diagramType').value,
-                instructions: document.getElementById('diagramInstructions').value,
-                display_order: parseInt(document.getElementById('displayOrder').value),
+                diagram_name: `${selectedTherapy} Probe Placement`,
+                diagram_url: diagramUrl,
+                diagram_type: 'primary',
                 is_active: true
             };
             
             try {
-                if (editingDiagramId) {
-                    const { error } = await supabase
-                        .from('probe_diagrams')
-                        .update(formData)
-                        .eq('id', editingDiagramId);
-                        
-                    if (error) throw error;
-                    alert('Diagram updated successfully!');
-                } else {
-                    const { error } = await supabase
-                        .from('probe_diagrams')
-                        .insert(formData);
-                        
-                    if (error) throw error;
-                    alert('Diagram added successfully!');
-                }
+                const { error } = await supabase
+                    .from('probe_diagrams')
+                    .insert(formData);
+                    
+                if (error) throw error;
+                alert('Diagram uploaded successfully!');
                 
                 closeModal('diagramModal');
                 await loadDiagrams();
@@ -1147,6 +1032,8 @@
             document.getElementById('therapyFilter').value = therapyCode;
             filterDiagrams();
             switchTab('diagrams');
+            document.querySelectorAll('.tab-btn')[1].classList.add('active');
+            document.querySelectorAll('.tab-btn')[0].classList.remove('active');
         };
     </script>
 </body>
