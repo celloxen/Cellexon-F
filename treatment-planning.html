@@ -962,7 +962,6 @@
                         scheduled_date: sessionDate.toISOString().split('T')[0],
                         scheduled_time: '10:00:00',
                         duration_minutes: primaryTherapy.session_duration_minutes || 45,
-                        therapy_code: primaryTherapyCode,
                         status: 'scheduled',
                         created_at: new Date().toISOString()
                     });
@@ -979,11 +978,10 @@
                             treatment_plan_id: treatmentPlan.id,
                             patient_id: selectedPatient.id,
                             clinic_id: currentClinicId,
-                            session_number: i + 1,
+                            session_number: primarySessions + i + 1,
                             scheduled_date: sessionDate.toISOString().split('T')[0],
                             scheduled_time: '14:00:00',
                             duration_minutes: secondaryTherapy.session_duration_minutes || 45,
-                            therapy_code: secondaryTherapyCode,
                             status: 'scheduled',
                             created_at: new Date().toISOString()
                         });
@@ -992,12 +990,17 @@
                 
                 // Insert all sessions
                 if (sessions.length > 0) {
-                    const { error: sessionsError } = await supabase
+                    console.log('Attempting to create sessions:', sessions);
+                    const { data: createdSessions, error: sessionsError } = await supabase
                         .from('treatment_sessions')
-                        .insert(sessions);
+                        .insert(sessions)
+                        .select();
                     
                     if (sessionsError) {
                         console.error('Error creating sessions:', sessionsError);
+                        alert('Warning: Treatment plan created but sessions could not be created. Error: ' + sessionsError.message);
+                    } else {
+                        console.log('Sessions created successfully:', createdSessions);
                     }
                 }
                 
