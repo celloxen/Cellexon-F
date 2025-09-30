@@ -115,6 +115,11 @@
             box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
         }
         
+        .btn-warning {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+        }
+        
         .filters {
             display: flex;
             gap: 10px;
@@ -240,6 +245,7 @@
             gap: 10px;
             padding-top: 15px;
             border-top: 1px solid #e5e7eb;
+            flex-wrap: wrap;
         }
         
         .btn-sm {
@@ -297,6 +303,16 @@
         .refresh-btn:hover {
             background: #059669;
         }
+        
+        .debug-info {
+            background: #f3f4f6;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 10px;
+            margin-top: 20px;
+            font-size: 12px;
+            color: #4b5563;
+        }
     </style>
 </head>
 <body>
@@ -352,6 +368,12 @@
             </div>
         </div>
         
+        <!-- Debug Info (optional - remove in production) -->
+        <div id="debugInfo" class="debug-info" style="display: none;">
+            <strong>Debug Info:</strong>
+            <div id="debugContent"></div>
+        </div>
+        
         <!-- Patients List -->
         <div class="patients-grid" id="patientsGrid">
             <div class="empty-state">
@@ -386,6 +408,15 @@
             
             const auth = JSON.parse(authData);
             currentClinicId = auth.clinicId;
+            
+            // Enable debug mode with Ctrl+D
+            document.addEventListener('keydown', (e) => {
+                if (e.ctrlKey && e.key === 'd') {
+                    e.preventDefault();
+                    const debugDiv = document.getElementById('debugInfo');
+                    debugDiv.style.display = debugDiv.style.display === 'none' ? 'block' : 'none';
+                }
+            });
             
             await loadAllData();
         });
@@ -423,52 +454,93 @@
         
         async function loadAssessments() {
             try {
-                // Load health assessments separately
+                // Load ALL health assessments
                 const { data: healthAssessments, error: healthError } = await supabase
                     .from('health_assessments')
-                    .select('patient_id, id, created_at, completed')
-                    .eq('clinic_id', currentClinicId);
+                    .select('*')
+                    .eq('clinic_id', currentClinicId)
+                    .order('created_at', { ascending: false });
                 
                 if (healthError) {
                     console.error('Health assessments error:', healthError);
                 }
                 
-                // Load iris assessments separately
+                // Load ALL iris assessments
                 const { data: irisAssessments, error: irisError } = await supabase
                     .from('iris_assessments')
-                    .select('patient_id, id, created_at, status')
-                    .eq('clinic_id', currentClinicId);
+                    .select('*')
+                    .eq('clinic_id', currentClinicId)
+                    .order('created_at', { ascending: false });
                 
                 if (irisError) {
                     console.error('IRIS assessments error:', irisError);
                 }
                 
-                // Store assessment data by patient ID
+                // Group assessments by patient ID and take the most recent of each type
                 assessmentData = {};
                 
-                if (healthAssessments) {
+                // Process health assessments - group by patient and take most recent
+                if (healthAssessments && healthAssessments.length > 0) {
                     healthAssessments.forEach(assessment => {
-                        if (!assessmentData[assessment.patient_id]) {
-                            assessmentData[assessment.patient_id] = {};
+                        const patientId = assessment.patient_id;
+                        if (!patientId) return;
+                        
+                        if (!assessmentData[patientId]) {
+                            assessmentData[patientId] = {};
                         }
-                        assessmentData[assessment.patient_id].health = assessment;
+                        
+                        // Only keep the most recent health assessment
+                        if (!assessmentData[patientId].health || 
+                            new Date(assessment.created_at) > new Date(assessmentData[patientId].health.created_at)) {
+                            assessmentData[patientId].health = assessment;
+                        }
                     });
                 }
                 
-                if (irisAssessments) {
+                // Process IRIS assessments - group by patient and take most recent
+                if (irisAssessments && irisAssessments.length > 0) {
                     irisAssessments.forEach(assessment => {
-                        if (!assessmentData[assessment.patient_id]) {
-                            assessmentData[assessment.patient_id] = {};
+                        const patientId = assessment.patient_id;
+                        if (!patientId) return;
+                        
+                        if (!assessmentData[patientId]) {
+                            assessmentData[patientId] = {};
                         }
-                        assessmentData[assessment.patient_id].iris = assessment;
+                        
+                        // Only keep the most recent IRIS assessment
+                        if (!assessmentData[patientId].iris || 
+                            new Date(assessment.created_at) > new Date(assessmentData[patientId].iris.created_at)) {
+                            assessmentData[patientId].iris = assessment;
+                        }
                     });
                 }
                 
                 console.log('Assessment data loaded:', assessmentData);
+                console.log('Patients with health assessments:', Object.keys(assessmentData).filter(id => assessmentData[id].health).length);
+                console.log('Patients with IRIS assessments:', Object.keys(assessmentData).filter(id => assessmentData[id].iris).length);
+                console.log('Patients with both:', Object.keys(assessmentData).filter(id => assessmentData[id].health && assessmentData[id].iris).length);
+                
+                // Update debug info
+                updateDebugInfo();
                 
             } catch (error) {
                 console.error('Error loading assessments:', error);
             }
+        }
+        
+        function updateDebugInfo() {
+            const debugContent = document.getElementById('debugContent');
+            let debugHtml = '<br>';
+            
+            allPatients.forEach(patient => {
+                const patientAssessments = assessmentData[patient.id] || {};
+                debugHtml += `Patient ${patient.first_name} ${patient.last_name} (ID: ${patient.id}):<br>`;
+                debugHtml += `- Health Assessment: ${patientAssessments.health ? 'YES (ID: ' + patientAssessments.health.id + ')' : 'NO'}<br>`;
+                debugHtml += `- IRIS Assessment: ${patientAssessments.iris ? 'YES (ID: ' + patientAssessments.iris.id + ')' : 'NO'}<br>`;
+                debugHtml += `- Complete: ${patientAssessments.health && patientAssessments.iris ? 'YES' : 'NO'}<br><br>`;
+            });
+            
+            debugContent.innerHTML = debugHtml;
         }
         
         function updatePatientStatuses() {
@@ -537,6 +609,8 @@
             
             grid.innerHTML = filteredPatients.map(patient => {
                 const hasCompleteReport = patient.hasHealthAssessment && patient.hasIrisAssessment;
+                const needsHealth = !patient.hasHealthAssessment;
+                const needsIris = !patient.hasIrisAssessment;
                 
                 const age = patient.date_of_birth ? 
                     new Date().getFullYear() - new Date(patient.date_of_birth).getFullYear() : 'N/A';
@@ -586,11 +660,20 @@
                                 <button class="btn btn-success btn-sm" onclick="viewReport('${patient.id}')">
                                     View Comprehensive Report
                                 </button>
-                            ` : `
-                                <button class="btn btn-secondary btn-sm" onclick="startAssessments('${patient.id}')">
-                                    Complete Assessments
+                            ` : ''}
+                            
+                            ${needsHealth ? `
+                                <button class="btn btn-warning btn-sm" onclick="startHealthAssessment('${patient.id}')">
+                                    Start Health Assessment
                                 </button>
-                            `}
+                            ` : ''}
+                            
+                            ${needsIris ? `
+                                <button class="btn btn-warning btn-sm" onclick="startIrisAssessment('${patient.id}')">
+                                    Start IRIS Assessment
+                                </button>
+                            ` : ''}
+                            
                             <button class="btn btn-primary btn-sm" onclick="viewPatientDetails('${patient.id}')">
                                 Patient Details
                             </button>
@@ -690,8 +773,12 @@
             window.location.href = `comprehensive-report.html?patientId=${patientId}`;
         }
         
-        window.startAssessments = function(patientId) {
+        window.startHealthAssessment = function(patientId) {
             window.location.href = `lily-ai-agent-integrated.html?patientId=${patientId}`;
+        }
+        
+        window.startIrisAssessment = function(patientId) {
+            window.location.href = `iris-assessment-integrated.html?patientId=${patientId}`;
         }
         
         window.viewPatientDetails = function(patientId) {
