@@ -525,7 +525,7 @@
         let allSessions = [];
         
         // Initialize
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             const authData = localStorage.getItem('celloxen_auth');
             if (!authData) {
                 window.location.href = 'unified-login.html';
@@ -539,6 +539,16 @@
             document.getElementById('patientSearch').addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') searchPatient();
             });
+            
+            // Check if patient ID passed in URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const patientId = urlParams.get('patientId');
+            
+            if (patientId) {
+                console.log('Patient ID found in URL:', patientId);
+                // Auto-load patient if ID provided
+                await loadPatientFromUrl(patientId);
+            }
         });
         
         window.searchPatient = async function() {
@@ -629,6 +639,32 @@
             // Load treatment plans
             await loadTreatmentPlans(patientId);
         };
+        
+        // Load patient from URL parameter
+        async function loadPatientFromUrl(patientId) {
+            try {
+                console.log('Loading patient with ID:', patientId);
+                const { data, error } = await supabase
+                    .from('patients')
+                    .select('*')
+                    .eq('id', patientId)
+                    .eq('clinic_id', currentClinicId)
+                    .single();
+                    
+                if (error) throw error;
+                
+                if (data) {
+                    // Use existing selectPatient function
+                    await window.selectPatient(patientId);
+                    
+                    // Hide the search card since patient is already selected
+                    document.querySelector('.search-card').style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Error loading patient from URL:', error);
+                // Keep search card visible if patient not found
+            }
+        }
         
         async function loadPatientData(patientId) {
             try {
