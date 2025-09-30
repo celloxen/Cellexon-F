@@ -704,6 +704,11 @@
                 // Use first active plan
                 currentPlan = plans[0];
                 
+                // Format the plan to show primary therapy (and secondary if exists)
+                currentPlan.therapy_name = currentPlan.primary_therapy_name;
+                currentPlan.therapy_code = currentPlan.primary_therapy_code;
+                currentPlan.total_sessions = currentPlan.primary_sessions_total || 12;
+                
                 // Load sessions for this plan
                 await loadSessions(currentPlan.id);
                 
