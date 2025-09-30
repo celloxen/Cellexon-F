@@ -782,6 +782,16 @@
             
             // Check camera availability
             await checkCameraAvailability();
+            
+            // Check if patient ID passed in URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const patientId = urlParams.get('patientId');
+            
+            if (patientId) {
+                console.log('Patient ID found in URL:', patientId);
+                // Auto-load patient if ID provided
+                await loadPatientFromUrl(patientId);
+            }
         });
         
         // Setup patient search functionality
@@ -896,6 +906,55 @@
                 alert('Error selecting patient. Please try again.');
             }
         };
+        
+        // Load patient from URL parameter
+        async function loadPatientFromUrl(patientId) {
+            try {
+                console.log('Loading patient with ID:', patientId);
+                const { data: patient, error } = await supabaseClient
+                    .from('patients')
+                    .select('*')
+                    .eq('id', patientId)
+                    .eq('clinic_id', clinicId)
+                    .single();
+                    
+                if (error) {
+                    console.error('Error loading patient:', error);
+                    alert('Patient not found. Please select a patient manually.');
+                    return;
+                }
+                
+                if (patient) {
+                    currentPatient = patient;
+                    const age = calculateAge(patient.date_of_birth);
+                    
+                    // Update search input
+                    document.getElementById('patientSearch').value = `${patient.first_name} ${patient.last_name}`;
+                    
+                    // Show selected patient preview
+                    const preview = document.getElementById('selectedPatientPreview');
+                    preview.style.display = 'block';
+                    document.getElementById('selectedPatientDetails').innerHTML = `
+                        <div style="display: grid; gap: 10px;">
+                            <div><strong>Name:</strong> ${patient.first_name} ${patient.last_name}</div>
+                            <div><strong>Patient ID:</strong> ${patient.patient_id}</div>
+                            <div><strong>Age:</strong> ${age}</div>
+                            <div><strong>Email:</strong> ${patient.email || 'N/A'}</div>
+                        </div>
+                    `;
+                    
+                    // Auto-click the start assessment button after a short delay
+                    setTimeout(() => {
+                        const startBtn = document.querySelector('[onclick="startAssessment()"]');
+                        if (startBtn) {
+                            startBtn.click();
+                        }
+                    }, 500);
+                }
+            } catch (error) {
+                console.error('Error loading patient from URL:', error);
+            }
+        }
         
         // Start assessment function
         window.startAssessment = function() {
