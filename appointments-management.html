@@ -433,6 +433,13 @@
             color: #92400e;
         }
         
+        .calendar-appointment.therapy.treatment-session {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            color: #78350f;
+            border-left: 3px solid #f59e0b;
+            font-weight: 600;
+        }
+        
         .calendar-appointment.follow-up {
             background: linear-gradient(135deg, #e9d5ff, #c084fc);
             color: #6b21a8;
@@ -745,8 +752,8 @@
                     return;
                 }
                 
-                // Load appointments with patient info
-                const { data, error } = await supabase
+                // Load regular appointments with patient info
+                const { data: appointmentsData, error: appointmentsError } = await supabase
                     .from('appointments')
                     .select(`
                         *,
@@ -756,10 +763,27 @@
                     .order('appointment_date', { ascending: true })
                     .order('appointment_time', { ascending: true });
                 
-                if (error) throw error;
+                if (appointmentsError) throw appointmentsError;
                 
-                // Transform data
-                allAppointments = (data || []).map(apt => ({
+                // Load treatment sessions with patient and treatment plan info
+                const { data: sessionsData, error: sessionsError } = await supabase
+                    .from('treatment_sessions')
+                    .select(`
+                        *,
+                        patients!inner(first_name, last_name, patient_id),
+                        treatment_plans!inner(primary_therapy_name, primary_therapy_code)
+                    `)
+                    .eq('clinic_id', clinicId)
+                    .gte('scheduled_date', new Date(new Date().setMonth(new Date().getMonth() - 1)).toISOString().split('T')[0])
+                    .order('scheduled_date', { ascending: true })
+                    .order('scheduled_time', { ascending: true });
+                
+                if (sessionsError) {
+                    console.error('Error loading treatment sessions:', sessionsError);
+                }
+                
+                // Transform regular appointments
+                const regularAppointments = (appointmentsData || []).map(apt => ({
                     id: apt.id,
                     appointment_date: apt.appointment_date,
                     appointment_time: apt.appointment_time,
@@ -768,8 +792,40 @@
                     notes: apt.notes,
                     patient_name: apt.patients ? `${apt.patients.first_name} ${apt.patients.last_name}` : 'Unknown',
                     patient_id: apt.patient_id,
-                    therapy_code: apt.therapy_code
+                    therapy_code: apt.therapy_code,
+                    is_treatment_session: false
                 }));
+                
+                // Transform treatment sessions to appointment format
+                const treatmentAppointments = (sessionsData || []).map(session => ({
+                    id: `session-${session.id}`,
+                    appointment_date: session.scheduled_date,
+                    appointment_time: session.scheduled_time,
+                    appointment_type: 'therapy',
+                    status: session.status || 'scheduled',
+                    notes: `Session ${session.session_number} - ${session.treatment_plans.primary_therapy_name}`,
+                    patient_name: session.patients ? `${session.patients.first_name} ${session.patients.last_name}` : 'Unknown',
+                    patient_id: session.patient_id,
+                    therapy_code: session.treatment_plans.primary_therapy_code,
+                    is_treatment_session: true,
+                    session_id: session.id,
+                    session_number: session.session_number,
+                    duration_minutes: session.duration_minutes,
+                    treatment_plan_id: session.treatment_plan_id
+                }));
+                
+                // Combine both lists
+                allAppointments = [...regularAppointments, ...treatmentAppointments];
+                
+                // Sort by date and time
+                allAppointments.sort((a, b) => {
+                    const dateCompare = new Date(a.appointment_date) - new Date(b.appointment_date);
+                    if (dateCompare !== 0) return dateCompare;
+                    if (a.appointment_time && b.appointment_time) {
+                        return a.appointment_time.localeCompare(b.appointment_time);
+                    }
+                    return 0;
+                });
                 
                 displayAppointments(allAppointments);
                 renderCalendar();
@@ -793,20 +849,24 @@
             container.innerHTML = appointments.map(apt => `
                 <div class="appointment-card">
                     <div class="appointment-info">
-                        <h3>${apt.patient_name}</h3>
+                        <h3>${apt.patient_name} ${apt.is_treatment_session ? '(Treatment Session)' : ''}</h3>
                         <div class="appointment-details">
                             <span>Date: ${formatDate(apt.appointment_date)}</span>
                             <span>Time: ${apt.appointment_time ? apt.appointment_time.substring(0, 5) : 'No time'}</span>
                             <span>Type: ${apt.appointment_type}</span>
                             ${apt.therapy_code ? `<span>Therapy: ${apt.therapy_code}</span>` : ''}
+                            ${apt.session_number ? `<span>Session #${apt.session_number}</span>` : ''}
                             <span class="status-badge status-${apt.status}">${apt.status}</span>
                         </div>
                         ${apt.notes ? `<div style="margin-top: 5px; font-size: 12px; color: #6b7280;">Notes: ${apt.notes}</div>` : ''}
                     </div>
                     <div class="appointment-actions">
-                        ${apt.status === 'scheduled' ? `
+                        ${apt.status === 'scheduled' && !apt.is_treatment_session ? `
                             <button class="btn btn-primary btn-sm" onclick="updateStatus(${apt.id}, 'completed')">Complete</button>
                             <button class="btn btn-danger btn-sm" onclick="updateStatus(${apt.id}, 'cancelled')">Cancel</button>
+                        ` : ''}
+                        ${apt.is_treatment_session && apt.status === 'scheduled' ? `
+                            <button class="btn btn-primary btn-sm" onclick="goToTreatmentDelivery(${apt.patient_id})">Deliver Treatment</button>
                         ` : ''}
                     </div>
                 </div>
@@ -923,6 +983,11 @@
             window.location.href = 'clinic-dashboard.html';
         };
         
+        // Go to treatment delivery for a patient
+        window.goToTreatmentDelivery = function(patientId) {
+            window.location.href = `treatment-delivery.html?patientId=${patientId}`;
+        };
+        
         // Calendar Functions
         window.renderCalendar = function() {
             const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
@@ -1003,9 +1068,20 @@
             // Show up to 3 appointments
             dayAppointments.slice(0, 3).forEach(apt => {
                 const aptDiv = document.createElement('div');
-                aptDiv.className = `calendar-appointment ${apt.appointment_type}`;
+                const appointmentClass = apt.is_treatment_session ? 
+                    'calendar-appointment therapy treatment-session' : 
+                    `calendar-appointment ${apt.appointment_type}`;
+                aptDiv.className = appointmentClass;
+                
                 const patientName = apt.patient_name ? apt.patient_name.split(' ')[0] : 'Patient';
-                aptDiv.textContent = `${apt.appointment_time ? apt.appointment_time.substring(0, 5) : ''} ${patientName}`;
+                const timeStr = apt.appointment_time ? apt.appointment_time.substring(0, 5) : '';
+                
+                if (apt.is_treatment_session) {
+                    aptDiv.textContent = `${timeStr} [S${apt.session_number}] ${patientName}`;
+                } else {
+                    aptDiv.textContent = `${timeStr} ${patientName}`;
+                }
+                
                 aptDiv.onclick = () => showAppointmentDetails(apt);
                 dayDiv.appendChild(aptDiv);
             });
@@ -1053,13 +1129,31 @@
         };
         
         window.showAppointmentDetails = function(appointment) {
-            alert(`Appointment Details:
+            const details = appointment.is_treatment_session ? 
+                `Treatment Session Details:
+Patient: ${appointment.patient_name || 'Unknown'}
+Date: ${formatDate(appointment.appointment_date)}
+Time: ${appointment.appointment_time ? appointment.appointment_time.substring(0, 5) : 'No time'}
+Session: #${appointment.session_number || ''}
+Therapy: ${appointment.therapy_code || ''}
+Duration: ${appointment.duration_minutes || 45} minutes
+Status: ${appointment.status}
+${appointment.notes ? 'Notes: ' + appointment.notes : ''}
+
+Click OK to go to Treatment Delivery` :
+                `Appointment Details:
 Patient: ${appointment.patient_name || 'Unknown'}
 Date: ${formatDate(appointment.appointment_date)}
 Time: ${appointment.appointment_time ? appointment.appointment_time.substring(0, 5) : 'No time'}
 Type: ${appointment.appointment_type}
 Status: ${appointment.status}
-${appointment.notes ? 'Notes: ' + appointment.notes : ''}`);
+${appointment.notes ? 'Notes: ' + appointment.notes : ''}`;
+            
+            if (confirm(details)) {
+                if (appointment.is_treatment_session && appointment.status === 'scheduled') {
+                    goToTreatmentDelivery(appointment.patient_id);
+                }
+            }
         };
     </script>
 </body>
