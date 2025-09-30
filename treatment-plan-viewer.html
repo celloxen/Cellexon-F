@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Treatment Plan Viewer - Celloxen Platform</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+            color: white;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        
+        .header-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+        }
+        
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        
+        .search-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+            margin-bottom: 25px;
+        }
+        
+        .search-header {
+            font-size: 24px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 20px;
+        }
+        
+        .search-container {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: #1e3a8a;
+            box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+        }
+        
+        .suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-top: none;
+            border-radius: 0 0 12px 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            display: none;
+            z-index: 100;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        
+        .suggestions.active {
+            display: block;
+        }
+        
+        .suggestion-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            transition: background 0.2s;
+            border-bottom: 1px solid #f1f5f9;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .suggestion-item:hover {
+            background: #f0f9ff;
+        }
+        
+        .patient-name {
+            font-weight: 500;
+            color: #1e293b;
+        }
+        
+        .patient-id {
+            font-size: 12px;
+            color: #64748b;
+        }
+        
+        .plan-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+            margin-bottom: 25px;
+            display: none;
+        }
+        
+        .plan-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f1f5f9;
+        }
+        
+        .plan-title {
+            font-size: 22px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #374151;
+        }
+        
+        .patient-info {
+            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .info-item {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+        }
+        
+        .info-label {
+            font-size: 12px;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 5px;
+        }
+        
+        .info-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .plan-list {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 20px;
+        }
+        
+        .plan-item {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+        
+        .plan-item:hover {
+            border-color: #3b82f6;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+        }
+        
+        .plan-item.active-plan {
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+            border-color: #10b981;
+        }
+        
+        .plan-date {
+            font-size: 14px;
+            color: #64748b;
+            margin-bottom: 10px;
+        }
+        
+        .plan-summary {
+            font-size: 16px;
+            color: #1e293b;
+            margin-bottom: 10px;
+        }
+        
+        .plan-content {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .plan-content.active {
+            display: block;
+        }
+        
+        .plan-section {
+            margin-bottom: 30px;
+        }
+        
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .therapy-details {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .therapy-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .therapy-item {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+        }
+        
+        .session-schedule {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .session-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .session-card {
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            border: 2px solid #e5e7eb;
+        }
+        
+        .session-card.completed {
+            background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+            border-color: #10b981;
+        }
+        
+        .session-card.scheduled {
+            background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+            border-color: #3b82f6;
+        }
+        
+        .session-number {
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .session-date {
+            font-size: 12px;
+            color: #64748b;
+            margin-top: 5px;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-left: 10px;
+        }
+        
+        .status-active {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .status-completed {
+            background: #e5e7eb;
+            color: #475569;
+        }
+        
+        .status-superseded {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .no-plans {
+            text-align: center;
+            padding: 40px;
+            color: #64748b;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-container">
+            <h1>Treatment Plan Viewer</h1>
+            <a href="clinic-dashboard.html" class="back-btn">← Back to Dashboard</a>
+        </div>
+    </div>
+    
+    <div class="container">
+        <!-- Search Section -->
+        <div class="search-card">
+            <h2 class="search-header">Search Patient</h2>
+            <div class="search-container">
+                <input type="text" 
+                       class="search-input" 
+                       id="patientSearch" 
+                       placeholder="Type patient name or ID..."
+                       autocomplete="off">
+                <div class="suggestions" id="suggestions"></div>
+            </div>
+        </div>
+        
+        <!-- Plan Display Section -->
+        <div class="plan-card" id="planCard">
+            <div class="plan-header">
+                <h2 class="plan-title">Treatment Plans</h2>
+                <div class="action-buttons">
+                    <button class="btn btn-secondary" onclick="printPlan()">🖨️ Print</button>
+                    <button class="btn btn-primary" onclick="downloadPlan()">📥 Download</button>
+                </div>
+            </div>
+            
+            <div class="patient-info" id="patientInfo">
+                <!-- Patient info will be populated here -->
+            </div>
+            
+            <div class="plan-list" id="planList">
+                <!-- Plan list will be populated here -->
+            </div>
+            
+            <div class="plan-content" id="planContent">
+                <!-- Plan details will be shown here -->
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+        
+        const SUPABASE_URL = 'https://defifwzgazqlrigwumqn.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlZmlmd3pnYXpxbHJpZ3d1bXFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcyNTM0MjYsImV4cCI6MjA3MjgyOTQyNn0.wcUBq6Pszjtqn5aBtuu3iXBE4BLmu8x9LtJbsMWlIiA';
+        
+        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        let currentClinicId = null;
+        let allPatients = [];
+        let selectedPatient = null;
+        let currentPlan = null;
+        let planSessions = [];
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            const authData = localStorage.getItem('celloxen_auth');
+            if (!authData) {
+                window.location.href = 'unified-login.html';
+                return;
+            }
+            
+            const auth = JSON.parse(authData);
+            currentClinicId = auth.clinicId;
+            
+            await loadPatients();
+            setupSearch();
+        });
+        
+        async function loadPatients() {
+            try {
+                const { data, error } = await supabase
+                    .from('patients')
+                    .select('*')
+                    .eq('clinic_id', currentClinicId)
+                    .order('first_name');
+                
+                if (error) throw error;
+                allPatients = data || [];
+            } catch (error) {
+                console.error('Error loading patients:', error);
+            }
+        }
+        
+        function setupSearch() {
+            const searchInput = document.getElementById('patientSearch');
+            const suggestions = document.getElementById('suggestions');
+            
+            searchInput.addEventListener('input', (e) => {
+                const value = e.target.value.toLowerCase().trim();
+                
+                if (value.length < 2) {
+                    suggestions.classList.remove('active');
+                    return;
+                }
+                
+                const filtered = allPatients.filter(p => 
+                    p.first_name.toLowerCase().includes(value) ||
+                    p.last_name.toLowerCase().includes(value) ||
+                    p.patient_id.toLowerCase().includes(value)
+                );
+                
+                if (filtered.length > 0) {
+                    displaySuggestions(filtered);
+                } else {
+                    suggestions.classList.remove('active');
+                }
+            });
+            
+            document.addEventListener('click', (e) => {
+                if (!searchInput.contains(e.target) && !suggestions.contains(e.target)) {
+                    suggestions.classList.remove('active');
+                }
+            });
+        }
+        
+        function displaySuggestions(patients) {
+            const suggestions = document.getElementById('suggestions');
+            
+            suggestions.innerHTML = patients.slice(0, 10).map(p => `
+                <div class="suggestion-item" onclick="selectPatient(${p.id})">
+                    <div>
+                        <div class="patient-name">${p.first_name} ${p.last_name}</div>
+                        <div class="patient-id">ID: ${p.patient_id}</div>
+                    </div>
+                </div>
+            `).join('');
+            
+            suggestions.classList.add('active');
+        }
+        
+        window.selectPatient = async function(patientId) {
+            selectedPatient = allPatients.find(p => p.id === patientId);
+            if (!selectedPatient) return;
+            
+            // Hide suggestions
+            document.getElementById('suggestions').classList.remove('active');
+            document.getElementById('patientSearch').value = `${selectedPatient.first_name} ${selectedPatient.last_name}`;
+            
+            // Display patient info
+            displayPatientInfo();
+            
+            // Load treatment plans
+            await loadTreatmentPlans();
+            
+            // Show plan card
+            document.getElementById('planCard').style.display = 'block';
+        };
+        
+        function displayPatientInfo() {
+            const age = calculateAge(selectedPatient.date_of_birth);
+            
+            document.getElementById('patientInfo').innerHTML = `
+                <div class="info-item">
+                    <div class="info-label">Patient Name</div>
+                    <div class="info-value">${selectedPatient.first_name} ${selectedPatient.last_name}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Patient ID</div>
+                    <div class="info-value">${selectedPatient.patient_id}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Age</div>
+                    <div class="info-value">${age} years</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Gender</div>
+                    <div class="info-value">${selectedPatient.gender || 'Not specified'}</div>
+                </div>
+            `;
+        }
+        
+        async function loadTreatmentPlans() {
+            try {
+                const { data, error } = await supabase
+                    .from('treatment_plans')
+                    .select('*')
+                    .eq('patient_id', selectedPatient.id)
+                    .order('created_at', { ascending: false });
+                
+                if (error) throw error;
+                
+                if (data && data.length > 0) {
+                    displayPlanList(data);
+                } else {
+                    document.getElementById('planList').innerHTML = 
+                        '<div class="no-plans">No treatment plans found for this patient.</div>';
+                    document.getElementById('planContent').classList.remove('active');
+                }
+            } catch (error) {
+                console.error('Error loading treatment plans:', error);
+                document.getElementById('planList').innerHTML = 
+                    '<div class="no-plans">Error loading treatment plans. Please try again.</div>';
+            }
+        }
+        
+        function displayPlanList(plans) {
+            const listHtml = plans.map((plan, index) => {
+                const date = new Date(plan.created_at);
+                const isActive = plan.status === 'active';
+                
+                return `
+                    <div class="plan-item ${isActive ? 'active-plan' : ''}" onclick="viewPlan(${index})">
+                        <div class="plan-date">
+                            Created: ${date.toLocaleDateString('en-GB')} at ${date.toLocaleTimeString('en-GB', {hour: '2-digit', minute:'2-digit'})}
+                        </div>
+                        <div class="plan-summary">
+                            Primary Therapy: ${plan.primary_therapy_name || 'N/A'}
+                            <span class="status-badge status-${plan.status}">${plan.status}</span>
+                        </div>
+                        <div style="color: #64748b; font-size: 14px;">
+                            Sessions: ${plan.primary_sessions_total || 0} | 
+                            Start: ${plan.start_date ? new Date(plan.start_date).toLocaleDateString('en-GB') : 'N/A'}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            document.getElementById('planList').innerHTML = 
+                '<h3 style="margin-bottom: 15px;">Available Treatment Plans</h3>' + listHtml;
+            
+            // Store plans for viewing
+            window.treatmentPlans = plans;
+        }
+        
+        window.viewPlan = async function(index) {
+            const plan = window.treatmentPlans[index];
+            if (!plan) return;
+            
+            currentPlan = plan;
+            
+            // Load sessions for this plan
+            await loadPlanSessions(plan.id);
+            
+            let contentHtml = '<h3 style="margin-bottom: 20px;">Treatment Plan Details</h3>';
+            
+            // Plan Overview
+            contentHtml += `
+                <div class="plan-section">
+                    <h4 class="section-title">Plan Overview</h4>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                        <div>
+                            <strong>Status:</strong> <span class="status-badge status-${plan.status}">${plan.status}</span>
+                        </div>
+                        <div>
+                            <strong>Start Date:</strong> ${plan.start_date ? new Date(plan.start_date).toLocaleDateString('en-GB') : 'N/A'}
+                        </div>
+                        <div>
+                            <strong>End Date:</strong> ${plan.end_date ? new Date(plan.end_date).toLocaleDateString('en-GB') : 'N/A'}
+                        </div>
+                        <div>
+                            <strong>Duration:</strong> ${plan.total_weeks || 'N/A'} weeks
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Primary Therapy
+            if (plan.primary_therapy_name) {
+                contentHtml += `
+                    <div class="plan-section">
+                        <h4 class="section-title">Primary Therapy</h4>
+                        <div class="therapy-details">
+                            <h5 style="font-size: 18px; margin-bottom: 10px;">${plan.primary_therapy_name}</h5>
+                            <div class="therapy-info">
+                                <div class="therapy-item">
+                                    <div class="info-label">Therapy Code</div>
+                                    <div class="info-value">${plan.primary_therapy_code || 'N/A'}</div>
+                                </div>
+                                <div class="therapy-item">
+                                    <div class="info-label">Total Sessions</div>
+                                    <div class="info-value">${plan.primary_sessions_total || 0}</div>
+                                </div>
+                                <div class="therapy-item">
+                                    <div class="info-label">Frequency</div>
+                                    <div class="info-value">${plan.primary_frequency || 'N/A'}</div>
+                                </div>
+                                <div class="therapy-item">
+                                    <div class="info-label">Completed</div>
+                                    <div class="info-value">${plan.completed_sessions || 0} sessions</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Secondary Therapy (if exists)
+            if (plan.secondary_therapy_name) {
+                contentHtml += `
+                    <div class="plan-section">
+                        <h4 class="section-title">Secondary Therapy</h4>
+                        <div class="therapy-details" style="background: linear-gradient(135deg, #e0f2fe, #dbeafe);">
+                            <h5 style="font-size: 18px; margin-bottom: 10px;">${plan.secondary_therapy_name}</h5>
+                            <div class="therapy-info">
+                                <div class="therapy-item">
+                                    <div class="info-label">Therapy Code</div>
+                                    <div class="info-value">${plan.secondary_therapy_code || 'N/A'}</div>
+                                </div>
+                                <div class="therapy-item">
+                                    <div class="info-label">Total Sessions</div>
+                                    <div class="info-value">${plan.secondary_sessions_total || 0}</div>
+                                </div>
+                                <div class="therapy-item">
+                                    <div class="info-label">Frequency</div>
+                                    <div class="info-value">${plan.secondary_frequency || 'N/A'}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Session Schedule
+            if (planSessions.length > 0) {
+                contentHtml += `
+                    <div class="plan-section">
+                        <h4 class="section-title">Session Schedule</h4>
+                        <div class="session-schedule">
+                            <div class="session-grid">
+                                ${planSessions.map(session => `
+                                    <div class="session-card ${session.status}">
+                                        <div class="session-number">Session ${session.session_number}</div>
+                                        <div class="session-date">${new Date(session.scheduled_date).toLocaleDateString('en-GB')}</div>
+                                        <div class="session-date">${session.scheduled_time ? session.scheduled_time.substring(0, 5) : ''}</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            document.getElementById('planContent').innerHTML = contentHtml;
+            document.getElementById('planContent').classList.add('active');
+            
+            // Scroll to content
+            document.getElementById('planContent').scrollIntoView({ behavior: 'smooth' });
+        };
+        
+        async function loadPlanSessions(planId) {
+            try {
+                const { data, error } = await supabase
+                    .from('treatment_sessions')
+                    .select('*')
+                    .eq('treatment_plan_id', planId)
+                    .order('session_number');
+                
+                if (error) throw error;
+                planSessions = data || [];
+            } catch (error) {
+                console.error('Error loading sessions:', error);
+                planSessions = [];
+            }
+        }
+        
+        window.printPlan = function() {
+            if (!currentPlan) {
+                alert('Please select a treatment plan first');
+                return;
+            }
+            window.print();
+        };
+        
+        window.downloadPlan = function() {
+            if (!currentPlan) {
+                alert('Please select a treatment plan first');
+                return;
+            }
+            
+            // Create downloadable content
+            const content = generateDownloadContent();
+            const blob = new Blob([content], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `treatment-plan-${selectedPatient.patient_id}-${new Date().toISOString().split('T')[0]}.html`;
+            a.click();
+            URL.revokeObjectURL(url);
+        };
+        
+        function generateDownloadContent() {
+            const date = new Date(currentPlan.created_at);
+            
+            let html = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Treatment Plan - ${selectedPatient.first_name} ${selectedPatient.last_name}</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; padding: 20px; }
+                        h1 { color: #1e3a8a; }
+                        .info { margin-bottom: 20px; padding: 10px; background: #f0f9ff; }
+                        .section { margin: 20px 0; }
+                        .therapy { padding: 10px; background: #fef3c7; border-radius: 5px; margin: 10px 0; }
+                        .sessions { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; }
+                        .session { padding: 8px; background: #e0f2fe; border-radius: 4px; text-align: center; }
+                    </style>
+                </head>
+                <body>
+                    <h1>Treatment Plan</h1>
+                    <div class="info">
+                        <p><strong>Patient:</strong> ${selectedPatient.first_name} ${selectedPatient.last_name}</p>
+                        <p><strong>Patient ID:</strong> ${selectedPatient.patient_id}</p>
+                        <p><strong>Plan Created:</strong> ${date.toLocaleDateString('en-GB')}</p>
+                        <p><strong>Status:</strong> ${currentPlan.status}</p>
+                    </div>
+            `;
+            
+            if (currentPlan.primary_therapy_name) {
+                html += `
+                    <div class="section">
+                        <h2>Primary Therapy</h2>
+                        <div class="therapy">
+                            <p><strong>Name:</strong> ${currentPlan.primary_therapy_name}</p>
+                            <p><strong>Code:</strong> ${currentPlan.primary_therapy_code || 'N/A'}</p>
+                            <p><strong>Sessions:</strong> ${currentPlan.primary_sessions_total || 0}</p>
+                            <p><strong>Frequency:</strong> ${currentPlan.primary_frequency || 'N/A'}</p>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            if (planSessions.length > 0) {
+                html += `
+                    <div class="section">
+                        <h2>Session Schedule</h2>
+                        <div class="sessions">
+                            ${planSessions.map(s => `
+                                <div class="session">
+                                    Session ${s.session_number}<br>
+                                    ${new Date(s.scheduled_date).toLocaleDateString('en-GB')}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            html += '</body></html>';
+            return html;
+        }
+        
+        function calculateAge(dateOfBirth) {
+            if (!dateOfBirth) return 'Unknown';
+            const birthDate = new Date(dateOfBirth);
+            const today = new Date();
+            let age = today.getFullYear() - birthDate.getFullYear();
+            const monthDiff = today.getMonth() - birthDate.getMonth();
+            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                age--;
+            }
+            return age;
+        }
+    </script>
+</body>
+</html>
