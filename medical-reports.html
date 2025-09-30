@@ -283,6 +283,20 @@
             color: #64748b;
             font-size: 14px;
         }
+        
+        .refresh-btn {
+            padding: 8px 16px;
+            background: #10b981;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        
+        .refresh-btn:hover {
+            background: #059669;
+        }
     </style>
 </head>
 <body>
@@ -318,7 +332,10 @@
         
         <!-- Search Section -->
         <div class="search-section">
-            <h2 class="search-title">Search Patients</h2>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 class="search-title" style="margin: 0;">Search Patients</h2>
+                <button class="refresh-btn" onclick="refreshData()">🔄 Refresh</button>
+            </div>
             <div class="search-box">
                 <input type="text" class="search-input" id="searchInput" 
                        placeholder="Search by patient name or ID...">
@@ -356,6 +373,7 @@
         let allPatients = [];
         let filteredPatients = [];
         let currentFilter = 'all';
+        let assessmentData = {};
         
         // Initialize
         document.addEventListener('DOMContentLoaded', async () => {
@@ -369,21 +387,23 @@
             const auth = JSON.parse(authData);
             currentClinicId = auth.clinicId;
             
-            await loadPatients();
-            await loadStatistics();
-            setupSearch();
+            await loadAllData();
         });
+        
+        async function loadAllData() {
+            await loadPatients();
+            await loadAssessments();
+            updatePatientStatuses();
+            displayPatients();
+            loadStatistics();
+        }
         
         async function loadPatients() {
             try {
-                // Load patients with their assessment status
+                // Load just patients first
                 const { data: patients, error } = await supabase
                     .from('patients')
-                    .select(`
-                        *,
-                        health_assessments (id, created_at),
-                        iris_assessments (id, created_at)
-                    `)
+                    .select('*')
                     .eq('clinic_id', currentClinicId)
                     .order('created_at', { ascending: false });
                 
@@ -392,7 +412,7 @@
                 allPatients = patients || [];
                 filteredPatients = allPatients;
                 
-                displayPatients();
+                console.log('Loaded patients:', allPatients.length);
                 
             } catch (error) {
                 console.error('Error loading patients:', error);
@@ -401,7 +421,73 @@
             }
         }
         
-        async function loadStatistics() {
+        async function loadAssessments() {
+            try {
+                // Load health assessments separately
+                const { data: healthAssessments, error: healthError } = await supabase
+                    .from('health_assessments')
+                    .select('patient_id, id, created_at, completed')
+                    .eq('clinic_id', currentClinicId);
+                
+                if (healthError) {
+                    console.error('Health assessments error:', healthError);
+                }
+                
+                // Load iris assessments separately
+                const { data: irisAssessments, error: irisError } = await supabase
+                    .from('iris_assessments')
+                    .select('patient_id, id, created_at, status')
+                    .eq('clinic_id', currentClinicId);
+                
+                if (irisError) {
+                    console.error('IRIS assessments error:', irisError);
+                }
+                
+                // Store assessment data by patient ID
+                assessmentData = {};
+                
+                if (healthAssessments) {
+                    healthAssessments.forEach(assessment => {
+                        if (!assessmentData[assessment.patient_id]) {
+                            assessmentData[assessment.patient_id] = {};
+                        }
+                        assessmentData[assessment.patient_id].health = assessment;
+                    });
+                }
+                
+                if (irisAssessments) {
+                    irisAssessments.forEach(assessment => {
+                        if (!assessmentData[assessment.patient_id]) {
+                            assessmentData[assessment.patient_id] = {};
+                        }
+                        assessmentData[assessment.patient_id].iris = assessment;
+                    });
+                }
+                
+                console.log('Assessment data loaded:', assessmentData);
+                
+            } catch (error) {
+                console.error('Error loading assessments:', error);
+            }
+        }
+        
+        function updatePatientStatuses() {
+            // Add assessment status to each patient
+            allPatients = allPatients.map(patient => {
+                const patientAssessments = assessmentData[patient.id] || {};
+                return {
+                    ...patient,
+                    hasHealthAssessment: !!patientAssessments.health,
+                    hasIrisAssessment: !!patientAssessments.iris,
+                    healthAssessmentDate: patientAssessments.health?.created_at,
+                    irisAssessmentDate: patientAssessments.iris?.created_at
+                };
+            });
+            
+            filteredPatients = allPatients;
+        }
+        
+        function loadStatistics() {
             try {
                 const today = new Date();
                 const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
@@ -411,22 +497,20 @@
                 
                 // Complete reports (both assessments done)
                 const completeCount = allPatients.filter(p => 
-                    p.health_assessments && p.health_assessments.length > 0 &&
-                    p.iris_assessments && p.iris_assessments.length > 0
+                    p.hasHealthAssessment && p.hasIrisAssessment
                 ).length;
                 document.getElementById('completeReports').textContent = completeCount;
                 
                 // Pending assessments
                 const pendingCount = allPatients.filter(p => 
-                    (!p.health_assessments || p.health_assessments.length === 0) ||
-                    (!p.iris_assessments || p.iris_assessments.length === 0)
+                    !p.hasHealthAssessment || !p.hasIrisAssessment
                 ).length;
                 document.getElementById('pendingAssessments').textContent = pendingCount;
                 
                 // Reports this month
                 const monthCount = allPatients.filter(p => {
-                    if (p.health_assessments && p.health_assessments.length > 0) {
-                        const assessmentDate = new Date(p.health_assessments[0].created_at);
+                    if (p.healthAssessmentDate) {
+                        const assessmentDate = new Date(p.healthAssessmentDate);
                         return assessmentDate >= monthStart;
                     }
                     return false;
@@ -452,9 +536,7 @@
             }
             
             grid.innerHTML = filteredPatients.map(patient => {
-                const hasHealthAssessment = patient.health_assessments && patient.health_assessments.length > 0;
-                const hasIrisAssessment = patient.iris_assessments && patient.iris_assessments.length > 0;
-                const hasCompleteReport = hasHealthAssessment && hasIrisAssessment;
+                const hasCompleteReport = patient.hasHealthAssessment && patient.hasIrisAssessment;
                 
                 const age = patient.date_of_birth ? 
                     new Date().getFullYear() - new Date(patient.date_of_birth).getFullYear() : 'N/A';
@@ -488,11 +570,11 @@
                         </div>
                         
                         <div class="report-status">
-                            <span class="status-badge ${hasHealthAssessment ? 'status-complete' : 'status-none'}">
-                                ${hasHealthAssessment ? '✓' : '○'} Health Assessment
+                            <span class="status-badge ${patient.hasHealthAssessment ? 'status-complete' : 'status-none'}">
+                                ${patient.hasHealthAssessment ? '✓' : '○'} Health Assessment
                             </span>
-                            <span class="status-badge ${hasIrisAssessment ? 'status-complete' : 'status-none'}">
-                                ${hasIrisAssessment ? '✓' : '○'} IRIS Assessment
+                            <span class="status-badge ${patient.hasIrisAssessment ? 'status-complete' : 'status-none'}">
+                                ${patient.hasIrisAssessment ? '✓' : '○'} IRIS Assessment
                             </span>
                             <span class="status-badge ${hasCompleteReport ? 'status-complete' : 'status-pending'}">
                                 ${hasCompleteReport ? 'Complete Report' : 'Pending Report'}
@@ -562,29 +644,46 @@
         }
         
         function applyFilter() {
-            let filtered = filteredPatients;
+            let filtered = [...allPatients];
             
-            if (currentFilter === 'complete') {
-                filtered = filteredPatients.filter(p => 
-                    p.health_assessments && p.health_assessments.length > 0 &&
-                    p.iris_assessments && p.iris_assessments.length > 0
-                );
-            } else if (currentFilter === 'pending') {
-                filtered = filteredPatients.filter(p => 
-                    (p.health_assessments && p.health_assessments.length > 0) ||
-                    (p.iris_assessments && p.iris_assessments.length > 0)
-                );
-            } else if (currentFilter === 'no-report') {
-                filtered = filteredPatients.filter(p => 
-                    (!p.health_assessments || p.health_assessments.length === 0) &&
-                    (!p.iris_assessments || p.iris_assessments.length === 0)
+            // Apply search filter first if exists
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            if (searchTerm) {
+                filtered = filtered.filter(patient => 
+                    patient.first_name.toLowerCase().includes(searchTerm) ||
+                    patient.last_name.toLowerCase().includes(searchTerm) ||
+                    patient.patient_id.toLowerCase().includes(searchTerm)
                 );
             }
             
-            const tempFiltered = filteredPatients;
+            // Then apply status filter
+            if (currentFilter === 'complete') {
+                filtered = filtered.filter(p => 
+                    p.hasHealthAssessment && p.hasIrisAssessment
+                );
+            } else if (currentFilter === 'pending') {
+                filtered = filtered.filter(p => 
+                    (p.hasHealthAssessment || p.hasIrisAssessment) &&
+                    !(p.hasHealthAssessment && p.hasIrisAssessment)
+                );
+            } else if (currentFilter === 'no-report') {
+                filtered = filtered.filter(p => 
+                    !p.hasHealthAssessment && !p.hasIrisAssessment
+                );
+            }
+            
             filteredPatients = filtered;
             displayPatients();
-            filteredPatients = tempFiltered; // Restore for next filter
+        }
+        
+        window.refreshData = async function() {
+            document.getElementById('patientsGrid').innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-state-icon">🔄</div>
+                    <p>Refreshing data...</p>
+                </div>
+            `;
+            await loadAllData();
         }
         
         window.viewReport = function(patientId) {
@@ -602,6 +701,9 @@
         window.goBack = function() {
             window.location.href = 'clinic-dashboard.html';
         }
+        
+        // Setup search on load
+        setupSearch();
     </script>
 </body>
 </html>
