@@ -893,7 +893,21 @@
                 const therapyCode = document.getElementById('primaryTherapy').value;
                 const therapy = therapies.find(t => t.therapy_code === therapyCode);
                 
-                // Create treatment plan
+                // First, mark any existing active plans as completed/superseded
+                const { error: updateError } = await supabase
+                    .from('treatment_plans')
+                    .update({ 
+                        status: 'superseded',
+                        updated_at: new Date().toISOString()
+                    })
+                    .eq('patient_id', selectedPatient.id)
+                    .eq('status', 'active');
+                
+                if (updateError) {
+                    console.log('Note: Could not update old plans:', updateError);
+                }
+                
+                // Create NEW treatment plan
                 const { data: treatmentPlan, error: planError } = await supabase
                     .from('treatment_plans')
                     .insert({
@@ -916,7 +930,9 @@
                 
                 if (planError) throw planError;
                 
-                // Create sessions
+                console.log('Created new treatment plan with ID:', treatmentPlan.id);
+                
+                // Create sessions for the NEW plan
                 const sessionsToInsert = sessions.map(s => ({
                     treatment_plan_id: treatmentPlan.id,
                     patient_id: selectedPatient.id,
@@ -931,15 +947,20 @@
                 
                 if (sessionsError) throw sessionsError;
                 
+                console.log('Created', sessions.length, 'sessions for plan ID:', treatmentPlan.id);
+                
                 showNotification('Treatment plan created successfully!', 'success');
                 
+                // Store the plan ID to ensure treatment delivery loads this specific plan
+                localStorage.setItem('current_treatment_plan_id', treatmentPlan.id);
+                
                 setTimeout(() => {
-                    window.location.href = `treatment-delivery.html?patientId=${selectedPatient.id}`;
+                    window.location.href = `treatment-delivery.html?patientId=${selectedPatient.id}&planId=${treatmentPlan.id}`;
                 }, 1500);
                 
             } catch (error) {
                 console.error('Error creating treatment plan:', error);
-                showNotification('Error creating treatment plan', 'error');
+                showNotification('Error creating treatment plan: ' + error.message, 'error');
             }
         };
         
