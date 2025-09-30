@@ -526,7 +526,7 @@
                 </div>
             </div>
             <button class="proceed-btn" onclick="proceedToScheduling()">
-                Start Treatment Delivery →
+                Configure Session Schedule →
             </button>
         </div>
     </div>
@@ -1013,8 +1013,8 @@
                 
                 localStorage.setItem('treatment_plan_data', JSON.stringify(selectedData));
                 
-                // Pass patient ID in URL for treatment delivery
-                window.location.href = `treatment-delivery.html?patientId=${selectedPatient.id}`;
+                // Pass patient ID in URL for session scheduling
+                window.location.href = `session-scheduling.html?patientId=${selectedPatient.id}`;
                 
             } catch (error) {
                 console.error('Error creating treatment plans:', error);
