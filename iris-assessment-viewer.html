@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IRIS Assessment Viewer - Celloxen Platform</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+            color: white;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        
+        .header-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+        }
+        
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        
+        .search-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+            margin-bottom: 25px;
+        }
+        
+        .search-header {
+            font-size: 24px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 20px;
+        }
+        
+        .search-container {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: #1e3a8a;
+            box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+        }
+        
+        .suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-top: none;
+            border-radius: 0 0 12px 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            display: none;
+            z-index: 100;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        
+        .suggestions.active {
+            display: block;
+        }
+        
+        .suggestion-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            transition: background 0.2s;
+            border-bottom: 1px solid #f1f5f9;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .suggestion-item:hover {
+            background: #f0f9ff;
+        }
+        
+        .patient-name {
+            font-weight: 500;
+            color: #1e293b;
+        }
+        
+        .patient-id {
+            font-size: 12px;
+            color: #64748b;
+        }
+        
+        .iris-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+            margin-bottom: 25px;
+            display: none;
+        }
+        
+        .iris-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f1f5f9;
+        }
+        
+        .iris-title {
+            font-size: 22px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #374151;
+        }
+        
+        .patient-info {
+            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .info-item {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+        }
+        
+        .info-label {
+            font-size: 12px;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 5px;
+        }
+        
+        .info-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .iris-list {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 20px;
+        }
+        
+        .iris-item {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+        
+        .iris-item:hover {
+            border-color: #3b82f6;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+        }
+        
+        .iris-date {
+            font-size: 14px;
+            color: #64748b;
+            margin-bottom: 10px;
+        }
+        
+        .iris-summary {
+            font-size: 16px;
+            color: #1e293b;
+            margin-bottom: 10px;
+        }
+        
+        .iris-content {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .iris-content.active {
+            display: block;
+        }
+        
+        .iris-images {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .iris-image-container {
+            text-align: center;
+        }
+        
+        .iris-image {
+            width: 100%;
+            max-width: 400px;
+            height: auto;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            margin-bottom: 10px;
+        }
+        
+        .iris-scores {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .score-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .score-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .score-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1e3a8a;
+        }
+        
+        .score-label {
+            font-size: 12px;
+            color: #64748b;
+            margin-top: 5px;
+        }
+        
+        .no-iris {
+            text-align: center;
+            padding: 40px;
+            color: #64748b;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-container">
+            <h1>IRIS Assessment Viewer</h1>
+            <a href="clinic-dashboard.html" class="back-btn">← Back to Dashboard</a>
+        </div>
+    </div>
+    
+    <div class="container">
+        <!-- Search Section -->
+        <div class="search-card">
+            <h2 class="search-header">Search Patient</h2>
+            <div class="search-container">
+                <input type="text" 
+                       class="search-input" 
+                       id="patientSearch" 
+                       placeholder="Type patient name or ID..."
+                       autocomplete="off">
+                <div class="suggestions" id="suggestions"></div>
+            </div>
+        </div>
+        
+        <!-- IRIS Display Section -->
+        <div class="iris-card" id="irisCard">
+            <div class="iris-header">
+                <h2 class="iris-title">IRIS Assessments</h2>
+                <div class="action-buttons">
+                    <button class="btn btn-secondary" onclick="printIRIS()">🖨️ Print</button>
+                    <button class="btn btn-primary" onclick="downloadIRIS()">📥 Download</button>
+                </div>
+            </div>
+            
+            <div class="patient-info" id="patientInfo">
+                <!-- Patient info will be populated here -->
+            </div>
+            
+            <div class="iris-list" id="irisList">
+                <!-- IRIS list will be populated here -->
+            </div>
+            
+            <div class="iris-content" id="irisContent">
+                <!-- IRIS details will be shown here -->
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+        
+        const SUPABASE_URL = 'https://defifwzgazqlrigwumqn.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlZmlmd3pnYXpxbHJpZ3d1bXFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcyNTM0MjYsImV4cCI6MjA3MjgyOTQyNn0.wcUBq6Pszjtqn5aBtuu3iXBE4BLmu8x9LtJbsMWlIiA';
+        
+        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        let currentClinicId = null;
+        let allPatients = [];
+        let selectedPatient = null;
+        let currentIRIS = null;
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            const authData = localStorage.getItem('celloxen_auth');
+            if (!authData) {
+                window.location.href = 'unified-login.html';
+                return;
+            }
+            
+            const auth = JSON.parse(authData);
+            currentClinicId = auth.clinicId;
+            
+            await loadPatients();
+            setupSearch();
+        });
+        
+        async function loadPatients() {
+            try {
+                const { data, error } = await supabase
+                    .from('patients')
+                    .select('*')
+                    .eq('clinic_id', currentClinicId)
+                    .order('first_name');
+                
+                if (error) throw error;
+                allPatients = data || [];
+            } catch (error) {
+                console.error('Error loading patients:', error);
+            }
+        }
+        
+        function setupSearch() {
+            const searchInput = document.getElementById('patientSearch');
+            const suggestions = document.getElementById('suggestions');
+            
+            searchInput.addEventListener('input', (e) => {
+                const value = e.target.value.toLowerCase().trim();
+                
+                if (value.length < 2) {
+                    suggestions.classList.remove('active');
+                    return;
+                }
+                
+                const filtered = allPatients.filter(p => 
+                    p.first_name.toLowerCase().includes(value) ||
+                    p.last_name.toLowerCase().includes(value) ||
+                    p.patient_id.toLowerCase().includes(value)
+                );
+                
+                if (filtered.length > 0) {
+                    displaySuggestions(filtered);
+                } else {
+                    suggestions.classList.remove('active');
+                }
+            });
+            
+            document.addEventListener('click', (e) => {
+                if (!searchInput.contains(e.target) && !suggestions.contains(e.target)) {
+                    suggestions.classList.remove('active');
+                }
+            });
+        }
+        
+        function displaySuggestions(patients) {
+            const suggestions = document.getElementById('suggestions');
+            
+            suggestions.innerHTML = patients.slice(0, 10).map(p => `
+                <div class="suggestion-item" onclick="selectPatient(${p.id})">
+                    <div>
+                        <div class="patient-name">${p.first_name} ${p.last_name}</div>
+                        <div class="patient-id">ID: ${p.patient_id}</div>
+                    </div>
+                </div>
+            `).join('');
+            
+            suggestions.classList.add('active');
+        }
+        
+        window.selectPatient = async function(patientId) {
+            selectedPatient = allPatients.find(p => p.id === patientId);
+            if (!selectedPatient) return;
+            
+            // Hide suggestions
+            document.getElementById('suggestions').classList.remove('active');
+            document.getElementById('patientSearch').value = `${selectedPatient.first_name} ${selectedPatient.last_name}`;
+            
+            // Display patient info
+            displayPatientInfo();
+            
+            // Load IRIS assessments
+            await loadIRISAssessments();
+            
+            // Show IRIS card
+            document.getElementById('irisCard').style.display = 'block';
+        };
+        
+        function displayPatientInfo() {
+            const age = calculateAge(selectedPatient.date_of_birth);
+            
+            document.getElementById('patientInfo').innerHTML = `
+                <div class="info-item">
+                    <div class="info-label">Patient Name</div>
+                    <div class="info-value">${selectedPatient.first_name} ${selectedPatient.last_name}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Patient ID</div>
+                    <div class="info-value">${selectedPatient.patient_id}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Age</div>
+                    <div class="info-value">${age} years</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Gender</div>
+                    <div class="info-value">${selectedPatient.gender || 'Not specified'}</div>
+                </div>
+            `;
+        }
+        
+        async function loadIRISAssessments() {
+            try {
+                const { data, error } = await supabase
+                    .from('iris_assessments')
+                    .select('*')
+                    .eq('patient_id', selectedPatient.id)
+                    .order('created_at', { ascending: false });
+                
+                if (error) throw error;
+                
+                if (data && data.length > 0) {
+                    displayIRISList(data);
+                } else {
+                    document.getElementById('irisList').innerHTML = 
+                        '<div class="no-iris">No IRIS assessments found for this patient.</div>';
+                    document.getElementById('irisContent').classList.remove('active');
+                }
+            } catch (error) {
+                console.error('Error loading IRIS assessments:', error);
+                document.getElementById('irisList').innerHTML = 
+                    '<div class="no-iris">Error loading IRIS assessments. Please try again.</div>';
+            }
+        }
+        
+        function displayIRISList(assessments) {
+            const listHtml = assessments.map((assessment, index) => {
+                const date = new Date(assessment.created_at);
+                const eyesAnalyzed = (assessment.left_eye_image ? 1 : 0) + (assessment.right_eye_image ? 1 : 0);
+                
+                return `
+                    <div class="iris-item" onclick="viewIRIS(${index})">
+                        <div class="iris-date">
+                            Date: ${date.toLocaleDateString('en-GB')} at ${date.toLocaleTimeString('en-GB', {hour: '2-digit', minute:'2-digit'})}
+                        </div>
+                        <div class="iris-summary">
+                            Eyes Analyzed: ${eyesAnalyzed} | Overall Score: ${assessment.overall_score || 'N/A'}%
+                        </div>
+                        <div style="color: #64748b; font-size: 14px;">
+                            Status: ${assessment.status || 'Completed'}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            document.getElementById('irisList').innerHTML = 
+                '<h3 style="margin-bottom: 15px;">Available IRIS Assessments</h3>' + listHtml;
+            
+            // Store assessments for viewing
+            window.irisAssessments = assessments;
+        }
+        
+        window.viewIRIS = function(index) {
+            const assessment = window.irisAssessments[index];
+            if (!assessment) return;
+            
+            currentIRIS = assessment;
+            
+            let contentHtml = '<h3 style="margin-bottom: 20px;">IRIS Assessment Details</h3>';
+            
+            // Display images
+            contentHtml += '<div class="iris-images">';
+            
+            if (assessment.left_eye_image) {
+                contentHtml += `
+                    <div class="iris-image-container">
+                        <img src="${assessment.left_eye_image}" alt="Left Eye" class="iris-image">
+                        <div>Left Eye</div>
+                    </div>
+                `;
+            }
+            
+            if (assessment.right_eye_image) {
+                contentHtml += `
+                    <div class="iris-image-container">
+                        <img src="${assessment.right_eye_image}" alt="Right Eye" class="iris-image">
+                        <div>Right Eye</div>
+                    </div>
+                `;
+            }
+            
+            contentHtml += '</div>';
+            
+            // Display scores
+            if (assessment.analysis_results) {
+                contentHtml += `
+                    <div class="iris-scores">
+                        <h4>Analysis Results</h4>
+                        <div class="score-grid">
+                            <div class="score-item">
+                                <div class="score-value">${assessment.overall_score || 'N/A'}%</div>
+                                <div class="score-label">Overall Score</div>
+                            </div>
+                `;
+                
+                // Add individual organ scores if available
+                if (assessment.analysis_results.organ_scores) {
+                    for (const [organ, score] of Object.entries(assessment.analysis_results.organ_scores)) {
+                        contentHtml += `
+                            <div class="score-item">
+                                <div class="score-value">${score}%</div>
+                                <div class="score-label">${organ}</div>
+                            </div>
+                        `;
+                    }
+                }
+                
+                contentHtml += '</div></div>';
+            }
+            
+            // Display recommendations if available
+            if (assessment.recommendations) {
+                contentHtml += `
+                    <div style="margin-top: 20px;">
+                        <h4>Recommendations</h4>
+                        <div style="padding: 15px; background: #f8fafc; border-radius: 8px;">
+                            ${assessment.recommendations}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            document.getElementById('irisContent').innerHTML = contentHtml;
+            document.getElementById('irisContent').classList.add('active');
+            
+            // Scroll to content
+            document.getElementById('irisContent').scrollIntoView({ behavior: 'smooth' });
+        };
+        
+        window.printIRIS = function() {
+            if (!currentIRIS) {
+                alert('Please select an IRIS assessment first');
+                return;
+            }
+            window.print();
+        };
+        
+        window.downloadIRIS = function() {
+            if (!currentIRIS) {
+                alert('Please select an IRIS assessment first');
+                return;
+            }
+            
+            // Create downloadable content
+            const content = generateDownloadContent();
+            const blob = new Blob([content], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `iris-assessment-${selectedPatient.patient_id}-${new Date().toISOString().split('T')[0]}.html`;
+            a.click();
+            URL.revokeObjectURL(url);
+        };
+        
+        function generateDownloadContent() {
+            const date = new Date(currentIRIS.created_at);
+            
+            let html = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>IRIS Assessment - ${selectedPatient.first_name} ${selectedPatient.last_name}</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; padding: 20px; }
+                        h1 { color: #1e3a8a; }
+                        .info { margin-bottom: 20px; padding: 10px; background: #f0f9ff; }
+                        .images { display: flex; gap: 20px; margin: 20px 0; }
+                        .image { text-align: center; }
+                        img { max-width: 300px; height: auto; }
+                    </style>
+                </head>
+                <body>
+                    <h1>IRIS Assessment Report</h1>
+                    <div class="info">
+                        <p><strong>Patient:</strong> ${selectedPatient.first_name} ${selectedPatient.last_name}</p>
+                        <p><strong>Patient ID:</strong> ${selectedPatient.patient_id}</p>
+                        <p><strong>Assessment Date:</strong> ${date.toLocaleDateString('en-GB')}</p>
+                        <p><strong>Overall Score:</strong> ${currentIRIS.overall_score || 'N/A'}%</p>
+                    </div>
+            `;
+            
+            if (currentIRIS.left_eye_image || currentIRIS.right_eye_image) {
+                html += '<div class="images">';
+                if (currentIRIS.left_eye_image) {
+                    html += `<div class="image"><img src="${currentIRIS.left_eye_image}" alt="Left Eye"><p>Left Eye</p></div>`;
+                }
+                if (currentIRIS.right_eye_image) {
+                    html += `<div class="image"><img src="${currentIRIS.right_eye_image}" alt="Right Eye"><p>Right Eye</p></div>`;
+                }
+                html += '</div>';
+            }
+            
+            if (currentIRIS.recommendations) {
+                html += `<h2>Recommendations</h2><p>${currentIRIS.recommendations}</p>`;
+            }
+            
+            html += '</body></html>';
+            return html;
+        }
+        
+        function calculateAge(dateOfBirth) {
+            if (!dateOfBirth) return 'Unknown';
+            const birthDate = new Date(dateOfBirth);
+            const today = new Date();
+            let age = today.getFullYear() - birthDate.getFullYear();
+            const monthDiff = today.getMonth() - birthDate.getMonth();
+            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                age--;
+            }
+            return age;
+        }
+    </script>
+</body>
+</html>
