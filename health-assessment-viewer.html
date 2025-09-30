@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Health Assessment Viewer - Celloxen Platform</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+            color: white;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        
+        .header-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+        }
+        
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        
+        .search-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+            margin-bottom: 25px;
+        }
+        
+        .search-header {
+            font-size: 24px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 20px;
+        }
+        
+        .search-container {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: #1e3a8a;
+            box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+        }
+        
+        .suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-top: none;
+            border-radius: 0 0 12px 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            display: none;
+            z-index: 100;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        
+        .suggestions.active {
+            display: block;
+        }
+        
+        .suggestion-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            transition: background 0.2s;
+            border-bottom: 1px solid #f1f5f9;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .suggestion-item:hover {
+            background: #f0f9ff;
+        }
+        
+        .patient-name {
+            font-weight: 500;
+            color: #1e293b;
+        }
+        
+        .patient-id {
+            font-size: 12px;
+            color: #64748b;
+        }
+        
+        .assessment-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+            margin-bottom: 25px;
+            display: none;
+        }
+        
+        .assessment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f1f5f9;
+        }
+        
+        .assessment-title {
+            font-size: 22px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #374151;
+        }
+        
+        .btn-secondary:hover {
+            background: #d1d5db;
+        }
+        
+        .patient-info {
+            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .info-item {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+        }
+        
+        .info-label {
+            font-size: 12px;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 5px;
+        }
+        
+        .info-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .assessment-list {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 20px;
+        }
+        
+        .assessment-item {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+        
+        .assessment-item:hover {
+            border-color: #3b82f6;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+        }
+        
+        .assessment-date {
+            font-size: 14px;
+            color: #64748b;
+            margin-bottom: 10px;
+        }
+        
+        .assessment-summary {
+            font-size: 16px;
+            color: #1e293b;
+            margin-bottom: 10px;
+        }
+        
+        .assessment-content {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-top: 20px;
+            display: none;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        
+        .assessment-content.active {
+            display: block;
+        }
+        
+        .question-block {
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .question-block:last-child {
+            border-bottom: none;
+        }
+        
+        .question {
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        
+        .answer {
+            color: #475569;
+            font-size: 15px;
+            padding: 10px;
+            background: #f8fafc;
+            border-radius: 8px;
+            border-left: 3px solid #3b82f6;
+        }
+        
+        .no-assessments {
+            text-align: center;
+            padding: 40px;
+            color: #64748b;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #64748b;
+        }
+        
+        @media print {
+            .header, .action-buttons, .search-card {
+                display: none;
+            }
+            
+            .assessment-card {
+                box-shadow: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-container">
+            <h1>Health Assessment Viewer</h1>
+            <a href="clinic-dashboard.html" class="back-btn">← Back to Dashboard</a>
+        </div>
+    </div>
+    
+    <div class="container">
+        <!-- Search Section -->
+        <div class="search-card">
+            <h2 class="search-header">Search Patient</h2>
+            <div class="search-container">
+                <input type="text" 
+                       class="search-input" 
+                       id="patientSearch" 
+                       placeholder="Type patient name or ID..."
+                       autocomplete="off">
+                <div class="suggestions" id="suggestions"></div>
+            </div>
+        </div>
+        
+        <!-- Assessment Display Section -->
+        <div class="assessment-card" id="assessmentCard">
+            <div class="assessment-header">
+                <h2 class="assessment-title">Health Assessments</h2>
+                <div class="action-buttons">
+                    <button class="btn btn-secondary" onclick="printAssessment()">🖨️ Print</button>
+                    <button class="btn btn-primary" onclick="downloadAssessment()">📥 Download</button>
+                </div>
+            </div>
+            
+            <div class="patient-info" id="patientInfo">
+                <!-- Patient info will be populated here -->
+            </div>
+            
+            <div class="assessment-list" id="assessmentList">
+                <!-- Assessment list will be populated here -->
+            </div>
+            
+            <div class="assessment-content" id="assessmentContent">
+                <!-- Assessment details will be shown here -->
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+        
+        const SUPABASE_URL = 'https://defifwzgazqlrigwumqn.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlZmlmd3pnYXpxbHJpZ3d1bXFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcyNTM0MjYsImV4cCI6MjA3MjgyOTQyNn0.wcUBq6Pszjtqn5aBtuu3iXBE4BLmu8x9LtJbsMWlIiA';
+        
+        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        let currentClinicId = null;
+        let allPatients = [];
+        let selectedPatient = null;
+        let currentAssessment = null;
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            const authData = localStorage.getItem('celloxen_auth');
+            if (!authData) {
+                window.location.href = 'unified-login.html';
+                return;
+            }
+            
+            const auth = JSON.parse(authData);
+            currentClinicId = auth.clinicId;
+            
+            await loadPatients();
+            setupSearch();
+        });
+        
+        async function loadPatients() {
+            try {
+                const { data, error } = await supabase
+                    .from('patients')
+                    .select('*')
+                    .eq('clinic_id', currentClinicId)
+                    .order('first_name');
+                
+                if (error) throw error;
+                allPatients = data || [];
+            } catch (error) {
+                console.error('Error loading patients:', error);
+            }
+        }
+        
+        function setupSearch() {
+            const searchInput = document.getElementById('patientSearch');
+            const suggestions = document.getElementById('suggestions');
+            
+            searchInput.addEventListener('input', (e) => {
+                const value = e.target.value.toLowerCase().trim();
+                
+                if (value.length < 2) {
+                    suggestions.classList.remove('active');
+                    return;
+                }
+                
+                const filtered = allPatients.filter(p => 
+                    p.first_name.toLowerCase().includes(value) ||
+                    p.last_name.toLowerCase().includes(value) ||
+                    p.patient_id.toLowerCase().includes(value)
+                );
+                
+                if (filtered.length > 0) {
+                    displaySuggestions(filtered);
+                } else {
+                    suggestions.classList.remove('active');
+                }
+            });
+            
+            document.addEventListener('click', (e) => {
+                if (!searchInput.contains(e.target) && !suggestions.contains(e.target)) {
+                    suggestions.classList.remove('active');
+                }
+            });
+        }
+        
+        function displaySuggestions(patients) {
+            const suggestions = document.getElementById('suggestions');
+            
+            suggestions.innerHTML = patients.slice(0, 10).map(p => `
+                <div class="suggestion-item" onclick="selectPatient(${p.id})">
+                    <div>
+                        <div class="patient-name">${p.first_name} ${p.last_name}</div>
+                        <div class="patient-id">ID: ${p.patient_id}</div>
+                    </div>
+                </div>
+            `).join('');
+            
+            suggestions.classList.add('active');
+        }
+        
+        window.selectPatient = async function(patientId) {
+            selectedPatient = allPatients.find(p => p.id === patientId);
+            if (!selectedPatient) return;
+            
+            // Hide suggestions
+            document.getElementById('suggestions').classList.remove('active');
+            document.getElementById('patientSearch').value = `${selectedPatient.first_name} ${selectedPatient.last_name}`;
+            
+            // Display patient info
+            displayPatientInfo();
+            
+            // Load assessments
+            await loadAssessments();
+            
+            // Show assessment card
+            document.getElementById('assessmentCard').style.display = 'block';
+        };
+        
+        function displayPatientInfo() {
+            const age = calculateAge(selectedPatient.date_of_birth);
+            
+            document.getElementById('patientInfo').innerHTML = `
+                <div class="info-item">
+                    <div class="info-label">Patient Name</div>
+                    <div class="info-value">${selectedPatient.first_name} ${selectedPatient.last_name}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Patient ID</div>
+                    <div class="info-value">${selectedPatient.patient_id}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Age</div>
+                    <div class="info-value">${age} years</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Gender</div>
+                    <div class="info-value">${selectedPatient.gender || 'Not specified'}</div>
+                </div>
+            `;
+        }
+        
+        async function loadAssessments() {
+            try {
+                const { data, error } = await supabase
+                    .from('comprehensive_assessments')
+                    .select('*')
+                    .eq('patient_id', selectedPatient.id)
+                    .order('created_at', { ascending: false });
+                
+                if (error) throw error;
+                
+                if (data && data.length > 0) {
+                    displayAssessmentList(data);
+                } else {
+                    document.getElementById('assessmentList').innerHTML = 
+                        '<div class="no-assessments">No health assessments found for this patient.</div>';
+                    document.getElementById('assessmentContent').classList.remove('active');
+                }
+            } catch (error) {
+                console.error('Error loading assessments:', error);
+                document.getElementById('assessmentList').innerHTML = 
+                    '<div class="no-assessments">Error loading assessments. Please try again.</div>';
+            }
+        }
+        
+        function displayAssessmentList(assessments) {
+            const listHtml = assessments.map((assessment, index) => {
+                const date = new Date(assessment.created_at);
+                const completedQuestions = assessment.wellness_questionnaire ? 
+                    Object.keys(assessment.wellness_questionnaire).length : 0;
+                
+                return `
+                    <div class="assessment-item" onclick="viewAssessment(${index})">
+                        <div class="assessment-date">
+                            Date: ${date.toLocaleDateString('en-GB')} at ${date.toLocaleTimeString('en-GB', {hour: '2-digit', minute:'2-digit'})}
+                        </div>
+                        <div class="assessment-summary">
+                            Wellness Score: ${assessment.overall_wellness_score || 'N/A'}%
+                        </div>
+                        <div style="color: #64748b; font-size: 14px;">
+                            ${completedQuestions} questions answered
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            document.getElementById('assessmentList').innerHTML = 
+                '<h3 style="margin-bottom: 15px;">Available Assessments</h3>' + listHtml;
+            
+            // Store assessments for viewing
+            window.assessments = assessments;
+        }
+        
+        window.viewAssessment = function(index) {
+            const assessment = window.assessments[index];
+            if (!assessment) return;
+            
+            currentAssessment = assessment;
+            
+            let contentHtml = '<h3 style="margin-bottom: 20px;">Assessment Responses</h3>';
+            
+            if (assessment.wellness_questionnaire) {
+                const questions = assessment.wellness_questionnaire;
+                
+                for (const [key, value] of Object.entries(questions)) {
+                    contentHtml += `
+                        <div class="question-block">
+                            <div class="question">${formatQuestionKey(key)}</div>
+                            <div class="answer">${value || 'No response'}</div>
+                        </div>
+                    `;
+                }
+            } else {
+                contentHtml += '<p>No questionnaire data available.</p>';
+            }
+            
+            // Add wellness scores if available
+            if (assessment.overall_wellness_score) {
+                contentHtml += `
+                    <div style="margin-top: 30px; padding: 20px; background: linear-gradient(135deg, #f0f9ff, #e0f2fe); border-radius: 12px;">
+                        <h4 style="margin-bottom: 15px;">Wellness Scores</h4>
+                        <div style="font-size: 24px; font-weight: bold; color: #1e3a8a;">
+                            Overall Score: ${assessment.overall_wellness_score}%
+                        </div>
+                    </div>
+                `;
+            }
+            
+            document.getElementById('assessmentContent').innerHTML = contentHtml;
+            document.getElementById('assessmentContent').classList.add('active');
+            
+            // Scroll to content
+            document.getElementById('assessmentContent').scrollIntoView({ behavior: 'smooth' });
+        };
+        
+        function formatQuestionKey(key) {
+            // Convert snake_case to readable format
+            return key.replace(/_/g, ' ')
+                     .replace(/\b\w/g, l => l.toUpperCase());
+        }
+        
+        window.printAssessment = function() {
+            if (!currentAssessment) {
+                alert('Please select an assessment first');
+                return;
+            }
+            window.print();
+        };
+        
+        window.downloadAssessment = function() {
+            if (!currentAssessment) {
+                alert('Please select an assessment first');
+                return;
+            }
+            
+            // Create downloadable content
+            const content = generateDownloadContent();
+            const blob = new Blob([content], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `health-assessment-${selectedPatient.patient_id}-${new Date().toISOString().split('T')[0]}.html`;
+            a.click();
+            URL.revokeObjectURL(url);
+        };
+        
+        function generateDownloadContent() {
+            const date = new Date(currentAssessment.created_at);
+            
+            let html = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Health Assessment - ${selectedPatient.first_name} ${selectedPatient.last_name}</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; padding: 20px; }
+                        h1 { color: #1e3a8a; }
+                        .info { margin-bottom: 20px; padding: 10px; background: #f0f9ff; }
+                        .question { font-weight: bold; margin-top: 15px; }
+                        .answer { margin-left: 20px; padding: 10px; background: #f8fafc; }
+                    </style>
+                </head>
+                <body>
+                    <h1>Health Assessment Report</h1>
+                    <div class="info">
+                        <p><strong>Patient:</strong> ${selectedPatient.first_name} ${selectedPatient.last_name}</p>
+                        <p><strong>Patient ID:</strong> ${selectedPatient.patient_id}</p>
+                        <p><strong>Assessment Date:</strong> ${date.toLocaleDateString('en-GB')}</p>
+                        <p><strong>Wellness Score:</strong> ${currentAssessment.overall_wellness_score || 'N/A'}%</p>
+                    </div>
+                    <h2>Questionnaire Responses</h2>
+            `;
+            
+            if (currentAssessment.wellness_questionnaire) {
+                for (const [key, value] of Object.entries(currentAssessment.wellness_questionnaire)) {
+                    html += `
+                        <div class="question">${formatQuestionKey(key)}</div>
+                        <div class="answer">${value || 'No response'}</div>
+                    `;
+                }
+            }
+            
+            html += '</body></html>';
+            return html;
+        }
+        
+        function calculateAge(dateOfBirth) {
+            if (!dateOfBirth) return 'Unknown';
+            const birthDate = new Date(dateOfBirth);
+            const today = new Date();
+            let age = today.getFullYear() - birthDate.getFullYear();
+            const monthDiff = today.getMonth() - birthDate.getMonth();
+            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                age--;
+            }
+            return age;
+        }
+    </script>
+</body>
+</html>
