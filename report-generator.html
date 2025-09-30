@@ -356,6 +356,7 @@
             <div class="action-buttons">
                 <button class="action-btn" onclick="window.print()">🖨️ Print Report</button>
                 <button class="action-btn" onclick="sendEmail()">📧 Email Report</button>
+                <button class="action-btn" style="background: linear-gradient(135deg, #10b981, #059669);" onclick="createTreatmentPlan()">📋 Create Treatment Plan</button>
                 <button class="action-btn btn-secondary" onclick="window.location.href='clinic-dashboard.html'">Return to Dashboard</button>
             </div>
         </div><!-- End of reportContent -->
@@ -802,6 +803,22 @@
             const subject = `Comprehensive Health Report for Patient ID: ${document.getElementById('patientId').textContent}`;
             const body = "Please find the attached comprehensive health report combining wellness and IRIS assessments.";
             window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        };
+
+        // Create Treatment Plan Function
+        window.createTreatmentPlan = () => {
+            if (currentPatient && currentPatient.id) {
+                window.location.href = `treatment-planning.html?patientId=${currentPatient.id}`;
+            } else {
+                // Fallback to get patient ID from the report if currentPatient not set
+                const urlParams = new URLSearchParams(window.location.search);
+                const patientId = urlParams.get('patientId');
+                if (patientId) {
+                    window.location.href = `treatment-planning.html?patientId=${patientId}`;
+                } else {
+                    alert('Patient information not available. Please regenerate the report.');
+                }
+            }
         };
 
         // Initialize on DOM Load
