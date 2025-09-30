@@ -402,6 +402,16 @@
                 this.setupPatientSearch();
                 this.setupNavigation();
                 this.populateStaticQuestions();
+                
+                // Check if patient ID passed in URL
+                const urlParams = new URLSearchParams(window.location.search);
+                const patientId = urlParams.get('patientId');
+                
+                if (patientId) {
+                    console.log('Patient ID found in URL:', patientId);
+                    // Auto-load patient if ID provided
+                    await this.loadPatientFromId(patientId);
+                }
             }
 
             setupPatientSearch() {
@@ -490,6 +500,48 @@
                 } catch (error) {
                      console.error('Error fetching patient details:', error);
                      this.showSaveIndicator('Error fetching patient details', 'error');
+                }
+            }
+            
+            async loadPatientFromId(patientId) {
+                try {
+                    console.log('Loading patient with ID:', patientId);
+                    const { data: patient, error } = await supabaseClient
+                        .from('patients')
+                        .select('*')
+                        .eq('id', patientId)
+                        .eq('clinic_id', this.clinicId)
+                        .single();
+                        
+                    if (error) {
+                        console.error('Error loading patient:', error);
+                        alert('Patient not found. Please select a patient manually.');
+                        return;
+                    }
+                    
+                    if (patient) {
+                        this.patientId = patient.id;
+                        this.patientData = patient;
+                        
+                        const age = patient.date_of_birth ? Math.floor((new Date() - new Date(patient.date_of_birth)) / 31557600000) : 'N/A';
+                        
+                        document.getElementById('selectedPatientInfo').classList.remove('hidden');
+                        document.getElementById('selectedPatientDetails').innerHTML = `
+                            <p><strong>Name:</strong> ${patient.first_name} ${patient.last_name}</p>
+                            <p><strong>Age:</strong> ${age}</p>
+                        `;
+                        document.getElementById('patientSearch').value = `${patient.first_name} ${patient.last_name}`;
+                        
+                        // Auto-click the start assessment button
+                        const startBtn = document.getElementById('startAssessmentBtn');
+                        if (startBtn) {
+                            setTimeout(() => {
+                                startBtn.click();
+                            }, 500);
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error loading patient from URL:', error);
                 }
             }
 
