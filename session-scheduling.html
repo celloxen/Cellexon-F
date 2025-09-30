@@ -359,6 +359,10 @@
             background: #ef4444;
         }
         
+        .notification.warning {
+            background: #f59e0b;
+        }
+        
         .notification.show {
             display: block;
         }
@@ -372,6 +376,29 @@
                 transform: translateX(0);
                 opacity: 1;
             }
+        }
+        
+        .warning-box {
+            background: #fef2f2;
+            border: 2px solid #ef4444;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            color: #991b1b;
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
     </style>
 </head>
@@ -406,7 +433,7 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Total Sessions</label>
+                        <label class="form-label">Total Sessions (Override Protocol Default)</label>
                         <input type="number" class="form-input" id="totalSessions" 
                                min="1" max="50" value="12">
                     </div>
@@ -433,6 +460,11 @@
                     <label class="form-label">Start Date</label>
                     <input type="text" class="form-input" id="startDate" 
                            placeholder="Select start date">
+                </div>
+                
+                <div class="warning-box" id="existingPlanWarning" style="display: none;">
+                    <strong>⚠️ Warning:</strong> This patient has an existing active treatment plan. 
+                    Creating a new plan will supersede the existing one.
                 </div>
             </div>
             
@@ -474,7 +506,7 @@
                         + Add Session
                     </button>
                     <button class="btn btn-secondary btn-sm" onclick="saveSchedule()">
-                        💾 Save Schedule
+                        💾 Save Draft
                     </button>
                 </div>
             </div>
@@ -516,7 +548,7 @@
             </div>
             
             <div style="margin-top: 30px; text-align: center;">
-                <button class="btn btn-primary" onclick="proceedToDelivery()" 
+                <button class="btn btn-primary" onclick="proceedToDelivery()" id="confirmButton"
                         style="padding: 15px 40px; font-size: 18px;">
                     Confirm Schedule & Start Treatment Delivery →
                 </button>
@@ -565,6 +597,7 @@
         let sessions = [];
         let therapies = [];
         let editingSessionId = null;
+        let existingActivePlan = null;
         
         // Initialize
         document.addEventListener('DOMContentLoaded', async () => {
@@ -583,12 +616,14 @@
             
             if (patientId) {
                 await loadPatient(patientId);
+                await checkExistingPlans(patientId);
             } else {
                 // Try to get from localStorage (from treatment planning)
                 const planData = localStorage.getItem('treatment_plan_data');
                 if (planData) {
                     const data = JSON.parse(planData);
                     await loadPatient(data.patientId);
+                    await checkExistingPlans(data.patientId);
                 }
             }
             
@@ -606,7 +641,38 @@
             
             // Load therapies
             await loadTherapies();
+            
+            // Update therapy default sessions when selection changes
+            document.getElementById('primaryTherapy').addEventListener('change', updateDefaultSessions);
         });
+        
+        async function checkExistingPlans(patientId) {
+            try {
+                const { data, error } = await supabase
+                    .from('treatment_plans')
+                    .select('*')
+                    .eq('patient_id', patientId)
+                    .eq('status', 'active');
+                    
+                if (data && data.length > 0) {
+                    existingActivePlan = data[0];
+                    document.getElementById('existingPlanWarning').style.display = 'block';
+                    console.log('Found existing active plan:', existingActivePlan);
+                }
+            } catch (error) {
+                console.error('Error checking existing plans:', error);
+            }
+        }
+        
+        function updateDefaultSessions() {
+            const therapyCode = document.getElementById('primaryTherapy').value;
+            const therapy = therapies.find(t => t.therapy_code === therapyCode);
+            
+            if (therapy && therapy.total_sessions) {
+                document.getElementById('totalSessions').value = therapy.total_sessions;
+                showNotification(`Default sessions for ${therapy.therapy_name}: ${therapy.total_sessions}`, 'info');
+            }
+        }
         
         async function loadPatient(patientId) {
             try {
@@ -664,7 +730,7 @@
                 // Populate therapy dropdown
                 const select = document.getElementById('primaryTherapy');
                 select.innerHTML = therapies.map(t => 
-                    `<option value="${t.therapy_code}">${t.therapy_name} (${t.therapy_code})</option>`
+                    `<option value="${t.therapy_code}">${t.therapy_name} (${t.therapy_code}) - Default: ${t.total_sessions || 12} sessions</option>`
                 ).join('');
                 
                 // Check if we have pre-selected therapies from treatment planning
@@ -673,6 +739,7 @@
                     const data = JSON.parse(planData);
                     if (data.therapyCodes && data.therapyCodes[0]) {
                         select.value = data.therapyCodes[0];
+                        updateDefaultSessions();
                     }
                 }
                 
@@ -889,11 +956,15 @@
                 return;
             }
             
+            const button = document.getElementById('confirmButton');
+            button.disabled = true;
+            button.innerHTML = '<span class="loading-spinner"></span> Creating treatment plan...';
+            
             try {
                 const therapyCode = document.getElementById('primaryTherapy').value;
                 const therapy = therapies.find(t => t.therapy_code === therapyCode);
                 
-                // First, mark any existing active plans as completed/superseded
+                // CRITICAL: First, mark ALL existing active plans as superseded
                 const { error: updateError } = await supabase
                     .from('treatment_plans')
                     .update({ 
@@ -905,9 +976,24 @@
                 
                 if (updateError) {
                     console.log('Note: Could not update old plans:', updateError);
+                } else {
+                    console.log('Marked existing active plans as superseded');
                 }
                 
-                // Create NEW treatment plan
+                // CRITICAL: Delete any orphaned sessions from old plans to prevent duplicates
+                if (existingActivePlan) {
+                    const { error: deleteOldSessions } = await supabase
+                        .from('treatment_sessions')
+                        .delete()
+                        .eq('patient_id', selectedPatient.id)
+                        .eq('status', 'scheduled');
+                    
+                    if (!deleteOldSessions) {
+                        console.log('Cleaned up old scheduled sessions');
+                    }
+                }
+                
+                // Create NEW treatment plan with custom session count
                 const { data: treatmentPlan, error: planError } = await supabase
                     .from('treatment_plans')
                     .insert({
@@ -915,7 +1001,7 @@
                         patient_id: selectedPatient.id,
                         primary_therapy_code: therapyCode,
                         primary_therapy_name: therapy.therapy_name,
-                        primary_sessions_total: sessions.length,
+                        primary_sessions_total: sessions.length, // Use actual session count, not protocol default
                         primary_frequency: document.getElementById('sessionsPerWeek').value + ' per week',
                         start_date: sessions[0].scheduled_date,
                         end_date: sessions[sessions.length - 1].scheduled_date,
@@ -931,6 +1017,7 @@
                 if (planError) throw planError;
                 
                 console.log('Created new treatment plan with ID:', treatmentPlan.id);
+                console.log('Total sessions in plan:', sessions.length);
                 
                 // Create sessions for the NEW plan
                 const sessionsToInsert = sessions.map(s => ({
@@ -941,18 +1028,19 @@
                     created_at: new Date().toISOString()
                 }));
                 
-                const { error: sessionsError } = await supabase
+                const { data: createdSessions, error: sessionsError } = await supabase
                     .from('treatment_sessions')
-                    .insert(sessionsToInsert);
+                    .insert(sessionsToInsert)
+                    .select();
                 
                 if (sessionsError) throw sessionsError;
                 
-                console.log('Created', sessions.length, 'sessions for plan ID:', treatmentPlan.id);
+                console.log('Created', createdSessions.length, 'sessions for plan ID:', treatmentPlan.id);
                 
                 showNotification('Treatment plan created successfully!', 'success');
                 
                 // Store the plan ID to ensure treatment delivery loads this specific plan
-                localStorage.setItem('current_treatment_plan_id', treatmentPlan.id);
+                localStorage.setItem('current_treatment_plan_id', treatmentPlan.id.toString());
                 
                 setTimeout(() => {
                     window.location.href = `treatment-delivery.html?patientId=${selectedPatient.id}&planId=${treatmentPlan.id}`;
@@ -961,6 +1049,9 @@
             } catch (error) {
                 console.error('Error creating treatment plan:', error);
                 showNotification('Error creating treatment plan: ' + error.message, 'error');
+                
+                button.disabled = false;
+                button.innerHTML = 'Confirm Schedule & Start Treatment Delivery →';
             }
         };
         
