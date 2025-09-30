@@ -729,13 +729,28 @@
                 
                 allSessions = sessions || [];
                 
+                // Check if we have any sessions at all
+                if (allSessions.length === 0) {
+                    document.getElementById('sessionTracker').innerHTML = 
+                        '<div class="alert alert-warning">No sessions found for this treatment plan. Sessions may need to be created.</div>';
+                    document.getElementById('sessionTracker').style.display = 'block';
+                    document.getElementById('diagramCard').style.display = 'none';
+                    return;
+                }
+                
                 // Find current session (first scheduled)
                 currentSession = allSessions.find(s => s.status === 'scheduled');
                 
-                if (!currentSession && allSessions.every(s => s.status === 'completed')) {
+                // Only show complete if we have sessions AND they're all completed
+                if (!currentSession && allSessions.length > 0 && allSessions.every(s => s.status === 'completed')) {
                     // All sessions complete
                     showTherapyComplete();
                     return;
+                }
+                
+                // If no scheduled session found but sessions exist, show first incomplete
+                if (!currentSession && allSessions.length > 0) {
+                    currentSession = allSessions.find(s => s.status !== 'completed') || allSessions[0];
                 }
                 
                 displaySessionTracker();
@@ -743,6 +758,9 @@
                 
             } catch (error) {
                 console.error('Error loading sessions:', error);
+                document.getElementById('sessionTracker').innerHTML = 
+                    '<div class="alert alert-warning">Error loading sessions. Please try again.</div>';
+                document.getElementById('sessionTracker').style.display = 'block';
             }
         }
         
