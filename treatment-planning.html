@@ -526,7 +526,7 @@
                 </div>
             </div>
             <button class="proceed-btn" onclick="proceedToScheduling()">
-                Proceed to Scheduling →
+                Start Treatment Delivery →
             </button>
         </div>
     </div>
@@ -890,14 +890,14 @@
                 return;
             }
             
-            // Store selections and proceed to scheduling
+            // Store selections and proceed to treatment delivery
             const selectedData = {
                 patientId: selectedPatient.id,
                 therapyCodes: Array.from(selectedTherapies)
             };
             
             localStorage.setItem('treatment_plan_data', JSON.stringify(selectedData));
-            window.location.href = 'treatment-scheduling.html';
+            window.location.href = 'treatment-delivery.html';
         };
         
         function calculateAge(dateOfBirth) {
