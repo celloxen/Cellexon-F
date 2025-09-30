@@ -884,22 +884,101 @@
             }
         }
         
-        window.proceedToScheduling = function() {
+        window.proceedToScheduling = async function() {
             if (selectedTherapies.size === 0) {
                 alert('Please select at least one therapy');
                 return;
             }
             
-            // Store selections and proceed to treatment delivery
-            const selectedData = {
-                patientId: selectedPatient.id,
-                therapyCodes: Array.from(selectedTherapies)
-            };
-            
-            localStorage.setItem('treatment_plan_data', JSON.stringify(selectedData));
-            
-            // Pass patient ID in URL for treatment delivery
-            window.location.href = `treatment-delivery.html?patientId=${selectedPatient.id}`;
+            try {
+                // Show loading state
+                const button = event.target;
+                const originalText = button.textContent;
+                button.disabled = true;
+                button.textContent = 'Creating treatment plan...';
+                
+                // Create treatment plans for each selected therapy
+                for (const therapyCode of selectedTherapies) {
+                    const therapy = allTherapies.find(t => t.therapy_code === therapyCode);
+                    if (!therapy) continue;
+                    
+                    // Create treatment plan
+                    const { data: treatmentPlan, error: planError } = await supabase
+                        .from('treatment_plans')
+                        .insert({
+                            patient_id: selectedPatient.id,
+                            clinic_id: currentClinicId,
+                            therapy_code: therapyCode,
+                            therapy_name: therapy.therapy_name,
+                            total_sessions: therapy.total_sessions || 12,
+                            frequency_per_week: therapy.sessions_per_week || 2,
+                            status: 'active',
+                            created_at: new Date().toISOString(),
+                            start_date: new Date().toISOString().split('T')[0]
+                        })
+                        .select()
+                        .single();
+                    
+                    if (planError) {
+                        console.error('Error creating treatment plan:', planError);
+                        continue;
+                    }
+                    
+                    // Create sessions for this treatment plan
+                    const totalSessions = therapy.total_sessions || 12;
+                    const sessions = [];
+                    const startDate = new Date();
+                    
+                    for (let i = 0; i < totalSessions; i++) {
+                        const sessionDate = new Date(startDate);
+                        // Schedule sessions every 3-4 days (2 per week)
+                        sessionDate.setDate(startDate.getDate() + Math.floor(i * 3.5));
+                        
+                        sessions.push({
+                            treatment_plan_id: treatmentPlan.id,
+                            patient_id: selectedPatient.id,
+                            clinic_id: currentClinicId,
+                            session_number: i + 1,
+                            scheduled_date: sessionDate.toISOString().split('T')[0],
+                            scheduled_time: '10:00:00',
+                            duration_minutes: 45,
+                            status: 'scheduled',
+                            created_at: new Date().toISOString()
+                        });
+                    }
+                    
+                    // Insert all sessions
+                    if (sessions.length > 0) {
+                        const { error: sessionsError } = await supabase
+                            .from('treatment_sessions')
+                            .insert(sessions);
+                        
+                        if (sessionsError) {
+                            console.error('Error creating sessions:', sessionsError);
+                        }
+                    }
+                }
+                
+                // Store selections and proceed to treatment delivery
+                const selectedData = {
+                    patientId: selectedPatient.id,
+                    therapyCodes: Array.from(selectedTherapies)
+                };
+                
+                localStorage.setItem('treatment_plan_data', JSON.stringify(selectedData));
+                
+                // Pass patient ID in URL for treatment delivery
+                window.location.href = `treatment-delivery.html?patientId=${selectedPatient.id}`;
+                
+            } catch (error) {
+                console.error('Error creating treatment plans:', error);
+                alert('Error creating treatment plans. Please try again.');
+                
+                // Reset button
+                const button = event.target;
+                button.disabled = false;
+                button.textContent = 'Start Treatment Delivery →';
+            }
         };
         
         function calculateAge(dateOfBirth) {
