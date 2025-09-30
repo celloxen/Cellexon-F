@@ -734,21 +734,21 @@
             try {
                 // Try to get recommended therapies from assessments
                 const { data: healthAssessment } = await supabase
-                    .from('health_assessments')
-                    .select('primary_therapy_code, secondary_therapy_codes')
+                    .from('comprehensive_assessments')
+                    .select('therapy_scores')
                     .eq('patient_id', selectedPatient.id)
                     .order('created_at', { ascending: false })
                     .limit(1)
                     .single();
                 
-                if (healthAssessment) {
-                    recommendedCodes = [];
-                    if (healthAssessment.primary_therapy_code) {
-                        recommendedCodes.push(healthAssessment.primary_therapy_code);
-                    }
-                    if (healthAssessment.secondary_therapy_codes) {
-                        recommendedCodes.push(...healthAssessment.secondary_therapy_codes);
-                    }
+                if (healthAssessment && healthAssessment.therapy_scores) {
+                    // Get top recommended therapy codes from scores
+                    const scores = healthAssessment.therapy_scores;
+                    const sortedCodes = Object.entries(scores)
+                        .sort((a, b) => b[1] - a[1])
+                        .slice(0, 3)  // Get top 3
+                        .map(([code]) => code);
+                    recommendedCodes = sortedCodes;
                 } else {
                     // Default recommendations
                     recommendedCodes = ['101', '102', '601'];
@@ -897,7 +897,9 @@
             };
             
             localStorage.setItem('treatment_plan_data', JSON.stringify(selectedData));
-            window.location.href = 'treatment-delivery.html';
+            
+            // Pass patient ID in URL for treatment delivery
+            window.location.href = `treatment-delivery.html?patientId=${selectedPatient.id}`;
         };
         
         function calculateAge(dateOfBirth) {
