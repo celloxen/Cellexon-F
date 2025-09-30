@@ -659,10 +659,49 @@
                     
                     // Hide the search card since patient is already selected
                     document.querySelector('.search-card').style.display = 'none';
+                    
+                    // Check if specific plan ID provided
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const planId = urlParams.get('planId');
+                    
+                    if (planId) {
+                        console.log('Loading specific treatment plan ID:', planId);
+                        await loadSpecificTreatmentPlan(planId);
+                    }
                 }
             } catch (error) {
                 console.error('Error loading patient from URL:', error);
                 // Keep search card visible if patient not found
+            }
+        }
+        
+        // Load specific treatment plan by ID
+        async function loadSpecificTreatmentPlan(planId) {
+            try {
+                const { data: plan, error } = await supabase
+                    .from('treatment_plans')
+                    .select('*')
+                    .eq('id', planId)
+                    .single();
+                    
+                if (error) throw error;
+                
+                if (plan) {
+                    currentPlan = plan;
+                    console.log('Loaded specific treatment plan:', currentPlan.id);
+                    
+                    // Format the plan
+                    currentPlan.therapy_name = currentPlan.primary_therapy_name;
+                    currentPlan.therapy_code = currentPlan.primary_therapy_code;
+                    currentPlan.total_sessions = currentPlan.primary_sessions_total || 12;
+                    
+                    // Load sessions for this specific plan
+                    await loadSessions(currentPlan.id);
+                }
+            } catch (error) {
+                console.error('Error loading specific treatment plan:', error);
+                // Fall back to loading most recent plan
+                await loadTreatmentPlans(selectedPatient.id);
             }
         }
         
@@ -685,12 +724,14 @@
         
         async function loadTreatmentPlans(patientId) {
             try {
-                // Get active treatment plans
+                // Get the MOST RECENT active treatment plan
                 const { data: plans, error } = await supabase
                     .from('treatment_plans')
                     .select('*')
                     .eq('patient_id', patientId)
-                    .in('status', ['active', 'planned']);
+                    .in('status', ['active', 'planned'])
+                    .order('created_at', { ascending: false })  // Most recent first
+                    .limit(1);  // Only get the most recent one
                     
                 if (error) throw error;
                 
@@ -701,8 +742,9 @@
                     return;
                 }
                 
-                // Use first active plan
+                // Use the most recent plan
                 currentPlan = plans[0];
+                console.log('Loading treatment plan ID:', currentPlan.id, 'Created at:', currentPlan.created_at);
                 
                 // Format the plan to show primary therapy (and secondary if exists)
                 currentPlan.therapy_name = currentPlan.primary_therapy_name;
