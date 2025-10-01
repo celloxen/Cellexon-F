@@ -755,7 +755,7 @@
                             ` : ''}
                             
                             <button class="btn btn-primary btn-sm" onclick="viewPatientProfile('${patient.id}')">
-                                View Patient
+                                Patient Details
                             </button>
                         </div>
                     </div>
@@ -862,18 +862,9 @@
         }
         
         window.viewPatientProfile = function(patientId) {
-            // Try different possible patient view page names
-            // You can update this to match your actual patient view page name
-            const possiblePages = [
-                'patient-profile.html',
-                'patient-view.html', 
-                'patient-details.html',
-                'patient-info.html'
-            ];
-            
-            // For now, we'll use patient search with the specific patient ID pre-selected
-            // Update this URL to match your actual patient view page
-            window.location.href = `patient-search.html?viewPatient=${patientId}`;
+            // Route to patient search page with the patient ID to view
+            // This will show the patient details in the search interface
+            window.location.href = `patient-search.html?patientId=${patientId}&action=view`;
         }
         
         window.goBack = function() {
