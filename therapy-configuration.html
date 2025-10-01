@@ -773,9 +773,7 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Priority</label>
-                        <input type="number" class="form-input" id="priority" 
-                               min="1" max="100" value="50">
+                        <!-- Empty space to maintain grid layout -->
                     </div>
                 </div>
                 
@@ -1035,7 +1033,6 @@
                 document.getElementById('totalSessions').value = protocol.total_sessions || 6;
                 document.getElementById('sessionDuration').value = protocol.session_duration_minutes || 45;
                 document.getElementById('sessionsPerWeek').value = protocol.sessions_per_week || 2;
-                document.getElementById('priority').value = protocol.priority || 50;
                 document.getElementById('description').value = protocol.description || '';
                 document.getElementById('conditionsTreated').value = protocol.conditions_treated || '';
                 document.getElementById('contraindications').value = protocol.contraindications || '';
@@ -1061,7 +1058,6 @@
                     total_sessions: parseInt(document.getElementById('totalSessions').value),
                     session_duration_minutes: parseInt(document.getElementById('sessionDuration').value),
                     sessions_per_week: parseInt(document.getElementById('sessionsPerWeek').value),
-                    priority: parseInt(document.getElementById('priority').value) || 50,
                     description: document.getElementById('description').value.trim(),
                     conditions_treated: document.getElementById('conditionsTreated').value.trim(),
                     contraindications: document.getElementById('contraindications').value.trim(),
