@@ -845,8 +845,6 @@
                     </div>
                 </div>
                 
-                <input type="hidden" id="diagramUrl">
-                
                 <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 30px;">
                     <button type="button" class="btn btn-secondary" onclick="closeDiagramModal()">Cancel</button>
                     <button type="submit" class="btn btn-primary">Upload Diagram</button>
@@ -1200,43 +1198,112 @@
             const file = event.target.files[0];
             if (!file) return;
             
+            // Validate file size (5MB limit)
+            const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+            if (file.size > maxSize) {
+                showNotification('File size must be less than 5MB', 'error');
+                event.target.value = ''; // Clear the file input
+                return;
+            }
+            
+            // Validate file type
+            const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+            if (!allowedTypes.includes(file.type)) {
+                showNotification('Please upload a valid image file (JPG, PNG, GIF, or WebP)', 'error');
+                event.target.value = ''; // Clear the file input
+                return;
+            }
+            
+            // Show preview
             const reader = new FileReader();
             reader.onload = function(e) {
                 document.getElementById('previewImage').src = e.target.result;
                 document.getElementById('diagramPreview').style.display = 'block';
-                document.getElementById('diagramUrl').value = e.target.result;
             };
             reader.readAsDataURL(file);
         };
         
         async function saveDiagram() {
             const selectedTherapy = document.getElementById('diagramTherapy').value;
-            const diagramUrl = document.getElementById('diagramUrl').value;
             const diagramName = document.getElementById('diagramName').value || 'Probe Placement';
+            const fileInput = document.getElementById('diagramFile');
+            const file = fileInput.files[0];
             
-            if (!selectedTherapy || !diagramUrl) {
+            if (!selectedTherapy || !file) {
                 showNotification('Please select a therapy and upload an image', 'error');
                 return;
             }
             
-            const therapy = allProtocols.find(p => p.therapy_code === selectedTherapy);
-            
-            const formData = {
-                therapy_code: selectedTherapy,
-                therapy_name: therapy ? therapy.therapy_name : '',
-                diagram_name: diagramName,
-                diagram_url: diagramUrl,
-                diagram_type: 'primary',
-                is_active: true,
-                created_at: new Date().toISOString()
-            };
+            // Show loading state
+            const submitBtn = event.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Uploading...';
             
             try {
-                const { error } = await supabase
+                // Generate unique filename
+                const fileExt = file.name.split('.').pop();
+                const fileName = `${selectedTherapy}_${Date.now()}.${fileExt}`;
+                const filePath = `probe-diagrams/${fileName}`;
+                
+                // Upload to Supabase Storage
+                const { data: uploadData, error: uploadError } = await supabase.storage
+                    .from('therapy-diagrams')
+                    .upload(filePath, file, {
+                        cacheControl: '3600',
+                        upsert: false
+                    });
+                
+                if (uploadError) {
+                    // If bucket doesn't exist, try to create it
+                    if (uploadError.message.includes('not found')) {
+                        // Create the bucket
+                        const { data: bucketData, error: bucketError } = await supabase.storage
+                            .createBucket('therapy-diagrams', {
+                                public: true
+                            });
+                        
+                        if (bucketError && !bucketError.message.includes('already exists')) {
+                            throw bucketError;
+                        }
+                        
+                        // Try upload again
+                        const { data: retryData, error: retryError } = await supabase.storage
+                            .from('therapy-diagrams')
+                            .upload(filePath, file, {
+                                cacheControl: '3600',
+                                upsert: false
+                            });
+                        
+                        if (retryError) throw retryError;
+                    } else {
+                        throw uploadError;
+                    }
+                }
+                
+                // Get public URL
+                const { data: urlData } = supabase.storage
+                    .from('therapy-diagrams')
+                    .getPublicUrl(filePath);
+                
+                const therapy = allProtocols.find(p => p.therapy_code === selectedTherapy);
+                
+                // Save diagram record to database
+                const formData = {
+                    therapy_code: selectedTherapy,
+                    therapy_name: therapy ? therapy.therapy_name : '',
+                    diagram_name: diagramName,
+                    diagram_url: urlData.publicUrl,
+                    diagram_type: 'primary',
+                    file_path: filePath,
+                    created_at: new Date().toISOString()
+                };
+                
+                const { error: dbError } = await supabase
                     .from('probe_diagrams')
                     .insert(formData);
                 
-                if (error) throw error;
+                if (dbError) throw dbError;
                 
                 showNotification('Diagram uploaded successfully', 'success');
                 closeDiagramModal();
@@ -1244,7 +1311,11 @@
                 
             } catch (error) {
                 console.error('Error saving diagram:', error);
-                showNotification('Error saving diagram: ' + error.message, 'error');
+                showNotification('Error uploading diagram: ' + error.message, 'error');
+            } finally {
+                // Reset button state
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
             }
         }
         
@@ -1252,12 +1323,34 @@
             if (!confirm('Delete this probe diagram?')) return;
             
             try {
-                const { error } = await supabase
+                // First get the diagram to find the file path
+                const { data: diagram, error: fetchError } = await supabase
+                    .from('probe_diagrams')
+                    .select('file_path')
+                    .eq('id', id)
+                    .single();
+                
+                if (fetchError) throw fetchError;
+                
+                // Delete from storage if file_path exists
+                if (diagram && diagram.file_path) {
+                    const { error: storageError } = await supabase.storage
+                        .from('therapy-diagrams')
+                        .remove([diagram.file_path]);
+                    
+                    // Log but don't fail if storage delete fails
+                    if (storageError) {
+                        console.error('Error deleting file from storage:', storageError);
+                    }
+                }
+                
+                // Delete from database
+                const { error: dbError } = await supabase
                     .from('probe_diagrams')
                     .delete()
                     .eq('id', id);
                 
-                if (error) throw error;
+                if (dbError) throw dbError;
                 
                 showNotification('Diagram deleted successfully', 'success');
                 await loadDiagrams();
