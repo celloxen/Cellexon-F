@@ -1060,8 +1060,7 @@
                     sessions_per_week: parseInt(document.getElementById('sessionsPerWeek').value),
                     description: document.getElementById('description').value.trim(),
                     conditions_treated: document.getElementById('conditionsTreated').value.trim(),
-                    contraindications: document.getElementById('contraindications').value.trim(),
-                    updated_at: new Date().toISOString()
+                    contraindications: document.getElementById('contraindications').value.trim()
                 };
                 
                 try {
@@ -1078,7 +1077,7 @@
                         this.showNotification('Protocol updated successfully', 'success');
                     } else {
                         // Add new protocol
-                        protocolData.created_at = new Date().toISOString();
+                        // created_at will be handled by database default (now())
                         
                         const { error } = await supabase
                             .from('therapy_protocols')
@@ -1296,7 +1295,7 @@
                         diagram_url: urlData.publicUrl,
                         diagram_type: 'primary',
                         file_path: filePath,
-                        created_at: new Date().toISOString()
+                        active: true
                     };
                     
                     const { error: dbError } = await supabase
