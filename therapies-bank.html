@@ -409,14 +409,13 @@
             
             <div class="filter-tabs">
                 <button class="filter-tab active" onclick="filterByCategory('all', event)">All Protocols</button>
-                <button class="filter-tab" onclick="filterByCategory('Mental Wellness', event)">Mental Wellness</button>
-                <button class="filter-tab" onclick="filterByCategory('Vitality', event)">Vitality</button>
+                <button class="filter-tab" onclick="filterByCategory('Circulatory & Heart', event)">Circulatory & Heart</button>
+                <button class="filter-tab" onclick="filterByCategory('Vitality & Digestive', event)">Vitality & Digestive</button>
+                <button class="filter-tab" onclick="filterByCategory('Sleep & Relaxation', event)">Sleep & Relaxation</button>
+                <button class="filter-tab" onclick="filterByCategory('Joint & Pain', event)">Joint & Pain</button>
+                <button class="filter-tab" onclick="filterByCategory('Recovery & Healing', event)">Recovery & Healing</button>
+                <button class="filter-tab" onclick="filterByCategory('Comprehensive Packages', event)">Complete Packages</button>
                 <button class="filter-tab" onclick="filterByCategory('Sleep Health', event)">Sleep Health</button>
-                <button class="filter-tab" onclick="filterByCategory('Digestive Health', event)">Digestive</button>
-                <button class="filter-tab" onclick="filterByCategory('Immune Support', event)">Immune</button>
-                <button class="filter-tab" onclick="filterByCategory('Pain Relief', event)">Pain Relief</button>
-                <button class="filter-tab" onclick="filterByCategory('Detoxification', event)">Detox</button>
-                <button class="filter-tab" onclick="filterByCategory('Heart Health', event)">Heart Health</button>
             </div>
         </div>
 
@@ -530,14 +529,13 @@
         
         function getCategoryClass(category) {
             const categoryMap = {
-                'Mental Wellness': 'category-mental',
-                'Vitality': 'category-vitality',
+                'Circulatory & Heart': 'category-heart',
+                'Vitality & Digestive': 'category-vitality',
+                'Sleep & Relaxation': 'category-sleep',
                 'Sleep Health': 'category-sleep',
-                'Digestive Health': 'category-digestive',
-                'Immune Support': 'category-immune',
-                'Pain Relief': 'category-pain',
-                'Detoxification': 'category-detox',
-                'Heart Health': 'category-heart'
+                'Joint & Pain': 'category-pain',
+                'Recovery & Healing': 'category-immune',
+                'Comprehensive Packages': 'category-mental'
             };
             return categoryMap[category] || 'category-mental';
         }
