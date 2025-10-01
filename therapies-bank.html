@@ -21,19 +21,38 @@
         }
         
         .header {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
             color: white;
-            padding: 20px 0;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
         }
         
         .header-container {
             max-width: 1400px;
             margin: 0 auto;
-            padding: 0 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+        }
+        
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
         }
         
         .container {
@@ -42,54 +61,133 @@
             padding: 0 20px;
         }
         
-        .search-bar {
+        /* Stats Dashboard - Platform Style */
+        .stats-dashboard {
             background: white;
-            padding: 20px;
-            border-radius: 12px;
+            border-radius: 16px;
+            padding: 25px;
             margin-bottom: 30px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        }
+        
+        .stats-header {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #f8f9fa, #ffffff);
+            border-radius: 12px;
+            padding: 20px;
+            border-left: 4px solid #3b82f6;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .stat-icon {
+            font-size: 32px;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .stat-content {
+            flex: 1;
+        }
+        
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            color: #6b7280;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        /* Search and Filters Section */
+        .controls-section {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
         }
         
         .search-input {
             width: 100%;
-            padding: 12px 20px;
+            padding: 15px 20px;
             border: 2px solid #e5e7eb;
-            border-radius: 8px;
+            border-radius: 12px;
             font-size: 16px;
+            transition: all 0.3s;
         }
         
         .search-input:focus {
             outline: none;
-            border-color: #10b981;
+            border-color: #1e3a8a;
+            box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
         }
         
         .filter-tabs {
             display: flex;
             gap: 10px;
-            margin-top: 15px;
+            margin-top: 20px;
             flex-wrap: wrap;
         }
         
         .filter-tab {
-            padding: 8px 16px;
-            border: 1px solid #e5e7eb;
+            padding: 10px 18px;
+            border: 2px solid #e5e7eb;
             background: white;
-            border-radius: 20px;
+            border-radius: 8px;
             cursor: pointer;
             transition: all 0.3s;
+            font-size: 14px;
+            font-weight: 500;
         }
         
         .filter-tab:hover {
-            border-color: #10b981;
-            background: #f0fdf4;
+            border-color: #3b82f6;
+            background: #f0f9ff;
         }
         
         .filter-tab.active {
-            background: #10b981;
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
             color: white;
-            border-color: #10b981;
+            border-color: #1e3a8a;
         }
         
+        /* Therapy Cards Grid */
         .therapies-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
@@ -102,15 +200,17 @@
             overflow: hidden;
             box-shadow: 0 4px 15px rgba(0,0,0,0.08);
             transition: all 0.3s;
+            border: 2px solid transparent;
         }
         
         .therapy-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+            border-color: #3b82f6;
         }
         
         .therapy-header {
-            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
             color: white;
             padding: 20px;
         }
@@ -122,7 +222,7 @@
         }
         
         .therapy-name {
-            font-size: 18px;
+            font-size: 16px;
             opacity: 0.95;
         }
         
@@ -134,179 +234,181 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 15px;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
         
         .info-box {
-            background: #f8fafc;
-            padding: 10px;
+            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+            padding: 12px;
             border-radius: 8px;
+            border-left: 3px solid #3b82f6;
         }
         
         .info-label {
             font-size: 11px;
             color: #64748b;
             text-transform: uppercase;
-            margin-bottom: 3px;
+            margin-bottom: 5px;
+            letter-spacing: 0.5px;
         }
         
         .info-value {
-            font-size: 16px;
+            font-size: 18px;
             font-weight: 600;
             color: #1e293b;
         }
         
         .therapy-description {
-            color: #64748b;
+            color: #475569;
             line-height: 1.6;
             margin-bottom: 15px;
             min-height: 60px;
+            font-size: 14px;
         }
         
         .category-badge {
             display: inline-block;
-            padding: 4px 12px;
+            padding: 6px 14px;
             border-radius: 20px;
             font-size: 12px;
             font-weight: 600;
             margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         
+        /* Category Colors - Updated to match platform */
         .category-mental {
-            background: #e0e7ff;
-            color: #3730a3;
+            background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+            color: #1e3a8a;
         }
         
         .category-vitality {
-            background: #fef3c7;
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
             color: #92400e;
         }
         
         .category-sleep {
-            background: #ddd6fe;
-            color: #5b21b6;
+            background: linear-gradient(135deg, #e9d5ff, #d8b4fe);
+            color: #6b21a8;
         }
         
         .category-digestive {
-            background: #d1fae5;
+            background: linear-gradient(135deg, #d1fae5, #a7f3d0);
             color: #065f46;
         }
         
         .category-immune {
-            background: #fee2e2;
+            background: linear-gradient(135deg, #fee2e2, #fecaca);
             color: #991b1b;
         }
         
         .category-pain {
-            background: #fce7f3;
+            background: linear-gradient(135deg, #fce7f3, #fbcfe8);
             color: #9f1239;
         }
         
         .category-detox {
-            background: #ccfbf1;
+            background: linear-gradient(135deg, #ccfbf1, #99f6e4);
             color: #134e4a;
         }
         
         .category-heart {
-            background: #fecaca;
+            background: linear-gradient(135deg, #fecaca, #fbbf24);
             color: #7f1d1d;
         }
         
-        .therapy-actions {
-            display: flex;
-            gap: 10px;
-            padding-top: 15px;
-            border-top: 1px solid #e5e7eb;
-        }
-        
-        .btn {
-            flex: 1;
-            padding: 10px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
             font-weight: 600;
-            transition: all 0.3s;
+            float: right;
         }
         
-        .btn-primary {
-            background: #10b981;
-            color: white;
+        .status-active {
+            background: #d1fae5;
+            color: #065f46;
         }
         
-        .btn-primary:hover {
-            background: #059669;
+        .status-inactive {
+            background: #fee2e2;
+            color: #991b1b;
         }
         
-        .btn-secondary {
-            background: #f3f4f6;
-            color: #374151;
-        }
-        
-        .btn-secondary:hover {
-            background: #e5e7eb;
-        }
-        
-        .stats-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 20px;
-            background: white;
-            border-radius: 12px;
-            margin-bottom: 30px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        }
-        
-        .stat-item {
+        .no-results {
             text-align: center;
-        }
-        
-        .stat-number {
-            font-size: 32px;
-            font-weight: 700;
-            color: #10b981;
-        }
-        
-        .stat-label {
+            padding: 60px 20px;
             color: #64748b;
-            font-size: 14px;
+            grid-column: 1/-1;
+        }
+        
+        .no-results h3 {
+            font-size: 20px;
+            margin-bottom: 10px;
+            color: #475569;
         }
     </style>
 </head>
 <body>
     <div class="header">
         <div class="header-container">
-            <h1>Therapies Bank</h1>
-            <button class="btn btn-secondary" onclick="goBack()" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid white;">
-                Back to Dashboard
-            </button>
+            <h1>Therapy Protocols Bank</h1>
+            <a href="clinic-dashboard.html" class="back-btn">← Back to Dashboard</a>
         </div>
     </div>
 
     <div class="container">
-        <div class="stats-row">
-            <div class="stat-item">
-                <div class="stat-number" id="totalTherapies">0</div>
-                <div class="stat-label">Total Therapies</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-number" id="activeTherapies">0</div>
-                <div class="stat-label">Active Protocols</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-number" id="categories">0</div>
-                <div class="stat-label">Categories</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-number" id="avgDuration">0</div>
-                <div class="stat-label">Avg Duration (min)</div>
+        <!-- Statistics Dashboard -->
+        <div class="stats-dashboard">
+            <h2 class="stats-header">
+                <span>📊</span>
+                <span>Protocol Overview</span>
+            </h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">💊</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="totalTherapies">0</div>
+                        <div class="stat-label">Total Protocols</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="activeTherapies">0</div>
+                        <div class="stat-label">Active Protocols</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">📁</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="categories">0</div>
+                        <div class="stat-label">Categories</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">⏱️</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="avgDuration">0</div>
+                        <div class="stat-label">Avg Duration (min)</div>
+                    </div>
+                </div>
             </div>
         </div>
         
-        <div class="search-bar">
-            <input type="text" class="search-input" id="searchInput" placeholder="Search therapies by name, code, or description...">
+        <!-- Search and Filters -->
+        <div class="controls-section">
+            <input type="text" 
+                   class="search-input" 
+                   id="searchInput" 
+                   placeholder="Search by protocol name, code, or description...">
+            
             <div class="filter-tabs">
-                <button class="filter-tab active" onclick="filterByCategory('all')">All Therapies</button>
+                <button class="filter-tab active" onclick="filterByCategory('all')">All Protocols</button>
                 <button class="filter-tab" onclick="filterByCategory('Mental Wellness')">Mental Wellness</button>
                 <button class="filter-tab" onclick="filterByCategory('Vitality')">Vitality</button>
                 <button class="filter-tab" onclick="filterByCategory('Sleep Health')">Sleep Health</button>
@@ -318,6 +420,7 @@
             </div>
         </div>
 
+        <!-- Therapies Grid -->
         <div class="therapies-grid" id="therapiesGrid">
             <!-- Therapy cards will be loaded here -->
         </div>
@@ -359,7 +462,7 @@
             } catch (error) {
                 console.error('Error loading therapies:', error);
                 document.getElementById('therapiesGrid').innerHTML = 
-                    '<p style="text-align: center; color: #ef4444;">Error loading therapies. Please refresh the page.</p>';
+                    '<div class="no-results"><h3>Error Loading Protocols</h3><p>Please refresh the page to try again.</p></div>';
             }
         }
         
@@ -378,12 +481,14 @@
             const grid = document.getElementById('therapiesGrid');
             
             if (filteredTherapies.length === 0) {
-                grid.innerHTML = '<p style="text-align: center; color: #64748b; grid-column: 1/-1;">No therapies found</p>';
+                grid.innerHTML = '<div class="no-results"><h3>No Protocols Found</h3><p>Try adjusting your search or filter criteria.</p></div>';
                 return;
             }
             
             grid.innerHTML = filteredTherapies.map(therapy => {
                 const categoryClass = getCategoryClass(therapy.category);
+                const statusClass = therapy.active ? 'status-active' : 'status-inactive';
+                const statusText = therapy.active ? '● Active' : '○ Inactive';
                 
                 return `
                     <div class="therapy-card">
@@ -393,14 +498,15 @@
                         </div>
                         <div class="therapy-body">
                             <span class="category-badge ${categoryClass}">${therapy.category || 'General'}</span>
+                            <span class="status-indicator ${statusClass}">${statusText}</span>
                             
                             <div class="therapy-description">
-                                ${therapy.description || 'Comprehensive therapy protocol for health improvement'}
+                                ${therapy.description || 'Comprehensive therapy protocol designed for optimal health improvement and patient wellness.'}
                             </div>
                             
                             <div class="therapy-info">
                                 <div class="info-box">
-                                    <div class="info-label">Sessions</div>
+                                    <div class="info-label">Total Sessions</div>
                                     <div class="info-value">${therapy.total_sessions || 6}</div>
                                 </div>
                                 <div class="info-box">
@@ -408,22 +514,13 @@
                                     <div class="info-value">${therapy.session_duration_minutes || 45} min</div>
                                 </div>
                                 <div class="info-box">
-                                    <div class="info-label">Per Week</div>
-                                    <div class="info-value">${therapy.sessions_per_week || 2}</div>
+                                    <div class="info-label">Frequency</div>
+                                    <div class="info-value">${therapy.sessions_per_week || 2}/week</div>
                                 </div>
                                 <div class="info-box">
-                                    <div class="info-label">Status</div>
-                                    <div class="info-value">${therapy.active ? 'Active' : 'Inactive'}</div>
+                                    <div class="info-label">Total Weeks</div>
+                                    <div class="info-value">${Math.ceil((therapy.total_sessions || 6) / (therapy.sessions_per_week || 2))}</div>
                                 </div>
-                            </div>
-                            
-                            <div class="therapy-actions">
-                                <button class="btn btn-primary" onclick="viewDetails('${therapy.therapy_code}')">
-                                    View Details
-                                </button>
-                                <button class="btn btn-secondary" onclick="usetherapy('${therapy.id}')">
-                                    Use in Plan
-                                </button>
                             </div>
                         </div>
                     </div>
@@ -481,19 +578,10 @@
                 filteredTherapies = allTherapies.filter(t => t.category === category);
             }
             
+            // Clear search when switching categories
+            document.getElementById('searchInput').value = '';
+            
             displayTherapies();
-        }
-        
-        window.viewDetails = function(therapyCode) {
-            alert(`Detailed view for ${therapyCode} will show:\n- Full protocol description\n- Conditions treated\n- Contraindications\n- Expected outcomes\n- Probe placement diagrams`);
-        }
-        
-        window.useTherapy = function(therapyId) {
-            window.location.href = `treatment-planning.html?therapyId=${therapyId}`;
-        }
-        
-        window.goBack = function() {
-            window.location.href = 'clinic-dashboard.html';
         }
     </script>
 </body>
