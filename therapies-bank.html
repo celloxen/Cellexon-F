@@ -408,15 +408,15 @@
                    placeholder="Search by protocol name, code, or description...">
             
             <div class="filter-tabs">
-                <button class="filter-tab active" onclick="filterByCategory('all')">All Protocols</button>
-                <button class="filter-tab" onclick="filterByCategory('Mental Wellness')">Mental Wellness</button>
-                <button class="filter-tab" onclick="filterByCategory('Vitality')">Vitality</button>
-                <button class="filter-tab" onclick="filterByCategory('Sleep Health')">Sleep Health</button>
-                <button class="filter-tab" onclick="filterByCategory('Digestive Health')">Digestive</button>
-                <button class="filter-tab" onclick="filterByCategory('Immune Support')">Immune</button>
-                <button class="filter-tab" onclick="filterByCategory('Pain Relief')">Pain Relief</button>
-                <button class="filter-tab" onclick="filterByCategory('Detoxification')">Detox</button>
-                <button class="filter-tab" onclick="filterByCategory('Heart Health')">Heart Health</button>
+                <button class="filter-tab active" onclick="filterByCategory('all', event)">All Protocols</button>
+                <button class="filter-tab" onclick="filterByCategory('Mental Wellness', event)">Mental Wellness</button>
+                <button class="filter-tab" onclick="filterByCategory('Vitality', event)">Vitality</button>
+                <button class="filter-tab" onclick="filterByCategory('Sleep Health', event)">Sleep Health</button>
+                <button class="filter-tab" onclick="filterByCategory('Digestive Health', event)">Digestive</button>
+                <button class="filter-tab" onclick="filterByCategory('Immune Support', event)">Immune</button>
+                <button class="filter-tab" onclick="filterByCategory('Pain Relief', event)">Pain Relief</button>
+                <button class="filter-tab" onclick="filterByCategory('Detoxification', event)">Detox</button>
+                <button class="filter-tab" onclick="filterByCategory('Heart Health', event)">Heart Health</button>
             </div>
         </div>
 
@@ -562,14 +562,18 @@
             });
         }
         
-        window.filterByCategory = function(category) {
+        window.filterByCategory = function(category, event) {
             currentCategory = category;
             
             // Update active tab
             document.querySelectorAll('.filter-tab').forEach(tab => {
                 tab.classList.remove('active');
             });
-            event.target.classList.add('active');
+            
+            // Add active class to clicked button
+            if (event && event.target) {
+                event.target.classList.add('active');
+            }
             
             // Filter therapies
             if (category === 'all') {
