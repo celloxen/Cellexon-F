@@ -615,9 +615,9 @@
         
         <!-- Tabs -->
         <div class="tabs">
-            <button class="tab-btn active" onclick="switchTab('protocols', this)">Therapy Protocols</button>
-            <button class="tab-btn" onclick="switchTab('diagrams', this)">Probe Diagrams</button>
-            <button class="tab-btn" onclick="switchTab('categories', this)">Categories</button>
+            <button class="tab-btn active" onclick="TherapyConfig.switchTab('protocols', this)">Therapy Protocols</button>
+            <button class="tab-btn" onclick="TherapyConfig.switchTab('diagrams', this)">Probe Diagrams</button>
+            <button class="tab-btn" onclick="TherapyConfig.switchTab('categories', this)">Categories</button>
         </div>
         
         <!-- Therapy Protocols Tab -->
@@ -631,7 +631,7 @@
                 <div class="controls-section">
                     <input type="text" class="search-box" id="searchInput" 
                            placeholder="Search by code, name, or category...">
-                    <button class="btn btn-primary" onclick="openAddModal()">
+                    <button class="btn btn-primary" onclick="TherapyConfig.openAddModal()">
                         + Add New Protocol
                     </button>
                 </div>
@@ -664,7 +664,7 @@
             <div class="card">
                 <div class="card-header">
                     <h2 class="card-title">Probe Placement Diagrams</h2>
-                    <button class="btn btn-primary" onclick="openDiagramModal()">
+                    <button class="btn btn-primary" onclick="TherapyConfig.openDiagramModal()">
                         + Upload Diagram
                     </button>
                 </div>
@@ -675,7 +675,7 @@
                 
                 <div class="form-group">
                     <label class="form-label">Filter by Therapy</label>
-                    <select class="form-select" id="diagramFilter" onchange="filterDiagrams()">
+                    <select class="form-select" id="diagramFilter" onchange="TherapyConfig.filterDiagrams()">
                         <option value="">All Therapies</option>
                     </select>
                 </div>
@@ -705,7 +705,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h2 class="modal-title" id="modalTitle">Add New Protocol</h2>
-                <button class="close-btn" onclick="closeModal()">×</button>
+                <button class="close-btn" onclick="TherapyConfig.closeModal()">×</button>
             </div>
             
             <form id="protocolForm">
@@ -800,7 +800,7 @@
                 <input type="hidden" id="protocolId">
                 
                 <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 30px;">
-                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                    <button type="button" class="btn btn-secondary" onclick="TherapyConfig.closeModal()">Cancel</button>
                     <button type="submit" class="btn btn-primary">Save Protocol</button>
                 </div>
             </form>
@@ -812,7 +812,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h2 class="modal-title">Upload Probe Diagram</h2>
-                <button class="close-btn" onclick="closeDiagramModal()">×</button>
+                <button class="close-btn" onclick="TherapyConfig.closeDiagramModal()">×</button>
             </div>
             
             <form id="diagramForm">
@@ -837,7 +837,7 @@
                             PNG, JPG up to 5MB
                         </p>
                         <input type="file" id="diagramFile" accept="image/*" style="display: none;" 
-                               onchange="previewDiagram(event)">
+                               onchange="TherapyConfig.previewDiagram(event)">
                     </div>
                     <div id="diagramPreview" style="display: none; margin-top: 20px; text-align: center;">
                         <img id="previewImage" src="" alt="Preview" 
@@ -846,7 +846,7 @@
                 </div>
                 
                 <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 30px;">
-                    <button type="button" class="btn btn-secondary" onclick="closeDiagramModal()">Cancel</button>
+                    <button type="button" class="btn btn-secondary" onclick="TherapyConfig.closeDiagramModal()">Cancel</button>
                     <button type="submit" class="btn btn-primary">Upload Diagram</button>
                 </div>
             </form>
@@ -864,541 +864,551 @@
         
         const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         
-        let allProtocols = [];
-        let allDiagrams = [];
-        let editingProtocolId = null;
-        let isEditMode = false;
-        
-        // Initialize
-        document.addEventListener('DOMContentLoaded', async () => {
-            await checkAuthentication();
-            await loadProtocols();
-            await loadDiagrams();
-            await loadCategories();
-            setupEventListeners();
-        });
-        
-        async function checkAuthentication() {
-            const authData = localStorage.getItem('celloxen_auth');
-            if (!authData) {
-                window.location.href = 'unified-login.html';
-                return;
-            }
+        // Create global TherapyConfig object to expose functions
+        window.TherapyConfig = {
+            allProtocols: [],
+            allDiagrams: [],
+            editingProtocolId: null,
+            isEditMode: false,
             
-            const auth = JSON.parse(authData);
-            if (auth.userType !== 'super_admin') {
-                alert('Access denied. Super Administrator privileges required.');
-                window.location.href = 'unified-login.html';
-                return;
-            }
-        }
-        
-        async function loadProtocols() {
-            try {
-                const { data, error } = await supabase
-                    .from('therapy_protocols')
-                    .select('*')
-                    .order('therapy_code');
+            // Initialize
+            init: async function() {
+                await this.checkAuthentication();
+                await this.loadProtocols();
+                await this.loadDiagrams();
+                await this.loadCategories();
+                this.setupEventListeners();
+            },
+            
+            checkAuthentication: async function() {
+                const authData = localStorage.getItem('celloxen_auth');
+                if (!authData) {
+                    window.location.href = 'unified-login.html';
+                    return;
+                }
                 
-                if (error) throw error;
-                
-                allProtocols = data || [];
-                displayProtocols(allProtocols);
-                updateStatistics();
-                populateTherapySelects();
-                
-            } catch (error) {
-                console.error('Error loading protocols:', error);
-                showNotification('Error loading protocols', 'error');
-            }
-        }
-        
-        function displayProtocols(protocols) {
-            const tbody = document.getElementById('protocolsTableBody');
+                const auth = JSON.parse(authData);
+                if (auth.userType !== 'super_admin') {
+                    alert('Access denied. Super Administrator privileges required.');
+                    window.location.href = 'unified-login.html';
+                    return;
+                }
+            },
             
-            if (protocols.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: #64748b;">No protocols found</td></tr>';
-                return;
-            }
-            
-            tbody.innerHTML = protocols.map(protocol => {
-                const statusClass = protocol.active ? 'status-active' : 'status-inactive';
-                const statusText = protocol.active ? 'Active' : 'Inactive';
-                
-                return `
-                    <tr>
-                        <td class="therapy-code">${protocol.therapy_code}</td>
-                        <td>${protocol.therapy_name}</td>
-                        <td><span class="category-badge">${protocol.category || 'Uncategorized'}</span></td>
-                        <td>${protocol.total_sessions || 0}</td>
-                        <td>${protocol.session_duration_minutes || 0} min</td>
-                        <td>${protocol.sessions_per_week || 0}/week</td>
-                        <td><span class="status-badge ${statusClass}">${statusText}</span></td>
-                        <td>
-                            <div class="action-buttons">
-                                <button class="btn btn-sm btn-secondary" onclick="editProtocol(${protocol.id})">Edit</button>
-                                <button class="btn btn-sm btn-danger" onclick="deleteProtocol(${protocol.id})">Delete</button>
-                            </div>
-                        </td>
-                    </tr>
-                `;
-            }).join('');
-        }
-        
-        function updateStatistics() {
-            const activeCount = allProtocols.filter(p => p.active).length;
-            const categories = [...new Set(allProtocols.map(p => p.category))].filter(c => c).length;
-            const avgSessions = Math.round(allProtocols.reduce((sum, p) => sum + (p.total_sessions || 0), 0) / allProtocols.length) || 0;
-            
-            document.getElementById('totalProtocols').textContent = allProtocols.length;
-            document.getElementById('activeProtocols').textContent = activeCount;
-            document.getElementById('totalCategories').textContent = categories;
-            document.getElementById('avgSessions').textContent = avgSessions;
-        }
-        
-        function setupEventListeners() {
-            // Search functionality
-            document.getElementById('searchInput').addEventListener('input', (e) => {
-                const searchTerm = e.target.value.toLowerCase();
-                
-                const filtered = allProtocols.filter(protocol => 
-                    protocol.therapy_code.toLowerCase().includes(searchTerm) ||
-                    protocol.therapy_name.toLowerCase().includes(searchTerm) ||
-                    (protocol.category && protocol.category.toLowerCase().includes(searchTerm))
-                );
-                
-                displayProtocols(filtered);
-            });
-            
-            // Form submissions
-            document.getElementById('protocolForm').addEventListener('submit', async (e) => {
-                e.preventDefault();
-                await saveProtocol();
-            });
-            
-            document.getElementById('diagramForm').addEventListener('submit', async (e) => {
-                e.preventDefault();
-                await saveDiagram();
-            });
-        }
-        
-        window.switchTab = function(tab, button) {
-            // Hide all tabs
-            document.querySelectorAll('.tab-content').forEach(content => {
-                content.classList.remove('active');
-            });
-            
-            // Remove active from all buttons
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            
-            // Show selected tab
-            document.getElementById(`${tab}Tab`).classList.add('active');
-            
-            // Set active button
-            button.classList.add('active');
-        };
-        
-        window.openAddModal = function() {
-            isEditMode = false;
-            editingProtocolId = null;
-            document.getElementById('modalTitle').textContent = 'Add New Protocol';
-            document.getElementById('protocolForm').reset();
-            document.getElementById('active').checked = true;
-            
-            // Enable all fields for new protocol
-            document.getElementById('therapyCode').disabled = false;
-            document.getElementById('therapyName').disabled = false;
-            document.getElementById('category').disabled = false;
-            
-            document.getElementById('protocolModal').classList.add('active');
-        };
-        
-        window.editProtocol = function(id) {
-            isEditMode = true;
-            editingProtocolId = id;
-            const protocol = allProtocols.find(p => p.id === id);
-            
-            if (!protocol) return;
-            
-            document.getElementById('modalTitle').textContent = 'Edit Protocol';
-            document.getElementById('protocolId').value = protocol.id;
-            document.getElementById('therapyCode').value = protocol.therapy_code;
-            document.getElementById('therapyName').value = protocol.therapy_name;
-            document.getElementById('category').value = protocol.category || '';
-            document.getElementById('active').checked = protocol.active;
-            document.getElementById('totalSessions').value = protocol.total_sessions || 6;
-            document.getElementById('sessionDuration').value = protocol.session_duration_minutes || 45;
-            document.getElementById('sessionsPerWeek').value = protocol.sessions_per_week || 2;
-            document.getElementById('priority').value = protocol.priority || 50;
-            document.getElementById('description').value = protocol.description || '';
-            document.getElementById('conditionsTreated').value = protocol.conditions_treated || '';
-            document.getElementById('contraindications').value = protocol.contraindications || '';
-            
-            // Disable code field when editing (can't change code)
-            document.getElementById('therapyCode').disabled = true;
-            document.getElementById('therapyName').disabled = false;
-            document.getElementById('category').disabled = false;
-            
-            document.getElementById('protocolModal').classList.add('active');
-        };
-        
-        window.closeModal = function() {
-            document.getElementById('protocolModal').classList.remove('active');
-        };
-        
-        async function saveProtocol() {
-            const protocolData = {
-                therapy_code: document.getElementById('therapyCode').value.trim(),
-                therapy_name: document.getElementById('therapyName').value.trim(),
-                category: document.getElementById('category').value,
-                active: document.getElementById('active').checked,
-                total_sessions: parseInt(document.getElementById('totalSessions').value),
-                session_duration_minutes: parseInt(document.getElementById('sessionDuration').value),
-                sessions_per_week: parseInt(document.getElementById('sessionsPerWeek').value),
-                priority: parseInt(document.getElementById('priority').value) || 50,
-                description: document.getElementById('description').value.trim(),
-                conditions_treated: document.getElementById('conditionsTreated').value.trim(),
-                contraindications: document.getElementById('contraindications').value.trim(),
-                updated_at: new Date().toISOString()
-            };
-            
-            try {
-                if (isEditMode && editingProtocolId) {
-                    // Update existing protocol
-                    delete protocolData.therapy_code; // Don't update code
-                    
-                    const { error } = await supabase
+            loadProtocols: async function() {
+                try {
+                    const { data, error } = await supabase
                         .from('therapy_protocols')
-                        .update(protocolData)
-                        .eq('id', editingProtocolId);
+                        .select('*')
+                        .order('therapy_code');
                     
                     if (error) throw error;
-                    showNotification('Protocol updated successfully', 'success');
-                } else {
-                    // Add new protocol
-                    protocolData.created_at = new Date().toISOString();
                     
-                    const { error } = await supabase
-                        .from('therapy_protocols')
-                        .insert(protocolData);
+                    this.allProtocols = data || [];
+                    this.displayProtocols(this.allProtocols);
+                    this.updateStatistics();
+                    this.populateTherapySelects();
                     
-                    if (error) throw error;
-                    showNotification('Protocol added successfully', 'success');
+                } catch (error) {
+                    console.error('Error loading protocols:', error);
+                    this.showNotification('Error loading protocols', 'error');
+                }
+            },
+            
+            displayProtocols: function(protocols) {
+                const tbody = document.getElementById('protocolsTableBody');
+                
+                if (protocols.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: #64748b;">No protocols found</td></tr>';
+                    return;
                 }
                 
-                closeModal();
-                await loadProtocols();
-                
-            } catch (error) {
-                console.error('Error saving protocol:', error);
-                showNotification('Error saving protocol: ' + error.message, 'error');
-            }
-        }
-        
-        window.deleteProtocol = async function(id) {
-            if (!confirm('Are you sure you want to delete this protocol? This action cannot be undone.')) {
-                return;
-            }
-            
-            try {
-                const { error } = await supabase
-                    .from('therapy_protocols')
-                    .delete()
-                    .eq('id', id);
-                
-                if (error) throw error;
-                
-                showNotification('Protocol deleted successfully', 'success');
-                await loadProtocols();
-                
-            } catch (error) {
-                console.error('Error deleting protocol:', error);
-                showNotification('Error deleting protocol: ' + error.message, 'error');
-            }
-        };
-        
-        // Diagram functions
-        async function loadDiagrams() {
-            try {
-                const { data, error } = await supabase
-                    .from('probe_diagrams')
-                    .select('*')
-                    .order('therapy_code');
-                
-                if (error) throw error;
-                
-                allDiagrams = data || [];
-                displayDiagrams();
-                
-            } catch (error) {
-                console.error('Error loading diagrams:', error);
-            }
-        }
-        
-        function displayDiagrams(filteredDiagrams = null) {
-            const container = document.getElementById('diagramsList');
-            const diagramsToShow = filteredDiagrams || allDiagrams;
-            
-            if (diagramsToShow.length === 0) {
-                container.innerHTML = '<p style="text-align: center; color: #64748b;">No probe diagrams uploaded yet.</p>';
-                return;
-            }
-            
-            container.innerHTML = diagramsToShow.map(diagram => `
-                <div class="diagram-item">
-                    ${diagram.diagram_url ? `
-                        <img src="${diagram.diagram_url}" alt="${diagram.therapy_code}" 
-                             class="diagram-thumbnail"
-                             onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22150%22%3E%3Crect width=%22200%22 height=%22150%22 fill=%22%23e5e7eb%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%2364748b%22%3ENo Image%3C/text%3E%3C/svg%3E'">
-                    ` : '<div class="diagram-thumbnail" style="background: #e5e7eb;">No Image</div>'}
-                    <div style="font-weight: 600; margin: 10px 0;">${diagram.diagram_name || 'Untitled'}</div>
-                    <div style="font-size: 12px; color: #64748b;">${diagram.therapy_name || diagram.therapy_code}</div>
-                    <button class="btn btn-sm btn-danger" style="margin-top: 10px;" 
-                            onclick="deleteDiagram(${diagram.id})">Delete</button>
-                </div>
-            `).join('');
-        }
-        
-        function populateTherapySelects() {
-            const diagramFilter = document.getElementById('diagramFilter');
-            const diagramTherapy = document.getElementById('diagramTherapy');
-            
-            const options = allProtocols.map(p => 
-                `<option value="${p.therapy_code}">${p.therapy_name} (${p.therapy_code})</option>`
-            ).join('');
-            
-            diagramFilter.innerHTML = '<option value="">All Therapies</option>' + options;
-            diagramTherapy.innerHTML = '<option value="">Select a therapy...</option>' + options;
-        }
-        
-        window.filterDiagrams = function() {
-            const filter = document.getElementById('diagramFilter').value;
-            
-            if (!filter) {
-                displayDiagrams();
-            } else {
-                const filtered = allDiagrams.filter(d => d.therapy_code === filter);
-                displayDiagrams(filtered);
-            }
-        };
-        
-        window.openDiagramModal = function() {
-            document.getElementById('diagramForm').reset();
-            document.getElementById('diagramPreview').style.display = 'none';
-            document.getElementById('diagramModal').classList.add('active');
-        };
-        
-        window.closeDiagramModal = function() {
-            document.getElementById('diagramModal').classList.remove('active');
-        };
-        
-        window.previewDiagram = function(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            
-            // Validate file size (5MB limit)
-            const maxSize = 5 * 1024 * 1024; // 5MB in bytes
-            if (file.size > maxSize) {
-                showNotification('File size must be less than 5MB', 'error');
-                event.target.value = ''; // Clear the file input
-                return;
-            }
-            
-            // Validate file type
-            const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
-            if (!allowedTypes.includes(file.type)) {
-                showNotification('Please upload a valid image file (JPG, PNG, GIF, or WebP)', 'error');
-                event.target.value = ''; // Clear the file input
-                return;
-            }
-            
-            // Show preview
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                document.getElementById('previewImage').src = e.target.result;
-                document.getElementById('diagramPreview').style.display = 'block';
-            };
-            reader.readAsDataURL(file);
-        };
-        
-        async function saveDiagram() {
-            const selectedTherapy = document.getElementById('diagramTherapy').value;
-            const diagramName = document.getElementById('diagramName').value || 'Probe Placement';
-            const fileInput = document.getElementById('diagramFile');
-            const file = fileInput.files[0];
-            
-            if (!selectedTherapy || !file) {
-                showNotification('Please select a therapy and upload an image', 'error');
-                return;
-            }
-            
-            // Show loading state
-            const submitBtn = event.target.querySelector('button[type="submit"]');
-            const originalText = submitBtn.textContent;
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Uploading...';
-            
-            try {
-                // Generate unique filename
-                const fileExt = file.name.split('.').pop();
-                const fileName = `${selectedTherapy}_${Date.now()}.${fileExt}`;
-                const filePath = `probe-diagrams/${fileName}`;
-                
-                // Upload to Supabase Storage
-                const { data: uploadData, error: uploadError } = await supabase.storage
-                    .from('therapy-diagrams')
-                    .upload(filePath, file, {
-                        cacheControl: '3600',
-                        upsert: false
-                    });
-                
-                if (uploadError) {
-                    // If bucket doesn't exist, try to create it
-                    if (uploadError.message.includes('not found')) {
-                        // Create the bucket
-                        const { data: bucketData, error: bucketError } = await supabase.storage
-                            .createBucket('therapy-diagrams', {
-                                public: true
-                            });
-                        
-                        if (bucketError && !bucketError.message.includes('already exists')) {
-                            throw bucketError;
-                        }
-                        
-                        // Try upload again
-                        const { data: retryData, error: retryError } = await supabase.storage
-                            .from('therapy-diagrams')
-                            .upload(filePath, file, {
-                                cacheControl: '3600',
-                                upsert: false
-                            });
-                        
-                        if (retryError) throw retryError;
-                    } else {
-                        throw uploadError;
-                    }
-                }
-                
-                // Get public URL
-                const { data: urlData } = supabase.storage
-                    .from('therapy-diagrams')
-                    .getPublicUrl(filePath);
-                
-                const therapy = allProtocols.find(p => p.therapy_code === selectedTherapy);
-                
-                // Save diagram record to database
-                const formData = {
-                    therapy_code: selectedTherapy,
-                    therapy_name: therapy ? therapy.therapy_name : '',
-                    diagram_name: diagramName,
-                    diagram_url: urlData.publicUrl,
-                    diagram_type: 'primary',
-                    file_path: filePath,
-                    created_at: new Date().toISOString()
-                };
-                
-                const { error: dbError } = await supabase
-                    .from('probe_diagrams')
-                    .insert(formData);
-                
-                if (dbError) throw dbError;
-                
-                showNotification('Diagram uploaded successfully', 'success');
-                closeDiagramModal();
-                await loadDiagrams();
-                
-            } catch (error) {
-                console.error('Error saving diagram:', error);
-                showNotification('Error uploading diagram: ' + error.message, 'error');
-            } finally {
-                // Reset button state
-                submitBtn.disabled = false;
-                submitBtn.textContent = originalText;
-            }
-        }
-        
-        window.deleteDiagram = async function(id) {
-            if (!confirm('Delete this probe diagram?')) return;
-            
-            try {
-                // First get the diagram to find the file path
-                const { data: diagram, error: fetchError } = await supabase
-                    .from('probe_diagrams')
-                    .select('file_path')
-                    .eq('id', id)
-                    .single();
-                
-                if (fetchError) throw fetchError;
-                
-                // Delete from storage if file_path exists
-                if (diagram && diagram.file_path) {
-                    const { error: storageError } = await supabase.storage
-                        .from('therapy-diagrams')
-                        .remove([diagram.file_path]);
-                    
-                    // Log but don't fail if storage delete fails
-                    if (storageError) {
-                        console.error('Error deleting file from storage:', storageError);
-                    }
-                }
-                
-                // Delete from database
-                const { error: dbError } = await supabase
-                    .from('probe_diagrams')
-                    .delete()
-                    .eq('id', id);
-                
-                if (dbError) throw dbError;
-                
-                showNotification('Diagram deleted successfully', 'success');
-                await loadDiagrams();
-                
-            } catch (error) {
-                console.error('Error deleting diagram:', error);
-                showNotification('Error deleting diagram: ' + error.message, 'error');
-            }
-        };
-        
-        // Categories
-        async function loadCategories() {
-            try {
-                const categories = [...new Set(allProtocols.map(p => p.category).filter(c => c))];
-                
-                const container = document.getElementById('categoriesList');
-                container.innerHTML = categories.map(category => {
-                    const count = allProtocols.filter(p => p.category === category).length;
-                    const activeCount = allProtocols.filter(p => p.category === category && p.active).length;
+                tbody.innerHTML = protocols.map(protocol => {
+                    const statusClass = protocol.active ? 'status-active' : 'status-inactive';
+                    const statusText = protocol.active ? 'Active' : 'Inactive';
                     
                     return `
-                        <div style="background: #f8fafc; border-radius: 10px; padding: 20px; margin-bottom: 15px; 
-                                    display: flex; justify-content: space-between; align-items: center;">
-                            <div>
-                                <h3 style="font-size: 18px; color: #1e293b; margin-bottom: 5px;">${category}</h3>
-                                <p style="color: #64748b; font-size: 14px;">
-                                    ${count} total protocols • ${activeCount} active
-                                </p>
-                            </div>
-                            <div style="font-size: 32px; color: #3b82f6;">${count}</div>
-                        </div>
+                        <tr>
+                            <td class="therapy-code">${protocol.therapy_code}</td>
+                            <td>${protocol.therapy_name}</td>
+                            <td><span class="category-badge">${protocol.category || 'Uncategorized'}</span></td>
+                            <td>${protocol.total_sessions || 0}</td>
+                            <td>${protocol.session_duration_minutes || 0} min</td>
+                            <td>${protocol.sessions_per_week || 0}/week</td>
+                            <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn btn-sm btn-secondary" onclick="TherapyConfig.editProtocol(${protocol.id})">Edit</button>
+                                    <button class="btn btn-sm btn-danger" onclick="TherapyConfig.deleteProtocol(${protocol.id})">Delete</button>
+                                </div>
+                            </td>
+                        </tr>
                     `;
                 }).join('');
-                
-            } catch (error) {
-                console.error('Error loading categories:', error);
-            }
-        }
-        
-        function showNotification(message, type) {
-            const notification = document.getElementById('notification');
-            notification.textContent = message;
-            notification.className = `notification ${type} show`;
+            },
             
-            setTimeout(() => {
-                notification.classList.remove('show');
-            }, 3000);
-        }
+            updateStatistics: function() {
+                const activeCount = this.allProtocols.filter(p => p.active).length;
+                const categories = [...new Set(this.allProtocols.map(p => p.category))].filter(c => c).length;
+                const avgSessions = Math.round(this.allProtocols.reduce((sum, p) => sum + (p.total_sessions || 0), 0) / this.allProtocols.length) || 0;
+                
+                document.getElementById('totalProtocols').textContent = this.allProtocols.length;
+                document.getElementById('activeProtocols').textContent = activeCount;
+                document.getElementById('totalCategories').textContent = categories;
+                document.getElementById('avgSessions').textContent = avgSessions;
+            },
+            
+            setupEventListeners: function() {
+                const self = this;
+                
+                // Search functionality
+                document.getElementById('searchInput').addEventListener('input', (e) => {
+                    const searchTerm = e.target.value.toLowerCase();
+                    
+                    const filtered = self.allProtocols.filter(protocol => 
+                        protocol.therapy_code.toLowerCase().includes(searchTerm) ||
+                        protocol.therapy_name.toLowerCase().includes(searchTerm) ||
+                        (protocol.category && protocol.category.toLowerCase().includes(searchTerm))
+                    );
+                    
+                    self.displayProtocols(filtered);
+                });
+                
+                // Form submissions
+                document.getElementById('protocolForm').addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    await self.saveProtocol();
+                });
+                
+                document.getElementById('diagramForm').addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    await self.saveDiagram();
+                });
+            },
+            
+            switchTab: function(tab, button) {
+                // Hide all tabs
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+                
+                // Remove active from all buttons
+                document.querySelectorAll('.tab-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                
+                // Show selected tab
+                document.getElementById(`${tab}Tab`).classList.add('active');
+                
+                // Set active button
+                button.classList.add('active');
+            },
+            
+            openAddModal: function() {
+                this.isEditMode = false;
+                this.editingProtocolId = null;
+                document.getElementById('modalTitle').textContent = 'Add New Protocol';
+                document.getElementById('protocolForm').reset();
+                document.getElementById('active').checked = true;
+                
+                // Enable all fields for new protocol
+                document.getElementById('therapyCode').disabled = false;
+                document.getElementById('therapyName').disabled = false;
+                document.getElementById('category').disabled = false;
+                
+                document.getElementById('protocolModal').classList.add('active');
+            },
+            
+            editProtocol: function(id) {
+                this.isEditMode = true;
+                this.editingProtocolId = id;
+                const protocol = this.allProtocols.find(p => p.id === id);
+                
+                if (!protocol) return;
+                
+                document.getElementById('modalTitle').textContent = 'Edit Protocol';
+                document.getElementById('protocolId').value = protocol.id;
+                document.getElementById('therapyCode').value = protocol.therapy_code;
+                document.getElementById('therapyName').value = protocol.therapy_name;
+                document.getElementById('category').value = protocol.category || '';
+                document.getElementById('active').checked = protocol.active;
+                document.getElementById('totalSessions').value = protocol.total_sessions || 6;
+                document.getElementById('sessionDuration').value = protocol.session_duration_minutes || 45;
+                document.getElementById('sessionsPerWeek').value = protocol.sessions_per_week || 2;
+                document.getElementById('priority').value = protocol.priority || 50;
+                document.getElementById('description').value = protocol.description || '';
+                document.getElementById('conditionsTreated').value = protocol.conditions_treated || '';
+                document.getElementById('contraindications').value = protocol.contraindications || '';
+                
+                // Disable code field when editing (can't change code)
+                document.getElementById('therapyCode').disabled = true;
+                document.getElementById('therapyName').disabled = false;
+                document.getElementById('category').disabled = false;
+                
+                document.getElementById('protocolModal').classList.add('active');
+            },
+            
+            closeModal: function() {
+                document.getElementById('protocolModal').classList.remove('active');
+            },
+            
+            saveProtocol: async function() {
+                const protocolData = {
+                    therapy_code: document.getElementById('therapyCode').value.trim(),
+                    therapy_name: document.getElementById('therapyName').value.trim(),
+                    category: document.getElementById('category').value,
+                    active: document.getElementById('active').checked,
+                    total_sessions: parseInt(document.getElementById('totalSessions').value),
+                    session_duration_minutes: parseInt(document.getElementById('sessionDuration').value),
+                    sessions_per_week: parseInt(document.getElementById('sessionsPerWeek').value),
+                    priority: parseInt(document.getElementById('priority').value) || 50,
+                    description: document.getElementById('description').value.trim(),
+                    conditions_treated: document.getElementById('conditionsTreated').value.trim(),
+                    contraindications: document.getElementById('contraindications').value.trim(),
+                    updated_at: new Date().toISOString()
+                };
+                
+                try {
+                    if (this.isEditMode && this.editingProtocolId) {
+                        // Update existing protocol
+                        delete protocolData.therapy_code; // Don't update code
+                        
+                        const { error } = await supabase
+                            .from('therapy_protocols')
+                            .update(protocolData)
+                            .eq('id', this.editingProtocolId);
+                        
+                        if (error) throw error;
+                        this.showNotification('Protocol updated successfully', 'success');
+                    } else {
+                        // Add new protocol
+                        protocolData.created_at = new Date().toISOString();
+                        
+                        const { error } = await supabase
+                            .from('therapy_protocols')
+                            .insert(protocolData);
+                        
+                        if (error) throw error;
+                        this.showNotification('Protocol added successfully', 'success');
+                    }
+                    
+                    this.closeModal();
+                    await this.loadProtocols();
+                    
+                } catch (error) {
+                    console.error('Error saving protocol:', error);
+                    this.showNotification('Error saving protocol: ' + error.message, 'error');
+                }
+            },
+            
+            deleteProtocol: async function(id) {
+                if (!confirm('Are you sure you want to delete this protocol? This action cannot be undone.')) {
+                    return;
+                }
+                
+                try {
+                    const { error } = await supabase
+                        .from('therapy_protocols')
+                        .delete()
+                        .eq('id', id);
+                    
+                    if (error) throw error;
+                    
+                    this.showNotification('Protocol deleted successfully', 'success');
+                    await this.loadProtocols();
+                    
+                } catch (error) {
+                    console.error('Error deleting protocol:', error);
+                    this.showNotification('Error deleting protocol: ' + error.message, 'error');
+                }
+            },
+            
+            // Diagram functions
+            loadDiagrams: async function() {
+                try {
+                    const { data, error } = await supabase
+                        .from('probe_diagrams')
+                        .select('*')
+                        .order('therapy_code');
+                    
+                    if (error) throw error;
+                    
+                    this.allDiagrams = data || [];
+                    this.displayDiagrams();
+                    
+                } catch (error) {
+                    console.error('Error loading diagrams:', error);
+                }
+            },
+            
+            displayDiagrams: function(filteredDiagrams = null) {
+                const container = document.getElementById('diagramsList');
+                const diagramsToShow = filteredDiagrams || this.allDiagrams;
+                
+                if (diagramsToShow.length === 0) {
+                    container.innerHTML = '<p style="text-align: center; color: #64748b;">No probe diagrams uploaded yet.</p>';
+                    return;
+                }
+                
+                container.innerHTML = diagramsToShow.map(diagram => `
+                    <div class="diagram-item">
+                        ${diagram.diagram_url ? `
+                            <img src="${diagram.diagram_url}" alt="${diagram.therapy_code}" 
+                                 class="diagram-thumbnail"
+                                 onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22150%22%3E%3Crect width=%22200%22 height=%22150%22 fill=%22%23e5e7eb%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%2364748b%22%3ENo Image%3C/text%3E%3C/svg%3E'">
+                        ` : '<div class="diagram-thumbnail" style="background: #e5e7eb;">No Image</div>'}
+                        <div style="font-weight: 600; margin: 10px 0;">${diagram.diagram_name || 'Untitled'}</div>
+                        <div style="font-size: 12px; color: #64748b;">${diagram.therapy_name || diagram.therapy_code}</div>
+                        <button class="btn btn-sm btn-danger" style="margin-top: 10px;" 
+                                onclick="TherapyConfig.deleteDiagram(${diagram.id})">Delete</button>
+                    </div>
+                `).join('');
+            },
+            
+            populateTherapySelects: function() {
+                const diagramFilter = document.getElementById('diagramFilter');
+                const diagramTherapy = document.getElementById('diagramTherapy');
+                
+                const options = this.allProtocols.map(p => 
+                    `<option value="${p.therapy_code}">${p.therapy_name} (${p.therapy_code})</option>`
+                ).join('');
+                
+                diagramFilter.innerHTML = '<option value="">All Therapies</option>' + options;
+                diagramTherapy.innerHTML = '<option value="">Select a therapy...</option>' + options;
+            },
+            
+            filterDiagrams: function() {
+                const filter = document.getElementById('diagramFilter').value;
+                
+                if (!filter) {
+                    this.displayDiagrams();
+                } else {
+                    const filtered = this.allDiagrams.filter(d => d.therapy_code === filter);
+                    this.displayDiagrams(filtered);
+                }
+            },
+            
+            openDiagramModal: function() {
+                document.getElementById('diagramForm').reset();
+                document.getElementById('diagramPreview').style.display = 'none';
+                document.getElementById('diagramModal').classList.add('active');
+            },
+            
+            closeDiagramModal: function() {
+                document.getElementById('diagramModal').classList.remove('active');
+            },
+            
+            previewDiagram: function(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+                
+                // Validate file size (5MB limit)
+                const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+                if (file.size > maxSize) {
+                    this.showNotification('File size must be less than 5MB', 'error');
+                    event.target.value = ''; // Clear the file input
+                    return;
+                }
+                
+                // Validate file type
+                const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+                if (!allowedTypes.includes(file.type)) {
+                    this.showNotification('Please upload a valid image file (JPG, PNG, GIF, or WebP)', 'error');
+                    event.target.value = ''; // Clear the file input
+                    return;
+                }
+                
+                // Show preview
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('previewImage').src = e.target.result;
+                    document.getElementById('diagramPreview').style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            },
+            
+            saveDiagram: async function() {
+                const selectedTherapy = document.getElementById('diagramTherapy').value;
+                const diagramName = document.getElementById('diagramName').value || 'Probe Placement';
+                const fileInput = document.getElementById('diagramFile');
+                const file = fileInput.files[0];
+                
+                if (!selectedTherapy || !file) {
+                    this.showNotification('Please select a therapy and upload an image', 'error');
+                    return;
+                }
+                
+                // Show loading state
+                const submitBtn = event.target.querySelector('button[type="submit"]');
+                const originalText = submitBtn.textContent;
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Uploading...';
+                
+                try {
+                    // Generate unique filename
+                    const fileExt = file.name.split('.').pop();
+                    const fileName = `${selectedTherapy}_${Date.now()}.${fileExt}`;
+                    const filePath = `probe-diagrams/${fileName}`;
+                    
+                    // Upload to Supabase Storage
+                    const { data: uploadData, error: uploadError } = await supabase.storage
+                        .from('therapy-diagrams')
+                        .upload(filePath, file, {
+                            cacheControl: '3600',
+                            upsert: false
+                        });
+                    
+                    if (uploadError) {
+                        // If bucket doesn't exist, try to create it
+                        if (uploadError.message.includes('not found')) {
+                            // Create the bucket
+                            const { data: bucketData, error: bucketError } = await supabase.storage
+                                .createBucket('therapy-diagrams', {
+                                    public: true
+                                });
+                            
+                            if (bucketError && !bucketError.message.includes('already exists')) {
+                                throw bucketError;
+                            }
+                            
+                            // Try upload again
+                            const { data: retryData, error: retryError } = await supabase.storage
+                                .from('therapy-diagrams')
+                                .upload(filePath, file, {
+                                    cacheControl: '3600',
+                                    upsert: false
+                                });
+                            
+                            if (retryError) throw retryError;
+                        } else {
+                            throw uploadError;
+                        }
+                    }
+                    
+                    // Get public URL
+                    const { data: urlData } = supabase.storage
+                        .from('therapy-diagrams')
+                        .getPublicUrl(filePath);
+                    
+                    const therapy = this.allProtocols.find(p => p.therapy_code === selectedTherapy);
+                    
+                    // Save diagram record to database
+                    const formData = {
+                        therapy_code: selectedTherapy,
+                        therapy_name: therapy ? therapy.therapy_name : '',
+                        diagram_name: diagramName,
+                        diagram_url: urlData.publicUrl,
+                        diagram_type: 'primary',
+                        file_path: filePath,
+                        created_at: new Date().toISOString()
+                    };
+                    
+                    const { error: dbError } = await supabase
+                        .from('probe_diagrams')
+                        .insert(formData);
+                    
+                    if (dbError) throw dbError;
+                    
+                    this.showNotification('Diagram uploaded successfully', 'success');
+                    this.closeDiagramModal();
+                    await this.loadDiagrams();
+                    
+                } catch (error) {
+                    console.error('Error saving diagram:', error);
+                    this.showNotification('Error uploading diagram: ' + error.message, 'error');
+                } finally {
+                    // Reset button state
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = originalText;
+                }
+            },
+            
+            deleteDiagram: async function(id) {
+                if (!confirm('Delete this probe diagram?')) return;
+                
+                try {
+                    // First get the diagram to find the file path
+                    const { data: diagram, error: fetchError } = await supabase
+                        .from('probe_diagrams')
+                        .select('file_path')
+                        .eq('id', id)
+                        .single();
+                    
+                    if (fetchError) throw fetchError;
+                    
+                    // Delete from storage if file_path exists
+                    if (diagram && diagram.file_path) {
+                        const { error: storageError } = await supabase.storage
+                            .from('therapy-diagrams')
+                            .remove([diagram.file_path]);
+                        
+                        // Log but don't fail if storage delete fails
+                        if (storageError) {
+                            console.error('Error deleting file from storage:', storageError);
+                        }
+                    }
+                    
+                    // Delete from database
+                    const { error: dbError } = await supabase
+                        .from('probe_diagrams')
+                        .delete()
+                        .eq('id', id);
+                    
+                    if (dbError) throw dbError;
+                    
+                    this.showNotification('Diagram deleted successfully', 'success');
+                    await this.loadDiagrams();
+                    
+                } catch (error) {
+                    console.error('Error deleting diagram:', error);
+                    this.showNotification('Error deleting diagram: ' + error.message, 'error');
+                }
+            },
+            
+            // Categories
+            loadCategories: async function() {
+                try {
+                    const categories = [...new Set(this.allProtocols.map(p => p.category).filter(c => c))];
+                    
+                    const container = document.getElementById('categoriesList');
+                    container.innerHTML = categories.map(category => {
+                        const count = this.allProtocols.filter(p => p.category === category).length;
+                        const activeCount = this.allProtocols.filter(p => p.category === category && p.active).length;
+                        
+                        return `
+                            <div style="background: #f8fafc; border-radius: 10px; padding: 20px; margin-bottom: 15px; 
+                                        display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <h3 style="font-size: 18px; color: #1e293b; margin-bottom: 5px;">${category}</h3>
+                                    <p style="color: #64748b; font-size: 14px;">
+                                        ${count} total protocols • ${activeCount} active
+                                    </p>
+                                </div>
+                                <div style="font-size: 32px; color: #3b82f6;">${count}</div>
+                            </div>
+                        `;
+                    }).join('');
+                    
+                } catch (error) {
+                    console.error('Error loading categories:', error);
+                }
+            },
+            
+            showNotification: function(message, type) {
+                const notification = document.getElementById('notification');
+                notification.textContent = message;
+                notification.className = `notification ${type} show`;
+                
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                }, 3000);
+            }
+        };
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', async () => {
+            await TherapyConfig.init();
+        });
     </script>
 </body>
 </html>
