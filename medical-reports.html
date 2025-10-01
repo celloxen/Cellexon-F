@@ -313,6 +313,12 @@
             font-size: 12px;
             color: #4b5563;
         }
+        
+        .assessment-date {
+            font-size: 11px;
+            color: #64748b;
+            margin-top: 2px;
+        }
     </style>
 </head>
 <body>
@@ -361,10 +367,10 @@
             
             <div class="filters">
                 <span style="margin-right: 10px; font-size: 14px; color: #6b7280;">Filter:</span>
-                <button class="filter-chip active" onclick="filterPatients('all')">All Patients</button>
-                <button class="filter-chip" onclick="filterPatients('complete')">Complete Reports</button>
-                <button class="filter-chip" onclick="filterPatients('pending')">Pending Reports</button>
-                <button class="filter-chip" onclick="filterPatients('no-report')">No Reports</button>
+                <button class="filter-chip active" onclick="filterPatients('all', event)">All Patients</button>
+                <button class="filter-chip" onclick="filterPatients('complete', event)">Complete Reports</button>
+                <button class="filter-chip" onclick="filterPatients('pending', event)">Pending Reports</button>
+                <button class="filter-chip" onclick="filterPatients('no-report', event)">No Reports</button>
             </div>
         </div>
         
@@ -396,6 +402,7 @@
         let filteredPatients = [];
         let currentFilter = 'all';
         let assessmentData = {};
+        let medicalReportsData = {};
         
         // Initialize
         document.addEventListener('DOMContentLoaded', async () => {
@@ -408,6 +415,8 @@
             
             const auth = JSON.parse(authData);
             currentClinicId = auth.clinicId;
+            
+            console.log('Current Clinic ID:', currentClinicId);
             
             // Enable debug mode with Ctrl+D
             document.addEventListener('keydown', (e) => {
@@ -422,8 +431,10 @@
         });
         
         async function loadAllData() {
+            console.log('Starting to load all data...');
             await loadPatients();
             await loadAssessments();
+            await loadMedicalReports();
             updatePatientStatuses();
             displayPatients();
             loadStatistics();
@@ -431,7 +442,7 @@
         
         async function loadPatients() {
             try {
-                // Load just patients first
+                // Load patients for this clinic
                 const { data: patients, error } = await supabase
                     .from('patients')
                     .select('*')
@@ -444,6 +455,7 @@
                 filteredPatients = allPatients;
                 
                 console.log('Loaded patients:', allPatients.length);
+                console.log('Patient IDs:', allPatients.map(p => p.id));
                 
             } catch (error) {
                 console.error('Error loading patients:', error);
@@ -454,29 +466,45 @@
         
         async function loadAssessments() {
             try {
-                // Load ALL health assessments
+                console.log('Loading assessments for clinic:', currentClinicId);
+                
+                // Get all patient IDs for this clinic
+                const patientIds = allPatients.map(p => p.id);
+                console.log('Looking for assessments for patient IDs:', patientIds);
+                
+                // Load health assessments using patient_id filter
                 const { data: healthAssessments, error: healthError } = await supabase
                     .from('health_assessments')
                     .select('*')
-                    .eq('clinic_id', currentClinicId)
+                    .in('patient_id', patientIds)
                     .order('created_at', { ascending: false });
                 
                 if (healthError) {
                     console.error('Health assessments error:', healthError);
+                } else {
+                    console.log('Health assessments found:', healthAssessments?.length || 0);
+                    if (healthAssessments && healthAssessments.length > 0) {
+                        console.log('First health assessment sample:', healthAssessments[0]);
+                    }
                 }
                 
-                // Load ALL iris assessments
+                // Load IRIS assessments using patient_id filter
                 const { data: irisAssessments, error: irisError } = await supabase
                     .from('iris_assessments')
                     .select('*')
-                    .eq('clinic_id', currentClinicId)
+                    .in('patient_id', patientIds)
                     .order('created_at', { ascending: false });
                 
                 if (irisError) {
                     console.error('IRIS assessments error:', irisError);
+                } else {
+                    console.log('IRIS assessments found:', irisAssessments?.length || 0);
+                    if (irisAssessments && irisAssessments.length > 0) {
+                        console.log('First IRIS assessment sample:', irisAssessments[0]);
+                    }
                 }
                 
-                // Group assessments by patient ID and take the most recent of each type
+                // Reset assessment data
                 assessmentData = {};
                 
                 // Process health assessments - group by patient and take most recent
@@ -515,7 +543,7 @@
                     });
                 }
                 
-                console.log('Assessment data loaded:', assessmentData);
+                console.log('Final assessment data:', assessmentData);
                 console.log('Patients with health assessments:', Object.keys(assessmentData).filter(id => assessmentData[id].health).length);
                 console.log('Patients with IRIS assessments:', Object.keys(assessmentData).filter(id => assessmentData[id].iris).length);
                 console.log('Patients with both:', Object.keys(assessmentData).filter(id => assessmentData[id].health && assessmentData[id].iris).length);
@@ -528,15 +556,51 @@
             }
         }
         
+        async function loadMedicalReports() {
+            try {
+                const patientIds = allPatients.map(p => p.id);
+                
+                // Load medical reports
+                const { data: reports, error } = await supabase
+                    .from('medical_reports')
+                    .select('*')
+                    .in('patient_id', patientIds)
+                    .order('created_at', { ascending: false });
+                
+                if (error) {
+                    console.error('Medical reports error:', error);
+                } else {
+                    console.log('Medical reports found:', reports?.length || 0);
+                    
+                    // Group by patient ID
+                    medicalReportsData = {};
+                    if (reports && reports.length > 0) {
+                        reports.forEach(report => {
+                            if (!medicalReportsData[report.patient_id]) {
+                                medicalReportsData[report.patient_id] = [];
+                            }
+                            medicalReportsData[report.patient_id].push(report);
+                        });
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading medical reports:', error);
+            }
+        }
+        
         function updateDebugInfo() {
             const debugContent = document.getElementById('debugContent');
             let debugHtml = '<br>';
             
             allPatients.forEach(patient => {
                 const patientAssessments = assessmentData[patient.id] || {};
-                debugHtml += `Patient ${patient.first_name} ${patient.last_name} (ID: ${patient.id}):<br>`;
-                debugHtml += `- Health Assessment: ${patientAssessments.health ? 'YES (ID: ' + patientAssessments.health.id + ')' : 'NO'}<br>`;
-                debugHtml += `- IRIS Assessment: ${patientAssessments.iris ? 'YES (ID: ' + patientAssessments.iris.id + ')' : 'NO'}<br>`;
+                const patientReports = medicalReportsData[patient.id] || [];
+                
+                debugHtml += `<strong>Patient: ${patient.first_name} ${patient.last_name} (ID: ${patient.id})</strong><br>`;
+                debugHtml += `- Patient ID in DB: ${patient.patient_id}<br>`;
+                debugHtml += `- Health Assessment: ${patientAssessments.health ? 'YES (ID: ' + patientAssessments.health.id + ', Created: ' + new Date(patientAssessments.health.created_at).toLocaleDateString() + ')' : 'NO'}<br>`;
+                debugHtml += `- IRIS Assessment: ${patientAssessments.iris ? 'YES (ID: ' + patientAssessments.iris.id + ', Created: ' + new Date(patientAssessments.iris.created_at).toLocaleDateString() + ')' : 'NO'}<br>`;
+                debugHtml += `- Medical Reports: ${patientReports.length} report(s)<br>`;
                 debugHtml += `- Complete: ${patientAssessments.health && patientAssessments.iris ? 'YES' : 'NO'}<br><br>`;
             });
             
@@ -547,12 +611,16 @@
             // Add assessment status to each patient
             allPatients = allPatients.map(patient => {
                 const patientAssessments = assessmentData[patient.id] || {};
+                const patientReports = medicalReportsData[patient.id] || [];
+                
                 return {
                     ...patient,
                     hasHealthAssessment: !!patientAssessments.health,
                     hasIrisAssessment: !!patientAssessments.iris,
                     healthAssessmentDate: patientAssessments.health?.created_at,
-                    irisAssessmentDate: patientAssessments.iris?.created_at
+                    irisAssessmentDate: patientAssessments.iris?.created_at,
+                    hasMedicalReport: patientReports.length > 0,
+                    latestReportDate: patientReports[0]?.created_at
                 };
             });
             
@@ -615,6 +683,12 @@
                 const age = patient.date_of_birth ? 
                     new Date().getFullYear() - new Date(patient.date_of_birth).getFullYear() : 'N/A';
                 
+                // Format assessment dates
+                const healthDate = patient.healthAssessmentDate ? 
+                    new Date(patient.healthAssessmentDate).toLocaleDateString('en-GB') : '';
+                const irisDate = patient.irisAssessmentDate ? 
+                    new Date(patient.irisAssessmentDate).toLocaleDateString('en-GB') : '';
+                
                 return `
                     <div class="patient-card">
                         <div class="patient-header">
@@ -644,12 +718,18 @@
                         </div>
                         
                         <div class="report-status">
-                            <span class="status-badge ${patient.hasHealthAssessment ? 'status-complete' : 'status-none'}">
-                                ${patient.hasHealthAssessment ? '✓' : '○'} Health Assessment
-                            </span>
-                            <span class="status-badge ${patient.hasIrisAssessment ? 'status-complete' : 'status-none'}">
-                                ${patient.hasIrisAssessment ? '✓' : '○'} IRIS Assessment
-                            </span>
+                            <div>
+                                <span class="status-badge ${patient.hasHealthAssessment ? 'status-complete' : 'status-none'}">
+                                    ${patient.hasHealthAssessment ? '✔' : '○'} Health Assessment
+                                </span>
+                                ${healthDate ? '<div class="assessment-date">' + healthDate + '</div>' : ''}
+                            </div>
+                            <div>
+                                <span class="status-badge ${patient.hasIrisAssessment ? 'status-complete' : 'status-none'}">
+                                    ${patient.hasIrisAssessment ? '✔' : '○'} IRIS Assessment
+                                </span>
+                                ${irisDate ? '<div class="assessment-date">' + irisDate + '</div>' : ''}
+                            </div>
                             <span class="status-badge ${hasCompleteReport ? 'status-complete' : 'status-pending'}">
                                 ${hasCompleteReport ? 'Complete Report' : 'Pending Report'}
                             </span>
@@ -674,8 +754,8 @@
                                 </button>
                             ` : ''}
                             
-                            <button class="btn btn-primary btn-sm" onclick="viewPatientDetails('${patient.id}')">
-                                Patient Details
+                            <button class="btn btn-primary btn-sm" onclick="viewPatientProfile('${patient.id}')">
+                                View Patient
                             </button>
                         </div>
                     </div>
@@ -714,7 +794,7 @@
             applyFilter();
         }
         
-        window.filterPatients = function(filter) {
+        window.filterPatients = function(filter, event) {
             currentFilter = filter;
             
             // Update active filter
@@ -781,8 +861,19 @@
             window.location.href = `iris-assessment-integrated.html?patientId=${patientId}`;
         }
         
-        window.viewPatientDetails = function(patientId) {
-            window.location.href = `patient-management.html?patientId=${patientId}`;
+        window.viewPatientProfile = function(patientId) {
+            // Try different possible patient view page names
+            // You can update this to match your actual patient view page name
+            const possiblePages = [
+                'patient-profile.html',
+                'patient-view.html', 
+                'patient-details.html',
+                'patient-info.html'
+            ];
+            
+            // For now, we'll use patient search with the specific patient ID pre-selected
+            // Update this URL to match your actual patient view page
+            window.location.href = `patient-search.html?viewPatient=${patientId}`;
         }
         
         window.goBack = function() {
