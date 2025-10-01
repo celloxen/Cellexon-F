@@ -980,7 +980,7 @@
                 
                 document.getElementById('diagramForm').addEventListener('submit', async (e) => {
                     e.preventDefault();
-                    await self.saveDiagram();
+                    await self.saveDiagram(e);
                 });
             },
             
@@ -1222,28 +1222,43 @@
                 reader.readAsDataURL(file);
             },
             
-            saveDiagram: async function() {
+            saveDiagram: async function(e) {
+                if (e) e.preventDefault();
+                
                 const selectedTherapy = document.getElementById('diagramTherapy').value;
                 const diagramName = document.getElementById('diagramName').value || 'Probe Placement';
                 const fileInput = document.getElementById('diagramFile');
                 const file = fileInput.files[0];
                 
-                if (!selectedTherapy || !file) {
-                    this.showNotification('Please select a therapy and upload an image', 'error');
+                console.log('Selected therapy:', selectedTherapy);
+                console.log('File selected:', file);
+                console.log('File input files:', fileInput.files);
+                
+                if (!selectedTherapy) {
+                    this.showNotification('Please select a therapy from the dropdown', 'error');
+                    return;
+                }
+                
+                if (!file) {
+                    this.showNotification('Please select an image file to upload', 'error');
                     return;
                 }
                 
                 // Show loading state
-                const submitBtn = event.target.querySelector('button[type="submit"]');
-                const originalText = submitBtn.textContent;
-                submitBtn.disabled = true;
-                submitBtn.textContent = 'Uploading...';
+                const submitBtn = document.querySelector('#diagramModal button[type="submit"]');
+                const originalText = submitBtn ? submitBtn.textContent : 'Upload Diagram';
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = 'Uploading...';
+                }
                 
                 try {
                     // Generate unique filename
                     const fileExt = file.name.split('.').pop();
-                    const fileName = `${selectedTherapy}_${Date.now()}.${fileExt}`;
+                    const fileName = `${selectedTherapy.replace(/[^a-zA-Z0-9]/g, '_')}_${Date.now()}.${fileExt}`;
                     const filePath = `probe-diagrams/${fileName}`;
+                    
+                    console.log('Uploading to path:', filePath);
                     
                     // Upload to Supabase Storage
                     const { data: uploadData, error: uploadError } = await supabase.storage
@@ -1254,12 +1269,18 @@
                         });
                     
                     if (uploadError) {
+                        console.error('Upload error:', uploadError);
+                        
                         // If bucket doesn't exist, try to create it
-                        if (uploadError.message.includes('not found')) {
+                        if (uploadError.message && uploadError.message.includes('not found')) {
+                            console.log('Creating storage bucket...');
+                            
                             // Create the bucket
                             const { data: bucketData, error: bucketError } = await supabase.storage
                                 .createBucket('therapy-diagrams', {
-                                    public: true
+                                    public: true,
+                                    allowedMimeTypes: ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'],
+                                    fileSizeLimit: 5242880 // 5MB
                                 });
                             
                             if (bucketError && !bucketError.message.includes('already exists')) {
@@ -1267,6 +1288,7 @@
                             }
                             
                             // Try upload again
+                            console.log('Retrying upload after bucket creation...');
                             const { data: retryData, error: retryError } = await supabase.storage
                                 .from('therapy-diagrams')
                                 .upload(filePath, file, {
@@ -1280,12 +1302,17 @@
                         }
                     }
                     
+                    console.log('Upload successful, getting public URL...');
+                    
                     // Get public URL
                     const { data: urlData } = supabase.storage
                         .from('therapy-diagrams')
                         .getPublicUrl(filePath);
                     
                     const therapy = this.allProtocols.find(p => p.therapy_code === selectedTherapy);
+                    
+                    console.log('Found therapy:', therapy);
+                    console.log('Public URL:', urlData.publicUrl);
                     
                     // Save diagram record to database
                     const formData = {
@@ -1298,11 +1325,16 @@
                         active: true
                     };
                     
+                    console.log('Saving to database:', formData);
+                    
                     const { error: dbError } = await supabase
                         .from('probe_diagrams')
                         .insert(formData);
                     
-                    if (dbError) throw dbError;
+                    if (dbError) {
+                        console.error('Database error:', dbError);
+                        throw dbError;
+                    }
                     
                     this.showNotification('Diagram uploaded successfully', 'success');
                     this.closeDiagramModal();
@@ -1313,8 +1345,10 @@
                     this.showNotification('Error uploading diagram: ' + error.message, 'error');
                 } finally {
                     // Reset button state
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = originalText;
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = originalText;
+                    }
                 }
             },
             
