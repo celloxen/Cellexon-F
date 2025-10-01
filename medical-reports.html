@@ -753,10 +753,6 @@
                                     Start IRIS Assessment
                                 </button>
                             ` : ''}
-                            
-                            <button class="btn btn-primary btn-sm" onclick="viewPatientProfile('${patient.id}')">
-                                Patient Details
-                            </button>
                         </div>
                     </div>
                 `;
@@ -861,10 +857,32 @@
             window.location.href = `iris-assessment-integrated.html?patientId=${patientId}`;
         }
         
-        window.viewPatientProfile = function(patientId) {
-            // Route to patient search page with the patient ID to view
-            // This will show the patient details in the search interface
-            window.location.href = `patient-search.html?patientId=${patientId}&action=view`;
+        window.viewPatientProfile = async function(patientId) {
+            // Since no patient view page exists, show patient details in an alert
+            // In production, you should create a proper patient-profile.html page
+            
+            try {
+                const patient = allPatients.find(p => p.id == patientId);
+                if (patient) {
+                    const age = patient.date_of_birth ? 
+                        new Date().getFullYear() - new Date(patient.date_of_birth).getFullYear() : 'N/A';
+                    
+                    alert(`Patient Details:\n\n` +
+                          `Name: ${patient.first_name} ${patient.last_name}\n` +
+                          `Patient ID: ${patient.patient_id}\n` +
+                          `Age: ${age} years\n` +
+                          `Gender: ${patient.gender || 'N/A'}\n` +
+                          `Phone: ${patient.phone || 'N/A'}\n` +
+                          `Email: ${patient.email || 'N/A'}\n` +
+                          `Registration Date: ${new Date(patient.created_at).toLocaleDateString('en-GB')}\n\n` +
+                          `Note: A dedicated patient profile page needs to be created.`);
+                } else {
+                    alert('Patient details not found.');
+                }
+            } catch (error) {
+                console.error('Error displaying patient details:', error);
+                alert('Error loading patient details. Please try again.');
+            }
         }
         
         window.goBack = function() {
