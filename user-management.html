@@ -6,7 +6,36 @@
     <title>User Management - Celloxen Platform</title>
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bcryptjs/2.4.3/bcrypt.min.js"></script>
+    
+    <!-- Alternative: Use browser's built-in crypto for password hashing -->
+    <script>
+        // Simple password hashing using Web Crypto API
+        async function hashPassword(password) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(password);
+            const hash = await crypto.subtle.digest('SHA-256', data);
+            return Array.from(new Uint8Array(hash))
+                .map(b => b.toString(16).padStart(2, '0'))
+                .join('');
+        }
+        
+        // For compatibility with existing bcrypt hashes, we'll prepend a marker
+        async function createPasswordHash(password) {
+            const hash = await hashPassword(password);
+            return '$sha256$' + hash; // Marker to identify SHA-256 hashes
+        }
+        
+        // Verify password against hash
+        async function verifyPassword(password, hash) {
+            if (hash.startsWith('$sha256$')) {
+                const newHash = await hashPassword(password);
+                return hash === '$sha256$' + newHash;
+            }
+            // For existing bcrypt hashes, we can't verify in frontend
+            // This should be handled by backend
+            return false;
+        }
+    </script>
     
     <style>
         * {
@@ -370,6 +399,16 @@
             padding: 40px 20px;
             color: #64748b;
         }
+        
+        .warning-banner {
+            background: #fef3c7;
+            border: 1px solid #fbbf24;
+            color: #92400e;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
@@ -384,6 +423,10 @@
     </div>
 
     <div class="container">
+        <div class="warning-banner">
+            ⚠️ Note: New users created with this interface will use SHA-256 password hashing. For production, consider implementing bcrypt on the backend.
+        </div>
+
         <!-- Statistics -->
         <div class="stats-grid">
             <div class="stat-card">
@@ -797,10 +840,9 @@
                     userData.clinic_id = parseInt(clinicId);
                 }
                 
-                // Hash password if provided
+                // Hash password if provided using Web Crypto API
                 if (password) {
-                    const salt = bcrypt.genSaltSync(10);
-                    userData.password_hash = bcrypt.hashSync(password, salt);
+                    userData.password_hash = await createPasswordHash(password);
                 }
                 
                 if (userId) {
@@ -867,8 +909,7 @@
             }
             
             try {
-                const salt = bcrypt.genSaltSync(10);
-                const passwordHash = bcrypt.hashSync(newPassword, salt);
+                const passwordHash = await createPasswordHash(newPassword);
                 
                 const table = userType === 'super_admin' ? 'super_admin_users' : 'clinic_users';
                 const { error } = await supabase
@@ -878,7 +919,7 @@
                 
                 if (error) throw error;
                 
-                showSuccess('Password reset successfully');
+                showSuccess('Password reset successfully (user must re-login)');
                 
             } catch (error) {
                 console.error('Error resetting password:', error);
