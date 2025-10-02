@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CELLOXEN - Login</title>
+    <title>User Management - Celloxen Platform</title>
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- Bcrypt for password verification -->
     <script src="https://cdn.jsdelivr.net/npm/bcryptjs@2.4.3/dist/bcrypt.min.js"></script>
     
     <style>
@@ -18,292 +17,489 @@
         
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+            color: #1f2937;
             min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
         }
         
-        .login-container {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-            width: 100%;
-            max-width: 400px;
-            overflow: hidden;
-        }
-        
-        .login-header {
-            background: #1e3a8a;
-            padding: 30px;
-            text-align: center;
-        }
-        
-        .login-header h1 {
+        .header {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
             color: white;
-            font-size: 2rem;
-            font-weight: 700;
-            margin-bottom: 5px;
+            padding: 20px 0;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
             letter-spacing: 1px;
         }
         
-        .login-header p {
-            color: rgba(255,255,255,0.8);
-            font-size: 0.9rem;
+        .page-title {
+            font-size: 20px;
+            font-weight: 500;
+            opacity: 0.9;
         }
         
-        .login-form {
-            padding: 40px 30px;
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 6px;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            border-left: 4px solid #3b82f6;
+        }
+        
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            color: #64748b;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+        
+        .action-bar {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+        }
+        
+        .btn-secondary {
+            background: #64748b;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #475569;
+        }
+        
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+            padding: 10px 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .search-box:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            background: white;
+            padding: 10px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            border-radius: 8px;
+            font-weight: 600;
+            color: #64748b;
+            transition: all 0.3s;
+        }
+        
+        .tab.active {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .table-container {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th {
+            background: #f8fafc;
+            padding: 12px;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: #64748b;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 14px;
+            color: #1e293b;
+        }
+        
+        tr:hover {
+            background: #f8fafc;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .status-active {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .status-inactive {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .action-link {
+            color: #3b82f6;
+            text-decoration: none;
+            font-size: 13px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        
+        .action-link:hover {
+            text-decoration: underline;
+        }
+        
+        .action-link.danger {
+            color: #dc2626;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .modal-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #1e293b;
         }
         
         .form-group {
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
         
         .form-label {
             display: block;
             margin-bottom: 8px;
+            font-weight: 600;
             color: #374151;
-            font-weight: 500;
-            font-size: 0.9rem;
         }
         
-        .form-input {
+        .form-label .required {
+            color: #dc2626;
+        }
+        
+        .form-input, .form-select {
             width: 100%;
-            padding: 12px 15px;
+            padding: 10px 15px;
             border: 2px solid #e5e7eb;
             border-radius: 8px;
-            font-size: 1rem;
-            transition: all 0.3s;
-            background: #f9fafb;
+            font-size: 14px;
         }
         
-        .form-input:focus {
+        .form-input:focus, .form-select:focus {
             outline: none;
-            border-color: #10b981;
-            background: white;
-            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+            border-color: #3b82f6;
         }
         
-        .password-wrapper {
-            position: relative;
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
         }
         
-        .toggle-password {
-            position: absolute;
-            right: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            cursor: pointer;
-            color: #6b7280;
-            background: none;
-            border: none;
-            font-size: 1.2rem;
-            padding: 5px;
-        }
-        
-        .toggle-password:hover {
-            color: #374151;
-        }
-        
-        .login-btn {
-            width: 100%;
-            padding: 14px;
-            background: #10b981;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-top: 10px;
-        }
-        
-        .login-btn:hover {
-            background: #059669;
-            transform: translateY(-1px);
-            box-shadow: 0 5px 15px rgba(16, 185, 129, 0.3);
-        }
-        
-        .login-btn:disabled {
-            background: #9ca3af;
-            cursor: not-allowed;
-            transform: none;
-        }
-        
-        .login-btn.loading {
-            position: relative;
-            color: transparent;
-        }
-        
-        .login-btn.loading::after {
-            content: '';
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            top: 50%;
-            left: 50%;
-            margin-left: -10px;
-            margin-top: -10px;
-            border: 2px solid #ffffff;
-            border-radius: 50%;
-            border-top-color: transparent;
-            animation: spinner 0.6s linear infinite;
-        }
-        
-        @keyframes spinner {
-            to { transform: rotate(360deg); }
-        }
-        
-        .error-message {
-            background: #fee2e2;
-            color: #991b1b;
-            padding: 12px;
+        .alert {
+            padding: 12px 15px;
             border-radius: 8px;
             margin-bottom: 20px;
-            font-size: 0.9rem;
             display: none;
+        }
+        
+        .alert.show {
+            display: block;
+        }
+        
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #6ee7b7;
+        }
+        
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
             border: 1px solid #fecaca;
         }
         
-        .error-message.show {
-            display: block;
-            animation: slideIn 0.3s;
-        }
-        
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .success-message {
-            background: #dcfce7;
-            color: #166534;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-size: 0.9rem;
-            display: none;
-            border: 1px solid #bbf7d0;
-        }
-        
-        .success-message.show {
-            display: block;
-            animation: slideIn 0.3s;
-        }
-        
-        .footer-text {
+        .empty-state {
             text-align: center;
-            margin-top: 25px;
-            padding-top: 25px;
-            border-top: 1px solid #e5e7eb;
-            color: #6b7280;
-            font-size: 0.85rem;
+            padding: 40px 20px;
+            color: #64748b;
         }
         
-        .footer-text a {
-            color: #10b981;
-            text-decoration: none;
-        }
-        
-        .footer-text a:hover {
-            text-decoration: underline;
-        }
-        
-        .security-notice {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-top: 20px;
-            padding: 10px;
-            background: #f0fdf4;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            color: #166534;
-            border: 1px solid #bbf7d0;
-        }
-        
-        .security-notice::before {
-            content: '🔒';
-        }
-        
-        @media (max-width: 480px) {
-            .login-container {
-                margin: 20px;
-            }
-            
-            .login-form {
-                padding: 30px 20px;
-            }
+        .loading {
+            text-align: center;
+            padding: 40px 20px;
+            color: #64748b;
         }
     </style>
 </head>
 <body>
-    <div class="login-container">
-        <div class="login-header">
-            <h1>CELLOXEN</h1>
-            <p>Healthcare Management System</p>
-        </div>
-        
-        <div class="login-form">
-            <div id="errorMessage" class="error-message"></div>
-            <div id="successMessage" class="success-message"></div>
-            
-            <form id="loginForm" onsubmit="handleLogin(event)">
-                <div class="form-group">
-                    <label class="form-label">Email Address</label>
-                    <input 
-                        type="email" 
-                        id="email" 
-                        class="form-input" 
-                        placeholder="Enter your email"
-                        required
-                        autocomplete="email"
-                    >
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Password</label>
-                    <div class="password-wrapper">
-                        <input 
-                            type="password" 
-                            id="password" 
-                            class="form-input" 
-                            placeholder="Enter your password"
-                            required
-                            autocomplete="current-password"
-                        >
-                        <button type="button" class="toggle-password" onclick="togglePassword()">
-                            👁️
-                        </button>
-                    </div>
-                </div>
-                
-                <button type="submit" class="login-btn" id="loginBtn">
-                    Sign In
-                </button>
-            </form>
-            
-            <div class="security-notice">
-                Secure encrypted connection
+    <div class="header">
+        <div class="header-container">
+            <div class="logo-section">
+                <div class="logo">CELLOXEN</div>
+                <div class="page-title">User Management</div>
             </div>
-            
-            <div class="footer-text">
-                <p>Need help? <a href="#" onclick="showHelp()">Contact Administrator</a></p>
-                <p style="margin-top: 10px;">© 2024 CELLOXEN Healthcare</p>
-            </div>
+            <button class="back-btn" onclick="goBack()">← Back to Dashboard</button>
         </div>
     </div>
-    
+
+    <div class="container">
+        <!-- Statistics -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="totalSuperAdmins">0</div>
+                <div class="stat-label">Super Admins</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalClinicUsers">0</div>
+                <div class="stat-label">Clinic Users</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalActiveUsers">0</div>
+                <div class="stat-label">Active Users</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalClinics">0</div>
+                <div class="stat-label">Total Clinics</div>
+            </div>
+        </div>
+
+        <!-- Action Bar -->
+        <div class="action-bar">
+            <button class="btn btn-primary" onclick="openCreateModal('super_admin')">+ Create Super Admin</button>
+            <button class="btn btn-primary" onclick="openCreateModal('clinic_user')">+ Create Clinic User</button>
+            <input type="text" class="search-box" id="searchBox" placeholder="Search by name, email, or username...">
+            <button class="btn btn-secondary" onclick="refreshData()">🔄 Refresh</button>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('all')">All Users</button>
+            <button class="tab" onclick="switchTab('super_admin')">Super Admins</button>
+            <button class="tab" onclick="switchTab('clinic_user')">Clinic Users</button>
+        </div>
+
+        <!-- Alert Messages -->
+        <div id="alertSuccess" class="alert alert-success"></div>
+        <div id="alertError" class="alert alert-error"></div>
+
+        <!-- Users Table -->
+        <div class="table-container">
+            <table id="usersTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Username</th>
+                        <th>Type</th>
+                        <th>Clinic</th>
+                        <th>Status</th>
+                        <th>Last Login</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="usersTableBody">
+                    <tr>
+                        <td colspan="9" class="loading">Loading users...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Create/Edit User Modal -->
+    <div id="userModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle">Create User</h2>
+            </div>
+            
+            <form id="userForm" onsubmit="saveUser(event)">
+                <input type="hidden" id="userId">
+                <input type="hidden" id="userType">
+                
+                <div class="form-group">
+                    <label class="form-label">Full Name <span class="required">*</span></label>
+                    <input type="text" class="form-input" id="fullName" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Email <span class="required">*</span></label>
+                    <input type="email" class="form-input" id="email" required>
+                </div>
+                
+                <div class="form-group" id="usernameGroup">
+                    <label class="form-label">Username <span class="required">*</span></label>
+                    <input type="text" class="form-input" id="username">
+                </div>
+                
+                <div class="form-group" id="clinicGroup" style="display: none;">
+                    <label class="form-label">Clinic <span class="required">*</span></label>
+                    <select class="form-select" id="clinicId">
+                        <option value="">Select Clinic</option>
+                    </select>
+                </div>
+                
+                <div class="form-group" id="passwordGroup">
+                    <label class="form-label">Password <span class="required">*</span></label>
+                    <input type="password" class="form-input" id="password" minlength="8">
+                    <small style="color: #64748b;">Minimum 8 characters</small>
+                </div>
+                
+                <div class="form-group" id="confirmPasswordGroup">
+                    <label class="form-label">Confirm Password <span class="required">*</span></label>
+                    <input type="password" class="form-input" id="confirmPassword" minlength="8">
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="saveBtn">Create User</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
         
@@ -312,220 +508,410 @@
         
         const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         
-        // Check if already logged in
-        document.addEventListener('DOMContentLoaded', function() {
-            const authData = localStorage.getItem('celloxen_auth');
-            if (authData) {
-                const auth = JSON.parse(authData);
-                redirectUser(auth.userType);
-            }
+        let allUsers = [];
+        let currentTab = 'all';
+        let clinics = [];
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async function() {
+            await checkAuthentication();
+            await loadClinics();
+            await loadUsers();
+            setupSearchFilter();
         });
         
-        window.togglePassword = function() {
-            const passwordInput = document.getElementById('password');
-            const toggleBtn = document.querySelector('.toggle-password');
-            
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                toggleBtn.textContent = '🙈';
-            } else {
-                passwordInput.type = 'password';
-                toggleBtn.textContent = '👁️';
+        async function checkAuthentication() {
+            const authData = localStorage.getItem('celloxen_auth');
+            if (!authData) {
+                window.location.href = 'user-management.html';
+                return;
             }
-        };
+            
+            const auth = JSON.parse(authData);
+            if (auth.userType !== 'super_admin') {
+                showError('Access denied. Super Administrator privileges required.');
+                setTimeout(() => window.location.href = 'super-admin-dashboard.html', 2000);
+            }
+        }
         
-        window.handleLogin = async function(event) {
-            event.preventDefault();
-            
-            const email = document.getElementById('email').value.toLowerCase().trim();
-            const password = document.getElementById('password').value;
-            
-            clearMessages();
-            
-            // Show loading state
-            const loginBtn = document.getElementById('loginBtn');
-            loginBtn.disabled = true;
-            loginBtn.classList.add('loading');
-            loginBtn.textContent = '';
-            
+        async function loadClinics() {
             try {
-                let userData = null;
-                let userFound = false;
+                const { data, error } = await supabase
+                    .from('clinics')
+                    .select('id, clinic_name, clinic_code')
+                    .order('clinic_name');
                 
-                // First check super_admin_users table
-                const { data: superAdmin, error: superError } = await supabase
-                    .from('super_admin_users')
-                    .select('*')
-                    .or(`email.eq.${email},username.eq.${email}`)
-                    .eq('is_active', true)
-                    .single();
+                if (error) throw error;
                 
-                if (superAdmin && !superError) {
-                    // Verify password using bcrypt
-                    let isValid = false;
-                    try {
-                        isValid = bcrypt.compareSync(password, superAdmin.password_hash);
-                    } catch (e) {
-                        // Fallback for migration period only - remove in production
-                        isValid = (password === superAdmin.password_hash);
-                    }
-                    
-                    if (isValid) {
-                        userData = {
-                            id: superAdmin.id,
-                            email: superAdmin.email,
-                            username: superAdmin.username || superAdmin.email,
-                            full_name: superAdmin.full_name,
-                            userType: 'super_admin',
-                            role: 'super_admin'
-                        };
-                        
-                        // Update last login
-                        await supabase
-                            .from('super_admin_users')
-                            .update({ last_login: new Date().toISOString() })
-                            .eq('id', superAdmin.id);
-                        
-                        userFound = true;
-                    }
-                }
+                clinics = data || [];
                 
-                // If not found in super_admin_users, check clinic_users
-                if (!userFound) {
-                    const { data: clinicUser, error: clinicError } = await supabase
-                        .from('clinic_users')
-                        .select('*, clinics(id, clinic_name, clinic_code)')
-                        .eq('email', email)
-                        .eq('is_active', true)
-                        .single();
-                    
-                    if (clinicUser && !clinicError) {
-                        // Verify password using bcrypt
-                        let isValid = false;
-                        try {
-                            isValid = bcrypt.compareSync(password, clinicUser.password_hash);
-                        } catch (e) {
-                            // Fallback for migration period only - remove in production
-                            isValid = (password === clinicUser.password_hash);
-                        }
-                        
-                        if (isValid) {
-                            userData = {
-                                id: clinicUser.id,
-                                email: clinicUser.email,
-                                username: clinicUser.email,
-                                full_name: clinicUser.full_name,
-                                userType: 'clinic_admin',
-                                role: 'clinic_admin',
-                                clinicId: clinicUser.clinic_id,
-                                clinicName: clinicUser.clinics?.clinic_name,
-                                clinicCode: clinicUser.clinics?.clinic_code
-                            };
-                            
-                            // Update last login
-                            await supabase
-                                .from('clinic_users')
-                                .update({ last_login: new Date().toISOString() })
-                                .eq('id', clinicUser.id);
-                            
-                            userFound = true;
-                        }
-                    }
-                }
+                // Populate clinic dropdown
+                const clinicSelect = document.getElementById('clinicId');
+                clinicSelect.innerHTML = '<option value="">Select Clinic</option>';
+                clinics.forEach(clinic => {
+                    const option = document.createElement('option');
+                    option.value = clinic.id;
+                    option.textContent = `${clinic.clinic_name} (${clinic.clinic_code})`;
+                    clinicSelect.appendChild(option);
+                });
                 
-                if (!userFound || !userData) {
-                    throw new Error('Invalid credentials');
-                }
-                
-                // Store auth data
-                localStorage.setItem('celloxen_auth', JSON.stringify(userData));
-                
-                // Store session data
-                sessionStorage.setItem('user_session', JSON.stringify({
-                    ...userData,
-                    loginTime: new Date().toISOString()
-                }));
-                
-                // Log successful login (for audit trail)
-                console.log(`User logged in: ${userData.email} (${userData.userType})`);
-                
-                // Show success message
-                showSuccess('Login successful! Redirecting...');
-                
-                // Redirect based on user type
-                setTimeout(() => {
-                    redirectUser(userData.userType);
-                }, 1000);
+                // Update stats
+                document.getElementById('totalClinics').textContent = clinics.length;
                 
             } catch (error) {
-                console.error('Login error:', error);
-                showError('Invalid email or password');
-            } finally {
-                loginBtn.disabled = false;
-                loginBtn.classList.remove('loading');
-                loginBtn.textContent = 'Sign In';
+                console.error('Error loading clinics:', error);
+            }
+        }
+        
+        async function loadUsers() {
+            try {
+                // Load super admins
+                const { data: superAdmins, error: superError } = await supabase
+                    .from('super_admin_users')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+                
+                if (superError) throw superError;
+                
+                // Load clinic users with clinic info
+                const { data: clinicUsers, error: clinicError } = await supabase
+                    .from('clinic_users')
+                    .select('*, clinics(id, clinic_name, clinic_code)')
+                    .order('created_at', { ascending: false });
+                
+                if (clinicError) throw clinicError;
+                
+                // Combine and format data
+                allUsers = [
+                    ...(superAdmins || []).map(u => ({
+                        ...u,
+                        user_type: 'super_admin',
+                        display_type: 'Super Admin',
+                        clinic_name: '-'
+                    })),
+                    ...(clinicUsers || []).map(u => ({
+                        ...u,
+                        user_type: 'clinic_user',
+                        display_type: 'Clinic User',
+                        clinic_name: u.clinics?.clinic_name || 'Unknown'
+                    }))
+                ];
+                
+                updateStats();
+                displayUsers();
+                
+            } catch (error) {
+                console.error('Error loading users:', error);
+                showError('Failed to load users: ' + error.message);
+            }
+        }
+        
+        function updateStats() {
+            const superAdmins = allUsers.filter(u => u.user_type === 'super_admin');
+            const clinicUsers = allUsers.filter(u => u.user_type === 'clinic_user');
+            const activeUsers = allUsers.filter(u => u.is_active);
+            
+            document.getElementById('totalSuperAdmins').textContent = superAdmins.length;
+            document.getElementById('totalClinicUsers').textContent = clinicUsers.length;
+            document.getElementById('totalActiveUsers').textContent = activeUsers.length;
+        }
+        
+        function displayUsers() {
+            const tbody = document.getElementById('usersTableBody');
+            const searchTerm = document.getElementById('searchBox').value.toLowerCase();
+            
+            let filteredUsers = allUsers;
+            
+            // Filter by tab
+            if (currentTab !== 'all') {
+                filteredUsers = filteredUsers.filter(u => u.user_type === currentTab);
+            }
+            
+            // Filter by search
+            if (searchTerm) {
+                filteredUsers = filteredUsers.filter(u => 
+                    (u.full_name?.toLowerCase() || '').includes(searchTerm) ||
+                    (u.email?.toLowerCase() || '').includes(searchTerm) ||
+                    (u.username?.toLowerCase() || '').includes(searchTerm)
+                );
+            }
+            
+            if (filteredUsers.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9" class="empty-state">No users found</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = filteredUsers.map(user => `
+                <tr>
+                    <td>${user.id}</td>
+                    <td>${user.full_name || '-'}</td>
+                    <td>${user.email}</td>
+                    <td>${user.username || '-'}</td>
+                    <td>${user.display_type}</td>
+                    <td>${user.clinic_name}</td>
+                    <td>
+                        <span class="status-badge ${user.is_active ? 'status-active' : 'status-inactive'}">
+                            ${user.is_active ? 'Active' : 'Inactive'}
+                        </span>
+                    </td>
+                    <td>${user.last_login ? new Date(user.last_login).toLocaleDateString() : 'Never'}</td>
+                    <td>
+                        <a class="action-link" onclick="window.editUser(${user.id}, '${user.user_type}')">Edit</a>
+                        <a class="action-link" onclick="window.toggleUserStatus(${user.id}, '${user.user_type}', ${user.is_active})">
+                            ${user.is_active ? 'Deactivate' : 'Activate'}
+                        </a>
+                        <a class="action-link" onclick="window.resetPassword(${user.id}, '${user.user_type}')">Reset Password</a>
+                    </td>
+                </tr>
+            `).join('');
+        }
+        
+        function setupSearchFilter() {
+            document.getElementById('searchBox').addEventListener('input', displayUsers);
+        }
+        
+        window.switchTab = function(tab) {
+            currentTab = tab;
+            
+            // Update tab buttons
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            displayUsers();
+        };
+        
+        window.openCreateModal = function(userType) {
+            document.getElementById('userModal').classList.add('active');
+            document.getElementById('modalTitle').textContent = 
+                userType === 'super_admin' ? 'Create Super Admin' : 'Create Clinic User';
+            document.getElementById('userForm').reset();
+            document.getElementById('userId').value = '';
+            document.getElementById('userType').value = userType;
+            
+            // Show/hide fields based on user type
+            document.getElementById('usernameGroup').style.display = 
+                userType === 'super_admin' ? 'block' : 'none';
+            document.getElementById('clinicGroup').style.display = 
+                userType === 'clinic_user' ? 'block' : 'none';
+            document.getElementById('passwordGroup').style.display = 'block';
+            document.getElementById('confirmPasswordGroup').style.display = 'block';
+            
+            document.getElementById('saveBtn').textContent = 'Create User';
+        };
+        
+        window.editUser = async function(userId, userType) {
+            try {
+                const table = userType === 'super_admin' ? 'super_admin_users' : 'clinic_users';
+                const { data, error } = await supabase
+                    .from(table)
+                    .select('*')
+                    .eq('id', userId)
+                    .single();
+                
+                if (error) throw error;
+                
+                document.getElementById('userModal').classList.add('active');
+                document.getElementById('modalTitle').textContent = 'Edit User';
+                document.getElementById('userId').value = userId;
+                document.getElementById('userType').value = userType;
+                document.getElementById('fullName').value = data.full_name || '';
+                document.getElementById('email').value = data.email;
+                document.getElementById('username').value = data.username || '';
+                document.getElementById('clinicId').value = data.clinic_id || '';
+                
+                // Hide password fields when editing
+                document.getElementById('passwordGroup').style.display = 'none';
+                document.getElementById('confirmPasswordGroup').style.display = 'none';
+                
+                document.getElementById('usernameGroup').style.display = 
+                    userType === 'super_admin' ? 'block' : 'none';
+                document.getElementById('clinicGroup').style.display = 
+                    userType === 'clinic_user' ? 'block' : 'none';
+                
+                document.getElementById('saveBtn').textContent = 'Update User';
+                
+            } catch (error) {
+                console.error('Error loading user:', error);
+                showError('Failed to load user data');
             }
         };
         
-        function redirectUser(userType) {
-            if (userType === 'super_admin') {
-                window.location.href = 'super-admin-dashboard.html';
-            } else if (userType === 'clinic_admin') {
-                window.location.href = 'clinic-dashboard.html';
-            } else {
-                // Default redirect if type unknown
-                window.location.href = 'index.html';
+        window.saveUser = async function(event) {
+            event.preventDefault();
+            
+            const userId = document.getElementById('userId').value;
+            const userType = document.getElementById('userType').value;
+            const fullName = document.getElementById('fullName').value;
+            const email = document.getElementById('email').value;
+            const username = document.getElementById('username').value;
+            const clinicId = document.getElementById('clinicId').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            // Validation
+            if (userType === 'super_admin' && !username) {
+                showError('Username is required for super admins');
+                return;
             }
+            
+            if (userType === 'clinic_user' && !clinicId) {
+                showError('Please select a clinic');
+                return;
+            }
+            
+            if (!userId) { // Creating new user
+                if (!password) {
+                    showError('Password is required');
+                    return;
+                }
+                
+                if (password !== confirmPassword) {
+                    showError('Passwords do not match');
+                    return;
+                }
+                
+                if (password.length < 8) {
+                    showError('Password must be at least 8 characters');
+                    return;
+                }
+            }
+            
+            try {
+                const saveBtn = document.getElementById('saveBtn');
+                saveBtn.disabled = true;
+                saveBtn.textContent = 'Saving...';
+                
+                const table = userType === 'super_admin' ? 'super_admin_users' : 'clinic_users';
+                
+                let userData = {
+                    full_name: fullName,
+                    email: email,
+                    updated_at: new Date().toISOString()
+                };
+                
+                if (userType === 'super_admin') {
+                    userData.username = username;
+                }
+                
+                if (userType === 'clinic_user') {
+                    userData.clinic_id = parseInt(clinicId);
+                }
+                
+                // Hash password if provided
+                if (password) {
+                    const salt = bcrypt.genSaltSync(10);
+                    userData.password_hash = bcrypt.hashSync(password, salt);
+                }
+                
+                if (userId) {
+                    // Update existing user
+                    const { error } = await supabase
+                        .from(table)
+                        .update(userData)
+                        .eq('id', userId);
+                    
+                    if (error) throw error;
+                    showSuccess('User updated successfully');
+                } else {
+                    // Create new user
+                    const { error } = await supabase
+                        .from(table)
+                        .insert(userData);
+                    
+                    if (error) throw error;
+                    showSuccess('User created successfully');
+                }
+                
+                closeModal();
+                await loadUsers();
+                
+            } catch (error) {
+                console.error('Error saving user:', error);
+                showError('Failed to save user: ' + error.message);
+            } finally {
+                const saveBtn = document.getElementById('saveBtn');
+                saveBtn.disabled = false;
+                saveBtn.textContent = userId ? 'Update User' : 'Create User';
+            }
+        };
+        
+        window.toggleUserStatus = async function(userId, userType, currentStatus) {
+            const action = currentStatus ? 'deactivate' : 'activate';
+            if (!confirm(`Are you sure you want to ${action} this user?`)) return;
+            
+            try {
+                const table = userType === 'super_admin' ? 'super_admin_users' : 'clinic_users';
+                const { error } = await supabase
+                    .from(table)
+                    .update({ is_active: !currentStatus })
+                    .eq('id', userId);
+                
+                if (error) throw error;
+                
+                showSuccess(`User ${action}d successfully`);
+                await loadUsers();
+                
+            } catch (error) {
+                console.error('Error toggling user status:', error);
+                showError('Failed to update user status');
+            }
+        };
+        
+        window.resetPassword = async function(userId, userType) {
+            const newPassword = prompt('Enter new password (minimum 8 characters):');
+            if (!newPassword) return;
+            
+            if (newPassword.length < 8) {
+                showError('Password must be at least 8 characters');
+                return;
+            }
+            
+            try {
+                const salt = bcrypt.genSaltSync(10);
+                const passwordHash = bcrypt.hashSync(newPassword, salt);
+                
+                const table = userType === 'super_admin' ? 'super_admin_users' : 'clinic_users';
+                const { error } = await supabase
+                    .from(table)
+                    .update({ password_hash: passwordHash })
+                    .eq('id', userId);
+                
+                if (error) throw error;
+                
+                showSuccess('Password reset successfully');
+                
+            } catch (error) {
+                console.error('Error resetting password:', error);
+                showError('Failed to reset password');
+            }
+        };
+        
+        window.closeModal = function() {
+            document.getElementById('userModal').classList.remove('active');
+        };
+        
+        window.refreshData = async function() {
+            await loadUsers();
+            showSuccess('Data refreshed');
+        };
+        
+        window.goBack = function() {
+            window.location.href = 'super-admin-dashboard.html';
+        };
+        
+        function showSuccess(message) {
+            const alert = document.getElementById('alertSuccess');
+            alert.textContent = message;
+            alert.classList.add('show');
+            setTimeout(() => alert.classList.remove('show'), 5000);
         }
         
         function showError(message) {
-            const errorDiv = document.getElementById('errorMessage');
-            errorDiv.textContent = message;
-            errorDiv.classList.add('show');
-            
-            // Auto-hide after 5 seconds
-            setTimeout(() => {
-                errorDiv.classList.remove('show');
-            }, 5000);
+            const alert = document.getElementById('alertError');
+            alert.textContent = message;
+            alert.classList.add('show');
+            setTimeout(() => alert.classList.remove('show'), 5000);
         }
-        
-        function showSuccess(message) {
-            const successDiv = document.getElementById('successMessage');
-            successDiv.textContent = message;
-            successDiv.classList.add('show');
-        }
-        
-        function clearMessages() {
-            document.getElementById('errorMessage').classList.remove('show');
-            document.getElementById('successMessage').classList.remove('show');
-        }
-        
-        window.showHelp = function() {
-            alert('For login assistance, please contact your system administrator.\n\nEmail: admin@celloxen.com\nPhone: +44 20 1234 5678');
-        };
-        
-        // Prevent form resubmission on page refresh
-        if (window.history.replaceState) {
-            window.history.replaceState(null, null, window.location.href);
-        }
-        
-        // Session timeout (30 minutes of inactivity)
-        let inactivityTimer;
-        function resetInactivityTimer() {
-            clearTimeout(inactivityTimer);
-            inactivityTimer = setTimeout(() => {
-                localStorage.removeItem('celloxen_auth');
-                sessionStorage.clear();
-                window.location.href = 'unified-login.html';
-            }, 30 * 60 * 1000); // 30 minutes
-        }
-        
-        // Track user activity
-        document.addEventListener('click', resetInactivityTimer);
-        document.addEventListener('keypress', resetInactivityTimer);
-        document.addEventListener('mousemove', resetInactivityTimer);
-        
-        resetInactivityTimer();
     </script>
 </body>
 </html>
